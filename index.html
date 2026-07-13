@@ -28,3 +28,27 @@
 
 </body>
 </html>
+<h2>数据测试</h2>
+
+<div id="result">正在读取...</div>
+
+<script>
+
+Promise.all([
+fetch("data/dlt_raw.txt").then(r=>r.text()),
+fetch("data/pl5_raw.txt").then(r=>r.text())
+])
+.then(data=>{
+
+document.getElementById("result").innerHTML =
+"数据读取成功";
+
+})
+.catch(()=>{
+
+document.getElementById("result").innerHTML =
+"数据读取失败";
+
+});
+
+</script>
