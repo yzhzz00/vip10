@@ -5,10 +5,10 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>
-大乐透智能分析系统 V70 AI Agent
+大乐透智能分析系统 V70.2 CORE
 </title>
 
 
@@ -18,21 +18,27 @@
 </head>
 
 
+
 <body>
 
 
 <div class="container">
 
 
+
 <h1>
-大乐透智能分析系统 V70 AI Agent
+大乐透智能分析系统
+<br>
+V70.2 CORE
 </h1>
+
+
 
 
 
 <!-- 数据状态 -->
 
-<div class="box">
+<div class="card">
 
 
 <h2>
@@ -40,26 +46,20 @@
 </h2>
 
 
-<p>
-大乐透数据：
+<div id="dataStatus">
 
-<span id="dataStatus">
-加载中...
-</span>
+正在初始化...
 
-</p>
+</div>
 
 
-<p>
-历史期数：
 
-<span id="dataCount">
-0
-</span>
+<div id="systemStatus">
 
-期
+等待系统加载...
 
-</p>
+</div>
+
 
 
 </div>
@@ -69,14 +69,16 @@
 
 
 
-<!-- AI预测 -->
 
-<div class="box">
+<!-- AI分析 -->
+
+<div class="card">
 
 
 <h2>
-AI智能预测中心
+AI智能分析中心
 </h2>
+
 
 
 <button onclick="startPredict()">
@@ -87,21 +89,16 @@ AI智能预测中心
 
 
 
-<div id="progress">
-
-</div>
-
-
-
 <div id="predictResult">
 
-等待AI决策...
+等待分析...
 
 </div>
 
 
 
 </div>
+
 
 
 
@@ -110,7 +107,7 @@ AI智能预测中心
 
 <!-- AI报告 -->
 
-<div class="box">
+<div class="card">
 
 
 <h2>
@@ -135,69 +132,26 @@ AI多维分析报告
 
 
 
-<!-- 回测 -->
-
-<div class="box">
+<!-- 开奖反馈 -->
 
 
-<h2>
-历史滚动回测
-
-</h2>
-
-
-<button onclick="startTrain()">
-
-开始历史回测
-
-</button>
-
-
-
-<div id="trainResult">
-
-等待回测...
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-<!-- 反馈学习 -->
-
-<div class="box">
+<div class="card">
 
 
 <h2>
 开奖反馈学习
-
 </h2>
 
-
-
-<p>
-输入真实开奖号码：
-</p>
 
 
 <input
 
 id="realResult"
 
-placeholder="例如：03 08 22 30 35 01 09"
+placeholder="输入真实开奖号码"
+
 
 >
-
-
-<br><br>
-
 
 
 <button onclick="saveFeedback()">
@@ -224,54 +178,64 @@ placeholder="例如：03 08 22 30 35 01 09"
 
 
 
+<!-- 模型列表 -->
 
-<!-- Agent状态 -->
 
-
-<div class="box">
+<div class="card">
 
 
 <h2>
+
 V70 AI Agent模型
 
 </h2>
 
 
 
-<ul>
+<div>
 
 
-<li>
-Master AI：总控决策
-</li>
+Master AI：
+总控决策
 
 
-<li>
-Trend AI：趋势走势分析
-</li>
+<br>
 
 
-<li>
-Structure AI：号码结构分析
-</li>
+Trend AI：
+趋势走势分析
 
 
-<li>
-Markov AI：历史转移分析
-</li>
+<br>
 
 
-<li>
-Risk AI：风险过滤
-</li>
+Structure AI：
+号码结构分析
 
 
-<li>
-Review AI：开奖复盘学习
-</li>
+<br>
 
 
-</ul>
+Markov AI：
+历史转移分析
+
+
+<br>
+
+
+Risk AI：
+风险过滤
+
+
+<br>
+
+
+Review AI：
+开奖复盘学习
+
+
+</div>
+
 
 
 </div>
@@ -282,30 +246,8 @@ Review AI：开奖复盘学习
 
 
 
-
-<div class="box">
-
-
-<h2>
-系统状态
-
-</h2>
-
-
-<p>
-
-V70 MULTI AGENT CORE RUNNING
-
-</p>
-
-
 </div>
 
-
-
-
-
-</div>
 
 
 
@@ -314,6 +256,7 @@ V70 MULTI AGENT CORE RUNNING
 
 
 <!-- Agent加载 -->
+
 
 <script src="agents/masterAgent.js"></script>
 
@@ -329,7 +272,10 @@ V70 MULTI AGENT CORE RUNNING
 
 
 
+
+
 <!-- 核心 -->
+
 
 <script src="engine.js"></script>
 

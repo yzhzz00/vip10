@@ -1,25 +1,30 @@
 /*
-================================
+====================================
 
 大乐透智能分析系统
 
-V70 CORE SCRIPT
+V70.2 CORE SCRIPT
 
-页面控制
+页面控制中心
 
-================================
+====================================
 */
 
 
-let ready=false;
+let systemReady=false;
+
+let analyzing=false;
 
 
 
+
+
+// 页面加载
 
 window.onload=async()=>{
 
 
-await startSystem();
+await initSystem();
 
 
 };
@@ -30,20 +35,24 @@ await startSystem();
 
 
 
-async function startSystem(){
+// ============================
+// 系统初始化
+// ============================
+
+
+async function initSystem(){
 
 
 
 try{
 
 
-document.getElementById(
 
-"dataStatus"
+setStatus(
 
-).innerHTML=
+"AI核心初始化..."
 
-"正在加载";
+);
 
 
 
@@ -63,36 +72,31 @@ AIEngine.status();
 
 
 
-document.getElementById(
 
-"dataStatus"
-
-).innerHTML=
-
-"加载成功";
-
-
-
-
-document.getElementById(
-
-"dataCount"
-
-).innerHTML=
-
-status.data;
+systemReady=true;
 
 
 
 
 
-ready=true;
+setStatus(
+
+"系统运行正常"
+
+);
+
+
+
+
+
+
+updateSystemInfo(status);
+
+
 
 
 
 }
-
-
 
 catch(e){
 
@@ -102,13 +106,74 @@ console.log(e);
 
 
 
+setStatus(
+
+"系统初始化失败"
+
+);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ============================
+// 显示系统状态
+// ============================
+
+
+function updateSystemInfo(status){
+
+
+
+let box=
+
 document.getElementById(
 
-"dataStatus"
+"systemStatus"
 
-).innerHTML=
+);
 
-"加载失败";
+
+
+
+
+if(box){
+
+
+
+box.innerHTML=
+
+`
+
+版本：
+
+${status.version}
+
+<br>
+
+数据：
+
+${status.data}期
+
+<br>
+
+模型：
+
+${status.agents.join(" , ")}
+
+`;
 
 
 
@@ -126,31 +191,127 @@ document.getElementById(
 
 
 
-// =====================
-// V70 AI分析
-// =====================
+// ============================
+// 开始AI分析
+// ============================
 
 
 async function startPredict(){
 
 
 
-if(!ready){
+if(!systemReady){
 
 
 
 alert(
 
-"系统未准备完成"
+"系统还没有准备完成"
 
 );
+
 
 
 return;
 
 
+
 }
 
+
+
+
+
+
+
+if(analyzing){
+
+
+
+return;
+
+
+
+}
+
+
+
+
+analyzing=true;
+
+
+
+
+
+showLoading();
+
+
+
+
+
+try{
+
+
+
+let result=
+
+await AIEngine.analyze();
+
+
+
+
+
+
+showResult(result);
+
+
+
+
+
+}
+
+catch(e){
+
+
+
+console.log(e);
+
+
+
+showError();
+
+
+
+}
+
+finally{
+
+
+
+analyzing=false;
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ============================
+// 加载显示
+// ============================
+
+
+function showLoading(){
 
 
 
@@ -164,20 +325,123 @@ document.getElementById(
 
 
 
+if(box){
+
 
 
 box.innerHTML=
 
-"Master AI正在分析...";
+`
+
+<div>
+
+AI专家团队分析中...
+
+</div>
+
+<br>
+
+Trend AI
+
+↓
+
+Structure AI
+
+↓
+
+Markov AI
+
+↓
+
+Master AI
+
+`;
+
+
+
+}
+
+
+
+}
 
 
 
 
 
 
-let result=
 
-await AIEngine.analyze();
+
+
+// ============================
+// 输出结果
+// ============================
+
+
+function showResult(result){
+
+
+
+let box=
+
+document.getElementById(
+
+"predictResult"
+
+);
+
+
+
+if(!box)return;
+
+
+
+
+
+let trendText="";
+
+
+
+if(result.models && result.models.trend){
+
+
+
+trendText=
+
+result.models.trend.reason.join(
+
+"<br>"
+
+);
+
+
+
+}
+
+
+
+
+
+
+let structureText="";
+
+
+
+if(result.models && result.models.structure){
+
+
+
+structureText=
+
+result.models.structure.reason.join(
+
+"<br>"
+
+);
+
+
+
+}
 
 
 
@@ -191,62 +455,55 @@ box.innerHTML=
 
 <h3>
 
-V70 AI决策
+V70.2 AI决策完成
 
 </h3>
 
 
-<p>
-
-版本：
-
-${result.version}
-
-</p>
-
-
-<p>
-
 历史数据：
 
-${result.data}期
-
-</p>
+${result.history}期
 
 
-<p>
-
-当前策略：
-
-${
-
-result.decision.strategy ||
-
-"等待模型"
-
-}
-
-</p>
+<br><br>
 
 
-<p>
+<b>Trend AI</b>
 
-分析依据：
+<br>
+
+${trendText}
+
+
+<br><br>
+
+
+<b>Structure AI</b>
+
+<br>
+
+${structureText}
+
+
+<br><br>
+
+
+<b>Master AI</b>
 
 <br>
 
 ${
 
-(result.decision.reason||[])
+JSON.stringify(
 
-.join("<br>")
+result.decision
+
+)
 
 }
 
-</p>
 
 `;
-
 
 
 
@@ -266,7 +523,12 @@ showReport(result);
 
 
 
-function showReport(data){
+// ============================
+// AI报告
+// ============================
+
+
+function showReport(result){
 
 
 
@@ -280,29 +542,26 @@ document.getElementById(
 
 
 
+if(!box)return;
+
+
+
 
 
 box.innerHTML=
 
 `
 
-AI多维分析报告
+<h3>
 
-<br><br>
+V70.2 AI多维分析报告
 
-Master AI状态：
+</h3>
 
-运行中
+
+参与模型：
 
 <br>
-
-时间：
-
-${data.time}
-
-<br><br>
-
-当前参与模型：
 
 ${
 
@@ -312,11 +571,25 @@ AIEngine.agents
 
 )
 
-.join(",")
+.join(" / ")
 
 }
 
 
+<br><br>
+
+
+状态：
+
+正常运行
+
+
+<br><br>
+
+
+分析时间：
+
+${result.time}
 
 `;
 
@@ -332,23 +605,34 @@ AIEngine.agents
 
 
 
-
-// =====================
-// 简单回测接口占位
-// =====================
-
-
-async function startTrain(){
+// ============================
+// 状态提示
+// ============================
 
 
+function setStatus(text){
+
+
+
+let box=
 
 document.getElementById(
 
-"trainResult"
+"dataStatus"
 
-).innerHTML=
+);
 
-"V70回测模块准备中";
+
+
+if(box){
+
+
+
+box.innerHTML=text;
+
+
+
+}
 
 
 
@@ -362,48 +646,65 @@ document.getElementById(
 
 
 
-
-// =====================
-// 反馈接口
-// =====================
+// ============================
+// 开奖反馈
+// ============================
 
 
 function saveFeedback(){
 
 
 
-let value=
+let input=
 
 document.getElementById(
 
 "realResult"
 
-).value;
+);
 
 
 
-if(!value)return;
+if(!input)return;
+
 
 
 
 
 localStorage.setItem(
 
-"last_feedback",
+"last_result",
 
-value
+input.value
 
 );
 
 
 
+
+
+
+let box=
+
 document.getElementById(
 
 "learningStatus"
 
-).innerHTML=
+);
 
-"反馈已保存";
+
+
+if(box){
+
+
+
+box.innerHTML=
+
+"开奖反馈已保存";
+
+
+
+}
 
 
 
