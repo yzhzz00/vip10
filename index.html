@@ -1,61 +1,59 @@
 <!DOCTYPE html>
-<html>
-<button onclick="startAnalysis()">开始分析</button>
-<h1>大乐透智能分析系统</h1>
+<html lang="zh-CN">
 
-<p>欢迎使用分析平台</p>
-
-<button onclick="startAnalysis()">开始分析</button>
-<link rel="stylesheet" href="style.css">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>彩票智能分析系统 V10.0</title>
 
+<link rel="stylesheet" href="style.css">
+
 </head>
-<script src="script.js"></script>
+
+
 <body>
 
 <h1>彩票智能分析系统 V10.0</h1>
+
 
 <h2>数据状态</h2>
 
 <p>大乐透历史数据：已加载</p>
 <p>排列五历史数据：已加载</p>
 
+
+<button onclick="startAnalysis()">开始分析</button>
+
+
+<h2>分析结果</h2>
+
+<div id="result">
+等待分析...
+</div>
+
+
 <h2>功能模块</h2>
 
 <ul>
-<li>冷热号分析（准备中）</li>
-<li>遗漏分析（准备中）</li>
-<li>马尔可夫模型（准备中）</li>
-<li>蒙特卡罗模拟（准备中）</li>
+
+<li>冷热号分析</li>
+
+<li>遗漏分析</li>
+
+<li>号码频率统计</li>
+
+<li>蒙特卡罗模拟</li>
+
+<li>智能评分模型</li>
+
 </ul>
 
+
+<script src="script.js"></script>
+
+
 </body>
+
 </html>
-<h2>数据测试</h2>
-
-<div id="result">正在读取...</div>
-
-<script>
-
-Promise.all([
-fetch("data/dlt_raw.txt").then(r=>r.text()),
-fetch("data/pl5_raw.txt").then(r=>r.text())
-])
-.then(data=>{
-
-document.getElementById("result").innerHTML =
-"数据读取成功";
-
-})
-.catch(()=>{
-
-document.getElementById("result").innerHTML =
-"数据读取失败";
-
-});
-
-</script>
