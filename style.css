@@ -1,6 +1,6 @@
 /*
 ====================================
-彩票智能分析系统 V50.7 Mobile
+彩票智能分析系统 V50.8 Mobile
 
 界面样式
 ====================================
@@ -12,8 +12,6 @@
 box-sizing:border-box;
 
 }
-
-
 
 
 
@@ -37,8 +35,6 @@ color:#222;
 
 
 
-
-
 .container{
 
 max-width:900px;
@@ -59,8 +55,6 @@ box-shadow:
 
 
 
-
-
 h1{
 
 text-align:center;
@@ -72,8 +66,6 @@ color:#1677ff;
 margin:10px 0 20px;
 
 }
-
-
 
 
 
@@ -93,8 +85,6 @@ margin-bottom:15px;
 
 
 
-
-
 .title{
 
 font-size:16px;
@@ -106,8 +96,6 @@ color:#333;
 margin-bottom:10px;
 
 }
-
-
 
 
 
@@ -125,13 +113,11 @@ border-radius:10px;
 
 background:#1677ff;
 
-color:#fff;
+color:white;
 
 font-size:16px;
 
 }
-
-
 
 
 
@@ -140,8 +126,6 @@ button:active{
 transform:scale(.98);
 
 }
-
-
 
 
 
@@ -163,8 +147,6 @@ border-radius:8px;
 
 
 
-
-
 input:focus{
 
 outline:none;
@@ -172,8 +154,6 @@ outline:none;
 border-color:#1677ff;
 
 }
-
-
 
 
 
@@ -187,10 +167,8 @@ font-weight:bold;
 
 
 
-
-
 /* ======================
-   预测结果
+预测区域
 ====================== */
 
 
@@ -213,9 +191,8 @@ min-height:120px;
 
 
 
-
 /* ======================
-   V50.7 模拟进度
+预测进度
 ====================== */
 
 
@@ -235,31 +212,14 @@ line-height:1.8;
 
 font-size:14px;
 
-color:#333;
-
 }
-
-
-
-
-
-progress{
-
-width:100%;
-
-height:18px;
-
-margin-top:8px;
-
-}
-
 
 
 
 
 
 /* ======================
-   回测结果
+回测结果
 ====================== */
 
 
@@ -274,6 +234,47 @@ padding:12px;
 border-radius:8px;
 
 line-height:2;
+
+}
+
+
+
+
+
+/* ======================
+回测进度
+====================== */
+
+
+#backProgressBox{
+
+margin-top:12px;
+
+padding:12px;
+
+background:#fff;
+
+border-left:4px solid #19a15f;
+
+border-radius:8px;
+
+line-height:1.8;
+
+font-size:14px;
+
+}
+
+
+
+
+
+progress{
+
+width:100%;
+
+height:18px;
+
+margin-top:8px;
 
 }
 
@@ -315,8 +316,6 @@ margin:0;
 
 
 
-
-
 li{
 
 line-height:1.8;
@@ -325,11 +324,6 @@ line-height:1.8;
 
 
 
-
-
-/* ======================
-   手机适配
-====================== */
 
 
 @media(max-width:600px){
@@ -372,7 +366,8 @@ font-size:15px;
 
 #result,
 #backTestResult,
-#progressBox{
+#progressBox,
+#backProgressBox{
 
 font-size:14px;
 
