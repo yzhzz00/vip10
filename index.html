@@ -8,10 +8,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>
-大乐透智能分析系统 V70.2 CORE
+大乐透智能分析系统 V70.3 AI CORE
 </title>
 
-<link rel="stylesheet" href="style.css?v=702">
+
+<link rel="stylesheet" href="style.css?v=703">
+
 
 </head>
 
@@ -25,12 +27,15 @@
 <h1>
 大乐透智能分析系统
 <br>
-V70.2 CORE
+V70.3 AI CORE
 </h1>
 
 
 
+
+
 <div class="card">
+
 
 <h2>
 数据状态
@@ -38,22 +43,28 @@ V70.2 CORE
 
 
 <div id="dataStatus">
+
 等待启动...
+
 </div>
 
 
 <div id="systemStatus">
+
 等待系统加载...
+
 </div>
 
 
 </div>
+
 
 
 
 
 
 <div class="card">
+
 
 <h2>
 AI智能分析中心
@@ -65,6 +76,7 @@ AI智能分析中心
 开始 V70 AI分析
 
 </button>
+
 
 
 <div id="predictResult">
@@ -80,7 +92,10 @@ AI智能分析中心
 
 
 
+
+
 <div class="card">
+
 
 <h2>
 AI多维分析报告
@@ -100,21 +115,26 @@ AI多维分析报告
 
 
 
+
+
 <div class="card">
+
 
 <h2>
 开奖反馈学习
 </h2>
 
 
+
 <input
 
 id="realResult"
 
-placeholder="输入真实开奖号码"
-
+placeholder="输入真实开奖号码，例如 01 05 12 22 33 + 06 09"
 
 >
+
+
 
 
 <button onclick="saveFeedback()">
@@ -124,6 +144,8 @@ placeholder="输入真实开奖号码"
 </button>
 
 
+
+
 <div id="learningStatus">
 
 等待反馈...
@@ -131,7 +153,10 @@ placeholder="输入真实开奖号码"
 </div>
 
 
+
 </div>
+
+
 
 
 
@@ -143,6 +168,7 @@ placeholder="输入真实开奖号码"
 <h2>
 V70 AI Agent模型
 </h2>
+
 
 
 <div id="agentList">
@@ -157,6 +183,7 @@ V70 AI Agent模型
 
 
 
+
 </div>
 
 
@@ -164,28 +191,36 @@ V70 AI Agent模型
 
 
 
-<!-- 只加载一次 -->
-
-<script src="agents/masterAgent.js?v=702"></script>
-
-<script src="agents/trendAgent.js?v=702"></script>
-
-<script src="agents/structureAgent.js?v=702"></script>
-
-<script src="agents/markovAgent.js?v=702"></script>
-
-<script src="agents/riskAgent.js?v=702"></script>
-
-<script src="agents/reviewAgent.js?v=702"></script>
 
 
 
-<script src="engine.js?v=702"></script>
+<!-- AI Agent -->
 
-<script src="script.js?v=702"></script>
+<script src="agents/masterAgent.js?v=703"></script>
+
+<script src="agents/trendAgent.js?v=703"></script>
+
+<script src="agents/structureAgent.js?v=703"></script>
+
+<script src="agents/markovAgent.js?v=703"></script>
+
+<script src="agents/riskAgent.js?v=703"></script>
+
+<script src="agents/reviewAgent.js?v=703"></script>
+
+
+
+
+
+<!-- 核心 -->
+
+<script src="engine.js?v=703"></script>
+
+<script src="script.js?v=703"></script>
 
 
 
 </body>
+
 
 </html>

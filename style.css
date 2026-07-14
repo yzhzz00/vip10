@@ -3,7 +3,7 @@
 
 大乐透智能分析系统
 
-V70.2 CORE STYLE
+V70.3 CORE CSS
 
 ================================
 */
@@ -19,67 +19,51 @@ box-sizing:border-box;
 
 body{
 
-
 margin:0;
 
 padding:0;
 
-background:#08111f;
-
-color:#ffffff;
+background:#f5f7fb;
 
 font-family:
 
+-apple-system,
+BlinkMacSystemFont,
+"Segoe UI",
 "Microsoft YaHei",
-Arial,
 sans-serif;
 
+color:#222;
 
 }
+
 
 
 
 
 .container{
 
+width:95%;
 
 max-width:900px;
 
-margin:auto;
-
-padding:20px;
-
+margin:20px auto;
 
 }
+
 
 
 
 
 h1{
 
-
 text-align:center;
 
-font-size:28px;
+font-size:26px;
 
-line-height:1.5;
+color:#1f3c88;
 
-margin-bottom:30px;
-
-
-}
-
-
-
-h2{
-
-
-font-size:20px;
-
-margin-top:0;
-
-color:#60a5fa;
-
+margin-bottom:25px;
 
 }
 
@@ -89,90 +73,97 @@ color:#60a5fa;
 
 .card{
 
+background:white;
 
-background:#111827;
-
-border-radius:16px;
+border-radius:15px;
 
 padding:20px;
 
-margin-bottom:20px;
-
+margin-bottom:18px;
 
 box-shadow:
 
-0 5px 20px rgba(0,0,0,0.35);
-
+0 4px 12px rgba(0,0,0,0.08);
 
 }
+
+
+
+
+
+.card h2{
+
+font-size:20px;
+
+margin-top:0;
+
+color:#333;
+
+border-bottom:
+
+1px solid #eee;
+
+padding-bottom:10px;
+
+}
+
 
 
 
 
 button{
 
-
 width:100%;
 
-height:50px;
+padding:14px;
 
 border:none;
 
-border-radius:12px;
-
+border-radius:10px;
 
 background:#2563eb;
 
-
 color:white;
 
-font-size:18px;
-
+font-size:16px;
 
 cursor:pointer;
 
+margin-top:10px;
 
 }
 
 
 
-button:hover{
 
 
-background:#1d4ed8;
+button:active{
 
+transform:scale(0.98);
 
 }
+
 
 
 
 
 input{
 
-
 width:100%;
 
-height:45px;
+padding:12px;
 
+border-radius:8px;
 
-border-radius:10px;
+border:
 
-
-border:none;
-
-
-padding:10px;
-
+1px solid #ddd;
 
 font-size:16px;
 
-
-margin-bottom:10px;
-
+margin-top:10px;
 
 }
-
-
 
 
 
@@ -180,30 +171,27 @@ margin-bottom:10px;
 
 #dataStatus{
 
-
 font-size:18px;
 
-color:#22c55e;
+font-weight:bold;
+
+color:#16a34a;
 
 margin-bottom:10px;
 
-
 }
+
 
 
 
 
 #systemStatus{
 
-
-color:#93c5fd;
-
 line-height:1.8;
 
+color:#555;
 
 }
-
-
 
 
 
@@ -211,41 +199,27 @@ line-height:1.8;
 
 #predictResult{
 
-
-background:#0b1220;
-
-
-border-radius:12px;
-
+background:#f8fafc;
 
 padding:15px;
 
-
-margin-top:15px;
-
+border-radius:10px;
 
 line-height:1.8;
 
+white-space:pre-wrap;
 
 }
+
 
 
 
 
 #aiReport{
 
-
-background:#0b1220;
-
-
-border-radius:12px;
-
-
-padding:15px;
-
-
 line-height:1.8;
 
+color:#374151;
 
 }
 
@@ -253,17 +227,13 @@ line-height:1.8;
 
 
 
-#backtestResult{
+#agentList{
 
+line-height:2;
 
-background:#0b1220;
+color:#2563eb;
 
-
-padding:15px;
-
-
-border-radius:12px;
-
+font-weight:bold;
 
 }
 
@@ -273,15 +243,11 @@ border-radius:12px;
 
 #learningStatus{
 
-
 margin-top:10px;
 
-
-color:#fbbf24;
-
+color:#16a34a;
 
 }
-
 
 
 
@@ -290,11 +256,10 @@ color:#fbbf24;
 @media(max-width:600px){
 
 
+
 .container{
 
-
-padding:12px;
-
+width:92%;
 
 }
 
@@ -302,9 +267,7 @@ padding:12px;
 
 h1{
 
-
 font-size:22px;
-
 
 }
 
@@ -312,11 +275,10 @@ font-size:22px;
 
 .card{
 
-
 padding:15px;
 
-
 }
+
 
 
 }
