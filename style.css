@@ -1,5 +1,5 @@
 /* ======================================
-   彩票智能分析系统 V35.7
+   彩票智能分析系统 V35.7.1
    style.css
 ====================================== */
 
@@ -16,7 +16,7 @@ body{
 
     padding:20px;
 
-    background:#f2f2f2;
+    background:#f3f4f6;
 
     font-family:
     "Microsoft YaHei",
@@ -24,6 +24,7 @@ body{
     sans-serif;
 
 }
+
 
 
 
@@ -40,7 +41,7 @@ body{
     border-radius:12px;
 
     box-shadow:
-    0 4px 15px rgba(0,0,0,0.08);
+    0 4px 18px rgba(0,0,0,0.08);
 
 }
 
@@ -53,7 +54,9 @@ h1{
 
     font-size:26px;
 
-    margin:10px 0 25px;
+    color:#222;
+
+    margin-bottom:25px;
 
 }
 
@@ -65,7 +68,7 @@ h1{
 
     margin-top:18px;
 
-    padding:15px;
+    padding:16px;
 
     background:#fafafa;
 
@@ -79,15 +82,19 @@ h1{
 
 
 
+
 .title{
 
     font-size:20px;
 
     font-weight:bold;
 
+    color:#333;
+
     margin-bottom:12px;
 
 }
+
 
 
 
@@ -103,7 +110,7 @@ button{
 
     background:#1677ff;
 
-    color:#ffffff;
+    color:white;
 
     border:none;
 
@@ -113,13 +120,15 @@ button{
 
     cursor:pointer;
 
+    transition:0.2s;
+
 }
 
 
 
 button:hover{
 
-    opacity:0.9;
+    background:#0958d9;
 
 }
 
@@ -127,7 +136,7 @@ button:hover{
 
 button:active{
 
-    opacity:0.7;
+    transform:scale(0.98);
 
 }
 
@@ -144,7 +153,9 @@ input{
 
     font-size:16px;
 
-    border:1px solid #ccc;
+    border:
+
+    1px solid #ccc;
 
     border-radius:8px;
 
@@ -164,6 +175,8 @@ input:focus{
 
 
 
+
+
 span{
 
     color:#1677ff;
@@ -176,15 +189,19 @@ span{
 
 
 
+
 #result{
 
     font-size:16px;
 
     line-height:1.9;
 
+    color:#222;
+
     word-break:break-all;
 
 }
+
 
 
 
@@ -196,8 +213,9 @@ span{
 
     line-height:1.8;
 
-}
+    color:#555;
 
+}
 
 
 
@@ -214,9 +232,28 @@ ul{
 
 
 
+
+
 li{
 
     line-height:2;
+
+    color:#444;
+
+}
+
+
+
+
+
+
+/* 推荐结果强调 */
+
+#result b{
+
+    font-size:18px;
+
+    color:#1677ff;
 
 }
 
@@ -229,43 +266,53 @@ li{
 @media(max-width:600px){
 
 
-    body{
 
-        padding:10px;
+body{
 
-    }
+    padding:10px;
 
-
-
-    .container{
-
-        padding:15px;
-
-    }
+}
 
 
 
-    h1{
+.container{
 
-        font-size:22px;
+    padding:15px;
 
-    }
-
-
-
-    .box{
-
-        padding:12px;
-
-    }
+}
 
 
 
-    button{
+h1{
 
-        font-size:16px;
+    font-size:22px;
 
-    }
+}
+
+
+
+.title{
+
+    font-size:18px;
+
+}
+
+
+
+button{
+
+    font-size:16px;
+
+}
+
+
+
+.box{
+
+    padding:12px;
+
+}
+
 
 
 }
