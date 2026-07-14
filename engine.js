@@ -3,9 +3,9 @@
 
 大乐透智能分析系统
 
-V70.4 CORE ENGINE
+V70.5 CORE ENGINE
 
-Confidence AI版
+Critic AI 自我否定版
 
 ================================
 */
@@ -14,10 +14,11 @@ Confidence AI版
 class AIEngine {
 
 
+
 constructor(){
 
 
-this.version="V70.4";
+this.version="V70.5";
 
 
 this.dlt=[];
@@ -35,7 +36,10 @@ this.ready=false;
 
 
 
+
+
 async init(){
+
 
 
 await this.loadData();
@@ -57,6 +61,8 @@ return true;
 
 
 
+
+
 async loadData(){
 
 
@@ -64,18 +70,21 @@ async loadData(){
 let response=
 
 await fetch(
-"data/dlt.txt?v=704"
+"data/dlt.txt?v=705"
 );
 
 
 
 if(!response.ok){
 
+
 throw new Error(
 "大乐透数据读取失败"
 );
 
+
 }
+
 
 
 
@@ -86,9 +95,14 @@ await response.text();
 
 
 
+
+
 let lines=
 
 text.trim().split(/\n+/);
+
+
+
 
 
 
@@ -108,6 +122,8 @@ line.trim().split(/\s+/);
 
 
 
+
+
 if(arr.length>=9){
 
 
@@ -115,7 +131,9 @@ if(arr.length>=9){
 this.dlt.push({
 
 
+
 issue:arr[0],
+
 
 
 front:[
@@ -129,6 +147,7 @@ arr[6]
 ],
 
 
+
 back:[
 
 arr[7],
@@ -137,18 +156,22 @@ arr[8]
 ]
 
 
+
 });
 
 
+
+}
+
+
+
+
 }
 
 
 
 }
 
-
-
-}
 
 
 
@@ -213,13 +236,19 @@ window.ReviewAgent;
 
 
 
-// 新增 Confidence AI
-
 if(window.ConfidenceAgent)
 
 this.agents.confidence=
 
 window.ConfidenceAgent;
+
+
+
+if(window.CriticAgent)
+
+this.agents.critic=
+
+window.CriticAgent;
 
 
 
@@ -243,6 +272,8 @@ let meeting={};
 
 
 
+
+
 if(this.agents.trend)
 
 meeting.trend=
@@ -250,6 +281,8 @@ meeting.trend=
 this.agents.trend.analyze(
 this.dlt
 );
+
+
 
 
 
@@ -267,6 +300,8 @@ this.dlt
 
 
 
+
+
 if(this.agents.markov)
 
 meeting.markov=
@@ -279,6 +314,8 @@ this.dlt
 
 
 
+
+
 if(this.agents.risk)
 
 meeting.risk=
@@ -286,6 +323,8 @@ meeting.risk=
 this.agents.risk.analyze(
 this.dlt
 );
+
+
 
 
 
@@ -304,7 +343,10 @@ this.dlt
 
 
 
-// Confidence AI会议评分
+
+
+
+// Confidence AI
 
 if(this.agents.confidence)
 
@@ -319,7 +361,12 @@ meeting
 
 
 
-let finalDecision={};
+
+
+// Master AI初步决策
+
+
+let decision={};
 
 
 
@@ -329,7 +376,7 @@ if(this.agents.master){
 
 
 
-finalDecision=
+decision=
 
 this.agents.master.analyze({
 
@@ -350,6 +397,44 @@ history:this.dlt.length
 
 
 
+
+
+// Critic AI反向审查
+
+
+let critic={};
+
+
+
+
+
+if(this.agents.critic){
+
+
+
+critic=
+
+this.agents.critic.analyze(
+
+
+decision,
+
+
+meeting
+
+
+);
+
+
+}
+
+
+
+
+
+
+
+
 return {
 
 
@@ -360,15 +445,24 @@ version:this.version,
 history:this.dlt.length,
 
 
+
 meeting:meeting,
 
 
-decision:finalDecision,
+
+decision:decision,
+
+
+
+critic:critic,
+
 
 
 message:
 
-"AI会议+信心指数完成",
+"AI会议+自我审查完成",
+
+
 
 
 agents:Object.keys(
@@ -432,3 +526,11 @@ ready:this.ready
 window.AIEngine=
 
 new AIEngine();
+
+
+
+console.log(
+
+"V70.5 ENGINE READY"
+
+);

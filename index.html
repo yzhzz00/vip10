@@ -8,11 +8,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>
-大乐透智能分析系统 V70.4 AI CORE
+大乐透智能分析系统 V70.5 AI CORE
 </title>
 
 
-<link rel="stylesheet" href="style.css?v=704">
+<link rel="stylesheet" href="style.css?v=705">
 
 
 </head>
@@ -27,7 +27,7 @@
 <h1>
 大乐透智能分析系统
 <br>
-V70.4 AI CORE
+V70.5 AI CORE
 </h1>
 
 
@@ -127,7 +127,6 @@ AI多维分析报告
 
 
 
-
 <input
 
 id="realResult"
@@ -147,13 +146,11 @@ placeholder="输入真实开奖号码"
 
 
 
-
 <div id="learningStatus">
 
 等待反馈...
 
 </div>
-
 
 
 </div>
@@ -170,7 +167,6 @@ placeholder="输入真实开奖号码"
 <h2>
 V70 AI Agent模型
 </h2>
-
 
 
 <div id="agentList">
@@ -195,47 +191,52 @@ V70 AI Agent模型
 
 
 
-
-<!-- =======================
-     V70.4 Agent加载
-======================= -->
-
-
-<script src="agents/masterAgent.js?v=704"></script>
-
-<script src="agents/trendAgent.js?v=704"></script>
-
-<script src="agents/structureAgent.js?v=704"></script>
-
-<script src="agents/markovAgent.js?v=704"></script>
-
-<script src="agents/riskAgent.js?v=704"></script>
-
-<script src="agents/reviewAgent.js?v=704"></script>
+<!-- =========================
+     V70.5 Agent加载
+========================= -->
 
 
-<!-- 新增信心指数 AI -->
+<script src="agents/masterAgent.js?v=705"></script>
 
-<script src="agents/confidenceAgent.js?v=704"></script>
+<script src="agents/trendAgent.js?v=705"></script>
+
+<script src="agents/structureAgent.js?v=705"></script>
+
+<script src="agents/markovAgent.js?v=705"></script>
+
+<script src="agents/riskAgent.js?v=705"></script>
+
+<script src="agents/reviewAgent.js?v=705"></script>
+
+
+<!-- 信心指数模型 -->
+
+<script src="agents/confidenceAgent.js?v=705"></script>
+
+
+<!-- 自我否定模型 -->
+
+<script src="agents/criticAgent.js?v=705"></script>
 
 
 
 
 
 
-<!-- =======================
+<!-- =========================
      核心
-======================= -->
+========================= -->
 
 
-<script src="engine.js?v=704"></script>
+<script src="engine.js?v=705"></script>
 
-<script src="script.js?v=704"></script>
+<script src="script.js?v=705"></script>
 
 
 
 
 
 </body>
+
 
 </html>

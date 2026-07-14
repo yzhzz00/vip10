@@ -3,15 +3,16 @@
 
 大乐透智能分析系统
 
-V70.4 CORE SCRIPT
+V70.5 CORE SCRIPT
 
-Confidence AI显示版
+Critic AI显示版
 
 ================================
 */
 
 
 let systemReady=false;
+
 
 
 
@@ -37,6 +38,7 @@ await window.AIEngine.init();
 
 
 
+
 let status=
 
 window.AIEngine.status();
@@ -45,7 +47,9 @@ window.AIEngine.status();
 
 
 
+
 systemReady=true;
+
 
 
 
@@ -85,6 +89,7 @@ AI模型：
 ${status.agents.join(" / ")}
 
 `;
+
 
 
 
@@ -142,9 +147,11 @@ async function startPredict(){
 if(!systemReady){
 
 
+
 alert(
 "系统未启动"
 );
+
 
 
 return;
@@ -199,6 +206,7 @@ ${result.meeting.trend.reason.join("<br>")}
 `;
 
 }
+
 
 
 
@@ -292,7 +300,7 @@ ${result.meeting.review.reason.join("<br>")}
 
 
 
-// Confidence AI显示
+
 
 if(result.meeting.confidence){
 
@@ -318,15 +326,11 @@ ${result.meeting.confidence.confidence}%
 ${result.meeting.confidence.level}
 
 
-<br>
-
-
-${result.meeting.confidence.reason.join("<br>")}
-
-
 <br><br>
 
 `;
+
+
 
 }
 
@@ -335,6 +339,10 @@ ${result.meeting.confidence.reason.join("<br>")}
 
 
 
+
+
+
+// Master AI
 
 
 html+=`
@@ -365,11 +373,78 @@ null,
 
 
 
+
+
+// Critic AI
+
+
+if(result.critic){
+
+
+
+html+=`
+
+<h3>
+Critic AI 自我审查
+</h3>
+
+
+信心：
+
+${result.critic.confidence}%
+
+
+<br>
+
+
+等级：
+
+${result.critic.level}
+
+
+<br><br>
+
+
+<b>挑战意见：</b>
+
+<br>
+
+
+${result.critic.challenge.join("<br>")}
+
+
+<br><br>
+
+
+<b>风险提醒：</b>
+
+<br>
+
+
+${result.critic.reason.join("<br>")}
+
+
+
+`;
+
+
+
+}
+
+
+
+
+
+
+
+
+
 document.getElementById(
 "predictResult"
 ).innerHTML=
 
 html;
+
 
 
 
@@ -399,6 +474,7 @@ ${result.version}
 ${result.agents.join(" / ")}
 
 `;
+
 
 
 
@@ -436,6 +512,7 @@ localStorage.setItem(
 value
 
 );
+
 
 
 
