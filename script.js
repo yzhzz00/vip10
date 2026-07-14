@@ -5,7 +5,7 @@
 
 V70.3 CORE SCRIPT
 
-AI会议显示版
+AI会议显示修正版
 
 ================================
 */
@@ -15,9 +15,7 @@ let systemReady=false;
 
 
 
-
 window.onload=async function(){
-
 
 
 try{
@@ -29,7 +27,6 @@ document.getElementById(
 ).innerHTML=
 
 "AI系统启动中...";
-
 
 
 
@@ -68,7 +65,6 @@ document.getElementById(
 
 
 
-
 document.getElementById(
 "systemStatus"
 ).innerHTML=
@@ -79,13 +75,17 @@ document.getElementById(
 
 ${status.version}
 
+
 <br>
+
 
 历史数据：
 
 ${status.data}
 
+
 <br>
+
 
 AI模型：
 
@@ -95,11 +95,31 @@ ${status.agents.join(" / ")}
 
 
 
+
+
+// 修复 Agent 列表显示
+
+document.getElementById(
+"agentList"
+).innerHTML=
+
+status.agents.join(
+"<br>"
+);
+
+
+
+
+
 }
 
 
 
 catch(e){
+
+
+
+console.error(e);
 
 
 
@@ -112,7 +132,6 @@ document.getElementById(
 
 
 }
-
 
 
 
@@ -171,7 +190,9 @@ AI多模型会议报告
 
 
 
+
 if(result.meeting.trend){
+
 
 
 html+=
@@ -192,8 +213,8 @@ ${result.meeting.trend.reason.join("<br>")}
 
 
 
-
 if(result.meeting.structure){
+
 
 
 html+=
@@ -214,8 +235,8 @@ ${result.meeting.structure.reason.join("<br>")}
 
 
 
-
 if(result.meeting.markov){
+
 
 
 html+=
@@ -236,8 +257,8 @@ ${result.meeting.markov.reason.join("<br>")}
 
 
 
-
 if(result.meeting.risk){
+
 
 
 html+=
@@ -258,8 +279,8 @@ ${result.meeting.risk.reason.join("<br>")}
 
 
 
-
 if(result.meeting.review){
+
 
 
 html+=
@@ -282,7 +303,6 @@ ${result.meeting.review.reason.join("<br>")}
 
 
 
-
 html+=
 
 `
@@ -291,10 +311,9 @@ html+=
 Master AI 总控决策
 </h3>
 
+<pre>
 
-${
-
-JSON.stringify(
+${JSON.stringify(
 
 result.decision,
 
@@ -302,9 +321,9 @@ null,
 
 2
 
-)
+)}
 
-}
+</pre>
 
 `;
 
@@ -318,6 +337,8 @@ document.getElementById(
 ).innerHTML=
 
 html;
+
+
 
 
 
@@ -372,6 +393,7 @@ document.getElementById(
 
 
 
+
 localStorage.setItem(
 
 "dlt_feedback",
@@ -379,6 +401,7 @@ localStorage.setItem(
 value
 
 );
+
 
 
 
