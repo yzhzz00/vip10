@@ -1,6 +1,6 @@
 /*
 ====================================
-彩票智能分析系统 V35.9.3 Mobile
+彩票智能分析系统 V35.9.4 Mobile
 script.js
 ====================================
 */
@@ -34,15 +34,14 @@ document
 .onclick=saveFeedback;
 
 
+
 };
 
 
 
 
 
-
-
-// 加载大乐透数据
+// 加载数据
 
 async function loadData(){
 
@@ -51,7 +50,6 @@ try{
 
 
 let res=
-
 await fetch(
 "data/dlt_raw.txt"
 );
@@ -59,14 +57,11 @@ await fetch(
 
 
 let text=
-
 await res.text();
 
 
 
-
 dltData=
-
 parseData(text);
 
 
@@ -90,22 +85,18 @@ dltData.length;
 document
 .getElementById("systemStatus")
 .innerHTML=
-
-"V35.9.3数据模块运行正常";
-
+"V35.9.4数据模块运行正常";
 
 
 
-}catch(e){
-
+}
+catch(e){
 
 
 document
 .getElementById("systemStatus")
 .innerHTML=
-
 "数据加载失败";
-
 
 
 console.log(e);
@@ -114,10 +105,7 @@ console.log(e);
 }
 
 
-
 }
-
-
 
 
 
@@ -134,30 +122,19 @@ let arr=[];
 
 
 
-let lines=
-
-text.split(/\r?\n/);
-
-
-
-lines.forEach(line=>{
-
+text
+.split(/\r?\n/)
+.forEach(line=>{
 
 
 let p=
-
 line.trim()
 .split(/\s+/);
 
 
 
-if(
-p.length<9
-){
-
+if(p.length<9)
 return;
-
-}
 
 
 
@@ -211,6 +188,7 @@ Number(p[i])
 
 
 
+
 arr.push({
 
 front,
@@ -226,6 +204,7 @@ back
 
 
 return arr;
+
 
 
 }
@@ -261,7 +240,6 @@ return;
 
 
 let box=
-
 document
 .getElementById("result");
 
@@ -269,7 +247,8 @@ document
 
 box.innerHTML=
 
-"V35.9.3模型运行中...<br>"+
+"V35.9.4模型运行中...<br>"+
+"动态权重分析...<br>"+
 "蒙特卡罗模拟20000组...";
 
 
@@ -280,18 +259,13 @@ box.innerHTML=
 setTimeout(()=>{
 
 
-
 DLTEngine.data=
-
 dltData;
 
 
 
 let result=
-
 DLTEngine.run();
-
-
 
 
 
@@ -313,7 +287,7 @@ showResult(result);
 
 
 
-// 显示预测
+// 显示结果
 
 function showResult(result){
 
@@ -325,7 +299,7 @@ let html="";
 
 html+=
 
-"<b>彩票智能分析系统 V35.9.3 Mobile</b><br><br>";
+"<b>彩票智能分析系统 V35.9.4 Mobile</b><br><br>";
 
 
 
@@ -375,7 +349,6 @@ r.back.join(" ")+
 
 
 
-
 html+=
 
 "综合评分："+
@@ -394,7 +367,7 @@ r.score+
 
 html+=
 
-"模型状态：V35.9.3综合模型完成";
+"模型状态：V35.9.4综合模型完成";
 
 
 
@@ -403,7 +376,6 @@ html+=
 document
 .getElementById("result")
 .innerHTML=
-
 html;
 
 
@@ -425,7 +397,6 @@ function startBackTest(){
 
 
 let box=
-
 document
 .getElementById("backTestResult");
 
@@ -433,8 +404,9 @@ document
 
 box.innerHTML=
 
-"V35.9.3回测运行中...<br>"+
+"V35.9.4历史回测运行中...<br>"+
 "测试100期...";
+
 
 
 
@@ -445,13 +417,11 @@ setTimeout(()=>{
 
 
 DLTEngine.data=
-
 dltData;
 
 
 
 let report=
-
 DLTEngine.backTest(100);
 
 
@@ -460,24 +430,27 @@ DLTEngine.backTest(100);
 
 box.innerHTML=
 
-"<b>V35.9.3历史回测报告</b><br><br>"+
+"<b>V35.9.4历史回测报告</b><br><br>"+
 
 "测试期数："+report.testCount+
 "<br>"+
 
-"前区3中："+report.front3+"次<br>"+
+"前区3中："+report.front3+
+"次<br>"+
 
-"前区4中："+report.front4+"次<br>"+
+"前区4中："+report.front4+
+"次<br>"+
 
-"前区5中："+report.front5+"次<br><br>"+
+"前区5中："+report.front5+
+"次<br><br>"+
 
-"后区中1："+report.back1+"次<br>"+
+"后区中1："+report.back1+
+"次<br>"+
 
-"后区中2："+report.back2+"次<br><br>"+
+"后区中2："+report.back2+
+"次<br><br>"+
 
 "模型表现率："+report.rate+"%";
-
-
 
 
 
@@ -495,7 +468,7 @@ box.innerHTML=
 
 
 
-// 开奖反馈保存
+// 保存开奖反馈
 
 function saveFeedback(){
 
@@ -524,6 +497,7 @@ return;
 
 
 
+
 localStorage.setItem(
 
 "DLT_FEEDBACK",
@@ -531,6 +505,7 @@ localStorage.setItem(
 value
 
 );
+
 
 
 

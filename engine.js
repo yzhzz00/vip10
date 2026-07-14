@@ -1,8 +1,8 @@
 /*
 ====================================
-彩票智能分析系统 V35.9.3
+彩票智能分析系统 V35.9.4
 engine.js
-评分重构版
+动态权重 + 三方案差异化
 ====================================
 */
 
@@ -10,20 +10,30 @@ engine.js
 const DLTEngine={
 
 
-version:"V35.9.3",
+version:"V35.9.4",
+
 
 data:[],
 
-seed:3593,
+
+seed:3594,
+
 
 frontScore:{},
 
 backScore:{},
 
-candidatePool:{},
+transition:{},
+
+
+pool:[],
+
+
+
 
 
 random(){
+
 
 this.seed=
 (
@@ -34,19 +44,33 @@ this.seed*9301+
 
 return this.seed/233280;
 
+
 },
+
+
+
+
 
 
 
 init(data){
 
+
+
 this.data=data||[];
+
 
 this.frontScore={};
 
+
 this.backScore={};
 
-this.candidatePool=[];
+
+this.transition={};
+
+
+this.pool=[];
+
 
 
 
@@ -56,12 +80,17 @@ i<=35;
 i++
 ){
 
+
 let n=
-String(i).padStart(2,"0");
+String(i)
+.padStart(2,"0");
+
 
 this.frontScore[n]=0;
 
+
 }
+
 
 
 
@@ -71,16 +100,31 @@ i<=12;
 i++
 ){
 
+
 let n=
-String(i).padStart(2,"0");
+String(i)
+.padStart(2,"0");
+
 
 this.backScore[n]=0;
+
 
 }
 
 
 
-this.train();
+
+this.trainFrequency();
+
+
+this.trainTransition();
+
+
+this.normalize();
+
+
+this.createPool();
+
 
 
 },
@@ -88,47 +132,45 @@ this.train();
 
 
 
-train(){
 
 
 
-// 历史频率
+// ============================
+// 动态频率模型
+// ============================
 
-this.data.forEach(item=>{
+
+trainFrequency(){
+
+
+
+this.data.forEach((item,index)=>{
+
+
+let weight=1;
+
+
+
+// 越近期权重越高
+
+
+if(
+index>
+this.data.length-100
+){
+
+weight=3;
+
+
+}
+
 
 
 item.front.forEach(n=>{
 
-this.frontScore[n]+=1;
 
-});
+this.frontScore[n]+=weight;
 
-
-item.back.forEach(n=>{
-
-this.backScore[n]+=1;
-
-});
-
-
-});
-
-
-
-
-// 最近100期趋势
-
-let recent=
-this.data.slice(-100);
-
-
-
-recent.forEach(item=>{
-
-
-item.front.forEach(n=>{
-
-this.frontScore[n]+=3;
 
 });
 
@@ -136,18 +178,22 @@ this.frontScore[n]+=3;
 
 item.back.forEach(n=>{
 
-this.backScore[n]+=3;
+
+this.backScore[n]+=weight;
+
 
 });
 
 
+
 });
 
 
 
 
 
-// 遗漏周期
+// 遗漏动态奖励
+
 
 Object.keys(
 this.frontScore
@@ -166,6 +212,7 @@ i--
 ){
 
 
+
 if(
 this.data[i].front.includes(n)
 ){
@@ -175,6 +222,7 @@ break;
 }
 
 
+
 miss++;
 
 
@@ -182,24 +230,27 @@ miss++;
 
 
 
+
 if(
-miss>15
+miss>=20
 ){
 
-this.frontScore[n]+=5;
+this.frontScore[n]+=8;
+
+
+}
+else if(
+miss>=12
+){
+
+this.frontScore[n]+=4;
+
 
 }
 
 
+
 });
-
-
-
-
-this.normalize();
-
-
-this.createPool();
 
 
 
@@ -207,6 +258,86 @@ this.createPool();
 
 
 
+
+
+
+
+// ============================
+// 马尔可夫转移
+// ============================
+
+
+trainTransition(){
+
+
+
+for(
+let i=1;
+i<this.data.length;
+i++
+){
+
+
+
+let last=
+this.data[i-1].front;
+
+
+
+let now=
+this.data[i].front;
+
+
+
+
+last.forEach(a=>{
+
+
+
+if(
+!this.transition[a]
+){
+
+this.transition[a]={};
+
+}
+
+
+
+now.forEach(b=>{
+
+
+
+if(
+!this.transition[a][b]
+){
+
+this.transition[a][b]=0;
+
+}
+
+
+
+this.transition[a][b]++;
+
+
+
+});
+
+
+
+});
+
+
+
+}
+
+
+
+},
+// ============================
+// 标准化评分
+// ============================
 
 
 normalize(){
@@ -221,6 +352,8 @@ this.frontScore
 )
 
 );
+
+
 
 
 
@@ -239,7 +372,9 @@ max
 100;
 
 
+
 });
+
 
 
 
@@ -253,6 +388,8 @@ this.backScore
 )
 
 );
+
+
 
 
 
@@ -271,6 +408,7 @@ max2
 100;
 
 
+
 });
 
 
@@ -281,10 +419,18 @@ max2
 
 
 
+
+
+// ============================
+// 候选池
+// ============================
+
+
 createPool(){
 
 
-this.candidatePool=
+
+this.pool=
 
 Object.keys(
 this.frontScore
@@ -302,169 +448,19 @@ this.frontScore[a]
 
 
 },
-// ================================
-// 前区组合生成
-// ================================
 
 
-generateFront(){
 
 
 
-let result=[];
 
 
+// ============================
+// 转移关联评分
+// ============================
 
-let guard=0;
 
-
-
-while(
-result.length<5 &&
-guard<200
-){
-
-
-
-guard++;
-
-
-
-let index=
-
-Math.floor(
-this.random()*
-this.candidatePool.length
-);
-
-
-
-let n=
-
-this.candidatePool[index];
-
-
-
-
-
-if(
-!result.includes(n)
-){
-
-result.push(n);
-
-}
-
-
-}
-
-
-
-
-
-return result.sort(
-
-(a,b)=>
-
-Number(a)-Number(b)
-
-);
-
-
-
-},
-
-
-
-
-
-
-
-// ================================
-// 后区生成
-// ================================
-
-
-generateBack(){
-
-
-
-let pool=
-
-Object.keys(
-this.backScore
-)
-.sort(
-
-(a,b)=>
-
-this.backScore[b]
--
-this.backScore[a]
-
-);
-
-
-
-
-let result=[];
-
-
-
-while(
-result.length<2
-){
-
-
-
-let n=
-
-pool[
-Math.floor(
-this.random()*pool.length
-)
-];
-
-
-
-if(
-!result.includes(n)
-){
-
-result.push(n);
-
-}
-
-
-}
-
-
-
-
-return result.sort(
-
-(a,b)=>
-
-Number(a)-Number(b)
-
-);
-
-
-
-},
-
-
-
-
-
-
-
-// ================================
-// 结构评分
-// ================================
-
-
-structureScore(front){
+transitionScore(numbers){
 
 
 
@@ -472,16 +468,109 @@ let score=0;
 
 
 
-// 奇偶
+numbers.forEach(a=>{
+
+
+if(
+this.transition[a]
+){
+
+
+
+numbers.forEach(b=>{
+
+
+if(
+a!==b &&
+this.transition[a][b]
+){
+
+
+
+score+=
+
+this.transition[a][b]
+*
+0.5;
+
+
+
+}
+
+
+
+});
+
+
+
+}
+
+
+
+});
+
+
+
+
+return score;
+
+
+
+},
+
+
+
+
+
+
+
+// ============================
+// 组合评分
+// ============================
+
+
+comboScore(front){
+
+
+
+let score=0;
+
+
+
+front.forEach(n=>{
+
+
+score+=
+
+this.frontScore[n];
+
+
+});
+
+
+
+
+score+=
+
+this.transitionScore(front);
+
+
+
+
+
+// 奇偶结构
 
 
 let odd=
 
 front.filter(
+
 n=>
+
 Number(n)%2===1
-)
-.length;
+
+).length;
+
 
 
 
@@ -498,10 +587,15 @@ score+=15;
 
 
 
+
 // 三区
 
 
-let zone=[0,0,0];
+let z1=0;
+
+let z2=0;
+
+let z3=0;
 
 
 
@@ -509,25 +603,27 @@ front.forEach(n=>{
 
 
 let x=
+
 Number(n);
 
 
 
 if(x<=12){
 
-zone[0]++;
+z1++;
 
 }
 else if(x<=24){
 
-zone[1]++;
+z2++;
 
 }
 else{
 
-zone[2]++;
+z3++;
 
 }
+
 
 
 });
@@ -535,14 +631,14 @@ zone[2]++;
 
 
 
+
 if(
-zone[0]>0 &&
-zone[1]>0 &&
-zone[2]>0
+z1>0 &&
+z2>0 &&
+z3>0
 ){
 
 score+=15;
-
 
 }
 
@@ -567,56 +663,14 @@ a+Number(b),
 
 
 
+
 if(
 sum>=100 &&
 sum<=170
 ){
 
-score+=15;
-
-
-}
-
-
-
-
-
-// 连号控制
-
-
-let same=0;
-
-
-
-for(
-let i=1;
-i<front.length;
-i++
-){
-
-
-if(
-Number(front[i])-
-Number(front[i-1])
-===1
-){
-
-same++;
-
-}
-
-
-}
-
-
-
-if(
-same<=2
-){
-
 score+=10;
 
-
 }
 
 
@@ -633,91 +687,86 @@ return score;
 
 
 
-// ================================
-// 原始评分
-// ================================
-
-
-rawScore(front){
+// ============================
+// 三种生成模式
+// ============================
 
 
 
-let score=0;
+generate(type){
 
 
 
-front.forEach(n=>{
-
-
-score+=
-this.frontScore[n];
-
-
-});
+let result=[];
 
 
 
-score+=
-
-this.structureScore(front);
+let guard=0;
 
 
 
-return score;
-
-
-
-},
-
-
-
-
-
-
-
-// ================================
-// 蒙特卡罗
-// ================================
-
-
-monteCarlo(times=20000){
-
-
-
-let list=[];
-
-
-
-for(
-let i=0;
-i<times;
-i++
+while(
+result.length<5 &&
+guard<200
 ){
 
 
-
-let front=
-
-this.generateFront();
+guard++;
 
 
 
-let score=
-
-this.rawScore(front);
+let index;
 
 
 
+if(type==="stable"){
 
 
-list.push({
+// 稳定型
+index=
 
-front,
+Math.floor(
 
-score
+this.random()*15
 
-});
+);
 
+
+}
+
+
+
+else if(type==="balance"){
+
+
+// 均衡型
+
+index=
+
+Math.floor(
+
+this.random()*25
+
+);
+
+
+}
+
+
+
+else{
+
+
+// 博冷型
+
+index=
+
+15+
+Math.floor(
+
+this.random()*20
+
+);
 
 
 }
@@ -726,74 +775,40 @@ score
 
 
 
-list.sort(
+
+let n=
+
+this.pool[index];
+
+
+
+
+
+if(
+n &&
+!result.includes(n)
+){
+
+result.push(n);
+
+}
+
+
+
+}
+
+
+
+return result.sort(
 
 (a,b)=>
 
-b.score-a.score
+Number(a)-Number(b)
 
 );
 
 
 
-return list;
-
-
-
-},
-// ================================
-// 分数归一化
-// ================================
-
-
-normalizeResult(list){
-
-
-
-let max=
-list[0].score;
-
-
-
-let min=
-list[list.length-1].score;
-
-
-
-return list.map(item=>{
-
-
-let s=
-
-
-(
-(item.score-min)/
-(max-min||1)
-)
-*100;
-
-
-
-
-return {
-
-
-front:item.front,
-
-score:
-Number(
-s.toFixed(2)
-)
-
-
-};
-
-
-
-});
-
-
-
 },
 
 
@@ -802,9 +817,79 @@ s.toFixed(2)
 
 
 
-// ================================
-// 三方案生成
-// ================================
+// ============================
+// 后区生成
+// ============================
+
+
+generateBack(){
+
+
+
+let p=
+
+Object.keys(
+this.backScore
+)
+.sort(
+
+(a,b)=>
+
+this.backScore[b]-
+this.backScore[a]
+
+);
+
+
+
+let r=[];
+
+
+
+while(
+r.length<2
+){
+
+
+
+let n=
+
+p[
+Math.floor(
+this.random()*p.length
+)
+];
+
+
+
+if(
+!r.includes(n)
+){
+
+r.push(n);
+
+}
+
+
+
+}
+
+
+
+return r.sort(
+
+(a,b)=>
+
+Number(a)-Number(b)
+
+);
+
+
+
+},
+// ============================
+// 生成三方案
+// ============================
 
 
 run(){
@@ -817,17 +902,17 @@ this.data
 
 
 
-let result=
-
-this.monteCarlo(20000);
 
 
+let modes=[
 
+"stable",
 
+"balance",
 
-result=
+"cold"
 
-this.normalizeResult(result);
+];
 
 
 
@@ -836,68 +921,39 @@ this.normalizeResult(result);
 let output=[];
 
 
-let used=[];
+
+modes.forEach(mode=>{
 
 
 
-for(
-let item of result
-){
+let front=
+
+this.generate(mode);
 
 
 
-let conflict=false;
+let score=
+
+this.comboScore(front);
 
 
-
-for(
-let u of used
-){
-
-
-
-let same=
-
-item.front.filter(
-
-x=>
-
-u.includes(x)
-
-).length;
-
-
-
-if(
-same>=4
-){
-
-conflict=true;
-
-}
-
-
-}
-
-
-
-
-if(
-!conflict
-){
 
 
 
 output.push({
 
 
-front:item.front,
-
+front,
 
 back:this.generateBack(),
 
+rawScore:score,
 
-score:item.score
+score:0
+
+
+
+});
 
 
 
@@ -906,28 +962,75 @@ score:item.score
 
 
 
-used.push(
-item.front
+
+
+// 分数排序归一化
+
+
+let max=
+
+Math.max(
+...output.map(
+x=>x.rawScore
+)
+
 );
 
 
 
-}
+let min=
+
+Math.min(
+...output.map(
+x=>x.rawScore
+)
+
+);
 
 
 
-if(
-output.length===3
-){
-
-break;
-
-}
 
 
+output.forEach(x=>{
 
-}
 
+x.score=
+
+Number(
+
+(
+
+(
+x.rawScore-min
+)/
+(
+max-min||1
+)
+*
+100
+
+)
+.toFixed(2)
+
+);
+
+
+
+});
+
+
+
+
+
+// 保证最高方案100
+
+output.sort(
+
+(a,b)=>
+
+b.score-a.score
+
+);
 
 
 
@@ -943,9 +1046,9 @@ return output;
 
 
 
-// ================================
-// 快速历史回测
-// ================================
+// ============================
+// 快速回测
+// ============================
 
 
 backTest(count=100){
@@ -979,13 +1082,9 @@ let back2=0;
 let start=
 
 Math.max(
-
 50,
-
 history.length-count
-
 );
-
 
 
 
@@ -1015,6 +1114,7 @@ history[i];
 
 
 
+
 this.init(train);
 
 
@@ -1023,10 +1123,16 @@ this.init(train);
 
 let result=
 
-this.monteCarlo(1000)[0];
+this.run();
 
 
 
+
+
+
+let front=
+
+result[0].front;
 
 
 
@@ -1034,7 +1140,7 @@ let same=0;
 
 
 
-result.front.forEach(n=>{
+front.forEach(n=>{
 
 
 if(
@@ -1077,7 +1183,7 @@ hit5++;
 
 let back=
 
-this.generateBack();
+result[0].back;
 
 
 
@@ -1118,7 +1224,6 @@ back2++;
 
 
 
-
 total++;
 
 
@@ -1130,7 +1235,6 @@ total++;
 
 
 this.init(history);
-
 
 
 
@@ -1170,6 +1274,7 @@ hit3/total*100
 )
 
 
+
 };
 
 
@@ -1183,5 +1288,7 @@ hit3/total*100
 
 
 
+
 window.DLTEngine=
+
 DLTEngine;
