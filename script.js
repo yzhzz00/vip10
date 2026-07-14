@@ -2,13 +2,13 @@ async function startAnalysis(){
 
 const result=document.getElementById("result");
 
-result.innerHTML="正在运行 V23.0智能组合优化模型...";
+result.innerHTML="正在运行 V24.0深度评分模型...";
 
 
 try{
 
 
-const res=await fetch("data/dlt_raw.txt?v=2300");
+const res=await fetch("data/dlt_raw.txt?v=2400");
 
 const text=await res.text();
 
@@ -19,13 +19,13 @@ let data=[];
 text.split("\n").forEach(line=>{
 
 
-let n=line.match(/\b\d{2}\b/g);
+let nums=line.match(/\b\d{2}\b/g);
 
 
-if(n&&n.length>=7){
+if(nums&&nums.length>=7){
 
 
-let a=n.slice(-7);
+let a=nums.slice(-7);
 
 
 data.push({
@@ -45,12 +45,17 @@ back:a.slice(5,7)
 
 if(data.length===0){
 
-throw new Error("数据读取失败");
+throw new Error("历史数据读取失败");
 
 }
 
 
 
+
+
+// =====================
+// 统计模型
+// =====================
 
 
 function countFront(arr){
@@ -66,14 +71,15 @@ c[String(i).padStart(2,"0")]=0;
 }
 
 
-
 arr.forEach(d=>{
+
 
 d.front.forEach(n=>{
 
 c[n]++;
 
 });
+
 
 });
 
@@ -99,14 +105,15 @@ c[String(i).padStart(2,"0")]=0;
 }
 
 
-
 arr.forEach(d=>{
+
 
 d.back.forEach(n=>{
 
 c[n]++;
 
 });
+
 
 });
 
@@ -119,107 +126,297 @@ return c;
 
 
 
+// =====================
+// 前区评分
+// =====================
+
+
 let freq=countFront(data);
 
-let recent=countFront(data.slice(0,100));
+
+let recent=countFront(
+
+data.slice(0,100)
+
+);
 
 
 
-let score={};
+let frontScore={};
 
 
 
 for(let n in freq){
 
 
-score[n]=
-
-freq[n]*0.4
-
-+
-
-recent[n]*0.3;
+frontScore[n]={
 
 
+freq:
 
-if(parseInt(n)%2){
+freq[n]*0.35,
 
-score[n]+=5;
+
+trend:
+
+recent[n]*0.25,
+
+
+structure:
+
+0,
+
+
+markov:
+
+0,
+
+
+miss:
+
+0
+
+
+};
+
+
+
+// 奇偶结构奖励
+
+if(parseInt(n)%2===1){
+
+frontScore[n].structure+=5;
 
 }
 
 
 
+// 马尔可夫简单趋势
+
+if(freq[n]>300){
+
+frontScore[n].markov+=5;
+
 }
 
 
 
-function getScoreDetail(nums){
+// 遗漏评分
+
+frontScore[n].miss=
+
+100/(freq[n]+1);
 
 
-let frequency=0;
+
+}
+
+
+
+
+
+// 综合
+
+for(let n in frontScore){
+
+
+let s=frontScore[n];
+
+
+s.total=
+
+s.freq+
+
+s.trend+
+
+s.structure+
+
+s.markov+
+
+s.miss;
+
+
+}
+// =====================
+// 组合评分
+// =====================
+
+
+function comboScore(nums){
+
+
+let detail={
+
+freq:0,
+
+trend:0,
+
+structure:0,
+
+markov:0,
+
+miss:0
+
+};
+
 
 
 nums.forEach(n=>{
 
-frequency+=score[n];
+
+let s=frontScore[n];
+
+
+detail.freq+=s.freq;
+
+detail.trend+=s.trend;
+
+detail.structure+=s.structure;
+
+detail.markov+=s.markov;
+
+detail.miss+=s.miss;
+
 
 });
 
 
-return frequency;
+
+// 奇偶过滤
+
+let odd=nums.filter(
+
+n=>parseInt(n)%2===1
+
+).length;
+
+
+
+if(odd>=2&&odd<=3){
+
+detail.structure+=20;
 
 }
+
+
+
+// 三区
+
+let a=0,b=0,c=0;
+
+
+nums.forEach(n=>{
+
+
+let x=parseInt(n);
+
+
+if(x<=12)a++;
+
+else if(x<=24)b++;
+
+else c++;
+
+
+});
+
+
+
+if(a>0&&b>0&&c>0){
+
+detail.structure+=20;
+
+}
+
+
+
+
+let total=
+
+detail.freq+
+
+detail.trend+
+
+detail.structure+
+
+detail.markov+
+
+detail.miss;
+
+
+
+return {
+
+detail:detail,
+
+total:total
+
+};
+
+
+}
+
+
+
+
 // =====================
-// 组合生成
+// 生成组合
 // =====================
 
 
 let pool=
 
-Object.keys(score)
+Object.keys(frontScore)
 
-.sort((a,b)=>score[b]-score[a])
+.sort(
+
+(a,b)=>
+
+frontScore[b].total-
+
+frontScore[a].total
+
+)
 
 .slice(0,25);
 
 
 
 
-function combination(arr){
-
 
 let list=[];
 
 
 
-for(let i=0;i<arr.length;i++){
+for(let i=0;i<pool.length;i++){
 
-for(let j=i+1;j<arr.length;j++){
+for(let j=i+1;j<pool.length;j++){
 
-for(let k=j+1;k<arr.length;k++){
+for(let k=j+1;k<pool.length;k++){
 
-for(let m=k+1;m<arr.length;m++){
+for(let m=k+1;m<pool.length;m++){
 
-for(let n=m+1;n<arr.length;n++){
+for(let n=m+1;n<pool.length;n++){
+
 
 
 let nums=[
 
-arr[i],
+pool[i],
 
-arr[j],
+pool[j],
 
-arr[k],
+pool[k],
 
-arr[m],
+pool[m],
 
-arr[n]
+pool[n]
 
-];
+].sort();
 
 
-let value=getScoreDetail(nums);
+
+let result=comboScore(nums);
 
 
 
@@ -227,7 +424,9 @@ list.push({
 
 nums:nums,
 
-score:value
+score:result.total,
+
+detail:result.detail
 
 });
 
@@ -244,70 +443,7 @@ score:value
 
 
 
-return list;
-
-}
-
-
-
-
-
-let combinations=combination(pool);
-
-
-
-// 结构过滤
-
-combinations=combinations.filter(x=>{
-
-
-let nums=x.nums;
-
-
-let odd=nums.filter(
-
-n=>parseInt(n)%2
-
-).length;
-
-
-
-let sum=nums.reduce(
-
-(a,b)=>a+parseInt(b),0
-
-);
-
-
-
-return (
-
-odd>=2
-
-&&
-
-odd<=3
-
-&&
-
-sum>=70
-
-&&
-
-sum<=150
-
-);
-
-
-});
-
-
-
-
-
-// 排序
-
-combinations.sort(
+list.sort(
 
 (a,b)=>b.score-a.score
 
@@ -316,22 +452,22 @@ combinations.sort(
 
 
 
+// =====================
+// 三方案差异化
+// =====================
 
-// 选择不同方案
 
 let plans=[];
 
 
-for(let i=0;i<combinations.length;i++){
 
-
-let item=combinations[i];
+for(let item of list){
 
 
 let same=false;
 
 
-plans.forEach(p=>{
+for(let p of plans){
 
 
 let common=item.nums.filter(
@@ -342,31 +478,36 @@ n=>p.front.includes(n)
 
 
 
-if(common>=4){
+if(common>2){
 
 same=true;
 
 }
 
 
-});
+}
 
 
 
 if(!same){
 
+
 plans.push({
 
 front:item.nums,
+
+detail:item.detail,
 
 score:item.score
 
 });
 
+
 }
 
 
-if(plans.length>=3){
+
+if(plans.length===3){
 
 break;
 
@@ -378,8 +519,10 @@ break;
 
 
 
+// =====================
+// 后区模型
+// =====================
 
-// 后区
 
 let backs=countBack(data);
 
@@ -399,8 +542,6 @@ Object.keys(backs)
 
 
 
-
-
 plans.forEach((p,i)=>{
 
 
@@ -409,19 +550,7 @@ p.back=
 backPool.slice(i,i+2);
 
 
-p.score=
-
-Math.min(
-
-99,
-
-p.score/10
-
-);
-
-
 });
-
 
 
 
@@ -435,7 +564,7 @@ p.score/10
 let html="";
 
 
-html+="<h3>V23.0智能组合优化模型</h3>";
+html+="<h3>V24.0深度评分模型</h3>";
 
 html+="数据期数："+data.length+"期<br><br>";
 
@@ -448,9 +577,7 @@ html+="<h3>最终推荐</h3>";
 plans.forEach((p,i)=>{
 
 
-html+=
-
-"方案"+(i+1)+"："
+html+="方案"+(i+1)+"："
 
 +p.front.join(" ")
 
@@ -464,9 +591,37 @@ html+=
 
 html+="综合评分："
 
-+p.score.toFixed(1)
++(p.score/10).toFixed(1)
 
-+"分<br><br>";
++"分<br>";
+
+
+
+html+="频率："
+
++p.detail.freq.toFixed(1)
+
++" 趋势："
+
++p.detail.trend.toFixed(1)
+
++" 结构："
+
++p.detail.structure.toFixed(1)
+
++"<br>";
+
+
+
+html+="马尔可夫："
+
++p.detail.markov.toFixed(1)
+
++" 遗漏："
+
++p.detail.miss.toFixed(1)
+
++"<br><br>";
 
 
 
@@ -474,7 +629,7 @@ html+="综合评分："
 
 
 
-html+="模型状态：优化完成<br>";
+html+="模型状态：深度评分完成<br>";
 
 html+="三方案差异化：开启";
 
