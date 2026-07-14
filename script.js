@@ -1,319 +1,300 @@
 async function startAnalysis(){
 
-let result=document.getElementById("result");
+    let result = document.getElementById("result");
 
-result.innerHTML="正在分析数据...";
+    result.innerHTML = "正在分析数据...";
 
 
-try{
+    try{
 
+        let response = await fetch("data/dlt_raw.txt?v=3000");
 
-let response=await fetch("data/dlt_raw.txt?v=3000");
+        let text = await response.text();
 
-let text=await response.text();
 
+        let lines = text.split("\n");
 
-let lines=text.split("\n");
+        let data = [];
 
 
-let data=[];
+        // 数据清洗
+        lines.forEach(line=>{
 
+            let nums = line.match(/\b\d{2}\b/g);
 
-lines.forEach(line=>{
 
+            if(nums && nums.length >= 7){
 
-let nums=line.match(/\b\d{2}\b/g);
+                let arr = nums.slice(-7);
 
 
-if(!nums) return;
+                let front = arr.slice(0,5);
 
+                let back = arr.slice(5,7);
 
-if(nums.length>=7){
 
+                data.push({
 
-let arr=nums.slice(-7);
+                    front:front,
 
+                    back:back
 
-let front=arr.slice(0,5);
+                });
 
+            }
 
-let back=arr.slice(5,7);
+        });
 
 
-data.push({
 
-front:front,
+        // 前区频率
 
-back:back
+        let count={};
 
-});
 
+        for(let i=1;i<=35;i++){
 
-}
+            let n=i.toString().padStart(2,"0");
 
+            count[n]=0;
 
-});
+        }
 
 
 
+        data.forEach(item=>{
 
-// 热号统计
+            item.front.forEach(n=>{
 
-let count={};
+                if(count[n]!==undefined){
 
-for(let i=1;i<=35;i++){
+                    count[n]++;
 
-count[i.toString().padStart(2,"0")]=0;
+                }
 
-}
+            });
 
+        });
 
-data.forEach(item=>{
 
-item.front.forEach(n=>{
 
-count[n]++;
+        // 热号
 
-});
+        let hot = Object.entries(count)
 
-});
+        .sort((a,b)=>b[1]-a[1])
 
+        .slice(0,10);
 
 
 
-// 热号
+        // 冷号
 
-let hot=Object.entries(count)
+        let cold = Object.entries(count)
 
-.sort((a,b)=>b[1]-a[1])
+        .sort((a,b)=>a[1]-b[1])
 
-.slice(0,10);
+        .slice(0,10);
 
 
 
-// 冷号
+        // 当前遗漏
 
-let cold=Object.entries(count)
+        let miss={};
 
-.sort((a,b)=>a[1]-b[1])
 
-.slice(0,10);
+        for(let i=1;i<=35;i++){
 
+            let n=i.toString().padStart(2,"0");
 
+            miss[n]=0;
 
 
-// 遗漏
+            for(let j=0;j<data.length;j++){
 
-let miss={};
+                if(data[j].front.includes(n)){
 
+                    break;
 
-for(let i=1;i<=35;i++){
+                }
 
-let n=i.toString().padStart(2,"0");
+                miss[n]++;
 
-miss[n]=0;
+            }
 
+        }
 
-for(let j=0;j<data.length;j++){
 
-if(data[j].front.includes(n)){
 
-break;
+        // 和值
 
-}
+        let totalSum=0;
 
-miss[n]++;
 
-}
+        data.forEach(item=>{
 
+            item.front.forEach(n=>{
 
-}
+                totalSum+=parseInt(n);
 
+            });
 
+        });
 
-// 和值
 
-let sumList=[];
 
+        let avgSum=(totalSum/data.length).toFixed(2);
 
-data.forEach(item=>{
 
 
-let sum=item.front.reduce(
+        // 奇偶
 
-(a,b)=>a+parseInt(b),0
+        let odd=0;
 
-);
+        let even=0;
 
 
-sumList.push(sum);
+        data.forEach(item=>{
 
+            item.front.forEach(n=>{
 
-});
+                if(parseInt(n)%2==0){
 
+                    even++;
 
-let avg=
+                }else{
 
-(sumList.reduce((a,b)=>a+b,0)/sumList.length)
+                    odd++;
 
-.toFixed(2);
+                }
 
+            });
 
+        });
 
 
-// 奇偶
 
+        // 三区
 
-let odd=0;
+        let zone1=0;
 
-let even=0;
+        let zone2=0;
 
+        let zone3=0;
 
-data.forEach(item=>{
 
+        data.forEach(item=>{
 
-item.front.forEach(n=>{
 
+            item.front.forEach(n=>{
 
-if(parseInt(n)%2==0){
+                let x=parseInt(n);
 
-even++;
 
-}else{
+                if(x<=12){
 
-odd++;
+                    zone1++;
 
-}
+                }
 
+                else if(x<=24){
 
-});
+                    zone2++;
 
+                }
 
-});
+                else{
 
+                    zone3++;
 
+                }
 
+            });
 
-// 三区
+        });
 
-let zone=[0,0,0];
 
 
-data.forEach(item=>{
+        let html="";
 
 
-item.front.forEach(n=>{
+        html+="<h3>数据检测</h3>";
 
+        html+="有效开奖："+data.length+"期<br>";
 
-let x=parseInt(n);
 
 
-if(x<=12){
+        html+="<h3>大乐透前区热号TOP10</h3>";
 
-zone[0]++;
+        hot.forEach((x,i)=>{
 
-}else if(x<=24){
+            html+=`${i+1}. ${x[0]} 出现 ${x[1]} 次<br>`;
 
-zone[1]++;
+        });
 
-}else{
 
-zone[2]++;
 
-}
+        html+="<h3>大乐透前区冷号TOP10</h3>";
 
+        cold.forEach((x,i)=>{
 
-});
+            html+=`${i+1}. ${x[0]} 出现 ${x[1]} 次<br>`;
 
+        });
 
-});
 
 
+        html+="<h3>当前遗漏TOP10</h3>";
 
+        Object.entries(miss)
 
+        .sort((a,b)=>b[1]-a[1])
 
-let html="";
+        .slice(0,10)
 
+        .forEach((x,i)=>{
 
-html+="<h3>数据检测</h3>";
+            html+=`${i+1}. ${x[0]} 遗漏 ${x[1]} 期<br>`;
 
-html+="有效开奖："+data.length+"期<br>";
+        });
 
 
 
-html+="<h3>前区热号TOP10</h3>";
+        html+="<h3>和值分析</h3>";
 
-hot.forEach((x,i)=>{
+        html+="平均和值："+avgSum+"<br>";
 
-html+=`${i+1}. ${x[0]} 出现 ${x[1]} 次<br>`;
 
-});
 
+        html+="<h3>奇偶分析</h3>";
 
+        html+="奇数数量："+odd+"<br>";
 
-html+="<h3>前区冷号TOP10</h3>";
+        html+="偶数数量："+even+"<br>";
 
-cold.forEach((x,i)=>{
 
-html+=`${i+1}. ${x[0]} 出现 ${x[1]} 次<br>`;
 
-});
+        html+="<h3>三区分布</h3>";
 
+        html+="一区01-12："+zone1+"<br>";
 
+        html+="二区13-24："+zone2+"<br>";
 
-html+="<h3>当前遗漏TOP10</h3>";
+        html+="三区25-35："+zone3+"<br>";
 
-Object.entries(miss)
 
-.sort((a,b)=>b[1]-a[1])
 
-.slice(0,10)
+        result.innerHTML=html;
 
-.forEach((x,i)=>{
 
-html+=`${i+1}. ${x[0]} 遗漏 ${x[1]} 期<br>`;
+    }
 
-});
 
+    catch(e){
 
+        result.innerHTML="分析失败："+e.message;
 
-html+="<h3>和值分析</h3>";
-
-html+="平均和值："+avg+"<br>";
-
-
-
-html+="<h3>奇偶比例</h3>";
-
-html+="奇数："+odd+" 个<br>";
-
-html+="偶数："+even+" 个<br>";
-
-
-
-html+="<h3>三区分布</h3>";
-
-html+="一区01-12："+zone[0]+" 个<br>";
-
-html+="二区13-24："+zone[1]+" 个<br>";
-
-html+="三区25-35："+zone[2]+" 个<br>";
-
-
-
-result.innerHTML=html;
-
-
-
-}
-
-catch(e){
-
-
-result.innerHTML="分析失败："+e.message;
-
-
-}
+    }
 
 
 }
