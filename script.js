@@ -1,6 +1,6 @@
 /*
 ====================================
-彩票智能分析系统 V38.0 Mobile
+彩票智能分析系统 V50.0 Mobile
 
 页面控制
 ====================================
@@ -11,9 +11,7 @@ let dltData=[];
 
 
 
-
 window.onload=function(){
-
 
 
 loadData();
@@ -46,24 +44,20 @@ document
 
 
 
-
 // ======================
 // 加载数据
 // ======================
 
-
 async function loadData(){
-
 
 
 try{
 
 
-
 let res=
 
 await fetch(
-"data/dlt_raw.txt?v380"
+"data/dlt_raw.txt?v500"
 );
 
 
@@ -96,7 +90,7 @@ document
 .getElementById("systemStatus")
 .innerHTML=
 
-"V38.0数据模块运行正常";
+"V50.0数据模块运行正常";
 
 
 
@@ -115,7 +109,6 @@ document
 }
 
 
-
 }
 
 
@@ -129,9 +122,7 @@ document
 // 数据解析
 // ======================
 
-
 function parseData(text){
-
 
 
 let arr=[];
@@ -143,13 +134,10 @@ text
 .forEach(line=>{
 
 
-
 let p=
 
 line.trim()
 .split(/\s+/);
-
-
 
 
 
@@ -159,13 +147,9 @@ p.length<9
 
 
 
-
-
 let front=[];
 
 let back=[];
-
-
 
 
 
@@ -177,7 +161,6 @@ i++
 ){
 
 
-
 front.push(
 
 String(Number(p[i]))
@@ -186,9 +169,7 @@ String(Number(p[i]))
 );
 
 
-
 }
-
 
 
 
@@ -200,7 +181,6 @@ i++
 ){
 
 
-
 back.push(
 
 String(Number(p[i]))
@@ -209,9 +189,7 @@ String(Number(p[i]))
 );
 
 
-
 }
-
 
 
 
@@ -227,16 +205,11 @@ back
 
 
 
-
-
 });
 
 
 
-
-
 return arr;
-
 
 
 }
@@ -252,14 +225,13 @@ return arr;
 // 开始预测
 // ======================
 
-
 function startPredict(){
-
 
 
 if(
 dltData.length===0
 ){
+
 
 alert(
 "数据未加载"
@@ -268,7 +240,9 @@ alert(
 
 return;
 
+
 }
+
 
 
 
@@ -280,12 +254,11 @@ document
 
 
 
-
 box.innerHTML=
 
-"V38.0模型启动...<br>"+
+"V50.0模型启动...<br>"+
 "评分引擎计算...<br>"+
-"100000组模拟搜索...";
+"100000组蒙特卡罗模拟...";
 
 
 
@@ -307,7 +280,8 @@ plans=>{
 
 let html=
 
-"<b>彩票智能分析系统 V38.0 Mobile</b><br><br>";
+"<b>彩票智能分析系统 V50.0 Mobile</b><br><br>";
+
 
 
 
@@ -387,9 +361,10 @@ p.type+
 
 
 
+
 html+=
 
-"模型状态：V38.0综合模型完成";
+"模型状态：V50.0 Build2综合模型完成";
 
 
 
@@ -416,14 +391,11 @@ box.innerHTML=html;
 
 
 
-
 // ======================
 // 回测
 // ======================
 
-
 function startBackTest(){
-
 
 
 let box=
@@ -437,7 +409,7 @@ document
 
 box.innerHTML=
 
-"V38.0滚动回测中...";
+"V50.0滚动回测中...";
 
 
 
@@ -457,7 +429,7 @@ result=>{
 
 let html=
 
-"<b>V38.0历史回测报告</b><br><br>";
+"<b>V50.0历史回测报告</b><br><br>";
 
 
 
@@ -533,7 +505,6 @@ r.best+
 
 
 
-
 box.innerHTML=html;
 
 
@@ -555,10 +526,10 @@ box.innerHTML=html;
 
 
 
+
 // ======================
 // 开奖反馈
 // ======================
-
 
 function saveFeedback(){
 
@@ -578,7 +549,6 @@ document
 if(!value){
 
 
-
 alert(
 "请输入开奖结果"
 );
@@ -588,7 +558,6 @@ return;
 
 
 }
-
 
 
 
@@ -603,7 +572,7 @@ document
 .getElementById("learningStatus")
 .innerHTML=
 
-"V38.0反馈保存成功："+value;
+"V50.0反馈保存成功："+value;
 
 
 

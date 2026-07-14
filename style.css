@@ -1,6 +1,6 @@
 /*
 ====================================
-彩票智能分析系统 V38.0 Mobile
+彩票智能分析系统 V50.0 Mobile
 
 界面样式
 ====================================
@@ -21,7 +21,7 @@ margin:0;
 
 padding:10px;
 
-background:#f3f6fa;
+background:#eef3f8;
 
 font-family:
 
@@ -45,13 +45,13 @@ margin:auto;
 
 background:#fff;
 
-padding:15px;
+padding:16px;
 
-border-radius:15px;
+border-radius:18px;
 
 box-shadow:
 
-0 5px 20px rgba(0,0,0,.08);
+0 8px 25px rgba(0,0,0,.10);
 
 }
 
@@ -63,11 +63,13 @@ h1{
 
 text-align:center;
 
-font-size:22px;
+font-size:23px;
 
-color:#1677ff;
+font-weight:bold;
 
-margin:10px 0 20px;
+color:#0958d9;
+
+margin:12px 0 22px;
 
 }
 
@@ -77,13 +79,13 @@ margin:10px 0 20px;
 
 .box{
 
-background:#fafafa;
+background:#f9fbff;
 
-border:1px solid #e5e5e5;
+border:1px solid #dce6f5;
 
-border-radius:12px;
+border-radius:14px;
 
-padding:15px;
+padding:16px;
 
 margin-bottom:15px;
 
@@ -99,9 +101,9 @@ font-size:16px;
 
 font-weight:bold;
 
-color:#333;
+color:#0958d9;
 
-margin-bottom:10px;
+margin-bottom:12px;
 
 }
 
@@ -113,19 +115,27 @@ button{
 
 width:100%;
 
-height:44px;
+height:46px;
 
 margin:8px 0;
 
 border:none;
 
-border-radius:10px;
+border-radius:12px;
 
-background:#1677ff;
+background:
+
+linear-gradient(
+135deg,
+#1677ff,
+#4096ff
+);
 
 color:#fff;
 
 font-size:16px;
+
+font-weight:bold;
 
 }
 
@@ -135,7 +145,7 @@ font-size:16px;
 
 button:active{
 
-transform:scale(.98);
+transform:scale(.97);
 
 }
 
@@ -147,15 +157,17 @@ input{
 
 width:100%;
 
-height:42px;
+height:44px;
 
 padding:10px;
 
 font-size:15px;
 
-border:1px solid #ccc;
+border:1px solid #ccd6e5;
 
-border-radius:8px;
+border-radius:10px;
+
+background:#fff;
 
 }
 
@@ -189,17 +201,31 @@ font-weight:bold;
 
 #result{
 
-background:#fff;
+background:#ffffff;
 
-border-left:4px solid #1677ff;
+border-left:
 
-padding:12px;
+5px solid #1677ff;
 
-border-radius:8px;
+padding:15px;
+
+border-radius:10px;
 
 line-height:2;
 
-min-height:120px;
+min-height:140px;
+
+font-size:15px;
+
+}
+
+
+
+
+
+#result b{
+
+color:#0958d9;
 
 }
 
@@ -209,13 +235,15 @@ min-height:120px;
 
 #backTestResult{
 
-background:#fff;
+background:#ffffff;
 
-border-left:4px solid #19a15f;
+border-left:
 
-padding:12px;
+5px solid #19a15f;
 
-border-radius:8px;
+padding:15px;
+
+border-radius:10px;
 
 line-height:2;
 
@@ -229,7 +257,7 @@ line-height:2;
 
 line-height:1.8;
 
-color:#555;
+color:#666;
 
 }
 
@@ -242,6 +270,12 @@ color:#555;
 font-weight:bold;
 
 color:#198754;
+
+background:#f0fff5;
+
+padding:8px;
+
+border-radius:8px;
 
 }
 
@@ -263,7 +297,7 @@ margin:0;
 
 li{
 
-line-height:1.8;
+line-height:1.9;
 
 }
 
@@ -277,9 +311,11 @@ line-height:1.8;
 
 body{
 
-padding:6px;
+padding:5px;
 
 }
+
+
 
 
 
@@ -287,7 +323,11 @@ padding:6px;
 
 padding:12px;
 
+border-radius:14px;
+
 }
+
+
 
 
 
@@ -299,9 +339,11 @@ font-size:20px;
 
 
 
+
+
 button{
 
-height:42px;
+height:43px;
 
 font-size:15px;
 
@@ -309,10 +351,24 @@ font-size:15px;
 
 
 
+
+
+.box{
+
+padding:12px;
+
+}
+
+
+
+
+
 #result,
 #backTestResult{
 
 font-size:14px;
+
+line-height:1.9;
 
 }
 
