@@ -1,18 +1,14 @@
 async function startAnalysis(){
 
 const result=document.getElementById("result");
-
-result.innerHTML="正在运行 V13.5 学习模型...";
-
+result.innerHTML="正在运行 V14.0智能回测模型...";
 
 try{
 
-const res=await fetch("data/dlt_raw.txt?v=1350");
-const text=await res.text();
-
+let res=await fetch("data/dlt_raw.txt?v=1400");
+let text=await res.text();
 
 let data=[];
-
 
 text.split("\n").forEach(line=>{
 
@@ -32,69 +28,59 @@ back:a.slice(5,7)
 });
 
 
-// 读取本地学习参数
+// 学习参数
 
-let memory=localStorage.getItem("dlt_model");
-
-
-let weight=memory?
-
-JSON.parse(memory):
-
-{
-frequency:0.25,
-trend:0.25,
-structure:0.2,
-anti:0.15,
-random:0.15
-};
+let weight=JSON.parse(
+localStorage.getItem("v14_weight")
+||
+'{"f":0.25,"t":0.25}'
+);
 
 
+// 前区统计
 
-// 前区
-
-let front={};
+let fc={};
 
 for(let i=1;i<=35;i++)
-front[String(i).padStart(2,"0")]=0;
+fc[String(i).padStart(2,"0")]=0;
 
 
 data.forEach(d=>{
-d.front.forEach(n=>{
-front[n]++;
+
+d.front.forEach(n=>fc[n]++);
+
 });
-});
 
 
 
-// 后区
+// 后区统计
 
-let back={};
+let bc={};
 
 for(let i=1;i<=12;i++)
-back[String(i).padStart(2,"0")]=0;
+bc[String(i).padStart(2,"0")]=0;
 
 
 data.forEach(d=>{
-d.back.forEach(n=>{
-back[n]++;
+
+d.back.forEach(n=>bc[n]++);
+
 });
-});
 
 
 
-// 最近100期
+// 最近趋势
 
-let recent={};
+let rc={};
 
 for(let i=1;i<=35;i++)
-recent[String(i).padStart(2,"0")]=0;
+rc[String(i).padStart(2,"0")]=0;
 
 
 data.slice(0,100).forEach(d=>{
-d.front.forEach(n=>{
-recent[n]++;
-});
+
+d.front.forEach(n=>rc[n]++);
+
 });
 
 
@@ -104,14 +90,14 @@ recent[n]++;
 let score={};
 
 
-for(let n in front){
+for(let n in fc){
 
 score[n]=
-
-front[n]*weight.frequency+
-recent[n]*weight.trend;
+fc[n]*weight.f+
+rc[n]*weight.t;
 
 }
+
 
 
 let fp=Object.entries(score)
@@ -120,21 +106,20 @@ let fp=Object.entries(score)
 .map(x=>x[0]);
 
 
-let bp=Object.entries(back)
+let bp=Object.entries(bc)
 .sort((a,b)=>b[1]-a[1])
 .slice(0,8)
 .map(x=>x[0]);
 
 
 
-// 随机组合
+// 选号
 
-function pick(arr,num){
+function pick(a,n){
 
-let t=[...arr];
-let r=[];
+let t=[...a],r=[];
 
-while(r.length<num){
+while(r.length<n){
 
 let i=Math.floor(Math.random()*t.length);
 
@@ -144,48 +129,60 @@ t.splice(i,1);
 
 }
 
-return r.sort((a,b)=>a-b);
+return r.sort();
 
 }
 
 
 
-// 生成方案
-
 let plans=[];
-
-let used={};
-
 
 while(plans.length<3){
 
-let f=pick(fp,5);
-let b=pick(bp,2);
-
-let key=f.join("")+b.join("");
-
-if(!used[key]){
-
-used[key]=1;
-
 plans.push({
-f,b
+
+f:pick(fp,5),
+
+b:pick(bp,2)
+
 });
 
 }
 
-}
+
+
+// 简单回测
+
+let hit3=0;
+let hit4=0;
+let hit5=0;
+
+
+data.slice(0,500).forEach(d=>{
+
+plans.forEach(p=>{
+
+let h=p.f.filter(x=>d.front.includes(x)).length;
+
+if(h>=3)hit3++;
+
+if(h>=4)hit4++;
+
+if(h==5)hit5++;
+
+});
+
+});
 
 
 
-// 简单学习调整
+// 学习调整
 
-weight.trend+=0.01;
-weight.frequency-=0.01;
-
+weight.t+=0.01;
+weight.f-=0.01;
 
 localStorage.setItem(
-"dlt_model",
+"v14_weight",
 JSON.stringify(weight)
 );
 
@@ -195,9 +192,9 @@ JSON.stringify(weight)
 
 let html="";
 
-html+="<h3>V13.5自适应学习模型</h3>";
+html+="<h3>V14.0智能回测模型</h3>";
 
-html+="数据期数："+data.length+"期<br><br>";
+html+="有效数据："+data.length+"期<br><br>";
 
 html+="<h3>推荐方案</h3>";
 
@@ -210,11 +207,16 @@ html+=
 });
 
 
-html+="<br>学习状态：已保存<br>";
+html+="<h3>500期回测</h3>";
 
-html+="频率权重："+(weight.frequency*100).toFixed(1)+"%<br>";
+html+="3个以上前区："+hit3+"次<br>";
 
-html+="趋势权重："+(weight.trend*100).toFixed(1)+"%";
+html+="4个以上前区："+hit4+"次<br>";
+
+html+="5个前区："+hit5+"次<br>";
+
+
+html+="<br>模型学习：已保存";
 
 
 result.innerHTML=html;
@@ -222,7 +224,7 @@ result.innerHTML=html;
 
 }catch(e){
 
-result.innerHTML="运行失败："+e.message;
+result.innerHTML="错误："+e.message;
 
 }
 
