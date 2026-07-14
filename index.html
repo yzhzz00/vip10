@@ -11,9 +11,7 @@
 大乐透智能分析系统 V70.2 CORE
 </title>
 
-
-<link rel="stylesheet" href="style.css">
-
+<link rel="stylesheet" href="style.css?v=702">
 
 </head>
 
@@ -24,7 +22,6 @@
 <div class="container">
 
 
-
 <h1>
 大乐透智能分析系统
 <br>
@@ -33,10 +30,7 @@ V70.2 CORE
 
 
 
-
-
 <div class="card">
-
 
 <h2>
 数据状态
@@ -44,25 +38,22 @@ V70.2 CORE
 
 
 <div id="dataStatus">
-等待加载...
+等待启动...
 </div>
 
 
 <div id="systemStatus">
-等待系统启动...
+等待系统加载...
 </div>
 
 
 </div>
-
-
 
 
 
 
 
 <div class="card">
-
 
 <h2>
 AI智能分析中心
@@ -76,7 +67,6 @@ AI智能分析中心
 </button>
 
 
-
 <div id="predictResult">
 
 等待分析...
@@ -84,17 +74,13 @@ AI智能分析中心
 </div>
 
 
-
 </div>
 
 
 
 
 
-
-
 <div class="card">
-
 
 <h2>
 AI多维分析报告
@@ -114,33 +100,7 @@ AI多维分析报告
 
 
 
-
-
 <div class="card">
-
-
-<h2>
-历史滚动回测
-</h2>
-
-
-<div id="backtestResult">
-
-等待回测...
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="card">
-
 
 <h2>
 开奖反馈学习
@@ -152,6 +112,7 @@ AI多维分析报告
 id="realResult"
 
 placeholder="输入真实开奖号码"
+
 
 >
 
@@ -176,8 +137,6 @@ placeholder="输入真实开奖号码"
 
 
 
-
-
 <div class="card">
 
 
@@ -186,55 +145,14 @@ V70 AI Agent模型
 </h2>
 
 
-<div>
+<div id="agentList">
 
-
-Master AI：
-总控决策
-
-
-<br><br>
-
-
-Trend AI：
-趋势走势分析
-
-
-<br><br>
-
-
-Structure AI：
-号码结构分析
-
-
-<br><br>
-
-
-Markov AI：
-历史转移分析
-
-
-<br><br>
-
-
-Risk AI：
-风险过滤
-
-
-<br><br>
-
-
-Review AI：
-开奖复盘学习
-
+加载中...
 
 </div>
 
 
 </div>
-
-
-
 
 
 
@@ -246,37 +164,28 @@ Review AI：
 
 
 
+<!-- 只加载一次 -->
 
-<!-- Agent -->
+<script src="agents/masterAgent.js?v=702"></script>
 
+<script src="agents/trendAgent.js?v=702"></script>
 
-<script src="agents/masterAgent.js?v=70"></script>
+<script src="agents/structureAgent.js?v=702"></script>
 
-<script src="agents/trendAgent.js?v=70"></script>
+<script src="agents/markovAgent.js?v=702"></script>
 
-<script src="agents/structureAgent.js?v=70"></script>
+<script src="agents/riskAgent.js?v=702"></script>
 
-<script src="agents/markovAgent.js?v=70"></script>
-
-<script src="agents/riskAgent.js?v=70"></script>
-
-<script src="agents/reviewAgent.js?v=70"></script>
+<script src="agents/reviewAgent.js?v=702"></script>
 
 
 
+<script src="engine.js?v=702"></script>
 
-
-<!-- Core -->
-
-
-<script src="engine.js?v=70"></script>
-
-<script src="script.js?v=70"></script>
-
+<script src="script.js?v=702"></script>
 
 
 
 </body>
-
 
 </html>

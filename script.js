@@ -1,193 +1,139 @@
 /*
-================================
-
-大乐透智能分析系统
-
-V70.2 CORE ENGINE
-
-启动修正版
-
-================================
+V70.2 CORE SCRIPT
 */
 
 
-class AIEngine {
-
-
-constructor(){
-
-
-this.version="V70.2";
-
-
-this.dlt=[];
-
-
-this.agents={};
-
-
-this.ready=false;
-
-
-}
+let systemReady=false;
 
 
 
 
+window.onload=async function(){
 
-async init(){
+
+
+try{
+
+
+document.getElementById(
+"dataStatus"
+).innerHTML=
+
+"AI系统启动中...";
+
+
+
 
 
 console.log(
-"AIEngine init执行"
+"当前AIEngine",
+window.AIEngine
 );
 
 
 
-this.loadAgents();
 
 
 
-this.ready=true;
+await window.AIEngine.init();
 
 
 
-return true;
+
+
+
+let status=
+
+window.AIEngine.status();
+
+
+
+
+
+
+systemReady=true;
+
+
+
+
+
+
+document.getElementById(
+"dataStatus"
+).innerHTML=
+
+"系统加载成功";
+
+
+
+
+
+document.getElementById(
+"systemStatus"
+).innerHTML=
+
+`
+
+版本：
+
+${status.version}
+
+
+<br>
+
+
+历史数据：
+
+${status.data}
+
+
+<br>
+
+
+状态：
+
+${status.ready}
+
+`;
+
+
+
+
+
+
+
+document.getElementById(
+"agentList"
+).innerHTML=
+
+status.agents.join(
+"<br>"
+);
+
+
 
 
 
 }
 
+catch(e){
 
 
 
+console.error(e);
 
 
 
-loadAgents(){
+document.getElementById(
+"dataStatus"
+).innerHTML=
 
-
-
-this.agents={};
-
-
-
-
-if(window.MasterAgent){
-
-this.agents.master =
-window.MasterAgent;
-
-}
-
-
-
-
-if(window.TrendAgent){
-
-this.agents.trend =
-window.TrendAgent;
-
-}
-
-
-
-if(window.StructureAgent){
-
-this.agents.structure =
-window.StructureAgent;
-
-}
-
-
-
-if(window.MarkovAgent){
-
-this.agents.markov =
-window.MarkovAgent;
-
-}
-
-
-
-if(window.RiskAgent){
-
-this.agents.risk =
-window.RiskAgent;
-
-}
-
-
-
-if(window.ReviewAgent){
-
-this.agents.review =
-window.ReviewAgent;
-
-}
+"加载失败："+e.message;
 
 
 
 }
 
-
-
-
-
-
-
-async analyze(){
-
-
-
-return {
-
-
-version:this.version,
-
-
-history:this.dlt.length,
-
-
-message:"AI分析完成",
-
-
-agents:Object.keys(
-this.agents
-)
-
-
-};
-
-
-
-}
-
-
-
-
-
-
-status(){
-
-
-
-return {
-
-
-
-version:this.version,
-
-
-data:this.dlt.length,
-
-
-agents:Object.keys(
-this.agents
-),
-
-
-ready:this.ready
 
 
 
@@ -195,25 +141,123 @@ ready:this.ready
 
 
 
+
+
+
+
+
+
+async function startPredict(){
+
+
+
+if(!systemReady){
+
+
+alert(
+"系统未启动"
+);
+
+
+return;
+
+
 }
 
 
 
+
+
+let result=
+
+await window.AIEngine.analyze();
+
+
+
+
+
+
+document.getElementById(
+"predictResult"
+).innerHTML=
+
+`
+
+分析完成
+
+<br>
+
+版本：
+
+${result.version}
+
+
+<br>
+
+历史：
+
+${result.history}
+
+
+<br>
+
+${result.message}
+
+`;
+
+
+
+
+document.getElementById(
+"aiReport"
+).innerHTML=
+
+"AI多模型分析完成";
+
+
+
 }
 
 
 
 
 
-window.AIEngine =
-new AIEngine();
 
 
 
-console.log(
 
-"ENGINE加载",
+function saveFeedback(){
 
-typeof window.AIEngine.init
+
+
+let value=
+
+document.getElementById(
+"realResult"
+).value;
+
+
+
+
+
+localStorage.setItem(
+
+"dlt_feedback",
+
+value
 
 );
+
+
+
+
+
+document.getElementById(
+"learningStatus"
+).innerHTML=
+
+"反馈保存成功";
+
+
+
+}
