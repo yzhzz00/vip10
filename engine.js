@@ -398,7 +398,7 @@ function showResult(data){
 
     html+=
 
-    "蒙特卡罗模拟：100000组<br><br>";
+    "蒙特卡罗模拟：1000组<br><br>";
 
 
 
