@@ -3,9 +3,9 @@
 
 大乐透智能分析系统
 
-V70.6 CORE ENGINE
+V70.7 CORE ENGINE
 
-Theory AI 理论库接入版
+Monte Carlo AI接入版
 
 ================================
 */
@@ -14,10 +14,11 @@ Theory AI 理论库接入版
 class AIEngine {
 
 
+
 constructor(){
 
 
-this.version="V70.6";
+this.version="V70.7";
 
 
 this.dlt=[];
@@ -37,7 +38,9 @@ this.ready=false;
 
 
 
+
 async init(){
+
 
 
 await this.loadData();
@@ -61,6 +64,7 @@ return true;
 
 
 
+
 async loadData(){
 
 
@@ -68,8 +72,9 @@ async loadData(){
 let response=
 
 await fetch(
-"data/dlt.txt?v=706"
+"data/dlt.txt?v=707"
 );
+
 
 
 
@@ -87,9 +92,11 @@ throw new Error(
 
 
 
+
 let text=
 
 await response.text();
+
 
 
 
@@ -101,7 +108,10 @@ text.trim().split(/\n+/);
 
 
 
+
 this.dlt=[];
+
+
 
 
 
@@ -114,6 +124,7 @@ for(let line of lines){
 let arr=
 
 line.trim().split(/\s+/);
+
 
 
 
@@ -164,7 +175,9 @@ arr[8]
 
 
 
+
 }
+
 
 
 
@@ -181,11 +194,15 @@ this.agents={};
 
 
 
+
+
 if(window.MasterAgent)
 
 this.agents.master=
 
 window.MasterAgent;
+
+
 
 
 
@@ -197,11 +214,15 @@ window.TrendAgent;
 
 
 
+
+
 if(window.StructureAgent)
 
 this.agents.structure=
 
 window.StructureAgent;
+
+
 
 
 
@@ -213,11 +234,15 @@ window.MarkovAgent;
 
 
 
+
+
 if(window.RiskAgent)
 
 this.agents.risk=
 
 window.RiskAgent;
+
+
 
 
 
@@ -229,11 +254,15 @@ window.ReviewAgent;
 
 
 
+
+
 if(window.ConfidenceAgent)
 
 this.agents.confidence=
 
 window.ConfidenceAgent;
+
+
 
 
 
@@ -245,13 +274,23 @@ window.CriticAgent;
 
 
 
-// 新增 Theory AI
+
 
 if(window.TheoryAgent)
 
 this.agents.theory=
 
 window.TheoryAgent;
+
+
+
+
+
+if(window.MonteCarloEngine)
+
+this.agents.montecarlo=
+
+window.MonteCarloEngine;
 
 
 
@@ -291,7 +330,6 @@ this.dlt
 
 
 
-
 // 结构
 
 if(this.agents.structure)
@@ -307,8 +345,7 @@ this.dlt
 
 
 
-
-// 马尔可夫
+// 转移
 
 if(this.agents.markov)
 
@@ -317,7 +354,6 @@ meeting.markov=
 this.agents.markov.analyze(
 this.dlt
 );
-
 
 
 
@@ -339,7 +375,6 @@ this.dlt
 
 
 
-
 // 复盘
 
 if(this.agents.review)
@@ -355,8 +390,7 @@ this.dlt
 
 
 
-
-// 理论库
+// 理论
 
 if(this.agents.theory)
 
@@ -372,7 +406,7 @@ this.dlt
 
 
 
-// 信心评分
+// 信心
 
 if(this.agents.confidence)
 
@@ -388,10 +422,48 @@ meeting
 
 
 
+// Monte Carlo模拟
+
+
+let simulation={};
+
+
+
+
+
+if(this.agents.montecarlo){
+
+
+
+simulation=
+
+this.agents.montecarlo.simulate();
+
+
+
+}
+
+
+
+
+
+meeting.montecarlo=
+
+simulation;
+
+
+
+
+
+
+
+
 
 // Master AI
 
+
 let decision={};
+
 
 
 
@@ -410,7 +482,10 @@ this.agents.master.analyze({
 models:meeting,
 
 
-history:this.dlt.length
+history:this.dlt.length,
+
+
+simulation:simulation
 
 
 
@@ -427,9 +502,12 @@ history:this.dlt.length
 
 
 
+
 // Critic AI
 
+
 let critic={};
+
 
 
 
@@ -444,10 +522,12 @@ critic=
 this.agents.critic.analyze(
 
 
+
 decision,
 
 
 meeting
+
 
 
 );
@@ -455,6 +535,7 @@ meeting
 
 
 }
+
 
 
 
@@ -473,18 +554,27 @@ version:this.version,
 history:this.dlt.length,
 
 
+
 meeting:meeting,
+
+
+
+simulation:simulation,
+
 
 
 decision:decision,
 
 
+
 critic:critic,
+
 
 
 message:
 
-"AI会议+理论库分析完成",
+"AI会议+理论+蒙特卡罗完成",
+
 
 
 
@@ -499,6 +589,7 @@ this.agents
 
 
 }
+
 
 
 
@@ -552,5 +643,5 @@ new AIEngine();
 
 
 console.log(
-"V70.6 ENGINE READY"
+"V70.7 ENGINE READY"
 );

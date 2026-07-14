@@ -3,15 +3,16 @@
 
 大乐透智能分析系统
 
-V70.6 CORE SCRIPT
+V70.7 CORE SCRIPT
 
-Theory AI显示版
+Monte Carlo显示版
 
 ================================
 */
 
 
 let systemReady=false;
+
 
 
 
@@ -30,7 +31,9 @@ document.getElementById(
 
 
 
+
 await window.AIEngine.init();
+
 
 
 
@@ -42,8 +45,8 @@ window.AIEngine.status();
 
 
 
-systemReady=true;
 
+systemReady=true;
 
 
 
@@ -54,6 +57,7 @@ document.getElementById(
 ).innerHTML=
 
 "系统加载成功";
+
 
 
 
@@ -82,7 +86,6 @@ AI模型：
 ${status.agents.join(" / ")}
 
 `;
-
 
 
 
@@ -154,10 +157,10 @@ return;
 
 
 
+
 let result=
 
 await window.AIEngine.analyze();
-
 
 
 
@@ -181,150 +184,48 @@ AI多模型会议报告
 
 
 
-// Trend AI
+// 基础AI模块
 
 
-if(result.meeting.trend){
+for(let key of [
+
+"trend",
+
+"structure",
+
+"markov",
+
+"risk",
+
+"review"
+
+]){
+
+
+
+if(result.meeting[key]){
 
 
 
 html+=`
 
 <b>
-Trend AI 趋势分析
+${key.toUpperCase()} AI
 </b>
 
 <br>
 
-${result.meeting.trend.reason.join("<br>")}
+${result.meeting[key].reason.join("<br>")}
 
 <br><br>
 
 `;
+
+
 
 }
 
 
-
-
-
-
-
-
-
-// Structure AI
-
-
-if(result.meeting.structure){
-
-
-
-html+=`
-
-<b>
-Structure AI 结构分析
-</b>
-
-<br>
-
-${result.meeting.structure.reason.join("<br>")}
-
-<br><br>
-
-`;
-
-}
-
-
-
-
-
-
-
-
-
-// Markov AI
-
-
-if(result.meeting.markov){
-
-
-
-html+=`
-
-<b>
-Markov AI 转移分析
-</b>
-
-<br>
-
-${result.meeting.markov.reason.join("<br>")}
-
-<br><br>
-
-`;
-
-}
-
-
-
-
-
-
-
-
-
-// Risk AI
-
-
-if(result.meeting.risk){
-
-
-
-html+=`
-
-<b>
-Risk AI 风险分析
-</b>
-
-<br>
-
-${result.meeting.risk.reason.join("<br>")}
-
-<br><br>
-
-`;
-
-}
-
-
-
-
-
-
-
-
-
-// Review AI
-
-
-if(result.meeting.review){
-
-
-
-html+=`
-
-<b>
-Review AI 复盘分析
-</b>
-
-<br>
-
-${result.meeting.review.reason.join("<br>")}
-
-<br><br>
-
-`;
 
 }
 
@@ -343,6 +244,12 @@ if(result.meeting.theory){
 
 
 
+let t=
+
+result.meeting.theory.theory;
+
+
+
 html+=`
 
 <h3>
@@ -350,61 +257,37 @@ Theory AI 大乐透理论库
 </h3>
 
 
-
 奇偶结构：
 
-${JSON.stringify(
-
-result.meeting.theory.theory.oddEven
-
-)}
+${JSON.stringify(t.oddEven)}
 
 <br><br>
 
 
 大小结构：
 
-${JSON.stringify(
-
-result.meeting.theory.theory.size
-
-)}
+${JSON.stringify(t.size)}
 
 <br><br>
 
 
 三区分布：
 
-${JSON.stringify(
-
-result.meeting.theory.theory.zone
-
-)}
+${JSON.stringify(t.zone)}
 
 <br><br>
 
 
-和值分析：
+和值：
 
-${JSON.stringify(
-
-result.meeting.theory.theory.sum
-
-)}
+${JSON.stringify(t.sum)}
 
 <br><br>
 
-
-理论说明：
-
-<br>
-
-${result.meeting.theory.reason.join("<br>")}
-
-
-<br><br>
 
 `;
+
+
 
 }
 
@@ -416,7 +299,98 @@ ${result.meeting.theory.reason.join("<br>")}
 
 
 
-// Confidence AI
+// Monte Carlo
+
+
+if(result.simulation){
+
+
+
+html+=`
+
+<h3>
+Monte Carlo AI 蒙特卡罗模拟
+</h3>
+
+
+模拟次数：
+
+${result.simulation.count}
+
+<br><br>
+
+
+TOP候选号码：
+
+<br><br>
+
+`;
+
+
+
+
+
+
+result.simulation.top.forEach(
+
+(item,index)=>{
+
+
+
+html+=`
+
+第 ${index+1} 名：
+
+<br>
+
+
+前区：
+
+${item.front.join(" ")}
+
+
+<br>
+
+
+后区：
+
+${item.back.join(" ")}
+
+
+<br>
+
+
+评分：
+
+${item.score}
+
+
+<br><br>
+
+
+`;
+
+
+
+}
+
+
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// Confidence
 
 
 if(result.meeting.confidence){
@@ -447,6 +421,8 @@ ${result.meeting.confidence.level}
 
 `;
 
+
+
 }
 
 
@@ -457,7 +433,7 @@ ${result.meeting.confidence.level}
 
 
 
-// Master AI
+// Master
 
 
 html+=`
@@ -491,7 +467,7 @@ null,
 
 
 
-// Critic AI
+// Critic
 
 
 if(result.critic){
@@ -540,7 +516,10 @@ ${result.critic.reason.join("<br>")}
 
 `;
 
+
+
 }
+
 
 
 
@@ -576,6 +555,7 @@ AI会议完成
 
 ${result.version}
 
+
 <br>
 
 参与模型：
@@ -583,6 +563,8 @@ ${result.version}
 ${result.agents.join(" / ")}
 
 `;
+
+
 
 
 
@@ -610,6 +592,7 @@ document.getElementById(
 
 
 
+
 localStorage.setItem(
 
 "dlt_feedback",
@@ -628,6 +611,7 @@ document.getElementById(
 ).innerHTML=
 
 "开奖反馈已保存";
+
 
 
 }
