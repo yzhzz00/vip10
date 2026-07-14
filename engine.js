@@ -317,7 +317,7 @@ function startAnalysis(){
     box.innerHTML=
 
     "V35.8.1模型运行中...<br>"+
-    "蒙特卡罗模拟100000组...";
+    "蒙特卡罗模拟1000组...";
 
 
 
