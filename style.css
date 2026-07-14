@@ -1,16 +1,14 @@
 /*
 ====================================
-彩票智能分析系统 V51.1 Mobile
+彩票智能分析系统 V51.2 Mobile
 
-界面样式
+CSS
 ====================================
 */
 
 
 *{
-
 box-sizing:border-box;
-
 }
 
 
@@ -21,13 +19,12 @@ margin:0;
 
 padding:10px;
 
-background:#f3f6fa;
+background:#f4f6f8;
 
 font-family:
 
 "Microsoft YaHei",
-Arial,
-sans-serif;
+Arial,sans-serif;
 
 color:#222;
 
@@ -45,13 +42,13 @@ margin:auto;
 
 background:#fff;
 
-padding:15px;
+border-radius:16px;
 
-border-radius:15px;
+padding:15px;
 
 box-shadow:
 
-0 5px 20px rgba(0,0,0,.08);
+0 4px 18px rgba(0,0,0,.08);
 
 }
 
@@ -77,15 +74,15 @@ margin:10px 0 20px;
 
 .box{
 
-background:#fafafa;
-
-border:1px solid #e5e5e5;
+background:#fff;
 
 border-radius:12px;
 
 padding:15px;
 
 margin-bottom:15px;
+
+border:1px solid #eee;
 
 }
 
@@ -95,13 +92,13 @@ margin-bottom:15px;
 
 .title{
 
-font-size:16px;
-
 font-weight:bold;
 
-margin-bottom:10px;
+font-size:16px;
 
 color:#333;
+
+margin-bottom:10px;
 
 }
 
@@ -113,19 +110,19 @@ button{
 
 width:100%;
 
-height:44px;
-
-margin:8px 0;
-
-border:none;
-
-border-radius:10px;
+height:45px;
 
 background:#1677ff;
 
 color:white;
 
+border:0;
+
+border-radius:10px;
+
 font-size:16px;
+
+margin:8px 0;
 
 }
 
@@ -149,37 +146,13 @@ width:100%;
 
 height:42px;
 
-padding:10px;
-
-font-size:15px;
-
 border:1px solid #ccc;
 
 border-radius:8px;
 
-}
+padding:10px;
 
-
-
-
-
-input:focus{
-
-outline:none;
-
-border-color:#1677ff;
-
-}
-
-
-
-
-
-span{
-
-color:#1677ff;
-
-font-weight:bold;
+font-size:15px;
 
 }
 
@@ -188,15 +161,17 @@ font-weight:bold;
 
 
 /*
-========================
+==============================
 预测结果
-========================
+==============================
 */
 
 
 #result{
 
-background:#fff;
+line-height:2;
+
+background:#fafafa;
 
 border-left:4px solid #1677ff;
 
@@ -204,31 +179,27 @@ padding:12px;
 
 border-radius:8px;
 
-line-height:2;
-
-min-height:120px;
-
 }
 
 
 
 
 
-.ai-box{
+.plan-card{
 
 background:#fff;
 
-border:1px solid #e8e8e8;
-
-border-left:4px solid #722ed1;
-
-border-radius:10px;
+border-radius:12px;
 
 padding:12px;
 
 margin:10px 0;
 
-line-height:1.8;
+border-left:4px solid #1677ff;
+
+box-shadow:
+
+0 2px 8px rgba(0,0,0,.06);
 
 }
 
@@ -236,36 +207,13 @@ line-height:1.8;
 
 
 
-.ai-box b{
+.plan-title{
+
+font-weight:bold;
 
 color:#1677ff;
 
-}
-
-
-
-
-
-/*
-========================
-AI报告
-========================
-*/
-
-
-#aiReport{
-
-background:#fff;
-
-border-left:4px solid #722ed1;
-
-padding:12px;
-
-border-radius:8px;
-
-line-height:2;
-
-color:#444;
+font-size:17px;
 
 }
 
@@ -273,7 +221,7 @@ color:#444;
 
 
 
-.ai-score{
+.score{
 
 font-size:18px;
 
@@ -287,26 +235,11 @@ color:#722ed1;
 
 
 
-/*
-========================
-进度
-========================
-*/
+.stable{
 
+color:#198754;
 
-#progressBox{
-
-background:#fff;
-
-border-left:4px solid #1677ff;
-
-padding:12px;
-
-border-radius:8px;
-
-margin-top:10px;
-
-line-height:1.8;
+font-weight:bold;
 
 }
 
@@ -314,17 +247,96 @@ line-height:1.8;
 
 
 
-#backProgressBox{
+.balance{
 
-background:#fff;
+color:#1677ff;
 
-border-left:4px solid #19a15f;
+font-weight:bold;
+
+}
+
+
+
+
+
+.cold{
+
+color:#fa8c16;
+
+font-weight:bold;
+
+}
+
+
+
+
+
+/*
+==============================
+AI报告
+==============================
+*/
+
+
+#aiReport{
+
+background:#fafafa;
 
 padding:12px;
 
-border-radius:8px;
+border-radius:10px;
+
+border-left:4px solid #722ed1;
+
+line-height:2;
+
+}
+
+
+
+
+
+.report-item{
+
+padding:8px;
+
+border-bottom:1px solid #eee;
+
+}
+
+
+
+
+
+.report-title{
+
+font-weight:bold;
+
+color:#722ed1;
+
+}
+
+
+
+
+
+/*
+==============================
+进度条
+==============================
+*/
+
+
+#progressBox,
+#backProgressBox{
 
 margin-top:10px;
+
+padding:10px;
+
+background:#fafafa;
+
+border-radius:8px;
 
 line-height:1.8;
 
@@ -346,20 +358,22 @@ height:18px;
 
 
 
+
+
 /*
-========================
+==============================
 回测
-========================
+==============================
 */
 
 
 #backTestResult{
 
-background:#fff;
-
-border-left:4px solid #19a15f;
+background:#f9f9f9;
 
 padding:12px;
+
+border-left:4px solid #19a15f;
 
 border-radius:8px;
 
@@ -372,41 +386,34 @@ line-height:2;
 
 
 /*
-========================
-学习状态
-========================
+==============================
+状态
+==============================
 */
+
+
+#systemStatus{
+
+color:#198754;
+
+font-weight:bold;
+
+}
+
+
+
 
 
 #learningStatus{
 
 line-height:1.8;
 
-color:#555;
+color:#666;
 
 }
 
 
 
-
-
-#systemStatus{
-
-font-weight:bold;
-
-color:#198754;
-
-}
-
-
-
-
-
-/*
-========================
-列表
-========================
-*/
 
 
 ul{
@@ -423,7 +430,19 @@ margin:0;
 
 li{
 
-line-height:1.8;
+line-height:1.9;
+
+}
+
+
+
+
+
+span{
+
+color:#1677ff;
+
+font-weight:bold;
 
 }
 
@@ -432,37 +451,25 @@ line-height:1.8;
 
 
 /*
-========================
-状态颜色
-========================
+==============================
+AI标签
+==============================
 */
 
 
-.success{
+.ai-tag{
 
-color:#198754;
+display:inline-block;
 
-font-weight:bold;
+padding:3px 8px;
 
-}
+border-radius:8px;
 
-
-
-.warning{
-
-color:#fa8c16;
-
-font-weight:bold;
-
-}
-
-
-
-.ai{
+background:#f0eaff;
 
 color:#722ed1;
 
-font-weight:bold;
+font-size:13px;
 
 }
 
@@ -471,9 +478,9 @@ font-weight:bold;
 
 
 /*
-========================
+==============================
 手机适配
-========================
+==============================
 */
 
 
@@ -489,11 +496,14 @@ padding:6px;
 
 
 
+
+
 .container{
 
-padding:12px;
+padding:10px;
 
 }
+
 
 
 
@@ -507,11 +517,22 @@ font-size:20px;
 
 
 
+
 button{
+
+font-size:15px;
 
 height:42px;
 
-font-size:15px;
+}
+
+
+
+
+
+.box{
+
+padding:12px;
 
 }
 
@@ -520,18 +541,8 @@ font-size:15px;
 
 
 #result,
-#backTestResult,
-#aiReport{
-
-font-size:14px;
-
-}
-
-
-
-
-
-.ai-box{
+#aiReport,
+#backTestResult{
 
 font-size:14px;
 
