@@ -1,63 +1,49 @@
 /* =====================================
-   彩票智能分析系统 V35.4
+   彩票智能分析系统 V35.5
    页面样式
 ===================================== */
 
 
 *{
-
-box-sizing:border-box;
-
+    box-sizing:border-box;
 }
 
 
 
 body{
 
+    font-family:
+    "Microsoft YaHei",
+    Arial,
+    sans-serif;
 
-font-family:
+    background:#f2f2f2;
 
-"Microsoft YaHei",
-Arial,
-sans-serif;
+    margin:0;
 
-
-background:#f2f2f2;
-
-
-margin:0;
-
-
-padding:20px;
-
+    padding:20px;
 
 }
 
 
 
 
+
+
 .container{
 
+    max-width:900px;
 
-max-width:900px;
+    margin:auto;
 
+    background:#ffffff;
 
-margin:auto;
+    padding:20px;
 
+    border-radius:12px;
 
-background:white;
-
-
-padding:20px;
-
-
-border-radius:12px;
-
-
-box-shadow:
-
-0 3px 10px rgba(0,0,0,0.08);
-
+    box-shadow:
+    0 3px 12px rgba(0,0,0,0.08);
 
 }
 
@@ -68,15 +54,11 @@ box-shadow:
 
 h1{
 
+    text-align:center;
 
-text-align:center;
+    font-size:26px;
 
-
-font-size:26px;
-
-
-margin-bottom:25px;
-
+    margin-bottom:25px;
 
 }
 
@@ -87,23 +69,18 @@ margin-bottom:25px;
 
 .box{
 
+    background:#fafafa;
 
-background:#fafafa;
+    border:1px solid #ddd;
 
+    border-radius:10px;
 
-border:1px solid #ddd;
+    padding:15px;
 
-
-border-radius:10px;
-
-
-padding:15px;
-
-
-margin-top:18px;
-
+    margin-top:18px;
 
 }
+
 
 
 
@@ -111,17 +88,14 @@ margin-top:18px;
 
 .title{
 
+    font-size:20px;
 
-font-size:20px;
+    font-weight:bold;
 
-
-font-weight:bold;
-
-
-margin-bottom:12px;
-
+    margin-bottom:12px;
 
 }
+
 
 
 
@@ -129,33 +103,31 @@ margin-bottom:12px;
 
 button{
 
+    width:100%;
 
-width:100%;
+    padding:14px;
 
+    margin-top:12px;
 
-padding:14px;
+    font-size:18px;
 
+    border:none;
 
-margin-top:12px;
+    border-radius:8px;
 
+    background:#1677ff;
 
-font-size:18px;
+    color:white;
 
+    cursor:pointer;
 
-border:none;
-
-
-border-radius:8px;
-
-
-background:#1677ff;
-
-
-color:white;
+}
 
 
-cursor:pointer;
 
+button:hover{
+
+    opacity:0.9;
 
 }
 
@@ -163,11 +135,10 @@ cursor:pointer;
 
 button:active{
 
-
-opacity:0.8;
-
+    opacity:0.75;
 
 }
+
 
 
 
@@ -176,42 +147,19 @@ opacity:0.8;
 
 input{
 
+    width:100%;
 
-width:100%;
+    padding:12px;
 
+    font-size:16px;
 
-padding:12px;
+    border:
 
+    1px solid #ccc;
 
-font-size:16px;
+    border-radius:8px;
 
-
-border:1px solid #ccc;
-
-
-border-radius:8px;
-
-
-}
-
-
-
-
-ul{
-
-
-padding-left:25px;
-
-
-}
-
-
-
-li{
-
-
-line-height:2;
-
+    outline:none;
 
 }
 
@@ -219,16 +167,14 @@ line-height:2;
 
 
 
-#result{
 
+input:focus{
 
-line-height:1.8;
-
-
-font-size:16px;
-
+    border-color:#1677ff;
 
 }
+
+
 
 
 
@@ -236,14 +182,73 @@ font-size:16px;
 
 span{
 
+    color:#1677ff;
 
-font-weight:bold;
-
-
-color:#1677ff;
-
+    font-weight:bold;
 
 }
+
+
+
+
+
+
+
+ul{
+
+    padding-left:25px;
+
+    margin:0;
+
+}
+
+
+
+li{
+
+    line-height:2;
+
+}
+
+
+
+
+
+
+
+#result{
+
+    font-size:16px;
+
+    line-height:1.8;
+
+}
+
+
+
+
+
+
+#systemStatus{
+
+    line-height:1.8;
+
+    color:#333;
+
+}
+
+
+
+
+
+
+#learningStatus{
+
+    line-height:1.8;
+
+}
+
+
 
 
 
@@ -255,9 +260,7 @@ color:#1677ff;
 
 body{
 
-
-padding:10px;
-
+    padding:10px;
 
 }
 
@@ -265,9 +268,7 @@ padding:10px;
 
 .container{
 
-
-padding:15px;
-
+    padding:15px;
 
 }
 
@@ -275,9 +276,15 @@ padding:15px;
 
 h1{
 
+    font-size:22px;
 
-font-size:22px;
+}
 
+
+
+.box{
+
+    padding:12px;
 
 }
 
@@ -285,11 +292,10 @@ font-size:22px;
 
 button{
 
-
-font-size:16px;
-
+    font-size:16px;
 
 }
+
 
 
 }
