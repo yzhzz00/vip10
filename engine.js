@@ -1,14 +1,15 @@
 /*
 ====================================
-彩票智能分析系统 V50.5 Ultimate
+彩票智能分析系统 V50.6 Ultimate
 
-后区评分优化版
+回测修复版
 
-升级：
-1. 后区独立评分
+核心：
+1. 动态评分
 2. 前后区联合评分
-3. 组合去重
-4. 结构优化
+3. 后区独立模型
+4. 蒙特卡罗模拟
+5. 滚动历史回测修复
 ====================================
 */
 
@@ -16,7 +17,7 @@
 const DLTEngine={
 
 
-version:"V50.5",
+version:"V50.6",
 
 
 data:[],
@@ -35,6 +36,7 @@ backMiss:{},
 
 
 records:[],
+
 
 
 
@@ -79,8 +81,6 @@ let length=this.data.length;
 
 
 
-// 前区初始化
-
 for(
 let n=1;
 n<=35;
@@ -102,7 +102,7 @@ this.miss[num]=0;
 
 
 
-// 后区初始化
+
 
 for(
 let n=1;
@@ -140,7 +140,6 @@ let weight=
 
 
 
-// 前区
 
 item.front.forEach(n=>{
 
@@ -153,7 +152,6 @@ this.frequency[n]+=weight;
 
 
 
-// 后区
 
 item.back.forEach(n=>{
 
@@ -175,7 +173,6 @@ this.backScore[n]+=weight;
 
 // 前区遗漏
 
-
 for(
 let n=1;
 n<=35;
@@ -183,11 +180,9 @@ n++
 ){
 
 
-
 let num=
 
 String(n).padStart(2,"0");
-
 
 
 let miss=0;
@@ -228,8 +223,8 @@ this.miss[num]=miss;
 
 
 
-// 后区遗漏
 
+// 后区遗漏
 
 for(
 let n=1;
@@ -238,11 +233,9 @@ n++
 ){
 
 
-
 let num=
 
 String(n).padStart(2,"0");
-
 
 
 let miss=0;
@@ -288,7 +281,7 @@ this.backMiss[num]=miss;
 
 
 // ======================
-// 前区号码评分
+// 前区评分
 // ======================
 
 numberScore(num){
@@ -345,7 +338,7 @@ return score;
 
 
 // ======================
-// 后区号码评分
+// 后区评分
 // ======================
 
 backNumberScore(num){
@@ -355,14 +348,9 @@ let score=0;
 
 
 
-// 基础频率
-
 score+=this.backScore[num];
 
 
-
-
-// 遗漏补偿
 
 score+=
 
@@ -376,9 +364,6 @@ this.backMiss[num],
 
 
 
-
-
-// 热号惩罚
 
 if(
 this.backScore[num]>50
@@ -414,8 +399,6 @@ let score=0;
 
 
 
-// 前区号码分
-
 combo.forEach(n=>{
 
 
@@ -431,7 +414,6 @@ score+=this.numberScore(n);
 
 // 奇偶结构
 
-
 let odd=
 
 combo.filter(
@@ -446,7 +428,6 @@ if(
 odd===2 ||
 odd===3
 ){
-
 
 score+=10;
 
@@ -464,9 +445,7 @@ score-=8;
 
 
 
-
 // 三区结构
-
 
 let zone=[0,0,0];
 
@@ -496,7 +475,6 @@ else
 zone[2]++;
 
 
-
 });
 
 
@@ -508,7 +486,6 @@ zone.filter(
 x=>x>0
 ).length===3
 ){
-
 
 score+=15;
 
@@ -526,17 +503,13 @@ score-=8;
 
 
 
-
 // 和值
-
 
 let sum=
 
 combo.reduce(
 
-(a,b)=>
-
-a+Number(b),
+(a,b)=>a+Number(b),
 
 0
 
@@ -548,7 +521,6 @@ if(
 sum>=80 &&
 sum<=160
 ){
-
 
 score+=10;
 
@@ -566,63 +538,6 @@ score-=5;
 
 
 
-// 连号
-
-
-let link=0;
-
-
-
-for(
-let i=1;
-i<combo.length;
-i++
-){
-
-
-
-if(
-Number(combo[i])-
-
-Number(combo[i-1])
-
-===1
-){
-
-
-link++;
-
-
-}
-
-
-
-}
-
-
-
-
-
-if(
-link<=2
-){
-
-
-score+=8;
-
-
-}else{
-
-
-score-=8;
-
-
-}
-
-
-
-
-
 return score;
 
 
@@ -635,10 +550,10 @@ return score;
 
 
 // ======================
-// 后区评分
+// 后区组合评分
 // ======================
 
-backScoreCombo(back){
+backComboScore(back){
 
 
 let score=0;
@@ -658,13 +573,11 @@ score+=this.backNumberScore(n);
 
 
 
-
-// 后区和值
-
-
 let sum=
 
-Number(back[0])+
+Number(back[0])
+
++
 
 Number(back[1]);
 
@@ -676,7 +589,6 @@ if(
 sum>=5 &&
 sum<=18
 ){
-
 
 score+=10;
 
@@ -694,10 +606,6 @@ score-=8;
 
 
 
-
-// 后区奇偶
-
-
 let odd=
 
 back.filter(
@@ -712,46 +620,7 @@ if(
 odd===1
 ){
 
-
 score+=8;
-
-
-}else{
-
-
-score-=3;
-
-
-}
-
-
-
-
-
-
-
-// 后区跨度
-
-
-let span=
-
-Number(back[1])
-
--
-
-Number(back[0]);
-
-
-
-
-
-if(
-span>=3 &&
-span<=10
-){
-
-
-score+=5;
 
 
 }else{
@@ -778,7 +647,7 @@ return score;
 
 
 // ======================
-// 完整组合评分
+// 总评分
 // ======================
 
 fullScore(front,back){
@@ -790,7 +659,7 @@ this.comboScore(front)*0.8
 
 +
 
-this.backScoreCombo(back)*0.2
+this.backComboScore(back)*0.2
 
 );
 
@@ -808,6 +677,7 @@ this.backScoreCombo(back)*0.2
 // ======================
 
 filterCandidate(front){
+
 
 
 let nums=
@@ -837,7 +707,9 @@ return false;
 
 
 nums.sort(
+
 (a,b)=>a-b
+
 );
 
 
@@ -847,11 +719,12 @@ nums.sort(
 let sum=
 
 nums.reduce(
+
 (a,b)=>a+b,
+
 0
+
 );
-
-
 
 
 
@@ -869,7 +742,9 @@ return false;
 let odd=
 
 nums.filter(
-n=>n%2
+
+n=>n%2!==0
+
 ).length;
 
 
@@ -912,6 +787,7 @@ arr.length<5
 ){
 
 
+
 let n=
 
 String(
@@ -926,10 +802,10 @@ Math.random()*35
 
 
 
+
 if(
 !arr.includes(n)
 ){
-
 
 arr.push(n);
 
@@ -942,14 +818,12 @@ arr.push(n);
 
 
 
+
 return arr.sort(
 
-(a,b)=>
-
-Number(a)-Number(b)
+(a,b)=>Number(a)-Number(b)
 
 );
-
 
 
 },
@@ -976,6 +850,7 @@ arr.length<2
 ){
 
 
+
 let n=
 
 String(
@@ -990,10 +865,10 @@ Math.random()*12
 
 
 
+
 if(
 !arr.includes(n)
 ){
-
 
 arr.push(n);
 
@@ -1001,16 +876,15 @@ arr.push(n);
 }
 
 
-
 }
+
+
 
 
 
 return arr.sort(
 
-(a,b)=>
-
-Number(a)-Number(b)
+(a,b)=>Number(a)-Number(b)
 
 );
 
@@ -1026,6 +900,7 @@ similar(a,b){
 let count=0;
 
 
+
 a.forEach(n=>{
 
 
@@ -1033,12 +908,9 @@ if(
 b.includes(n)
 ){
 
-
 count++;
 
-
 }
-
 
 
 });
@@ -1065,12 +937,12 @@ simulate(total,callback){
 
 let pool=[];
 
+
 let count=0;
 
 
 
 let timer=setInterval(()=>{
-
 
 
 for(
@@ -1082,6 +954,7 @@ i++
 
 
 let front;
+
 
 
 do{
@@ -1101,9 +974,11 @@ while(
 
 
 
+
 let back=
 
 this.randomBack();
+
 
 
 
@@ -1123,6 +998,7 @@ back
 
 
 
+
 pool.push({
 
 front,
@@ -1132,7 +1008,6 @@ back,
 score
 
 });
-
 
 
 
@@ -1146,15 +1021,13 @@ count++;
 
 
 
+
 if(
 count>=total
 ){
 
 
-
 clearInterval(timer);
-
-
 
 
 
@@ -1201,7 +1074,6 @@ this.generatePlans(pool)
 generatePlans(pool){
 
 
-
 let plans=[];
 
 
@@ -1228,7 +1100,6 @@ type:"stable"
 
 
 
-// 均衡方案
 
 for(
 let item of pool
@@ -1237,6 +1108,7 @@ let item of pool
 
 
 if(
+
 this.similar(
 
 stable.front,
@@ -1258,7 +1130,6 @@ item.back
 ){
 
 
-
 plans.push({
 
 ...item,
@@ -1266,7 +1137,6 @@ plans.push({
 type:"balance"
 
 });
-
 
 
 break;
@@ -1284,16 +1154,15 @@ break;
 
 
 
-// 冷门方案
 
-let cold=
+let coldList=
 
 [...pool].reverse();
 
 
 
 for(
-let item of cold
+let item of coldList
 ){
 
 
@@ -1308,7 +1177,6 @@ item.front
 )<=2
 
 ){
-
 
 
 plans.push({
@@ -1346,7 +1214,6 @@ pool[plans.length]
 );
 
 
-
 }
 
 
@@ -1372,7 +1239,6 @@ Number(
 p.score/max*30
 
 )
-
 .toFixed(2)
 
 );
@@ -1397,7 +1263,7 @@ return plans;
 
 
 // ======================
-// 回测
+// 回测修复版
 // ======================
 
 rollingBackTest(period,callback){
@@ -1424,21 +1290,15 @@ let report={
 
 period,
 
-
 test:0,
-
 
 hit3:0,
 
-
 hit4:0,
-
 
 hit5:0,
 
-
 best:0
-
 
 };
 
@@ -1446,22 +1306,21 @@ best:0
 
 
 
-let i=start;
+let index=start;
 
 
 
-let run=setInterval(()=>{
+let next=()=>{
 
 
 
 if(
-i>=history.length
+index>=history.length
 ){
 
 
-clearInterval(run);
-
 callback(report);
+
 
 return;
 
@@ -1472,19 +1331,19 @@ return;
 
 
 
-
 let train=
 
 history.slice(
 0,
-i
+index
 );
 
 
 
 let real=
 
-history[i];
+history[index];
+
 
 
 
@@ -1496,11 +1355,13 @@ this.init(train);
 
 
 
+
 this.simulate(
 
 1000,
 
 plans=>{
+
 
 
 let best=0;
@@ -1524,10 +1385,13 @@ real.front.includes(n)
 
 same++;
 
+
 }
 
 
+
 });
+
 
 
 
@@ -1540,6 +1404,7 @@ best=same;
 
 
 });
+
 
 
 
@@ -1569,6 +1434,9 @@ report.hit5++;
 
 
 
+
+
+
 if(
 best>report.best
 )
@@ -1577,79 +1445,18 @@ report.best=best;
 
 
 
-}
-
-);
-
-
-
-
-
 report.test++;
 
-i++;
-
-
-
-},100);
-
-
-
-},
-
-
-
-
-
-
-
-backTest(callback){
-
-
-
-let periods=[100,300,500];
-
-
-let result=[];
-
-
-let index=0;
-
-
-
-let next=()=>{
-
-
-if(
-index>=periods.length
-){
-
-
-callback(result);
-
-return;
-
-
-}
-
-
-
-
-
-this.rollingBackTest(
-
-periods[index],
-
-r=>{
-
-
-result.push(r);
 
 
 index++;
 
 
+
+
+
 next();
+
 
 
 }
@@ -1662,8 +1469,86 @@ next();
 
 
 
+
+
 next();
 
+
+},
+
+
+
+
+
+
+
+// ======================
+// 多周期回测
+// ======================
+
+backTest(callback){
+
+
+
+let periods=[100,300,500];
+
+
+let result=[];
+
+
+let i=0;
+
+
+
+let run=()=>{
+
+
+if(
+i>=periods.length
+){
+
+
+callback(result);
+
+
+return;
+
+
+}
+
+
+
+
+
+this.rollingBackTest(
+
+periods[i],
+
+r=>{
+
+
+result.push(r);
+
+
+i++;
+
+
+run();
+
+
+}
+
+);
+
+
+
+};
+
+
+
+
+
+run();
 
 
 },
@@ -1679,7 +1564,6 @@ next();
 // ======================
 
 feedback(value){
-
 
 
 let nums=
@@ -1716,10 +1600,12 @@ result:nums
 
 localStorage.setItem(
 
-"V505_FEEDBACK",
+"V506_FEEDBACK",
 
 JSON.stringify(
+
 this.records
+
 )
 
 );
@@ -1743,15 +1629,11 @@ status(){
 
 return {
 
-
 version:this.version,
-
 
 data:this.data.length,
 
-
 feedback:this.records.length
-
 
 };
 
