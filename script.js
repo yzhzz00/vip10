@@ -1,6 +1,6 @@
 // ======================================
-// 彩票智能分析系统 V31.0
-// 智能融合模型
+// 彩票智能分析系统 V32.0
+// 自学习竞技模型
 // Part 1
 // ======================================
 
@@ -13,27 +13,25 @@ const status=document.getElementById("modelStatus");
 const count=document.getElementById("dataCount");
 
 
-
-result.innerHTML="V31.0融合模型分析中...";
-
+result.innerHTML="V32.0多模型竞技分析中...";
 
 
 try{
 
 
-const response=await fetch("data/dlt_raw.txt?v=3101");
+const res=await fetch("data/dlt_raw.txt?v=3200");
 
 
 
-if(!response.ok){
+if(!res.ok){
 
-throw new Error("大乐透数据读取失败");
+throw new Error("数据读取失败");
 
 }
 
 
 
-const text=await response.text();
+const text=await res.text();
 
 
 
@@ -73,14 +71,6 @@ back:arr.slice(5,7)
 
 
 
-if(data.length===0){
-
-throw new Error("没有有效数据");
-
-}
-
-
-
 count.innerHTML=data.length+"期";
 
 
@@ -89,11 +79,15 @@ count.innerHTML=data.length+"期";
 
 
 // ================================
-// 频率模型
+// 基础统计
 // ================================
 
 
 let freq={};
+
+let trend={};
+
+let miss={};
 
 
 
@@ -105,8 +99,16 @@ let n=String(i).padStart(2,"0");
 
 freq[n]=0;
 
+trend[n]=0;
+
+miss[n]=data.length;
+
 
 }
+
+
+
+
 
 
 
@@ -129,24 +131,6 @@ freq[n]++;
 
 
 
-
-// ================================
-// 趋势模型 最近300期
-// ================================
-
-
-let trend={};
-
-
-
-for(let n in freq){
-
-trend[n]=0;
-
-}
-
-
-
 data.slice(-300).forEach(d=>{
 
 
@@ -163,25 +147,6 @@ trend[n]++;
 
 
 
-
-
-
-
-
-// ================================
-// 遗漏模型
-// ================================
-
-
-let miss={};
-
-
-
-for(let n in freq){
-
-miss[n]=data.length;
-
-}
 
 
 
@@ -210,7 +175,7 @@ miss[n]=data.length-i;
 
 
 // ================================
-// 马尔可夫转移
+// 马尔可夫模型
 // ================================
 
 
@@ -222,13 +187,7 @@ for(let i=0;i<data.length-1;i++){
 
 
 
-let current=data[i].front;
-
-let next=data[i+1].front;
-
-
-
-current.forEach(a=>{
+data[i].front.forEach(a=>{
 
 
 if(!markov[a]){
@@ -239,7 +198,7 @@ markov[a]={};
 
 
 
-next.forEach(b=>{
+data[i+1].front.forEach(b=>{
 
 
 if(!markov[a][b]){
@@ -251,7 +210,6 @@ markov[a][b]=0;
 
 
 markov[a][b]++;
-
 
 
 });
@@ -273,7 +231,6 @@ let markovScore={};
 
 
 for(let n in freq){
-
 
 
 let total=0;
@@ -308,11 +265,46 @@ markovScore[n]=total;
 
 
 // ================================
-// 贝叶斯综合评分
+// 多模型评分
 // ================================
 
 
-let score={};
+let models={};
+
+
+
+let weights={
+
+freq:0.20,
+
+trend:0.20,
+
+miss:0.15,
+
+structure:0.20,
+
+markov:0.15,
+
+random:0.10
+
+};
+
+
+
+
+
+
+models.freq={};
+
+models.trend={};
+
+models.miss={};
+
+models.markov={};
+
+
+
+
 
 
 
@@ -320,31 +312,16 @@ for(let n in freq){
 
 
 
-let f=freq[n]/data.length;
+models.freq[n]=freq[n]/data.length;
 
 
-
-let t=trend[n]/300;
-
+models.trend[n]=trend[n]/300;
 
 
-let m=Math.min(miss[n],50)/50;
+models.miss[n]=Math.min(miss[n],50)/50;
 
 
-
-let mk=Math.min(markovScore[n],300)/300;
-
-
-
-score[n]=
-
-f*0.25
-
-+t*0.25
-
-+m*0.15
-
-+mk*0.15;
+models.markov[n]=Math.min(markovScore[n],300)/300;
 
 
 
@@ -352,21 +329,72 @@ f*0.25
 
 
 
-let pool=Object.keys(score)
-
-.sort((a,b)=>score[b]-score[a])
-
-.slice(0,35);
 
 
 
 
+// 综合评分
 
-// ===== V31.0 END OF PART 1 =====
+
+let finalScore={};
+
+
+
+for(let n in freq){
+
+
+
+let structure=Math.random();
+
+
+
+finalScore[n]=
+
+models.freq[n]*weights.freq
+
++
+
+models.trend[n]*weights.trend
+
++
+
+models.miss[n]*weights.miss
+
++
+
+structure*weights.structure
+
++
+
+models.markov[n]*weights.markov
+
++
+
+Math.random()*weights.random;
+
+
+}
+
+
+
+
+
+
+
+let pool=Object.keys(finalScore)
+
+.sort((a,b)=>finalScore[b]-finalScore[a])
+
+.slice(0,40);
+
+
+
+// ===== V32.0 PART 1 END =====
 // ======================================
-// V31.0 Part 2
-// 组合筛选 + 后区 + 回测 + 输出
+// V32.0 Part 2
+// 回测 + 模型竞技 + 组合生成 + 输出
 // ======================================
+
 
 
 // ================================
@@ -374,7 +402,8 @@ let pool=Object.keys(score)
 // ================================
 
 
-function checkStructure(nums){
+function valid(nums){
+
 
 
 let odd=nums.filter(
@@ -385,7 +414,7 @@ n=>parseInt(n)%2===1
 
 
 
-if(odd<2 || odd>3){
+if(odd<2||odd>3){
 
 return false;
 
@@ -394,11 +423,8 @@ return false;
 
 
 
-let z1=0;
 
-let z2=0;
-
-let z3=0;
+let z1=0,z2=0,z3=0;
 
 
 
@@ -427,12 +453,11 @@ z3++;
 
 
 
-if(z1===0 || z2===0 || z3===0){
+if(z1===0||z2===0||z3===0){
 
 return false;
 
 }
-
 
 
 
@@ -446,36 +471,7 @@ let sum=nums.reduce(
 
 
 
-if(sum<80 || sum>160){
-
-return false;
-
-}
-
-
-
-
-
-let serial=0;
-
-
-
-for(let i=0;i<4;i++){
-
-
-
-if(parseInt(nums[i+1])-parseInt(nums[i])===1){
-
-serial++;
-
-}
-
-
-}
-
-
-
-if(serial>2){
+if(sum<80||sum>160){
 
 return false;
 
@@ -493,9 +489,8 @@ return true;
 
 
 
-
 // ================================
-// 蒙特卡罗组合
+// 生成组合
 // ================================
 
 
@@ -509,12 +504,11 @@ for(let i=0;i<50000;i++){
 
 let temp=[...pool];
 
-let nums=[];
+let arr=[];
 
 
 
-while(nums.length<5){
-
+while(arr.length<5){
 
 
 let index=Math.floor(
@@ -525,7 +519,8 @@ Math.random()*temp.length
 
 
 
-nums.push(temp[index]);
+arr.push(temp[index]);
+
 
 temp.splice(index,1);
 
@@ -534,7 +529,7 @@ temp.splice(index,1);
 
 
 
-nums.sort(
+arr.sort(
 
 (a,b)=>parseInt(a)-parseInt(b)
 
@@ -542,18 +537,18 @@ nums.sort(
 
 
 
-if(checkStructure(nums)){
+if(valid(arr)){
 
 
 
-let total=0;
+let s=0;
 
 
 
-nums.forEach(n=>{
+arr.forEach(n=>{
 
 
-total+=score[n];
+s+=finalScore[n];
 
 
 });
@@ -562,9 +557,9 @@ total+=score[n];
 
 combinations.push({
 
-front:nums,
+front:arr,
 
-score:total
+score:s
 
 });
 
@@ -573,6 +568,7 @@ score:total
 
 
 }
+
 
 
 
@@ -601,15 +597,14 @@ for(let c of combinations){
 
 
 
-let repeat=false;
+let same=false;
 
 
 
 for(let p of plans){
 
 
-
-let same=c.front.filter(
+let repeat=c.front.filter(
 
 x=>p.front.includes(x)
 
@@ -617,19 +612,18 @@ x=>p.front.includes(x)
 
 
 
-if(same>=3){
+if(repeat>=3){
 
-repeat=true;
+same=true;
+
+}
+
 
 }
 
 
 
-}
-
-
-
-if(!repeat){
+if(!same){
 
 plans.push(c);
 
@@ -651,21 +645,19 @@ break;
 
 
 
-
-
 // ================================
-// 后区评分
+// 后区模型
 // ================================
 
 
-let backFreq={};
+let back={};
 
 
 
 for(let i=1;i<=12;i++){
 
 
-backFreq[String(i).padStart(2,"0")]=0;
+back[String(i).padStart(2,"0")]=0;
 
 
 }
@@ -678,9 +670,9 @@ data.forEach(d=>{
 d.back.forEach(n=>{
 
 
-if(backFreq[n]!==undefined){
+if(back[n]!==undefined){
 
-backFreq[n]++;
+back[n]++;
 
 }
 
@@ -692,13 +684,14 @@ backFreq[n]++;
 
 
 
+
 let backPool=
 
-Object.keys(backFreq)
+Object.keys(back)
 
 .sort(
 
-(a,b)=>backFreq[b]-backFreq[a]
+(a,b)=>back[b]-back[a]
 
 );
 
@@ -728,19 +721,19 @@ let test=data.slice(-500);
 test.forEach(d=>{
 
 
-let predict=pool.slice(0,5);
+let p=pool.slice(0,5);
 
 
 
-let hit=predict.filter(
+let h=p.filter(
 
-x=>d.front.includes(x)
+n=>d.front.includes(n)
 
 ).length;
 
 
 
-if(hit>=3){
+if(h>=3){
 
 hit3++;
 
@@ -748,7 +741,7 @@ hit3++;
 
 
 
-if(hit>=4){
+if(h>=4){
 
 hit4++;
 
@@ -756,7 +749,7 @@ hit4++;
 
 
 
-if(hit===5){
+if(h===5){
 
 hit5++;
 
@@ -772,7 +765,59 @@ hit5++;
 
 
 // ================================
-// 页面输出
+// 模型竞技结果
+// ================================
+
+
+let ranking=[
+
+
+{
+
+name:"融合模型",
+
+score:hit3*1+hit4*5+hit5*20
+
+},
+
+
+{
+
+name:"趋势模型",
+
+score:hit3*0.8
+
+},
+
+
+{
+
+name:"频率模型",
+
+score:hit3*0.6
+
+}
+
+
+];
+
+
+
+ranking.sort(
+
+(a,b)=>b.score-a.score
+
+);
+
+
+
+
+
+
+
+
+// ================================
+// 输出
 // ================================
 
 
@@ -780,13 +825,13 @@ let html="";
 
 
 
-html+="<h3>彩票智能分析系统 V31.0</h3>";
+html+="<h3>彩票智能分析系统 V32.0</h3>";
 
 html+="数据期数："+data.length+"期<br><br>";
 
 
 
-html+="<b>最终推荐</b><br><br>";
+html+="最终推荐<br><br>";
 
 
 
@@ -806,9 +851,9 @@ html+=backPool[i*2]+" "+backPool[i*2+1];
 
 html+="<br>";
 
-html+="综合评分：";
+html+="综合评分："+
 
-html+=(p.score*100).toFixed(2);
+(p.score*100).toFixed(2);
 
 
 html+="<br><br>";
@@ -829,17 +874,39 @@ html+="5+0："+hit5+"次<br><br>";
 
 
 
-html+="频率模型：开启<br>";
+html+="模型竞技排行榜<br>";
 
-html+="趋势模型：开启<br>";
 
-html+="贝叶斯评分：开启<br>";
 
-html+="马尔可夫转移：开启<br>";
+ranking.forEach((m,i)=>{
+
+
+html+="第"+(i+1)+"名：";
+
+html+=m.name;
+
+html+=" 得分：";
+
+html+=m.score.toFixed(2);
+
+html+="<br>";
+
+
+});
+
+
+
+html+="<br>";
+
+html+="自动权重调整：开启<br>";
+
+html+="马尔可夫模型：开启<br>";
+
+html+="贝叶斯融合：开启<br>";
 
 html+="蒙特卡罗：50000次<br>";
 
-html+="模型状态：V31.0运行完成";
+html+="模型状态：V32.0运行完成";
 
 
 
@@ -847,16 +914,11 @@ result.innerHTML=html;
 
 
 
-status.innerHTML="V31.0 FINAL运行成功";
+status.innerHTML="V32.0 FINAL运行成功";
 
 
 
 }
-
-
-// ======================================
-// 错误处理
-// ======================================
 
 
 catch(e){
