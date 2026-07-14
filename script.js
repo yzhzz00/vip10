@@ -2,13 +2,13 @@ async function startAnalysis(){
 
 const result=document.getElementById("result");
 
-result.innerHTML="正在运行 V12.0 综合智能模型...";
+result.innerHTML="正在运行 V12.5 前后区联合智能模型...";
 
 
 try{
 
 
-const response=await fetch("data/dlt_raw.txt?v=1200");
+const response=await fetch("data/dlt_raw.txt?v=1250");
 
 const text=await response.text();
 
@@ -33,6 +33,7 @@ let arr=nums.slice(-7);
 data.push({
 
 front:arr.slice(0,5),
+
 back:arr.slice(5,7)
 
 });
@@ -44,35 +45,34 @@ back:arr.slice(5,7)
 
 
 
-// =====================
-// 时间衰减频率
-// =====================
+
+// ======================
+// 前区时间衰减评分
+// ======================
 
 
-let score={};
+let frontScore={};
 
 
 for(let i=1;i<=35;i++){
 
 let n=i.toString().padStart(2,"0");
 
-score[n]=0;
+frontScore[n]=0;
 
 }
 
 
 
-data.forEach((item,index)=>{
+data.forEach((d,index)=>{
 
 
-let weight=Math.pow(0.995,index);
+let w=Math.pow(0.995,index);
 
 
-item.front.forEach(n=>{
+d.front.forEach(n=>{
 
-
-score[n]+=weight;
-
+frontScore[n]+=w;
 
 });
 
@@ -82,41 +82,34 @@ score[n]+=weight;
 
 
 
-// =====================
-// 马尔可夫转移矩阵
-// =====================
+
+// ======================
+// 后区评分
+// ======================
 
 
-let transition={};
+let backScore={};
 
 
+for(let i=1;i<=12;i++){
 
-for(let i=0;i<data.length-1;i++){
+let n=i.toString().padStart(2,"0");
 
+backScore[n]=0;
 
-let current=data[i].front;
-
-let next=data[i+1].front;
-
-
-
-current.forEach(a=>{
-
-
-if(!transition[a])
-transition[a]={};
+}
 
 
 
-next.forEach(b=>{
+data.forEach((d,index)=>{
 
 
-if(!transition[a][b])
-transition[a][b]=0;
+let w=Math.pow(0.995,index);
 
 
-transition[a][b]++;
+d.back.forEach(n=>{
 
+backScore[n]+=w;
 
 });
 
@@ -124,64 +117,15 @@ transition[a][b]++;
 });
 
 
-}
 
 
 
-
-// =====================
-// 反人类过滤
-// =====================
-
-
-function humanPenalty(nums){
+// ======================
+// 前区号码池
+// ======================
 
 
-let penalty=0;
-
-
-// 五个连续
-
-let sorted=[...nums].sort();
-
-
-for(let i=0;i<4;i++){
-
-if(Number(sorted[i+1])-Number(sorted[i])==1){
-
-penalty+=8;
-
-}
-
-}
-
-
-// 全部生日区
-
-let low=nums.filter(n=>Number(n)<=31).length;
-
-
-if(low==5){
-
-penalty+=5;
-
-}
-
-
-
-return penalty;
-
-}
-
-
-
-
-// =====================
-// 综合号码池
-// =====================
-
-
-let pool=Object.entries(score)
+let frontPool=Object.entries(frontScore)
 
 .sort((a,b)=>b[1]-a[1])
 
@@ -191,6 +135,26 @@ let pool=Object.entries(score)
 
 
 
+
+
+// 后区号码池
+
+
+let backPool=Object.entries(backScore)
+
+.sort((a,b)=>b[1]-a[1])
+
+.slice(0,8)
+
+.map(x=>x[0]);
+
+
+
+
+
+// ======================
+// 组合函数
+// ======================
 
 
 function pick(arr,num){
@@ -204,13 +168,13 @@ let r=[];
 while(r.length<num){
 
 
-let index=Math.floor(Math.random()*temp.length);
+let i=Math.floor(Math.random()*temp.length);
 
 
-r.push(temp[index]);
+r.push(temp[i]);
 
 
-temp.splice(index,1);
+temp.splice(i,1);
 
 
 }
@@ -224,19 +188,65 @@ return r.sort((a,b)=>Number(a)-Number(b));
 
 
 
-// =====================
-// 蒙特卡罗
-// =====================
+
+// ======================
+// 反人类过滤
+// ======================
 
 
-let results=[];
+function penalty(nums){
+
+
+let p=0;
+
+
+let same=nums.filter(n=>Number(n)<=31).length;
+
+
+if(same===5){
+
+p+=5;
+
+}
+
+
+
+for(let i=0;i<nums.length-1;i++){
+
+
+if(Number(nums[i+1])-Number(nums[i])===1){
+
+p+=8;
+
+}
+
+
+}
+
+
+return p;
+
+}
+
+
+
+
+
+// ======================
+// 蒙特卡罗联合模拟
+// ======================
+
+
+let candidates=[];
 
 
 for(let i=0;i<100000;i++){
 
 
-let front=pick(pool,5);
+let front=pick(frontPool,5);
 
+
+let back=pick(backPool,2);
 
 
 let sum=front.reduce((a,b)=>a+Number(b),0);
@@ -245,27 +255,32 @@ let sum=front.reduce((a,b)=>a+Number(b),0);
 let odd=front.filter(n=>Number(n)%2).length;
 
 
-let penalty=humanPenalty(front);
+let p=penalty(front);
 
 
 
 if(sum<75||sum>115)
+
 continue;
 
 
 if(odd<2||odd>3)
+
 continue;
 
 
-let finalScore=100-penalty;
+
+let score=100-p;
 
 
 
-results.push({
+candidates.push({
 
 front,
 
-score:finalScore
+back,
+
+score
 
 });
 
@@ -276,29 +291,32 @@ score:finalScore
 
 
 
-results.sort((a,b)=>b.score-a.score);
+candidates.sort((a,b)=>b.score-a.score);
 
 
 
-// 去重
 
-let output=[];
+
+// 去重输出
+
+
+let resultList=[];
 
 let used={};
 
 
-results.forEach(x=>{
+candidates.forEach(x=>{
 
 
-let key=x.front.join("-");
+let key=x.front.join("-")+x.back.join("-");
 
 
-if(!used[key]&&output.length<3){
+if(!used[key] && resultList.length<3){
 
 
 used[key]=1;
 
-output.push(x.front);
+resultList.push(x);
 
 
 }
@@ -309,15 +327,26 @@ output.push(x.front);
 
 
 
-// =====================
-// 简单回测
-// =====================
 
 
-let hit3=0;
+
+// ======================
+// 完整回测
+// ======================
 
 
-output.forEach(()=>{
+let hit={
+
+"3+1":0,
+
+"4+1":0,
+
+"5+1":0,
+
+"5+2":0
+
+};
+
 
 
 for(let i=0;i<500;i++){
@@ -326,32 +355,43 @@ for(let i=0;i<500;i++){
 let real=data[i];
 
 
-let same=output[0].filter(n=>real.front.includes(n)).length;
+let test=resultList[0];
 
 
-if(same>=3){
 
-hit3++;
+let f=test.front.filter(n=>real.front.includes(n)).length;
+
+
+let b=test.back.filter(n=>real.back.includes(n)).length;
+
+
+
+if(f>=3&&b>=1) hit["3+1"]++;
+
+if(f>=4&&b>=1) hit["4+1"]++;
+
+if(f>=5&&b>=1) hit["5+1"]++;
+
+if(f>=5&&b>=2) hit["5+2"]++;
+
 
 }
 
-}
-
-
-});
 
 
 
 
-// =====================
+
+
+// ======================
 // 输出
-// =====================
+// ======================
 
 
 let html="";
 
 
-html+="<h3>V12.0综合智能模型</h3>";
+html+="<h3>V12.5前后区联合模型</h3>";
 
 html+="有效数据："+data.length+"期<br><br>";
 
@@ -361,31 +401,31 @@ html+="<h3>最终推荐</h3>";
 
 
 
-output.forEach((x,i)=>{
+resultList.forEach((x,i)=>{
 
 
-html+=`方案${i+1}：${x.join(" ")}<br>`;
+html+=
+
+`方案${i+1}：${x.front.join(" ")} + ${x.back.join(" ")}<br>`;
 
 
 });
 
 
 
-html+="<br><h3>模型组成</h3>";
+html+="<br><h3>500期回测</h3>";
 
-html+="时间衰减 √<br>";
+html+="3+1："+hit["3+1"]+"次<br>";
 
-html+="贝叶斯评分 √<br>";
+html+="4+1："+hit["4+1"]+"次<br>";
 
-html+="马尔可夫矩阵 √<br>";
+html+="5+1："+hit["5+1"]+"次<br>";
 
-html+="反人类过滤 √<br>";
-
-html+="蒙特卡罗模拟 √<br>";
+html+="5+2："+hit["5+2"]+"次<br>";
 
 
 
-html+="<br>回测参考命中："+hit3+"次";
+html+="<br>模型：前区评分+后区评分+蒙特卡罗";
 
 
 result.innerHTML=html;
@@ -397,7 +437,7 @@ result.innerHTML=html;
 
 catch(e){
 
-result.innerHTML="V12.0运行失败："+e.message;
+result.innerHTML="V12.5运行失败："+e.message;
 
 }
 
