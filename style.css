@@ -1,27 +1,35 @@
-/* =====================================
-   彩票智能分析系统 V35.6
-   FINAL STYLE
-===================================== */
+/* ======================================
+   彩票智能分析系统 V35.6.1
+   style.css
+====================================== */
 
 
 *{
+
     box-sizing:border-box;
+
 }
 
 
 
 body{
 
+
     margin:0;
+
 
     padding:20px;
 
-    background:#f2f2f2;
+
+    background:#f3f3f3;
+
 
     font-family:
+
     "Microsoft YaHei",
     Arial,
     sans-serif;
+
 
 }
 
@@ -32,18 +40,26 @@ body{
 
 .container{
 
+
     max-width:900px;
+
 
     margin:auto;
 
+
     background:#ffffff;
+
 
     padding:20px;
 
+
     border-radius:12px;
 
+
     box-shadow:
-    0 3px 12px rgba(0,0,0,0.08);
+
+    0 3px 15px rgba(0,0,0,0.08);
+
 
 }
 
@@ -54,11 +70,15 @@ body{
 
 h1{
 
+
     text-align:center;
+
 
     font-size:26px;
 
+
     margin:10px 0 25px;
+
 
 }
 
@@ -69,15 +89,21 @@ h1{
 
 .box{
 
-    background:#fafafa;
 
-    border:1px solid #ddd;
+    margin-top:18px;
 
-    border-radius:10px;
 
     padding:15px;
 
-    margin-top:18px;
+
+    background:#fafafa;
+
+
+    border:1px solid #ddd;
+
+
+    border-radius:10px;
+
 
 }
 
@@ -88,11 +114,15 @@ h1{
 
 .title{
 
+
     font-size:20px;
+
 
     font-weight:bold;
 
+
     margin-bottom:12px;
+
 
 }
 
@@ -103,23 +133,33 @@ h1{
 
 button{
 
+
     width:100%;
+
 
     padding:14px;
 
+
     margin-top:12px;
 
-    font-size:18px;
 
     border:none;
 
+
     border-radius:8px;
+
 
     background:#1677ff;
 
+
     color:white;
 
+
+    font-size:18px;
+
+
     cursor:pointer;
+
 
 }
 
@@ -127,7 +167,9 @@ button{
 
 button:hover{
 
+
     opacity:0.9;
+
 
 }
 
@@ -135,10 +177,11 @@ button:hover{
 
 button:active{
 
+
     opacity:0.7;
 
-}
 
+}
 
 
 
@@ -147,19 +190,24 @@ button:active{
 
 input{
 
+
     width:100%;
+
 
     padding:12px;
 
-    font-size:16px;
 
-    border:
+    border:1px solid #ccc;
 
-    1px solid #ccc;
 
     border-radius:8px;
 
+
+    font-size:16px;
+
+
     outline:none;
+
 
 }
 
@@ -167,7 +215,9 @@ input{
 
 input:focus{
 
+
     border-color:#1677ff;
+
 
 }
 
@@ -178,31 +228,12 @@ input:focus{
 
 span{
 
+
     color:#1677ff;
+
 
     font-weight:bold;
 
-}
-
-
-
-
-
-
-
-ul{
-
-    padding-left:25px;
-
-    margin:0;
-
-}
-
-
-
-li{
-
-    line-height:2;
 
 }
 
@@ -214,10 +245,16 @@ li{
 
 #result{
 
+
     font-size:16px;
+
 
     line-height:1.9;
 
+
+    word-break:break-all;
+
+
 }
 
 
@@ -225,21 +262,44 @@ li{
 
 
 
-#learningStatus{
-
-    line-height:1.8;
-
-}
-
+#learningStatus,
 
 
 #systemStatus{
 
+
     line-height:1.8;
 
-    color:#333;
 
 }
+
+
+
+
+
+
+
+ul{
+
+
+    margin:0;
+
+
+    padding-left:25px;
+
+
+}
+
+
+
+li{
+
+
+    line-height:2;
+
+
+}
+
 
 
 
@@ -250,9 +310,12 @@ li{
 @media(max-width:600px){
 
 
+
 body{
 
+
     padding:10px;
+
 
 }
 
@@ -260,7 +323,9 @@ body{
 
 .container{
 
+
     padding:15px;
+
 
 }
 
@@ -268,7 +333,9 @@ body{
 
 h1{
 
+
     font-size:22px;
+
 
 }
 
@@ -276,7 +343,9 @@ h1{
 
 .box{
 
+
     padding:12px;
+
 
 }
 
@@ -284,9 +353,12 @@ h1{
 
 button{
 
+
     font-size:16px;
 
+
 }
+
 
 
 }
