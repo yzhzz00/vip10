@@ -1,8 +1,8 @@
 /*
 ======================================
-彩票智能分析系统 V35.9
+彩票智能分析系统 V35.9.1
 engine.js
-历史回测模块版
+历史回测修正版
 ======================================
 */
 
@@ -10,27 +10,25 @@ engine.js
 const DLTEngine={
 
 
-version:"V35.9",
+version:"V35.9.1",
 
 
-seed:3590,
+seed:3591,
 
 
-cacheKey:"DLT_V359_RESULT",
+cacheKey:"DLT_V3591_RESULT",
 
 
 data:[],
+
+
+history:[],
 
 
 frontScore:{},
 
 
 backScore:{},
-
-
-markov:{},
-
-
 
 
 
@@ -45,7 +43,6 @@ this.seed*9301+
 )%233280;
 
 
-
 return this.seed/233280;
 
 
@@ -56,9 +53,7 @@ return this.seed/233280;
 
 
 
-
 init(data){
-
 
 
 this.data=data||[];
@@ -70,10 +65,7 @@ this.frontScore={};
 this.backScore={};
 
 
-this.markov={};
-
-
-this.seed=3590;
+this.seed=3591;
 
 
 
@@ -87,9 +79,6 @@ this.omissionModel();
 
 
 this.hotColdModel();
-
-
-this.markovModel();
 
 
 this.backModel();
@@ -106,9 +95,7 @@ this.normalize();
 
 
 
-
 initNumber(){
-
 
 
 for(
@@ -118,19 +105,15 @@ i++
 ){
 
 
-
 let n=
 String(i)
 .padStart(2,"0");
 
 
-
 this.frontScore[n]=0;
 
 
-
 }
-
 
 
 
@@ -143,15 +126,12 @@ i++
 ){
 
 
-
 let n=
 String(i)
 .padStart(2,"0");
 
 
-
 this.backScore[n]=0;
-
 
 
 }
@@ -166,13 +146,7 @@ this.backScore[n]=0;
 
 
 
-// ==============================
-// 历史频率
-// ==============================
-
-
 frequencyModel(){
-
 
 
 this.data.forEach(item=>{
@@ -210,13 +184,7 @@ this.backScore[n]+=25;
 
 
 
-// ==============================
-// 遗漏周期
-// ==============================
-
-
 omissionModel(){
-
 
 
 Object.keys(
@@ -236,11 +204,9 @@ i--
 ){
 
 
-
 if(
 this.data[i]
-.front
-.includes(n)
+.front.includes(n)
 ){
 
 
@@ -250,33 +216,23 @@ break;
 }
 
 
-
 miss++;
 
 
-
 }
 
 
 
 
 
-if(
-miss>=20
-){
-
+if(miss>=20){
 
 this.frontScore[n]+=15;
 
-
 }
-else if(
-miss>=10
-){
-
+else if(miss>=10){
 
 this.frontScore[n]+=8;
-
 
 }
 
@@ -295,6 +251,7 @@ this.frontScore[n]+=8;
 hotColdModel(){
 
 
+
 let recent50 =
 this.data.slice(-50);
 
@@ -310,12 +267,17 @@ if(
 this.frontScore[n]!==undefined
 ){
 
+
 this.frontScore[n]+=12;
+
 
 }
 
 
+
 });
+
+
 
 
 
@@ -326,85 +288,11 @@ if(
 this.backScore[n]!==undefined
 ){
 
+
 this.backScore[n]+=10;
 
-}
-
-
-});
-
-
-
-});
-
-
-
-},
-
-
-
-
-
-
-
-// ==============================
-// 马尔可夫
-// ==============================
-
-
-markovModel(){
-
-
-
-for(
-let i=1;
-i<this.data.length;
-i++
-){
-
-
-
-let before =
-this.data[i-1].front;
-
-
-
-let after =
-this.data[i].front;
-
-
-
-
-
-before.forEach(a=>{
-
-
-
-if(
-!this.markov[a]
-){
-
-this.markov[a]={};
 
 }
-
-
-
-
-after.forEach(b=>{
-
-
-if(
-!this.markov[a][b]
-){
-
-this.markov[a][b]=0;
-
-}
-
-
-
-this.markov[a][b]++;
 
 
 
@@ -413,10 +301,6 @@ this.markov[a][b]++;
 
 
 });
-
-
-
-}
 
 
 
@@ -440,7 +324,6 @@ backModel(){
 this.data.forEach(item=>{
 
 
-
 item.back.forEach(n=>{
 
 
@@ -448,18 +331,19 @@ if(
 this.backScore[n]!==undefined
 ){
 
+
 this.backScore[n]+=30;
+
 
 }
 
 
-});
-
-
 
 });
 
 
+
+});
 
 
 
@@ -472,7 +356,7 @@ this.backScore[n]+=30;
 
 
 // ==============================
-// 标准化
+// 权重标准化
 // ==============================
 
 
@@ -485,16 +369,15 @@ Math.max(
 ...Object.values(
 this.frontScore
 )
+
 );
 
 
 
-
-
-for(
-let n in this.frontScore
-){
-
+Object.keys(
+this.frontScore
+)
+.forEach(n=>{
 
 
 this.frontScore[n]=
@@ -515,8 +398,7 @@ max
 
 
 
-}
-
+});
 
 
 
@@ -524,9 +406,7 @@ max
 
 
 let max2 =
-
 Math.max(
-
 ...Object.values(
 this.backScore
 )
@@ -537,10 +417,10 @@ this.backScore
 
 
 
-for(
-let n in this.backScore
-){
-
+Object.keys(
+this.backScore
+)
+.forEach(n=>{
 
 
 this.backScore[n]=
@@ -561,7 +441,7 @@ max2
 
 
 
-}
+});
 
 
 
@@ -574,7 +454,7 @@ max2
 
 
 // ==============================
-// 前区池
+// 前区候选池
 // ==============================
 
 
@@ -590,7 +470,8 @@ this.frontScore
 
 (a,b)=>
 
-this.frontScore[b]-
+this.frontScore[b]
+-
 this.frontScore[a]
 
 )
@@ -608,7 +489,7 @@ this.frontScore[a]
 
 
 // ==============================
-// 生成组合
+// 前区生成
 // ==============================
 
 
@@ -637,13 +518,13 @@ pool[
 
 Math.floor(
 
-this.random()*
+this.random()
+*
 pool.length
 
 )
 
 ];
-
 
 
 
@@ -661,7 +542,6 @@ result.push(n);
 
 
 }
-
 
 
 
@@ -704,6 +584,7 @@ let result=[];
 
 
 
+
 while(
 result.length<2
 ){
@@ -716,13 +597,13 @@ pool[
 
 Math.floor(
 
-this.random()*
+this.random()
+*
 pool.length
 
 )
 
 ];
-
 
 
 
@@ -744,7 +625,6 @@ result.push(n);
 
 
 
-
 return result.sort(
 
 (a,b)=>
@@ -757,14 +637,14 @@ Number(a)-Number(b)
 
 },
 // ==============================
-// 组合评分
+// 组合评分（修正版）
 // ==============================
 
 
 score(nums){
 
 
-let score=70;
+let score=60;
 
 
 
@@ -773,7 +653,7 @@ nums.forEach(n=>{
 
 score +=
 (this.frontScore[n]||0)
-/20;
+/25;
 
 
 });
@@ -781,7 +661,7 @@ score +=
 
 
 
-// 奇偶
+// 奇偶结构
 
 let odd =
 nums.filter(
@@ -804,12 +684,14 @@ score+=8;
 
 
 
-// 三区
+// 三区结构
 
 
-let z1=0;
-let z2=0;
-let z3=0;
+let a=0;
+
+let b=0;
+
+let c=0;
 
 
 
@@ -822,17 +704,17 @@ n=Number(n);
 
 if(n<=12){
 
-z1++;
+a++;
 
 }
 else if(n<=24){
 
-z2++;
+b++;
 
 }
 else{
 
-z3++;
+c++;
 
 }
 
@@ -842,10 +724,11 @@ z3++;
 
 
 
+
 if(
-z1>0&&
-z2>0&&
-z3>0
+a>0&&
+b>0&&
+c>0
 ){
 
 score+=8;
@@ -859,10 +742,11 @@ score+=8;
 
 // 和值
 
+
 let sum =
 nums.reduce(
-(a,b)=>
-a+Number(b),
+(x,y)=>
+x+Number(y),
 0
 );
 
@@ -878,14 +762,6 @@ score+=6;
 
 }
 
-
-
-if(score>100){
-
-score=100;
-
-
-}
 
 
 
@@ -929,14 +805,14 @@ this.generateFront();
 
 
 
+
 list.push({
 
 
 front:front,
 
 
-score:
-this.score(front)
+score:this.score(front)
 
 
 
@@ -945,7 +821,6 @@ this.score(front)
 
 
 }
-
 
 
 
@@ -959,7 +834,7 @@ b.score-a.score
 
 
 
-return list.slice(0,3);
+return list.slice(0,20);
 
 
 
@@ -972,11 +847,17 @@ return list.slice(0,3);
 
 
 // ==============================
-// 历史回测
+// 正确历史回测
 // ==============================
 
 
 backTest(testCount=500){
+
+
+
+let history =
+this.data.slice();
+
 
 
 
@@ -985,15 +866,12 @@ let total=0;
 
 let hit3=0;
 
-
 let hit4=0;
-
 
 let hit5=0;
 
 
 let back1=0;
-
 
 let back2=0;
 
@@ -1003,15 +881,11 @@ let back2=0;
 
 
 let start =
-this.data.length-testCount;
+Math.max(
+50,
+history.length-testCount
+);
 
-
-
-if(start<50){
-
-start=50;
-
-}
 
 
 
@@ -1019,25 +893,27 @@ start=50;
 
 for(
 let i=start;
-i<this.data.length;
+i<history.length;
 i++
 ){
 
 
 
 let train =
-this.data.slice(
+history.slice(
 0,
 i
 );
 
 
 
-
 let real =
-this.data[i];
+history[i];
 
 
+
+
+// 临时训练，不覆盖主数据
 
 
 this.init(train);
@@ -1045,7 +921,8 @@ this.init(train);
 
 
 
-let predict =
+
+let front =
 this.generateFront();
 
 
@@ -1056,12 +933,13 @@ let same=0;
 
 
 
-predict.forEach(n=>{
+front.forEach(n=>{
 
 
 if(
 real.front.includes(n)
 ){
+
 
 same++;
 
@@ -1076,7 +954,9 @@ same++;
 
 
 
-if(same>=3){
+if(
+same>=3
+){
 
 hit3++;
 
@@ -1084,7 +964,9 @@ hit3++;
 
 
 
-if(same>=4){
+if(
+same>=4
+){
 
 hit4++;
 
@@ -1092,7 +974,9 @@ hit4++;
 
 
 
-if(same===5){
+if(
+same===5
+){
 
 hit5++;
 
@@ -1102,26 +986,25 @@ hit5++;
 
 
 
-let backSame=0;
 
-
-
-predictBack:
-{
-
-let b =
+let back =
 this.generateBack();
 
 
 
-b.forEach(n=>{
+let bs=0;
+
+
+
+back.forEach(n=>{
 
 
 if(
 real.back.includes(n)
 ){
 
-backSame++;
+
+bs++;
 
 
 }
@@ -1132,13 +1015,11 @@ backSame++;
 
 
 
-}
 
 
-
-
-
-if(backSame>=1){
+if(
+bs>=1
+){
 
 back1++;
 
@@ -1146,11 +1027,14 @@ back1++;
 
 
 
-if(backSame===2){
+if(
+bs===2
+){
 
 back2++;
 
 }
+
 
 
 
@@ -1159,6 +1043,16 @@ total++;
 
 
 }
+
+
+
+
+
+// 恢复完整数据
+
+
+this.init(history);
+
 
 
 
@@ -1185,8 +1079,7 @@ back1:back1,
 back2:back2,
 
 
-rate:
-Number(
+rate:Number(
 (
 hit3/total*100
 
@@ -1244,13 +1137,12 @@ this.monteCarlo(20000);
 
 
 
-
-
 let output=[];
 
 
 
-result.forEach(item=>{
+result.slice(0,3)
+.forEach(item=>{
 
 
 
@@ -1294,14 +1186,11 @@ return output;
 
 
 
-},
-
+}
 
 
 
 };
-
-
 
 
 

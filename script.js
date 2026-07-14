@@ -1,8 +1,8 @@
 /*
 ======================================
-彩票智能分析系统 V35.9
+彩票智能分析系统 V35.9.1
 script.js
-历史回测接口版
+回测修正版
 ======================================
 */
 
@@ -10,17 +10,14 @@ script.js
 let dltData=[];
 
 
-
 // ==============================
-// 页面启动
+// 页面初始化
 // ==============================
-
 
 window.onload=function(){
 
 
 loadDLTData();
-
 
 
 
@@ -35,7 +32,6 @@ startAnalysis();
 
 
 
-
 document
 .getElementById("backTestBtn")
 .onclick=function(){
@@ -43,7 +39,6 @@ document
 startBackTest();
 
 };
-
 
 
 
@@ -69,7 +64,7 @@ saveFeedback();
 
 
 // ==============================
-// 加载数据
+// 加载大乐透数据
 // ==============================
 
 
@@ -81,13 +76,14 @@ try{
 
 let res =
 await fetch(
-"data/dlt_raw.txt?v=359"
+"data/dlt_raw.txt?v=3591"
 );
 
 
 
 let text =
 await res.text();
+
 
 
 
@@ -119,7 +115,7 @@ document
 .getElementById("systemStatus")
 .innerHTML=
 
-"V35.9数据模块运行正常";
+"V35.9.1数据模块运行正常";
 
 
 
@@ -127,12 +123,10 @@ document
 catch(e){
 
 
-
 document
 .getElementById("systemStatus")
 .innerHTML=
 "数据加载失败";
-
 
 
 console.log(e);
@@ -162,7 +156,7 @@ function parseDLT(text){
 
 
 
-let arr=[];
+let result=[];
 
 
 
@@ -174,7 +168,6 @@ text.split(/\r?\n/);
 
 
 lines.forEach(line=>{
-
 
 
 let p =
@@ -190,6 +183,7 @@ if(p.length<9){
 return;
 
 }
+
 
 
 
@@ -251,7 +245,8 @@ Number(p[i])
 
 
 
-arr.push({
+
+result.push({
 
 front:front,
 
@@ -268,7 +263,7 @@ back:back
 
 
 
-return arr;
+return result;
 
 
 
@@ -302,7 +297,6 @@ alert(
 
 return;
 
-
 }
 
 
@@ -313,10 +307,9 @@ document.getElementById("result");
 
 
 
-
 box.innerHTML=
 
-"V35.9模型运行中...<br>"+
+"V35.9.1模型运行中...<br>"+
 "蒙特卡罗模拟20000组...";
 
 
@@ -327,16 +320,13 @@ box.innerHTML=
 setTimeout(()=>{
 
 
-
 DLTEngine.data =
 dltData;
 
 
 
-
 let result =
 DLTEngine.run();
-
 
 
 
@@ -360,7 +350,7 @@ showResult(result);
 
 
 // ==============================
-// 显示预测
+// 显示预测结果
 // ==============================
 
 
@@ -374,7 +364,7 @@ let html="";
 
 html+=
 
-"<b>彩票智能分析系统 V35.9</b><br><br>";
+"<b>彩票智能分析系统 V35.9.1</b><br><br>";
 
 
 
@@ -401,8 +391,8 @@ html+=
 
 
 
-result.forEach((item,index)=>{
 
+result.forEach((item,index)=>{
 
 
 html+=
@@ -419,15 +409,18 @@ item.front.join(" ");
 
 
 
+
 html+=
 
 " + ";
 
 
 
+
 html+=
 
 item.back.join(" ");
+
 
 
 
@@ -440,7 +433,9 @@ html+=
 html+=
 
 "综合评分："+
+
 item.score+
+
 "分<br><br>";
 
 
@@ -451,9 +446,10 @@ item.score+
 
 
 
+
 html+=
 
-"模型状态：V35.9综合模型完成";
+"模型状态：V35.9.1综合模型完成";
 
 
 
@@ -512,7 +508,7 @@ document
 box.innerHTML=
 
 "正在执行历史回测...<br>"+
-"测试500期数据...";
+"测试500期...";
 
 
 
@@ -542,16 +538,14 @@ let html="";
 
 html+=
 
-"<b>V35.9历史回测报告</b><br><br>";
+"<b>V35.9.1历史回测报告</b><br><br>";
 
 
 
 html+=
 
 "测试期数："+
-
 report.testCount+
-
 "<br>";
 
 
@@ -618,9 +612,9 @@ report.rate+
 
 
 
-
 box.innerHTML=
 html;
+
 
 
 
@@ -673,6 +667,7 @@ return;
 
 
 
+
 localStorage.setItem(
 
 "DLT_FEEDBACK",
@@ -680,6 +675,7 @@ localStorage.setItem(
 value
 
 );
+
 
 
 

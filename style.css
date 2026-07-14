@@ -1,439 +1,325 @@
 /*
 ======================================
-彩票智能分析系统 V35.9
+彩票智能分析系统 V35.9.1
 style.css
-历史回测版
+回测修正版
 ======================================
 */
 
 
 *{
-
-box-sizing:border-box;
-
+    box-sizing:border-box;
 }
-
 
 
 body{
 
+    margin:0;
+    padding:15px;
 
-margin:0;
+    background:#f3f6fb;
 
-padding:15px;
+    font-family:
+    "Microsoft YaHei",
+    Arial,
+    sans-serif;
 
-background:#f3f6fb;
-
-font-family:
-
-"Microsoft YaHei",
-Arial,
-sans-serif;
-
-color:#222;
-
+    color:#222;
 
 }
-
-
 
 
 
 .container{
 
+    width:100%;
+    max-width:900px;
 
-max-width:900px;
+    margin:auto;
 
-width:100%;
+    background:#fff;
 
-margin:auto;
+    padding:20px;
 
-background:#fff;
+    border-radius:16px;
 
-padding:20px;
-
-border-radius:16px;
-
-box-shadow:
-
-0 5px 20px rgba(0,0,0,.08);
-
+    box-shadow:
+    0 5px 20px rgba(0,0,0,.08);
 
 }
-
-
-
 
 
 
 h1{
 
+    text-align:center;
 
-text-align:center;
+    color:#1677ff;
 
-font-size:24px;
+    font-size:24px;
 
-color:#1677ff;
-
-margin:10px 0 25px;
-
+    margin:10px 0 25px;
 
 }
-
-
-
-
 
 
 
 .box{
 
+    background:#fafafa;
 
-background:#fafafa;
+    border:1px solid #e5e5e5;
 
-border:1px solid #e5e5e5;
+    border-radius:12px;
 
-border-radius:12px;
+    padding:15px;
 
-padding:15px;
-
-margin-bottom:15px;
-
+    margin-bottom:15px;
 
 }
-
-
-
 
 
 
 .title{
 
+    font-size:17px;
 
-font-size:17px;
+    font-weight:bold;
 
-font-weight:bold;
+    margin-bottom:12px;
 
-margin-bottom:12px;
-
-color:#333;
-
+    color:#333;
 
 }
-
-
-
 
 
 
 button{
 
+    width:100%;
 
-width:100%;
+    height:45px;
 
-height:45px;
+    margin-top:10px;
 
-margin-top:10px;
+    border:none;
 
-border:none;
+    border-radius:10px;
 
-border-radius:10px;
+    background:#1677ff;
 
-background:#1677ff;
+    color:white;
 
-color:white;
+    font-size:16px;
 
-font-size:16px;
-
+    cursor:pointer;
 
 }
-
-
-
-
 
 
 
 button:active{
 
-
-transform:scale(.98);
-
+    transform:scale(.98);
 
 }
-
-
-
-
 
 
 
 input{
 
+    width:100%;
 
-width:100%;
+    height:42px;
 
-height:42px;
+    padding:10px;
 
-padding:10px;
+    font-size:15px;
 
-font-size:15px;
+    border-radius:8px;
 
-border-radius:8px;
-
-border:1px solid #ccc;
-
+    border:1px solid #ccc;
 
 }
-
-
-
-
 
 
 
 input:focus{
 
+    outline:none;
 
-outline:none;
-
-border-color:#1677ff;
-
+    border-color:#1677ff;
 
 }
-
-
-
-
 
 
 
 span{
 
+    color:#1677ff;
 
-color:#1677ff;
-
-font-weight:bold;
-
+    font-weight:bold;
 
 }
 
 
 
 
-
-
+/* 预测结果 */
 
 #result{
 
+    background:#fff;
 
-background:#fff;
+    padding:15px;
 
-padding:15px;
+    border-radius:10px;
 
-border-radius:10px;
+    border-left:4px solid #1677ff;
 
-border-left:4px solid #1677ff;
+    line-height:2;
 
-line-height:2;
-
-min-height:120px;
-
+    min-height:120px;
 
 }
-
-
-
 
 
 
 #result b{
 
+    color:#1677ff;
 
-color:#1677ff;
-
-font-size:19px;
-
+    font-size:19px;
 
 }
 
 
 
-
-
-
-
-/* 回测区域 */
-
+/* 历史回测 */
 
 #backTestResult{
 
+    background:#fff;
 
-background:#fff;
+    padding:15px;
 
-padding:15px;
+    border-radius:10px;
 
-border-radius:10px;
+    border-left:4px solid #20a060;
 
-line-height:2;
+    line-height:2;
 
-color:#444;
-
-border-left:4px solid #20a060;
-
+    color:#444;
 
 }
-
-
 
 
 
 #backTestResult b{
 
+    color:#20a060;
 
-color:#20a060;
-
-font-size:18px;
-
+    font-size:18px;
 
 }
-
-
-
-
 
 
 
 #learningStatus{
 
+    line-height:1.8;
 
-line-height:1.8;
-
-color:#555;
-
+    color:#555;
 
 }
-
-
-
-
 
 
 
 #systemStatus{
 
+    color:#16803c;
 
-color:#16803c;
+    font-weight:bold;
 
-font-weight:bold;
-
-line-height:1.8;
-
+    line-height:1.8;
 
 }
-
-
-
-
 
 
 
 ul{
 
+    margin:0;
 
-margin:0;
-
-padding-left:22px;
-
+    padding-left:22px;
 
 }
-
-
-
 
 
 
 li{
 
+    line-height:1.9;
 
-line-height:1.9;
-
-color:#555;
-
+    color:#555;
 
 }
 
 
 
-
-
-
+/* 手机适配 */
 
 @media(max-width:600px){
 
 
+    body{
 
-body{
+        padding:8px;
 
-
-padding:8px;
-
-
-}
+    }
 
 
 
-.container{
+    .container{
 
+        padding:14px;
 
-padding:14px;
-
-
-}
-
-
-
-h1{
-
-
-font-size:21px;
-
-
-}
+    }
 
 
 
-.title{
+    h1{
 
+        font-size:21px;
 
-font-size:16px;
-
-
-}
-
-
-
-button{
-
-
-height:43px;
-
-font-size:15px;
-
-
-}
+    }
 
 
 
-#result,
-#backTestResult{
+    .title{
+
+        font-size:16px;
+
+    }
 
 
-font-size:14px;
+
+    button{
+
+        height:43px;
+
+        font-size:15px;
+
+    }
 
 
-}
 
+    #result,
+    #backTestResult{
+
+        font-size:14px;
+
+    }
 
 
 }
