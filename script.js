@@ -1,18 +1,19 @@
 /*
 ====================================
-彩票智能分析系统 V51.0 Mobile
+彩票智能分析系统 V51.1 Mobile
 
-页面控制
+页面控制修正版
 
-升级：
-AI评分显示
-多维模型展示
+功能：
+AI报告显示
+预测控制
+回测控制
+反馈学习
 ====================================
 */
 
 
 let dltData=[];
-
 
 
 
@@ -48,8 +49,6 @@ document
 
 
 
-
-
 // ======================
 // 加载数据
 // ======================
@@ -65,7 +64,7 @@ let res=
 
 await fetch(
 
-"data/dlt_raw.txt?v510"
+"data/dlt_raw.txt?v511"
 
 );
 
@@ -99,13 +98,11 @@ document
 .getElementById("systemStatus")
 .innerHTML=
 
-"V51.0数据模块运行正常";
+"V51.1数据模块运行正常";
 
 
 
 }
-
-
 
 catch(e){
 
@@ -144,23 +141,19 @@ let arr=[];
 
 
 
-text
-.split(/\r?\n/)
+text.split(/\r?\n/)
 .forEach(line=>{
 
 
 
-let p=line.trim()
+let p=
+
+line.trim()
 .split(/\s+/);
 
 
 
-if(
-p.length<9
-)
-
-return;
-
+if(p.length<9)return;
 
 
 
@@ -172,7 +165,6 @@ let back=[];
 
 
 
-
 for(
 let i=2;
 i<=6;
@@ -180,19 +172,15 @@ i++
 ){
 
 
-
 front.push(
 
 String(Number(p[i]))
-
 .padStart(2,"0")
 
 );
 
 
-
 }
-
 
 
 
@@ -203,20 +191,15 @@ i++
 ){
 
 
-
 back.push(
 
 String(Number(p[i]))
-
 .padStart(2,"0")
 
 );
 
 
-
 }
-
-
 
 
 
@@ -230,17 +213,15 @@ back
 
 
 
-
 });
-
 
 
 
 return arr;
 
 
-}
 
+}
 
 
 
@@ -257,9 +238,7 @@ function startPredict(){
 
 
 
-if(
-dltData.length===0
-){
+if(dltData.length===0){
 
 
 alert(
@@ -277,15 +256,19 @@ return;
 
 let result=
 
-document
-.getElementById("result");
+document.getElementById("result");
 
 
 
 let progress=
 
-document
-.getElementById("progressBox");
+document.getElementById("progressBox");
+
+
+
+let reportBox=
+
+document.getElementById("aiReport");
 
 
 
@@ -293,9 +276,9 @@ document
 
 result.innerHTML=
 
-"V51.0 AI模型启动...<br>"+
+"V51.1 AI模型启动...<br>"+
 "多维评分计算...<br>"+
-"蒙特卡罗搜索...";
+"100000组模拟搜索...";
 
 
 
@@ -312,7 +295,7 @@ DLTEngine.progress=function(done,total){
 
 
 
-let percent=
+let p=
 
 Math.floor(
 
@@ -322,25 +305,17 @@ done/total*100
 
 
 
+
+
 progress.innerHTML=
 
-"AI模拟进度："+
+"AI模拟进度："+p+"%<br>"+
 
-percent+
-
-"%<br>"+
-
-"<progress value='"+
-
-percent+
-
-"' max='100'></progress>";
+"<progress value='"+p+"' max='100'></progress>";
 
 
 
 };
-
-
 
 
 
@@ -357,8 +332,7 @@ plans=>{
 
 let html=
 
-"<b>彩票智能分析系统 V51.0 Mobile</b><br><br>";
-
+"<b>彩票智能分析系统 V51.1</b><br><br>";
 
 
 
@@ -375,15 +349,6 @@ dltData.length+
 html+=
 
 "模拟次数：100000组<br><br>";
-
-
-
-
-
-
-html+="<b>最终推荐</b><br><br>";
-
-
 
 
 
@@ -407,7 +372,7 @@ html+=
 
 (i+1)+
 
-"：</b><br>";
+"</b><br>";
 
 
 
@@ -435,29 +400,13 @@ p.back.join(" ")
 
 html+=
 
-"AI综合指数：";
+"AI评分："
 
++
 
+p.indexScore
 
-
-
-html+=
-
-p.indexScore||"计算中";
-
-
-
-html+="<br>";
-
-
-
-
-
-html+=
-
-"类型："+
-
-p.type+
++
 
 "<br>";
 
@@ -465,30 +414,78 @@ p.type+
 
 
 
-html+="<br>";
+html+=
+
+"类型："
+
++
+
+p.type
+
++
+
+"<br>";
 
 
 
-html+="评分模型：<br>";
 
 
 
-html+="频率趋势 ✓<br>";
+let report=
 
-html+="遗漏周期 ✓<br>";
+DLTEngine.analysisReport(
 
-html+="和值匹配 ✓<br>";
+p.front
 
-html+="马尔可夫转移 ✓<br>";
+);
 
-html+="结构过滤 ✓";
 
+
+
+
+html+=
+
+"和值："+
+
+report.sum
+
++
+
+"<br>";
+
+
+
+html+=
+
+"历史平均和值："+
+
+report.sumAverage
+
++
+
+"<br>";
+
+
+
+html+=
+
+"结构："
+
++
+
+JSON.stringify(
+
+report.structure
+
+)
+
++
+
+"<br>";
 
 
 
 html+="</div>";
-
-
 
 
 
@@ -498,15 +495,9 @@ html+="</div>";
 
 
 
-html+=
-
-"模型状态：V51.0综合模型完成";
-
-
-
-
-
 result.innerHTML=html;
+
+
 
 
 
@@ -514,6 +505,67 @@ progress.innerHTML=
 
 "模拟完成 100%";
 
+
+
+
+
+
+// AI报告
+
+let best=
+
+plans[0];
+
+
+
+let ai=
+
+DLTEngine.analysisReport(
+
+best.front
+
+);
+
+
+
+
+
+reportBox.innerHTML=
+
+
+
+"和值分析：<br>"+
+
+"当前和值："+ai.sum+
+
+"<br>"+
+
+"历史平均："+ai.sumAverage+
+
+"<br><br>"+
+
+
+"结构分析：<br>"+
+
+"奇偶："+ai.structure.odd+
+
+"奇 "+
+
+ai.structure.even+
+
+"偶<br><br>"+
+
+
+"趋势分析：<br>"+
+
+ai.trend+
+
+"<br><br>"+
+
+
+"马尔可夫：<br>"+
+
+ai.markov;
 
 
 
@@ -545,15 +597,13 @@ function startBackTest(){
 
 let box=
 
-document
-.getElementById("backTestResult");
+document.getElementById("backTestResult");
 
 
 
 let progress=
 
-document
-.getElementById("backProgressBox");
+document.getElementById("backProgressBox");
 
 
 
@@ -561,7 +611,7 @@ document
 
 box.innerHTML=
 
-"V51.0历史回测启动...";
+"V51.1回测启动...";
 
 
 
@@ -573,11 +623,12 @@ DLTEngine.init(dltData);
 
 
 
+
 DLTEngine.backProgress=function(done,total){
 
 
 
-let percent=
+let p=
 
 Math.floor(
 
@@ -591,17 +642,14 @@ done/total*100
 
 progress.innerHTML=
 
-"回测进度："+
+"回测进度："+p+"%<br>"+
 
-percent+
-
-"%<br>"+
-
-"<progress value='"+percent+"' max='100'></progress>";
+"<progress value='"+p+"' max='100'></progress>";
 
 
 
 };
+
 
 
 
@@ -616,7 +664,8 @@ result=>{
 
 let html=
 
-"<b>V51.0历史回测报告</b><br><br>";
+"<b>V51.1历史回测报告</b><br><br>";
+
 
 
 
@@ -678,7 +727,6 @@ progress.innerHTML=
 
 
 
-
 }
 
 );
@@ -686,6 +734,7 @@ progress.innerHTML=
 
 
 }
+
 
 
 
@@ -748,7 +797,11 @@ document
 
 .innerHTML=
 
-"V51.0反馈学习保存："+value;
+"V51.1反馈保存成功："
+
++
+
+value;
 
 
 

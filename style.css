@@ -1,6 +1,6 @@
 /*
 ====================================
-彩票智能分析系统 V51.0 Mobile
+彩票智能分析系统 V51.1 Mobile
 
 界面样式
 ====================================
@@ -32,6 +32,7 @@ sans-serif;
 color:#222;
 
 }
+
 
 
 
@@ -187,15 +188,15 @@ font-weight:bold;
 
 
 /*
-=====================
+========================
 预测结果
-=====================
+========================
 */
 
 
 #result{
 
-background:white;
+background:#fff;
 
 border-left:4px solid #1677ff;
 
@@ -213,14 +214,46 @@ min-height:120px;
 
 
 
+.ai-box{
+
+background:#fff;
+
+border:1px solid #e8e8e8;
+
+border-left:4px solid #722ed1;
+
+border-radius:10px;
+
+padding:12px;
+
+margin:10px 0;
+
+line-height:1.8;
+
+}
+
+
+
+
+
+.ai-box b{
+
+color:#1677ff;
+
+}
+
+
+
+
+
 /*
-=====================
-AI分析区域
-=====================
+========================
+AI报告
+========================
 */
 
 
-.ai-box{
+#aiReport{
 
 background:#fff;
 
@@ -230,9 +263,9 @@ padding:12px;
 
 border-radius:8px;
 
-line-height:1.8;
+line-height:2;
 
-margin-top:10px;
+color:#444;
 
 }
 
@@ -255,43 +288,45 @@ color:#722ed1;
 
 
 /*
-=====================
-进度条
-=====================
+========================
+进度
+========================
 */
-
-
-#progressBox,
-#backProgressBox{
-
-
-margin-top:12px;
-
-padding:12px;
-
-background:#fff;
-
-border-radius:8px;
-
-line-height:1.8;
-
-font-size:14px;
-
-}
-
 
 
 #progressBox{
 
+background:#fff;
+
 border-left:4px solid #1677ff;
+
+padding:12px;
+
+border-radius:8px;
+
+margin-top:10px;
+
+line-height:1.8;
 
 }
 
 
 
+
+
 #backProgressBox{
 
+background:#fff;
+
 border-left:4px solid #19a15f;
+
+padding:12px;
+
+border-radius:8px;
+
+margin-top:10px;
+
+line-height:1.8;
 
 }
 
@@ -312,15 +347,15 @@ height:18px;
 
 
 /*
-=====================
+========================
 回测
-=====================
+========================
 */
 
 
 #backTestResult{
 
-background:white;
+background:#fff;
 
 border-left:4px solid #19a15f;
 
@@ -337,9 +372,9 @@ line-height:2;
 
 
 /*
-=====================
-学习反馈
-=====================
+========================
+学习状态
+========================
 */
 
 
@@ -367,6 +402,13 @@ color:#198754;
 
 
 
+/*
+========================
+列表
+========================
+*/
+
+
 ul{
 
 padding-left:20px;
@@ -390,13 +432,53 @@ line-height:1.8;
 
 
 /*
-=====================
-移动端
-=====================
+========================
+状态颜色
+========================
+*/
+
+
+.success{
+
+color:#198754;
+
+font-weight:bold;
+
+}
+
+
+
+.warning{
+
+color:#fa8c16;
+
+font-weight:bold;
+
+}
+
+
+
+.ai{
+
+color:#722ed1;
+
+font-weight:bold;
+
+}
+
+
+
+
+
+/*
+========================
+手机适配
+========================
 */
 
 
 @media(max-width:600px){
+
 
 
 body{
@@ -425,7 +507,6 @@ font-size:20px;
 
 
 
-
 button{
 
 height:42px;
@@ -440,13 +521,21 @@ font-size:15px;
 
 #result,
 #backTestResult,
-#progressBox,
-#backProgressBox{
+#aiReport{
 
 font-size:14px;
 
 }
 
+
+
+
+
+.ai-box{
+
+font-size:14px;
+
+}
 
 
 
