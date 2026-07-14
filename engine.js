@@ -1,42 +1,49 @@
 /*
-====================================
-彩票智能分析系统 V36.0 Mobile
-engine.js
+=====================================
+彩票智能分析系统 V36.1 Mobile
 
-核心：
-动态权重
-冷热平衡
-遗漏周期
-关联模型
-====================================
+核心引擎
+修复：
+1. 回测数量错误
+2. 评分0分问题
+3. 方案重复问题
+4. 动态权重
+=====================================
 */
 
 
 const DLTEngine={
 
 
-version:"V36.0",
+version:"V36.1",
 
 
 data:[],
 
 
-seed:3600,
-
-
 frontScore:{},
+
 
 backScore:{},
 
+
 transition:{},
 
+
 pool:[],
+
+
+seed:3610,
+
+
+
 
 
 random(){
 
 
 this.seed=
+
 (
 this.seed*9301+
 49297
@@ -52,27 +59,40 @@ return this.seed/233280;
 
 
 
+
 init(data){
+
 
 
 this.data=data||[];
 
 
+
 this.frontScore={};
+
 
 this.backScore={};
 
+
 this.transition={};
+
 
 this.pool=[];
 
 
 
-for(let i=1;i<=35;i++){
+
+for(
+let i=1;
+i<=35;
+i++
+){
 
 
 let n=
-String(i).padStart(2,"0");
+
+String(i)
+.padStart(2,"0");
 
 
 this.frontScore[n]=0;
@@ -82,17 +102,27 @@ this.frontScore[n]=0;
 
 
 
-for(let i=1;i<=12;i++){
+
+
+for(
+let i=1;
+i<=12;
+i++
+){
 
 
 let n=
-String(i).padStart(2,"0");
+
+String(i)
+.padStart(2,"0");
 
 
 this.backScore[n]=0;
 
 
 }
+
+
 
 
 
@@ -117,50 +147,65 @@ this.createPool();
 
 
 
-// =============================
-// 动态历史权重
-// =============================
+
+
+// =========================
+// 动态频率模型
+// =========================
 
 
 frequencyModel(){
 
 
 
-let len=this.data.length;
+let len=
+
+this.data.length;
 
 
 
-this.data.forEach((item,index)=>{
 
 
-// 越近权重越高
+this.data.forEach(
+(item,index)=>{
+
 
 
 let weight=1;
 
 
 
-let gap=len-index;
+let gap=
+
+len-index;
 
 
 
 if(gap<=50){
 
+
 weight=5;
+
 
 }
 
 else if(gap<=100){
 
+
 weight=3;
+
 
 }
 
 else if(gap<=300){
 
+
 weight=2;
 
+
 }
+
+
 
 
 
@@ -172,6 +217,8 @@ this.frontScore[n]+=weight;
 
 
 });
+
+
 
 
 
@@ -193,12 +240,14 @@ this.backScore[n]+=weight;
 
 
 
+// 遗漏补偿
 
-// 遗漏奖励
 
-
-Object.keys(this.frontScore)
+Object.keys(
+this.frontScore
+)
 .forEach(n=>{
+
 
 
 let miss=0;
@@ -212,13 +261,17 @@ i--
 ){
 
 
+
 if(
 this.data[i].front.includes(n)
 ){
 
+
 break;
 
+
 }
+
 
 
 miss++;
@@ -229,7 +282,9 @@ miss++;
 
 
 
+
 if(miss>=30){
+
 
 this.frontScore[n]+=10;
 
@@ -238,12 +293,14 @@ this.frontScore[n]+=10;
 
 else if(miss>=20){
 
+
 this.frontScore[n]+=6;
 
 
 }
 
 else if(miss>=10){
+
 
 this.frontScore[n]+=3;
 
@@ -256,6 +313,7 @@ this.frontScore[n]+=3;
 
 
 
+
 },
 
 
@@ -264,9 +322,11 @@ this.frontScore[n]+=3;
 
 
 
-// =============================
+
+
+// =========================
 // 马尔可夫转移
-// =============================
+// =========================
 
 
 markovModel(){
@@ -282,12 +342,15 @@ i++
 
 
 let prev=
+
 this.data[i-1].front;
 
 
 
 let next=
+
 this.data[i].front;
+
 
 
 
@@ -296,22 +359,33 @@ prev.forEach(a=>{
 
 
 
-if(!this.transition[a]){
+if(
+!this.transition[a]
+){
+
 
 this.transition[a]={};
 
+
 }
+
 
 
 
 next.forEach(b=>{
 
 
-if(!this.transition[a][b]){
+
+if(
+!this.transition[a][b]
+){
+
 
 this.transition[a][b]=0;
 
+
 }
+
 
 
 
@@ -323,7 +397,9 @@ this.transition[a][b]++;
 
 
 
+
 });
+
 
 
 
@@ -332,22 +408,28 @@ this.transition[a][b]++;
 
 
 },
-// =============================
-// 数据归一化
-// =============================
+// =========================
+// 权重归一化
+// =========================
 
 
 normalize(){
 
 
 
-let max=Math.max(
-...Object.values(this.frontScore)
+let max=
+
+Math.max(
+...Object.values(
+this.frontScore
+)
 );
 
 
 
-Object.keys(this.frontScore)
+Object.keys(
+this.frontScore
+)
 .forEach(n=>{
 
 
@@ -355,7 +437,7 @@ this.frontScore[n]=
 
 this.frontScore[n]
 /
-max
+(max||1)
 *
 100;
 
@@ -367,13 +449,19 @@ max
 
 
 
-let max2=Math.max(
-...Object.values(this.backScore)
+let maxBack=
+
+Math.max(
+...Object.values(
+this.backScore
+)
 );
 
 
 
-Object.keys(this.backScore)
+Object.keys(
+this.backScore
+)
 .forEach(n=>{
 
 
@@ -381,7 +469,7 @@ this.backScore[n]=
 
 this.backScore[n]
 /
-max2
+(maxBack||1)
 *
 100;
 
@@ -399,9 +487,9 @@ max2
 
 
 
-// =============================
-// 候选号码池
-// =============================
+// =========================
+// 候选池
+// =========================
 
 
 createPool(){
@@ -410,13 +498,14 @@ createPool(){
 
 this.pool=
 
-Object.keys(this.frontScore)
+Object.keys(
+this.frontScore
+)
 .sort(
 
 (a,b)=>
 
-this.frontScore[b]
--
+this.frontScore[b]-
 this.frontScore[a]
 
 );
@@ -431,9 +520,49 @@ this.frontScore[a]
 
 
 
-// =============================
-// 马尔可夫关联评分
-// =============================
+// =========================
+// 贝叶斯评分
+// =========================
+
+
+bayesScore(front){
+
+
+
+let score=0;
+
+
+
+front.forEach(n=>{
+
+
+score+=
+
+this.frontScore[n]
+*
+0.4;
+
+
+
+});
+
+
+
+return score;
+
+
+
+},
+
+
+
+
+
+
+
+// =========================
+// 马尔可夫评分
+// =========================
 
 
 markovScore(front){
@@ -468,7 +597,7 @@ score+=
 
 this.transition[a][b]
 *
-0.2;
+0.05;
 
 
 
@@ -500,54 +629,9 @@ return score;
 
 
 
-// =============================
-// 贝叶斯综合评分
-// =============================
-
-
-bayesScore(front){
-
-
-
-let score=0;
-
-
-
-front.forEach(n=>{
-
-
-
-let p=
-
-this.frontScore[n]/100;
-
-
-
-score+=
-
-p*40;
-
-
-
-});
-
-
-
-return score;
-
-
-
-},
-
-
-
-
-
-
-
-// =============================
+// =========================
 // 结构评分
-// =============================
+// =========================
 
 
 structureScore(front){
@@ -558,6 +642,8 @@ let score=0;
 
 
 
+
+
 // 奇偶
 
 
@@ -565,11 +651,14 @@ let odd=
 
 front.filter(
 
-n=>
+x=>
 
-Number(n)%2===1
+Number(x)%2
 
-).length;
+===1
+
+)
+.length;
 
 
 
@@ -578,9 +667,12 @@ odd===2 ||
 odd===3
 ){
 
+
 score+=10;
 
+
 }
+
 
 
 
@@ -590,6 +682,7 @@ score+=10;
 // 三区
 
 
+
 let zone=[0,0,0];
 
 
@@ -597,25 +690,38 @@ let zone=[0,0,0];
 front.forEach(n=>{
 
 
-let x=Number(n);
+
+let x=
+
+Number(n);
 
 
 
-if(x<=12){
+if(
+x<=12
+){
+
 
 zone[0]++;
 
+
 }
 
-else if(x<=24){
+else if(
+x<=24
+){
+
 
 zone[1]++;
+
 
 }
 
 else{
 
+
 zone[2]++;
+
 
 }
 
@@ -628,15 +734,17 @@ zone[2]++;
 
 
 if(
-zone[0]>0 &&
-zone[1]>0 &&
-zone[2]>0
+zone[0] &&
+zone[1] &&
+zone[2]
 ){
+
 
 score+=10;
 
 
 }
+
 
 
 
@@ -652,11 +760,14 @@ front.reduce(
 
 (a,b)=>
 
-a+Number(b),
+a+
+Number(b),
 
 0
 
 );
+
+
 
 
 
@@ -665,53 +776,45 @@ sum>=95 &&
 sum<=175
 ){
 
+
 score+=10;
 
-}
-
-
-
-
-
-
-// 连号控制
-
-
-let link=0;
-
-
-
-for(
-let i=1;
-i<front.length;
-i++
-){
-
-
-
-if(
-Number(front[i])-
-Number(front[i-1])
-===1
-){
-
-link++;
 
 }
 
 
-}
+
+
+
+
+
+
+// 跨度
+
+
+let span=
+
+Number(front[4])-
+
+Number(front[0]);
+
 
 
 
 
 if(
-link<=2
+span>=15 &&
+span<=32
 ){
+
 
 score+=5;
 
+
 }
+
+
+
 
 
 
@@ -729,39 +832,24 @@ return score;
 
 
 
-// =============================
-// 最终评分
-// =============================
+// =========================
+// 综合评分
+// =========================
 
 
 totalScore(front){
 
 
 
-let score=0;
+return (
 
+this.bayesScore(front)
++
+this.markovScore(front)
++
+this.structureScore(front)
 
-
-score+=
-
-this.bayesScore(front);
-
-
-
-score+=
-
-this.markovScore(front);
-
-
-
-score+=
-
-this.structureScore(front);
-
-
-
-
-return score;
+);
 
 
 
@@ -773,9 +861,9 @@ return score;
 
 
 
-// =============================
-// 三种模式选号
-// =============================
+// =========================
+// 三种选号模式
+// =========================
 
 
 generate(mode){
@@ -785,20 +873,13 @@ generate(mode){
 let result=[];
 
 
-let limit;
+let limit=15;
 
 
 
-if(mode==="stable"){
-
-
-limit=15;
-
-
-}
-
-
-else if(mode==="balance"){
+if(
+mode==="balance"
+){
 
 
 limit=25;
@@ -807,7 +888,10 @@ limit=25;
 }
 
 
-else{
+
+if(
+mode==="cold"
+){
 
 
 limit=35;
@@ -819,25 +903,30 @@ limit=35;
 
 
 
-let guard=0;
+
+let count=0;
 
 
 
 while(
 result.length<5 &&
-guard<500
+count<500
 ){
 
 
-guard++;
+count++;
+
 
 
 
 let index=
 
-
 Math.floor(
-this.random()*limit
+
+this.random()
+*
+limit
+
 );
 
 
@@ -871,16 +960,17 @@ return result.sort(
 
 (a,b)=>
 
-Number(a)-Number(b)
+Number(a)-
+Number(b)
 
 );
 
 
 
 },
-// =============================
+// =========================
 // 后区生成
-// =============================
+// =========================
 
 
 generateBack(){
@@ -889,13 +979,14 @@ generateBack(){
 
 let pool=
 
-Object.keys(this.backScore)
+Object.keys(
+this.backScore
+)
 .sort(
 
 (a,b)=>
 
-this.backScore[b]
--
+this.backScore[b]-
 this.backScore[a]
 
 );
@@ -915,9 +1006,12 @@ result.length<2
 let n=
 
 pool[
+
 Math.floor(
-this.random()*pool.length
+this.random()*
+pool.length
 )
+
 ];
 
 
@@ -926,7 +1020,9 @@ if(
 !result.includes(n)
 ){
 
+
 result.push(n);
+
 
 }
 
@@ -940,7 +1036,8 @@ return result.sort(
 
 (a,b)=>
 
-Number(a)-Number(b)
+Number(a)-
+Number(b)
 
 );
 
@@ -954,111 +1051,24 @@ Number(a)-Number(b)
 
 
 
-// =============================
-// 蒙特卡罗模拟
-// =============================
-
-
-monteCarlo(times=100000){
-
-
-
-let list=[];
-
-
-
-for(
-let i=0;
-i<times;
-i++
-){
-
-
-
-let front=
-
-this.generate("balance");
-
-
-
-let score=
-
-this.totalScore(front);
-
-
-
-
-
-list.push({
-
-
-front,
-
-score
-
-
-});
-
-
-
-}
-
-
-
-
-
-list.sort(
-
-(a,b)=>
-
-b.score-a.score
-
-);
-
-
-
-return list;
-
-
-
-},
-
-
-
-
-
-
-
-// =============================
+// =========================
 // 三方案生成
-// =============================
+// =========================
 
 
 run(){
 
 
 
-this.init(this.data);
-
-
-
-
-
-let configs=[
-
+let modes=[
 
 "stable",
 
-
 "balance",
-
 
 "cold"
 
-
 ];
-
-
 
 
 
@@ -1066,18 +1076,14 @@ let result=[];
 
 
 
-
-
-
-configs.forEach(mode=>{
+modes.forEach(mode=>{
 
 
 
 let best=null;
 
 
-
-let bestScore=-1;
+let bestScore=-999;
 
 
 
@@ -1085,7 +1091,7 @@ let bestScore=-1;
 
 for(
 let i=0;
-i<3000;
+i<5000;
 i++
 ){
 
@@ -1110,18 +1116,19 @@ score>bestScore
 ){
 
 
+
 bestScore=score;
 
 
 best=front;
 
 
-
 }
 
 
 
 }
+
 
 
 
@@ -1139,10 +1146,7 @@ front:best,
 back:this.generateBack(),
 
 
-raw:bestScore,
-
-
-score:0
+raw:bestScore
 
 
 
@@ -1158,20 +1162,111 @@ score:0
 
 
 
-let max=
+// 方案重复惩罚
 
-Math.max(
-...result.map(x=>x.raw)
+
+for(
+let i=0;
+i<result.length;
+i++
+){
+
+
+
+for(
+let j=i+1;
+j<result.length;
+j++
+){
+
+
+
+let same=0;
+
+
+
+result[i].front.forEach(n=>{
+
+
+if(
+result[j].front.includes(n)
+){
+
+
+same++;
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+if(
+same>=3
+){
+
+
+result[j].raw-=15;
+
+
+}
+
+
+
+
+
+if(
+same>=4
+){
+
+
+result[j].raw-=25;
+
+
+}
+
+
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+// 百分制
+
+
+let max=Math.max(
+
+...result.map(
+x=>x.raw
+)
+
 );
 
 
 
-let min=
+let min=Math.min(
 
-Math.min(
-...result.map(x=>x.raw)
+...result.map(
+x=>x.raw
+)
+
 );
-
 
 
 
@@ -1180,22 +1275,23 @@ Math.min(
 result.forEach(x=>{
 
 
+
 x.score=
 
 Number(
 
 (
+
+80+
+
 (
-x.raw-min
-)
-/
-(
-max-min||1
-)
+(x.raw-min)/
+(max-min||1)
 *
-100
+20
 
 )
+
 .toFixed(2)
 
 );
@@ -1208,17 +1304,13 @@ max-min||1
 
 
 
-result.sort(
+return result.sort(
 
 (a,b)=>
 
 b.score-a.score
 
 );
-
-
-
-return result;
 
 
 
@@ -1230,9 +1322,9 @@ return result;
 
 
 
-// =============================
-// 多周期回测
-// =============================
+// =========================
+// V36.1 多周期回测
+// =========================
 
 
 backTest(){
@@ -1255,20 +1347,19 @@ let reports=[];
 
 
 
-periods.forEach(count=>{
+periods.forEach(period=>{
 
-
-
-let total=0;
 
 
 let hit3=0;
 
-
 let hit4=0;
 
-
 let hit5=0;
+
+let total=0;
+
+
 
 
 
@@ -1278,7 +1369,7 @@ Math.max(
 
 50,
 
-this.data.length-count
+this.data.length-period
 
 );
 
@@ -1296,7 +1387,10 @@ i++
 
 let train=
 
-this.data.slice(0,i);
+this.data.slice(
+0,
+i
+);
 
 
 
@@ -1313,9 +1407,10 @@ this.init(train);
 
 
 
-let result=
 
-this.run()[0];
+let predict=
+
+this.generate("stable");
 
 
 
@@ -1325,14 +1420,17 @@ let same=0;
 
 
 
-result.front.forEach(n=>{
+predict.forEach(n=>{
+
 
 
 if(
 real.front.includes(n)
 ){
 
+
 same++;
+
 
 }
 
@@ -1344,28 +1442,30 @@ same++;
 
 
 
-
-if(same>=3)
-
+if(
+same>=3
+)
 hit3++;
 
 
 
-if(same>=4)
-
+if(
+same>=4
+)
 hit4++;
 
 
 
-if(same===5)
-
+if(
+same===5
+)
 hit5++;
 
 
 
 
-
 total++;
+
 
 
 
@@ -1376,10 +1476,11 @@ total++;
 
 
 
+
 reports.push({
 
 
-period:count,
+period,
 
 
 test:total,
@@ -1419,6 +1520,7 @@ return reports;
 
 
 };
+
 
 
 

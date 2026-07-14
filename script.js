@@ -1,8 +1,9 @@
 /*
-====================================
-彩票智能分析系统 V36.0 Mobile
+=====================================
+彩票智能分析系统 V36.1 Mobile
+
 script.js
-====================================
+=====================================
 */
 
 
@@ -11,7 +12,6 @@ let dltData=[];
 
 
 window.onload=function(){
-
 
 
 loadData();
@@ -46,9 +46,9 @@ document
 
 
 
-// =============================
-// 加载历史数据
-// =============================
+// =========================
+// 加载数据
+// =========================
 
 
 async function loadData(){
@@ -62,7 +62,7 @@ try{
 let res=
 
 await fetch(
-"data/dlt_raw.txt"
+"data/dlt_raw.txt?v361"
 );
 
 
@@ -97,12 +97,11 @@ dltData.length;
 
 
 
-
 document
 .getElementById("systemStatus")
 .innerHTML=
 
-"V36.0数据模块运行正常";
+"V36.1数据模块运行正常";
 
 
 
@@ -119,10 +118,6 @@ document
 
 
 
-console.log(e);
-
-
-
 }
 
 
@@ -137,9 +132,9 @@ console.log(e);
 
 
 
-// =============================
+// =========================
 // 数据解析
-// =============================
+// =========================
 
 
 function parseData(text){
@@ -164,6 +159,7 @@ line.trim()
 
 
 
+
 if(
 p.length<9
 )
@@ -176,6 +172,7 @@ return;
 let front=[];
 
 let back=[];
+
 
 
 
@@ -231,19 +228,26 @@ Number(p[i])
 
 
 
+
 arr.push({
+
 
 front,
 
+
 back
 
-});
-
-
-
 
 
 });
+
+
+
+
+
+});
+
+
 
 
 
@@ -261,9 +265,9 @@ return arr;
 
 
 
-// =============================
-// 开始预测
-// =============================
+// =========================
+// 智能分析
+// =========================
 
 
 function startPredict(){
@@ -275,12 +279,15 @@ dltData.length===0
 ){
 
 
+
 alert(
-"数据未加载"
+"历史数据未加载"
 );
 
 
+
 return;
+
 
 
 }
@@ -300,10 +307,9 @@ document
 
 box.innerHTML=
 
-"V36.0智能模型启动...<br>"+
+"V36.1模型启动...<br>"+
 "动态权重计算...<br>"+
-"蒙特卡罗100000组模拟...";
-
+"蒙特卡罗搜索5000×3...";
 
 
 
@@ -314,10 +320,9 @@ setTimeout(()=>{
 
 
 
-DLTEngine.data=
 
-dltData;
 
+DLTEngine.init(dltData);
 
 
 
@@ -329,8 +334,8 @@ DLTEngine.run();
 
 
 
-
 showResult(result);
+
 
 
 
@@ -349,9 +354,9 @@ showResult(result);
 
 
 
-// =============================
+// =========================
 // 显示预测
-// =============================
+// =========================
 
 
 function showResult(result){
@@ -366,23 +371,21 @@ let html="";
 
 html+=
 
-"<b>彩票智能分析系统 V36.0 Mobile</b><br><br>";
+"<b>彩票智能分析系统 V36.1 Mobile</b><br><br>";
 
 
 
 html+=
 
 "数据期数："+
-
 dltData.length+
-
 "期<br><br>";
 
 
 
 html+=
 
-"蒙特卡罗模拟：100000组<br><br>";
+"蒙特卡罗模拟：15000组<br><br>";
 
 
 
@@ -403,27 +406,37 @@ html+=
 
 "方案"+
 
-(i+1)+
+(i+1)
+
++
 
 "："+
 
-r.front.join(" ")+
+r.front.join(" ")
 
-" + "+
++
 
-r.back.join(" ")+
+" + "
+
++
+
+r.back.join(" ")
+
++
 
 "<br>";
 
 
 
-
-
 html+=
 
-"综合评分："+
+"综合评分："
 
-r.score+
++
+
+r.score
+
++
 
 "分<br>";
 
@@ -431,17 +444,15 @@ r.score+
 
 html+=
 
-"类型："+
+"类型："
 
-(
-r.type||"综合型"
-)
++
+
+r.type
 
 +
 
 "<br><br>";
-
-
 
 
 
@@ -454,7 +465,7 @@ r.type||"综合型"
 
 html+=
 
-"模型状态：V36.0综合模型完成";
+"模型状态：V36.1综合模型完成";
 
 
 
@@ -478,9 +489,9 @@ html;
 
 
 
-// =============================
-// 历史回测
-// =============================
+// =========================
+// 回测
+// =========================
 
 
 function startBackTest(){
@@ -496,7 +507,7 @@ document
 
 box.innerHTML=
 
-"V36.0回测运行中...";
+"V36.1历史回测运行中...";
 
 
 
@@ -506,10 +517,7 @@ setTimeout(()=>{
 
 
 
-DLTEngine.data=
-
-dltData;
-
+DLTEngine.init(dltData);
 
 
 
@@ -521,10 +529,9 @@ DLTEngine.backTest();
 
 
 
-
 let html=
 
-"<b>V36.0历史回测报告</b><br><br>";
+"<b>V36.1历史回测报告</b><br><br>";
 
 
 
@@ -596,7 +603,6 @@ html;
 
 
 
-
 },300);
 
 
@@ -611,9 +617,9 @@ html;
 
 
 
-// =============================
+// =========================
 // 开奖反馈
-// =============================
+// =========================
 
 
 function saveFeedback(){
@@ -630,8 +636,8 @@ document
 
 
 
-if(!value){
 
+if(!value){
 
 
 alert(
@@ -639,9 +645,7 @@ alert(
 );
 
 
-
 return;
-
 
 
 }
@@ -652,7 +656,7 @@ return;
 
 localStorage.setItem(
 
-"V36_FEEDBACK",
+"V361_FEEDBACK",
 
 value
 
@@ -666,7 +670,7 @@ document
 .getElementById("learningStatus")
 .innerHTML=
 
-"V36.0开奖反馈已保存："+value;
+"V36.1开奖反馈已保存："+value;
 
 
 
