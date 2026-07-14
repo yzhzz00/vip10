@@ -1,5 +1,5 @@
 /* ======================================
-   彩票智能分析系统 V35.7.2
+   彩票智能分析系统 V35.8
    style.css
 ====================================== */
 
@@ -9,14 +9,13 @@
 }
 
 
-
 body{
 
     margin:0;
 
     padding:20px;
 
-    background:#f5f6fa;
+    background:#f3f6fb;
 
     font-family:
     "Microsoft YaHei",
@@ -31,25 +30,23 @@ body{
 
 
 
-
 .container{
-
-    width:100%;
 
     max-width:900px;
 
-    margin:0 auto;
+    margin:auto;
 
-    background:#ffffff;
+    background:#fff;
 
     padding:20px;
 
-    border-radius:15px;
+    border-radius:16px;
 
     box-shadow:
-    0 5px 20px rgba(0,0,0,0.08);
+    0 8px 25px rgba(0,0,0,0.08);
 
 }
+
 
 
 
@@ -60,11 +57,11 @@ h1{
 
     text-align:center;
 
+    color:#1677ff;
+
     font-size:26px;
 
-    margin:10px 0 25px;
-
-    color:#1677ff;
+    margin-bottom:25px;
 
 }
 
@@ -76,15 +73,15 @@ h1{
 
 .box{
 
-    background:#fafafa;
-
-    border:1px solid #e5e5e5;
-
-    border-radius:12px;
+    margin-top:18px;
 
     padding:16px;
 
-    margin-top:18px;
+    background:#fafafa;
+
+    border-radius:12px;
+
+    border:1px solid #e8e8e8;
 
 }
 
@@ -96,7 +93,7 @@ h1{
 
 .title{
 
-    font-size:19px;
+    font-size:18px;
 
     font-weight:bold;
 
@@ -120,19 +117,19 @@ button{
 
     margin-top:12px;
 
-    border:none;
+    border:0;
 
     border-radius:10px;
 
     background:#1677ff;
 
-    color:#fff;
+    color:white;
 
     font-size:17px;
 
     cursor:pointer;
 
-    transition:0.2s;
+    transition:.2s;
 
 }
 
@@ -148,7 +145,7 @@ button:hover{
 
 button:active{
 
-    transform:scale(0.98);
+    transform:scale(.98);
 
 }
 
@@ -206,15 +203,20 @@ span{
 
 #result{
 
-    min-height:100px;
+    min-height:120px;
+
+    padding:12px;
+
+    background:#fff;
+
+    border-radius:10px;
 
     line-height:2;
 
     font-size:16px;
 
-    color:#222;
-
 }
+
 
 
 
@@ -237,9 +239,9 @@ span{
 
 #learningStatus{
 
-    color:#666;
-
     line-height:1.8;
+
+    color:#555;
 
 }
 
@@ -251,14 +253,13 @@ span{
 
 #systemStatus{
 
+    line-height:1.8;
+
     color:#16803c;
 
     font-weight:bold;
 
-    line-height:1.8;
-
 }
-
 
 
 
@@ -294,15 +295,12 @@ li{
 
 
 
-/* 推荐方案显示 */
 
-#result{
+/* 推荐号码突出 */
 
-    background:#fff;
+#result br{
 
-    padding:10px;
-
-    border-radius:8px;
+    line-height:2;
 
 }
 
@@ -314,64 +312,57 @@ li{
 
 /* 手机适配 */
 
-@media screen and (max-width:600px){
+@media(max-width:600px){
 
 
 
-body{
+    body{
 
-    padding:10px;
+        padding:10px;
 
-}
-
-
-
-.container{
-
-    padding:15px;
-
-}
+    }
 
 
 
-h1{
+    .container{
 
-    font-size:22px;
+        padding:15px;
 
-}
-
-
-
-.title{
-
-    font-size:17px;
-
-}
+    }
 
 
 
-button{
+    h1{
 
-    font-size:16px;
+        font-size:22px;
 
-}
-
-
-
-.box{
-
-    padding:12px;
-
-}
+    }
 
 
 
-#result{
+    .title{
 
-    font-size:15px;
+        font-size:16px;
 
-}
+    }
 
+
+
+    button{
+
+        height:45px;
+
+        font-size:15px;
+
+    }
+
+
+
+    #result{
+
+        font-size:14px;
+
+    }
 
 
 }
