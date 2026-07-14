@@ -1,27 +1,65 @@
 /*
-=====================================
+================================
 
-大乐透智能分析系统 V70
+大乐透智能分析系统
 
-前端控制层
+V70 CORE SCRIPT
 
-=====================================
+页面控制
+
+================================
 */
 
 
+let ready=false;
 
-// ==========================
-// 页面初始化
-// ==========================
+
 
 
 window.onload=async()=>{
 
 
+await startSystem();
+
+
+};
+
+
+
+
+
+
+
+async function startSystem(){
+
+
+
 try{
 
 
+document.getElementById(
+
+"dataStatus"
+
+).innerHTML=
+
+"正在加载";
+
+
+
+
+
 await AIEngine.init();
+
+
+
+
+
+let status=
+
+AIEngine.status();
+
+
 
 
 
@@ -31,8 +69,7 @@ document.getElementById(
 
 ).innerHTML=
 
-"数据加载成功";
-
+"加载成功";
 
 
 
@@ -43,17 +80,25 @@ document.getElementById(
 
 ).innerHTML=
 
-AIEngine.dlt.length;
+status.data;
+
+
+
+
+
+ready=true;
 
 
 
 }
 
+
+
 catch(e){
 
 
 
-console.error(e);
+console.log(e);
 
 
 
@@ -71,7 +116,7 @@ document.getElementById(
 
 
 
-};
+}
 
 
 
@@ -79,12 +124,33 @@ document.getElementById(
 
 
 
-// ==========================
-// AI预测
-// ==========================
+
+
+// =====================
+// V70 AI分析
+// =====================
 
 
 async function startPredict(){
+
+
+
+if(!ready){
+
+
+
+alert(
+
+"系统未准备完成"
+
+);
+
+
+return;
+
+
+}
+
 
 
 
@@ -98,50 +164,11 @@ document.getElementById(
 
 
 
-let progress=
-
-document.getElementById(
-
-"progress"
-
-);
-
-
 
 
 box.innerHTML=
 
-"AI多智能体分析启动...";
-
-
-
-
-progress.innerHTML=`
-
-<div class="progress-bar">
-
-<div id="bar">
-
-0%
-
-</div>
-
-</div>
-
-`;
-
-
-
-
-
-let bar=
-
-document.getElementById(
-
-"bar"
-
-);
-
+"Master AI正在分析...";
 
 
 
@@ -150,135 +177,30 @@ document.getElementById(
 
 let result=
 
-await AIEngine.predict(
-
-p=>{
-
-
-bar.style.width=p+"%";
-
-
-bar.innerHTML=p+"%";
-
-
-
-}
-
-);
+await AIEngine.analyze();
 
 
 
 
 
-let html="";
 
 
+box.innerHTML=
 
-
-
-result.forEach((x,i)=>{
-
-
-
-html+=`
-
-
-<div class="plan-card">
-
+`
 
 <h3>
 
-方案 ${i+1}
+V70 AI决策
 
 </h3>
 
 
 <p>
 
-前区：
-
-${x.front.join(" ")}
-
-</p>
-
-
-<p>
-
-后区：
-
-${x.back.join(" ")}
-
-</p>
-
-
-<p>
-
-AI评分：
-
-${x.score}
-
-</p>
-
-
-</div>
-
-
-
-`;
-
-
-
-});
-
-
-
-
-
-
-
-box.innerHTML=html;
-
-
-
-
-
-
-
-showReport();
-
-
-
-}
-
-
-
-
-
-
-
-// ==========================
-// AI报告
-// ==========================
-
-
-function showReport(){
-
-
-
-let report=
-
-AIEngine.report();
-
-
-
-
-let html=`
-
-<p>
-
 版本：
 
-${report.version}
+${result.version}
 
 </p>
 
@@ -287,38 +209,39 @@ ${report.version}
 
 历史数据：
 
-${report.history}
-
-期
+${result.data}期
 
 </p>
 
-
-<h3>
-
-号码评分TOP10
-
-</h3>
-
-`;
-
-
-
-
-
-report.top10.forEach(x=>{
-
-
-
-html+=`
 
 <p>
 
-${x.num}
+当前策略：
 
-：
+${
 
-${x.score}
+result.decision.strategy ||
+
+"等待模型"
+
+}
+
+</p>
+
+
+<p>
+
+分析依据：
+
+<br>
+
+${
+
+(result.decision.reason||[])
+
+.join("<br>")
+
+}
 
 </p>
 
@@ -326,19 +249,10 @@ ${x.score}
 
 
 
-});
 
 
 
-
-
-document.getElementById(
-
-"aiReport"
-
-).innerHTML=
-
-html;
+showReport(result);
 
 
 
@@ -350,12 +264,9 @@ html;
 
 
 
-// ==========================
-// 历史回测
-// ==========================
 
 
-async function startTrain(){
+function showReport(data){
 
 
 
@@ -363,83 +274,49 @@ let box=
 
 document.getElementById(
 
-"trainResult"
+"aiReport"
 
 );
 
 
 
-
-
-box.innerHTML=
-
-"回测启动...";
-
-
-
-
-
-let result=
-
-await AIEngine.backtest(
-
-p=>{
 
 
 box.innerHTML=
 
 `
 
-回测进度：
+AI多维分析报告
 
-${p}%
+<br><br>
 
-`;
+Master AI状态：
 
+运行中
 
+<br>
+
+时间：
+
+${data.time}
+
+<br><br>
+
+当前参与模型：
+
+${
+
+Object.keys(
+
+AIEngine.agents
+
+)
+
+.join(",")
 
 }
 
-);
 
-
-
-
-
-box.innerHTML=`
-
-<p>
-
-回测完成
-
-</p>
-
-
-<p>
-
-3个命中：
-
-${result.three}
-
-</p>
-
-
-<p>
-
-4个命中：
-
-${result.four}
-
-</p>
-
-
-<p>
-
-5个命中：
-
-${result.five}
-
-</p>
 
 `;
 
@@ -453,9 +330,42 @@ ${result.five}
 
 
 
-// ==========================
-// 保存开奖反馈
-// ==========================
+
+
+
+// =====================
+// 简单回测接口占位
+// =====================
+
+
+async function startTrain(){
+
+
+
+document.getElementById(
+
+"trainResult"
+
+).innerHTML=
+
+"V70回测模块准备中";
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+// =====================
+// 反馈接口
+// =====================
 
 
 function saveFeedback(){
@@ -472,66 +382,18 @@ document.getElementById(
 
 
 
-let arr=
-
-value.trim()
-
-.split(/\s+/);
+if(!value)return;
 
 
 
 
+localStorage.setItem(
 
-if(arr.length<7){
+"last_feedback",
 
-
-
-alert(
-
-"请输入完整开奖号码"
+value
 
 );
-
-
-
-return;
-
-
-
-}
-
-
-
-
-
-let front=
-
-arr.slice(0,5);
-
-
-
-let back=
-
-arr.slice(5,7);
-
-
-
-
-
-
-
-let result=
-
-AIEngine.feedback(
-
-front,
-
-back
-
-);
-
-
-
 
 
 
@@ -541,15 +403,7 @@ document.getElementById(
 
 ).innerHTML=
 
-"反馈学习完成";
-
-
-
-console.log(
-
-result
-
-);
+"反馈已保存";
 
 
 

@@ -1,25 +1,80 @@
 /*
 ====================================
 
-大乐透智能分析系统 V70
+大乐透智能分析系统 V70 CORE
 
-Structure AI Agent
+Structure Agent
 
-结构分析专家
+号码结构分析专家
+
+
+分析：
+
+1. 奇偶结构
+2. 大小结构
+3. 三区结构
+4. 和值趋势
+5. 组合风险
+
 
 ====================================
 */
 
 
-const StructureAgent = {
+class StructureAgent{
 
 
-version:"V70.0",
+constructor(){
+
+
+this.name="Structure AI";
+
+
+this.version="V70.0";
+
+
+}
+
 
 
 
 
 analyze(history){
+
+
+
+if(!history || history.length===0){
+
+
+return {
+
+
+strategy:"unknown",
+
+
+reason:[
+
+"无历史数据"
+
+]
+
+
+};
+
+
+}
+
+
+
+
+
+
+let recent=
+
+history.slice(-100);
+
+
+
 
 
 
@@ -33,39 +88,30 @@ let small=0;
 let big=0;
 
 
-
-let zone={
-
-
-one:0,
+let sumList=[];
 
 
-two:0,
+let zones={
 
+zone1:0,
 
-three:0
+zone2:0,
 
+zone3:0
 
 };
 
 
 
 
-let sumTotal=0;
+
+
+recent.forEach(item=>{
 
 
 
-let last100=
+if(!item.front)return;
 
-history.slice(-100);
-
-
-
-
-
-
-
-last100.forEach(item=>{
 
 
 
@@ -73,71 +119,73 @@ let sum=0;
 
 
 
-item.front.forEach(n=>{
+item.front.forEach(num=>{
+
+
+let n=
+
+Number(num);
 
 
 
-let num=
-
-Number(n);
-
-
-
-
-sum+=num;
-
-
+sum+=n;
 
 
 
 
-// 奇偶
-
-if(num%2===0)
+if(n%2===0){
 
 even++;
 
-else
+}else{
 
 odd++;
 
+}
 
 
 
 
 
-
-// 大小
-
-if(num<=17)
+if(n<=17){
 
 small++;
 
-else
+}
+
+else{
 
 big++;
 
+}
 
 
 
 
 
-
-// 三区
-
-if(num<=12)
-
-zone.one++;
+if(n<=11){
 
 
-else if(num<=24)
-
-zone.two++;
+zones.zone1++;
 
 
-else
+}
 
-zone.three++;
+else if(n<=22){
+
+
+zones.zone2++;
+
+
+}
+
+else{
+
+
+zones.zone3++;
+
+
+}
 
 
 
@@ -145,7 +193,7 @@ zone.three++;
 
 
 
-sumTotal+=sum;
+sumList.push(sum);
 
 
 
@@ -157,155 +205,27 @@ sumTotal+=sum;
 
 
 
-let avgSum=
 
-Number(
 
-(sumTotal/last100.length)
-
-.toFixed(2)
-
-);
+let averageSum=0;
 
 
 
+if(sumList.length){
 
 
+averageSum=
 
+sumList.reduce(
 
-let strategy="balanced";
+(a,b)=>a+b,0
 
+)
 
-let reason=[];
-
-
-
-
-
-
-// 奇偶判断
-
-let oddRate=
-
-odd/(odd+even);
-
-
-
-
-
-if(oddRate>0.65){
-
-
-
-reason.push(
-
-"近期奇数偏热，降低奇号比例"
-
-);
-
+/sumList.length;
 
 
 }
-
-
-
-if(oddRate<0.35){
-
-
-
-reason.push(
-
-"近期偶数偏热，关注奇号回补"
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-// 和值判断
-
-
-if(avgSum>105){
-
-
-
-reason.push(
-
-"和值偏高，控制大号数量"
-
-);
-
-
-
-}
-
-
-
-if(avgSum<85){
-
-
-
-reason.push(
-
-"和值偏低，关注和值回升"
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-// 三区判断
-
-
-let zoneBalance=[
-
-zone.one,
-
-zone.two,
-
-zone.three
-
-];
-
-
-
-if(
-
-Math.max(...zoneBalance)
-
--
-
-Math.min(...zoneBalance)
-
->80
-
-){
-
-
-reason.push(
-
-"三区失衡，需要重新平衡"
-
-);
-
-
-
-}
-
 
 
 
@@ -315,10 +235,14 @@ reason.push(
 return {
 
 
-agent:"Structure AI",
+
+agent:this.name,
 
 
-strategy,
+
+strategy:"structure",
+
+
 
 
 oddEven:{
@@ -326,36 +250,82 @@ oddEven:{
 
 odd,
 
-
 even
 
 
 },
 
 
-size:{
 
 
-small,
+bigSmall:{
 
 
-big
+big,
+
+small
 
 
 },
 
 
-zone,
 
 
-averageSum:avgSum,
+zones:zones,
 
 
-reason
+
+
+averageSum:
+
+Number(
+
+averageSum.toFixed(2)
+
+),
+
+
+
+
+confidence:0.7,
+
+
+
+
+reason:[
+
+
+
+"最近100期结构分析",
+
+
+
+"平均和值："+
+
+averageSum.toFixed(2),
+
+
+
+"奇偶统计：奇"+
+
+odd+
+
+" 偶"+
+
+even,
+
+
+
+"三区结构完成分析"
+
+
+
+]
 
 
 
 };
+
 
 
 
@@ -363,7 +333,7 @@ reason
 
 
 
-};
+}
 
 
 
@@ -371,4 +341,4 @@ reason
 
 window.StructureAgent=
 
-StructureAgent;
+new StructureAgent();

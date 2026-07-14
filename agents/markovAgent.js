@@ -1,20 +1,39 @@
 /*
 ====================================
 
-大乐透智能分析系统 V70
+大乐透智能分析系统 V70 CORE
 
-Markov AI Agent
+Markov Agent
 
-马尔可夫转移专家
+历史转移分析专家
+
+
+功能：
+
+1. 分析上一期号码
+2. 统计下一期出现概率
+3. 分析重复号码趋势
+
 
 ====================================
 */
 
 
-const MarkovAgent={
+class MarkovAgent{
 
 
-version:"V70.0",
+constructor(){
+
+
+this.name="Markov AI";
+
+
+this.version="V70.0";
+
+
+}
+
+
 
 
 
@@ -24,33 +43,42 @@ analyze(history){
 
 
 
+if(!history || history.length<2){
+
+
+
+return {
+
+
+strategy:"unknown",
+
+
+reason:[
+
+"历史数据不足"
+
+]
+
+
+};
+
+
+
+}
+
+
+
+
+
+
 let transition={};
 
 
 
-let repeatCount=0;
 
 
 
-let total=0;
-
-
-
-
-
-
-// 建立上一期→下一期关系
-
-
-for(
-
-let i=0;
-
-i<history.length-1;
-
-i++
-
-){
+for(let i=0;i<history.length-1;i++){
 
 
 
@@ -69,33 +97,29 @@ history[i+1].front;
 
 
 
-current.forEach(a=>{
+current.forEach(num=>{
 
 
 
-if(!transition[a])
-
-transition[a]={};
+if(!transition[num]){
 
 
 
-
-
-next.forEach(b=>{
-
-
-
-if(!transition[a][b])
-
-transition[a][b]=0;
+transition[num]={};
 
 
 
-transition[a][b]++;
+}
 
 
 
-});
+next.forEach(n=>{
+
+
+
+transition[num][n]=
+
+(transition[num][n]||0)+1;
 
 
 
@@ -103,26 +127,7 @@ transition[a][b]++;
 
 
 
-
-
-
-// 统计重号
-
-
-let repeat=
-
-current.filter(n=>
-
-next.includes(n)
-
-).length;
-
-
-
-repeatCount+=repeat;
-
-
-total++;
+});
 
 
 
@@ -133,58 +138,43 @@ total++;
 
 
 
+let last=
 
-
-let repeatAverage=
-
-Number(
-
-(repeatCount/total)
-
-.toFixed(2)
-
-);
+history[history.length-1].front;
 
 
 
 
 
 
-
-// 找高转移号码
-
-
-let score={};
+let prediction={};
 
 
 
 
 
-Object.keys(transition)
 
-.forEach(a=>{
-
+last.forEach(num=>{
 
 
-Object.keys(
 
-transition[a]
+if(transition[num]){
+
+
+
+Object.entries(
+
+transition[num]
 
 )
 
-.forEach(b=>{
+.forEach(([n,c])=>{
 
 
 
-if(!score[b])
+prediction[n]=
 
-score[b]=0;
-
-
-
-score[b]+=
-
-transition[a][b];
+(prediction[n]||0)+c;
 
 
 
@@ -192,6 +182,10 @@ transition[a][b];
 
 
 
+}
+
+
+
 });
 
 
@@ -200,69 +194,19 @@ transition[a][b];
 
 
 
-let nextHot=
+let result=
 
-Object.keys(score)
+Object.entries(prediction)
 
 .sort(
 
-(a,b)=>
-
-score[b]-score[a]
+(a,b)=>b[1]-a[1]
 
 )
 
-.slice(0,10);
+.slice(0,10)
 
-
-
-
-
-
-
-
-let strategy="balanced";
-
-
-let reason=[];
-
-
-
-
-
-
-if(repeatAverage>=2){
-
-
-
-reason.push(
-
-"近期重号概率偏高"
-
-);
-
-
-
-strategy="repeat";
-
-
-
-}
-
-else{
-
-
-reason.push(
-
-"近期号码延续性较弱"
-
-);
-
-
-
-}
-
-
+.map(x=>x[0]);
 
 
 
@@ -272,24 +216,42 @@ reason.push(
 return {
 
 
-agent:"Markov AI",
+
+agent:this.name,
 
 
-strategy,
+
+strategy:"markov",
 
 
-repeatAverage,
+
+nextNumbers:result,
 
 
-nextHot,
+
+confidence:0.6,
 
 
-reason
+
+reason:[
+
+
+
+"基于历史转移关系分析",
+
+
+
+"下一期关联号码："+
+
+result.join(" ")
+
+
+
+]
 
 
 
 };
-
 
 
 
@@ -298,7 +260,7 @@ reason
 
 
 
-};
+}
 
 
 
@@ -307,4 +269,4 @@ reason
 
 window.MarkovAgent=
 
-MarkovAgent;
+new MarkovAgent();

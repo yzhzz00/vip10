@@ -1,20 +1,39 @@
 /*
 ====================================
 
-大乐透智能分析系统 V70
+大乐透智能分析系统 V70 CORE
 
-Trend AI Agent
+Trend Agent
 
-趋势分析专家
+趋势走势分析专家
+
+功能:
+
+1. 最近期号码频率
+2. 热号分析
+3. 冷号分析
+4. 趋势输出
 
 ====================================
 */
 
 
-const TrendAgent = {
+class TrendAgent {
 
 
-version:"V70.0",
+
+constructor(){
+
+
+this.name="Trend AI";
+
+
+this.version="V70.0";
+
+
+}
+
+
 
 
 
@@ -23,25 +42,23 @@ analyze(history){
 
 
 
-let frequency={};
+if(!history || history.length===0){
 
 
-
-let recent={};
-
+return {
 
 
-for(let i=1;i<=35;i++){
+strategy:"unknown",
 
 
-let n=
+reason:[
 
-String(i).padStart(2,"0");
+"没有历史数据"
+
+]
 
 
-frequency[n]=0;
-
-recent[n]=0;
+};
 
 
 }
@@ -50,119 +67,40 @@ recent[n]=0;
 
 
 
-
-
-// 全历史频率
-
-history.forEach(item=>{
-
-
-item.front.forEach(n=>{
-
-
-frequency[n]++;
-
-
-});
-
-
-});
+let numberCount={};
 
 
 
 
+// 最近100期分析
 
-
-
-
-// 最近100期趋势
-
-
-let last100=
+let recent=
 
 history.slice(-100);
 
 
 
-last100.forEach(item=>{
 
 
-item.front.forEach(n=>{
+recent.forEach(item=>{
 
 
-recent[n]++;
+if(item.front){
+
+
+item.front.forEach(num=>{
+
+
+numberCount[num]=
+
+(numberCount[num]||0)+1;
+
 
 
 });
 
 
-});
-
-
-
-
-
-
-
-let hot=[];
-
-let cold=[];
-
-let rise=[];
-
-let fall=[];
-
-
-
-
-
-
-
-
-Object.keys(frequency)
-
-.forEach(n=>{
-
-
-
-if(frequency[n]>=120){
-
-
-hot.push(n);
-
-
 }
-
-
-
-if(frequency[n]<=60){
-
-
-cold.push(n);
-
-
-}
-
-
-
-if(recent[n]>=15){
-
-
-rise.push(n);
-
-
-}
-
-
-
-if(recent[n]<=5){
-
-
-fall.push(n);
-
-
-}
-
 
 
 });
@@ -172,30 +110,41 @@ fall.push(n);
 
 
 
+let ranking=
+
+Object.entries(numberCount)
+
+.sort(
+
+(a,b)=>b[1]-a[1]
+
+);
 
 
 
-let strategy="balanced";
 
 
 
-if(rise.length>cold.length){
+let hotNumbers=
+
+ranking
+
+.slice(0,10)
+
+.map(item=>item[0]);
 
 
-strategy="hot";
-
-
-}
 
 
 
-if(cold.length>rise.length){
 
+let coldNumbers=
 
-strategy="cold";
+ranking
 
+.slice(-10)
 
-}
+.map(item=>item[0]);
 
 
 
@@ -206,35 +155,63 @@ strategy="cold";
 return {
 
 
-agent:"Trend AI",
+
+agent:this.name,
 
 
-strategy,
+
+strategy:"trend",
 
 
-hot,
 
 
-cold,
+hot:
+
+hotNumbers,
 
 
-rise,
 
+cold:
 
-fall,
+coldNumbers,
+
 
 
 confidence:
 
-0.5+
-
 Math.min(
 
-rise.length/50,
+0.9,
 
-0.3
+0.5+
 
-)
+recent.length/1000
+
+),
+
+
+
+reason:[
+
+
+
+"分析周期：最近100期",
+
+
+
+"热号："+
+
+hotNumbers.join(" "),
+
+
+
+"冷号："+
+
+coldNumbers.join(" ")
+
+
+
+]
 
 
 
@@ -246,13 +223,14 @@ rise.length/50,
 
 
 
-};
+}
 
 
 
 
 
+// 注册到全局
 
 window.TrendAgent=
 
-TrendAgent;
+new TrendAgent();

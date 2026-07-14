@@ -1,38 +1,37 @@
 /*
 ====================================
 
-大乐透智能分析系统 V70
+大乐透智能分析系统 V70 CORE
 
-Risk AI Agent
+Risk Agent
 
 风险控制专家
+
+
+功能：
+
+1. 组合风险检测
+2. 结构异常提醒
+3. 给Master AI提供反向意见
+
 
 ====================================
 */
 
 
-const RiskAgent={
+class RiskAgent{
 
 
-version:"V70.0",
+constructor(){
 
 
+this.name="Risk AI";
 
 
-check(front){
+this.version="V70.0";
 
 
-
-let risk=0;
-
-
-let reason=[];
-
-
-
-let nums=
-
-front.map(Number);
+}
 
 
 
@@ -40,46 +39,29 @@ front.map(Number);
 
 
 
-// ==================
-// 奇偶检查
-// ==================
-
-
-let odd=
-
-nums.filter(
-
-n=>n%2===1
-
-).length;
+analyze(numbers){
 
 
 
-let even=
-
-5-odd;
+if(!numbers || numbers.length===0){
 
 
 
-if(
-
-odd===5 ||
-
-even===5
-
-){
+return {
 
 
-
-risk+=30;
-
+risk:true,
 
 
-reason.push(
+reason:[
 
-"奇偶过度集中"
+"没有检测号码"
 
-);
+]
+
+
+
+};
 
 
 
@@ -91,44 +73,64 @@ reason.push(
 
 
 
-// ==================
-// 大小检查
-// ==================
-
-
-let small=
-
-nums.filter(
-
-n=>n<=17
-
-).length;
+let risk=[];
 
 
 
-let big=
 
-5-small;
+let odd=0;
+
+let even=0;
 
 
-
-if(
-
-small===5 ||
-
-big===5
-
-){
+let sum=0;
 
 
 
-risk+=25;
+
+numbers.forEach(n=>{
 
 
 
-reason.push(
+let num=
 
-"大小结构异常"
+Number(n);
+
+
+
+sum+=num;
+
+
+
+if(num%2===0){
+
+even++;
+
+}else{
+
+odd++;
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+// 奇偶风险
+
+if(odd===5 || even===5){
+
+
+
+risk.push(
+
+"奇偶比例极端"
 
 );
 
@@ -140,41 +142,17 @@ reason.push(
 
 
 
+// 和值风险
 
 
-// ==================
-// 和值检查
-// ==================
+if(sum<60){
 
 
-let sum=
-
-nums.reduce(
-
-(a,b)=>a+b,
-
-0
-
-);
-
-
-
-
-
-if(sum<55){
-
-
-
-risk+=20;
-
-
-
-reason.push(
+risk.push(
 
 "和值过低"
 
 );
-
 
 
 }
@@ -184,160 +162,11 @@ reason.push(
 if(sum>140){
 
 
-
-risk+=20;
-
-
-
-reason.push(
+risk.push(
 
 "和值过高"
 
 );
-
-
-
-}
-
-
-
-
-
-
-
-// ==================
-// 连号检查
-// ==================
-
-
-let sorted=
-
-[...nums]
-
-.sort(
-
-(a,b)=>a-b
-
-);
-
-
-
-
-
-let consecutive=0;
-
-
-
-for(
-
-let i=1;
-
-i<sorted.length;
-
-i++
-
-){
-
-
-
-if(
-
-sorted[i]-sorted[i-1]===1
-
-){
-
-
-
-consecutive++;
-
-}
-
-
-}
-
-
-
-
-
-if(consecutive>=3){
-
-
-
-risk+=15;
-
-
-
-reason.push(
-
-"连续号码过多"
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-// ==================
-// 三区检查
-// ==================
-
-
-let zone=[0,0,0];
-
-
-
-nums.forEach(n=>{
-
-
-if(n<=12)
-
-zone[0]++;
-
-
-else if(n<=24)
-
-zone[1]++;
-
-
-else
-
-zone[2]++;
-
-
-});
-
-
-
-
-
-if(
-
-Math.max(...zone)-
-
-Math.min(...zone)
-
->=4
-
-){
-
-
-
-risk+=15;
-
-
-
-reason.push(
-
-"三区失衡"
-
-);
-
 
 
 }
@@ -352,22 +181,53 @@ return {
 
 
 
-agent:"Risk AI",
+agent:this.name,
 
 
-risk,
+
+risk:
+
+risk.length>0,
 
 
-pass:
 
-risk<40,
+score:
+
+Math.max(
+
+0,
+
+100-risk.length*20
+
+),
 
 
-reason
+
+reason:
+
+risk.length
+
+?
+
+risk
+
+:
+
+[
+
+"结构风险正常"
+
+]
 
 
 
 };
+
+
+
+
+
+}
 
 
 
@@ -376,13 +236,9 @@ reason
 
 
 
-};
-
-
-
 
 
 
 window.RiskAgent=
 
-RiskAgent;
+new RiskAgent();

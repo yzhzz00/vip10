@@ -1,26 +1,70 @@
 /*
 ====================================
 
-大乐透智能分析系统 V70
+大乐透智能分析系统 V70 CORE
 
-Review AI Agent
+Review Agent
 
 开奖复盘学习专家
+
+
+功能：
+
+1. 预测记录
+2. 开奖对比
+3. 命中统计
+4. 错误分析
+
 
 ====================================
 */
 
 
-const ReviewAgent={
+class ReviewAgent{
 
 
-version:"V70.0",
+constructor(){
+
+
+this.name="Review AI";
+
+
+this.version="V70.0";
+
+
+}
 
 
 
 
 
-review(predict,real){
+
+
+review(predict, actual){
+
+
+
+if(!predict || !actual){
+
+
+
+return {
+
+
+success:false,
+
+
+reason:"数据不足"
+
+
+};
+
+
+
+}
+
+
+
 
 
 
@@ -28,59 +72,23 @@ let hit=0;
 
 
 
-predict.forEach(n=>{
+predict.forEach(num=>{
 
 
 
-if(real.includes(n)){
+if(actual.includes(num)){
 
 
 
 hit++;
 
+
+
 }
+
 
 
 });
-
-
-
-
-
-
-let analysis=[];
-
-
-
-if(hit>=3){
-
-
-
-analysis.push(
-
-"号码趋势判断有效"
-
-);
-
-
-
-}
-
-
-
-if(hit<2){
-
-
-
-analysis.push(
-
-"本次预测偏差较大，需要调整"
-
-);
-
-
-
-}
 
 
 
@@ -91,60 +99,50 @@ analysis.push(
 return {
 
 
-agent:"Review AI",
 
-
-hit,
-
-
-analysis
+agent:this.name,
 
 
 
-};
+hit:hit,
 
 
 
-},
+total:predict.length,
 
 
 
+accuracy:
+
+(hit/predict.length)
+
+.toFixed(2),
 
 
 
+reason:[
 
 
 
-// ======================
-// 权重调整
-// ======================
+"预测号码："+
 
-
-adjust(review,learning){
+predict.join(" "),
 
 
 
-if(!learning.weights){
+"实际号码："+
+
+actual.join(" "),
 
 
 
-learning.weights={
+"命中数量："+
+
+hit
 
 
 
-trend:0.2,
-
-
-structure:0.2,
-
-
-markov:0.2,
-
-
-frequency:0.2,
-
-
-risk:0.2
+]
 
 
 
@@ -159,106 +157,33 @@ risk:0.2
 
 
 
-if(review.hit>=3){
+
+learn(result){
 
 
 
-learning.weights.trend+=0.01;
-
-
-learning.weights.markov+=0.01;
+let history=JSON.parse(
 
 
 
-}
+localStorage.getItem(
 
-
-
-else{
-
-
-
-learning.weights.structure+=0.01;
-
-
-learning.weights.risk+=0.01;
-
-
-
-}
-
-
-
-
-
-
-
-
-// 限制范围
-
-
-Object.keys(
-
-learning.weights
+"review_memory"
 
 )
 
-.forEach(k=>{
+||"[]"
 
 
 
-if(
-
-learning.weights[k]>0.4
-
-)
-
-learning.weights[k]=0.4;
-
-
-
-if(
-
-learning.weights[k]<0.05
-
-)
-
-learning.weights[k]=0.05;
-
-
-
-});
+);
 
 
 
 
 
 
-
-return learning;
-
-
-
-},
-
-
-
-
-
-
-
-
-
-// ======================
-// 生成学习记录
-// ======================
-
-
-createLog(result){
-
-
-
-return {
+history.push({
 
 
 
@@ -270,17 +195,42 @@ new Date()
 
 
 
-agent:
-
-"Review AI",
+result:result
 
 
 
-result
+});
 
 
 
-};
+
+
+
+
+localStorage.setItem(
+
+
+
+"review_memory",
+
+
+
+JSON.stringify(history)
+
+
+
+);
+
+
+
+
+
+
+return true;
+
+
+
+}
 
 
 
@@ -290,13 +240,7 @@ result
 
 
 
-};
-
-
-
-
-
 
 window.ReviewAgent=
 
-ReviewAgent;
+new ReviewAgent();
