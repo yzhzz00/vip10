@@ -3,17 +3,18 @@
 
 大乐透智能分析系统
 
-V70.4
+V71.1
 
 Confidence AI
 
-信心指数模型
+信心指数模块
 
 ================================
 */
 
 
 class ConfidenceAgent {
+
 
 
 constructor(){
@@ -26,60 +27,17 @@ this.name="Confidence AI";
 
 
 
+
+
+
+
+
+
 analyze(models){
 
 
 
-let score=0;
-
-
-let count=0;
-
-
-
-for(let key in models){
-
-
-
-if(models[key].confidence){
-
-
-
-score +=
-
-models[key].confidence;
-
-
-
-count++;
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-let confidence=0;
-
-
-
-if(count>0){
-
-
-
-confidence=
-
-score/count;
-
-
-}
-
+if(!models){
 
 
 
@@ -90,47 +48,10 @@ return {
 agent:this.name,
 
 
-confidence:
-
-Number(
-
-(confidence*100)
-
-.toFixed(2)
-
-),
+confidence:0,
 
 
-
-level:
-
-confidence>=0.7
-
-?
-
-"高信心"
-
-:
-
-confidence>=0.5
-
-?
-
-"中等信心"
-
-:
-
-"低信心",
-
-
-
-reason:[
-
-"已综合多个AI模型评分",
-
-"用于Master AI决策参考"
-
-]
+level:"无数据"
 
 
 
@@ -142,12 +63,278 @@ reason:[
 
 
 
+
+
+
+let score=50;
+
+
+
+let count=0;
+
+
+
+
+
+
+
+
+
+// 趋势模型参与
+
+
+if(models.trend){
+
+
+
+score+=5;
+
+
+
+count++;
+
+
+
 }
 
 
 
 
 
-window.ConfidenceAgent =
+
+
+
+// 结构模型
+
+
+if(models.structure){
+
+
+
+score+=5;
+
+
+
+count++;
+
+
+
+}
+
+
+
+
+
+
+
+
+// Markov
+
+
+if(models.markov){
+
+
+
+score+=5;
+
+
+
+count++;
+
+
+
+}
+
+
+
+
+
+
+
+
+// 风险模型
+
+
+if(models.risk){
+
+
+
+score+=5;
+
+
+
+count++;
+
+
+
+}
+
+
+
+
+
+
+
+
+// 理论模型
+
+
+if(models.theory){
+
+
+
+score+=5;
+
+
+
+count++;
+
+
+
+}
+
+
+
+
+
+
+
+
+// Monte Carlo
+
+
+if(models.montecarlo){
+
+
+
+score+=8;
+
+
+
+count++;
+
+
+
+}
+
+
+
+
+
+
+
+
+// 防止超过100
+
+
+if(score>100){
+
+
+
+score=100;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+let level="低信心";
+
+
+
+
+
+
+if(score>=70){
+
+
+
+level="高信心";
+
+
+
+}
+
+else if(score>=55){
+
+
+
+level="中等信心";
+
+
+
+}
+
+
+
+
+
+
+
+
+return {
+
+
+
+agent:this.name,
+
+
+
+confidence:
+
+Number(
+
+score.toFixed(2)
+
+),
+
+
+
+
+level:level,
+
+
+
+models:
+
+count,
+
+
+
+strategy:
+
+
+
+"多模型一致性评分"
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+window.ConfidenceAgent=
 
 new ConfidenceAgent();

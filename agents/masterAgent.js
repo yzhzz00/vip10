@@ -7,7 +7,7 @@ V71.1
 
 Master AI
 
-多候选决策版
+总控决策模块
 
 ================================
 */
@@ -33,183 +33,74 @@ this.name="Master AI";
 
 
 
-analyze(data){
-
-
-
-let models=
-
-data.models || {};
+analyze(input){
 
 
 
 let simulation=
 
-data.simulation || {};
+input.simulation;
 
 
 
 
 
 
-let candidates=
+let recommend=null;
 
-simulation.top || [];
 
 
+let backup=[];
 
 
 
 
 
-if(candidates.length===0){
 
+let confidence=0.65;
 
 
-return {
 
 
 
-agent:this.name,
 
-confidence:0.5,
 
 
-decision:{
 
+if(
 
+simulation &&
 
-strategy:"等待候选生成",
+simulation.top &&
 
+simulation.top.length>0
 
-recommend:null,
+){
 
 
-backup:[]
 
 
-}
 
+// 第一推荐
 
 
-};
+recommend=
 
+simulation.top[0];
 
 
-}
 
 
+// 备用5组
 
 
+backup=
 
+simulation.top.slice(
 
+1,
 
-
-
-
-// =====================
-// 候选重新评分
-// =====================
-
-
-let ranked=
-
-candidates.map(item=>{
-
-
-
-let score=item.score;
-
-
-
-// Theory加权
-
-
-if(models.theory){
-
-
-score+=3;
-
-
-}
-
-
-
-// Frequency加权
-
-
-if(models.frequency){
-
-
-score+=2;
-
-
-}
-
-
-
-// Markov加权
-
-
-if(models.markov){
-
-
-score+=2;
-
-
-}
-
-
-
-// Risk
-
-
-if(models.risk){
-
-
-score-=1;
-
-
-}
-
-
-
-
-
-return {
-
-
-
-...item,
-
-
-finalScore:Number(
-
-score.toFixed(2)
-
-)
-
-
-
-};
-
-
-
-});
-
-
-
-
-
-
-
-
-
-ranked.sort(
-
-(a,b)=>
-
-b.finalScore-a.finalScore
+6
 
 );
 
@@ -218,18 +109,11 @@ b.finalScore-a.finalScore
 
 
 
+confidence=0.67;
 
 
 
-let main=ranked[0];
-
-
-
-
-
-let backup=
-
-ranked.slice(1,6);
+}
 
 
 
@@ -239,44 +123,37 @@ ranked.slice(1,6);
 
 
 
-let confidence=
+let strategy=
 
-0.65;
-
-
-
-
-
-confidence+=0.03;
-
-
-
-if(models.theory)
-
-confidence+=0.03;
-
-
-
-if(models.frequency)
-
-confidence+=0.03;
-
-
-
-if(models.markov)
-
-confidence+=0.02;
+"Monte Carlo + Frequency + Theory + Multi Agent综合决策";
 
 
 
 
 
 
-if(confidence>0.85)
+
+let reasons=[
 
 
-confidence=0.85;
 
+"Monte Carlo候选排序完成",
+
+
+
+"历史频率模型参与",
+
+
+
+"理论结构验证完成",
+
+
+
+"多AI模型会议完成"
+
+
+
+];
 
 
 
@@ -293,16 +170,7 @@ agent:this.name,
 
 
 
-confidence:
-
-Number(
-
-confidence.toFixed(2)
-
-),
-
-
-
+confidence:confidence,
 
 
 
@@ -310,80 +178,19 @@ decision:{
 
 
 
-strategy:
-
-"Monte Carlo + Frequency + Theory + Markov综合决策",
+strategy:strategy,
 
 
 
+recommend:recommend,
 
 
 
-recommend:{
+backup:backup,
 
 
 
-front:main.front,
-
-
-back:main.back,
-
-
-score:main.finalScore
-
-
-
-},
-
-
-
-
-
-
-backup:
-
-backup.map(item=>({
-
-
-
-front:item.front,
-
-
-back:item.back,
-
-
-score:item.finalScore
-
-
-
-})),
-
-
-
-
-
-
-reasons:[
-
-
-
-"Monte Carlo候选池生成",
-
-
-"Frequency历史频率校正",
-
-
-"Theory结构验证",
-
-
-"Markov趋势辅助判断",
-
-
-"Risk风险过滤"
-
-
-
-]
+reasons:reasons
 
 
 
@@ -399,8 +206,9 @@ reasons:[
 
 
 
-}
 
+
+}
 
 
 

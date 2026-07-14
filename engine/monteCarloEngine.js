@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V71.0
+V71.2
 
 Monte Carlo AI Engine
 
-Frequency融合版
+多模型融合版
 
 ================================
 */
@@ -16,17 +16,13 @@ Frequency融合版
 class MonteCarloEngine {
 
 
-
 constructor(){
 
 
 this.name="Monte Carlo AI";
 
 
-this.simulations=100000;
-
-
-this.frequency=null;
+this.times=100000;
 
 
 }
@@ -57,26 +53,26 @@ Math.random()*(max-min+1)
 
 
 
-unique(count,min,max){
-
+createFront(){
 
 
 let arr=[];
 
 
-
-while(arr.length<count){
-
+while(arr.length<5){
 
 
-let n=this.random(min,max);
+
+let n=this.random(1,35);
 
 
 
 if(!arr.includes(n)){
 
 
+
 arr.push(n);
+
 
 
 }
@@ -88,7 +84,9 @@ arr.push(n);
 
 
 return arr.sort(
+
 (a,b)=>a-b
+
 );
 
 
@@ -103,31 +101,41 @@ return arr.sort(
 
 
 
-generate(){
+createBack(){
+
+
+let arr=[];
+
+
+while(arr.length<2){
 
 
 
-return {
+let n=this.random(1,12);
 
 
 
-front:this.unique(
-5,
-1,
-35
-),
+if(!arr.includes(n)){
 
 
 
-back:this.unique(
-2,
-1,
-12
-)
+arr.push(n);
 
 
 
-};
+}
+
+
+
+}
+
+
+
+return arr.sort(
+
+(a,b)=>a-b
+
+);
 
 
 
@@ -141,24 +149,25 @@ back:this.unique(
 
 
 
-// =====================
-// 结构评分
-// =====================
-
-
-structureScore(ticket){
+structureScore(front){
 
 
 
-let score=50;
+let score=0;
 
+
+
+
+
+
+// 奇偶
 
 
 let odd=
 
-ticket.front.filter(
+front.filter(
 
-n=>n%2
+n=>n%2!==0
 
 ).length;
 
@@ -166,10 +175,97 @@ n=>n%2
 
 
 
-if(odd===2 || odd===3){
+
+if(
+
+odd===2 ||
+
+odd===3
+
+){
 
 
-score+=8;
+score+=10;
+
+
+}
+
+
+
+
+
+
+
+
+
+// 大小
+
+
+let small=
+
+front.filter(
+
+n=>n<=17
+
+).length;
+
+
+
+
+
+
+if(
+
+small===2 ||
+
+small===3
+
+){
+
+
+score+=10;
+
+
+}
+
+
+
+
+
+
+
+
+
+// 三区
+
+
+let zone=[0,0,0];
+
+
+
+
+
+
+front.forEach(n=>{
+
+
+
+if(n<=12){
+
+
+
+zone[0]++;
+
+
+
+}
+
+else if(n<=24){
+
+
+
+zone[1]++;
+
 
 
 }
@@ -177,7 +273,37 @@ score+=8;
 else{
 
 
-score-=5;
+
+zone[2]++;
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+if(
+
+zone[0]>0 &&
+
+zone[1]>0 &&
+
+zone[2]>0
+
+){
+
+
+
+score+=10;
+
 
 
 }
@@ -189,9 +315,13 @@ score-=5;
 
 
 
+
+// 和值
+
+
 let sum=
 
-ticket.front.reduce(
+front.reduce(
 
 (a,b)=>a+b,
 
@@ -203,23 +333,22 @@ ticket.front.reduce(
 
 
 
-if(sum>=85 && sum<=115){
+
+if(
+
+sum>=80 &&
+
+sum<=120
+
+){
+
 
 
 score+=10;
 
 
-}
-
-else{
-
-
-score-=5;
-
 
 }
-
-
 
 
 
@@ -240,20 +369,28 @@ return score;
 
 
 
-// =====================
-// Frequency评分
-// =====================
-
-
 frequencyScore(ticket){
 
 
 
-if(!this.frequency){
+let score=0;
 
 
 
-return 50;
+let engine=
+
+window.FrequencyEngine;
+
+
+
+
+
+
+if(!engine){
+
+
+
+return score;
 
 
 
@@ -263,9 +400,81 @@ return 50;
 
 
 
-return this.frequency.ticketScore(
-ticket
-);
+
+ticket.front.forEach(n=>{
+
+
+
+let f=
+
+engine.getFrontScore(n);
+
+
+
+
+
+if(f>50){
+
+
+
+score+=2;
+
+
+
+}
+
+else if(f<10){
+
+
+
+score-=1;
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+ticket.back.forEach(n=>{
+
+
+
+let f=
+
+engine.getBackScore(n);
+
+
+
+
+
+
+if(f>20){
+
+
+
+score+=1;
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+return score;
 
 
 
@@ -279,54 +488,217 @@ ticket
 
 
 
-// =====================
-// 综合评分
-// =====================
-
-
-score(ticket){
+riskScore(ticket){
 
 
 
-let structure=
+let score=0;
 
-this.structureScore(
-ticket
+
+
+
+
+
+// 避免连续号码过多
+
+
+let consecutive=0;
+
+
+
+
+
+
+for(let i=1;i<ticket.front.length;i++){
+
+
+
+if(
+
+ticket.front[i]-
+
+ticket.front[i-1]===1
+
+){
+
+
+
+consecutive++;
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+if(consecutive<=2){
+
+
+
+score+=5;
+
+
+
+}
+
+
+
+
+
+
+return score;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+markovScore(ticket){
+
+
+
+// Markov接口
+
+// 后续接入真实概率
+
+
+
+return 5;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+theoryScore(ticket){
+
+
+
+let score=0;
+
+
+
+let odd=
+
+ticket.front.filter(
+
+n=>n%2!==0
+
+).length;
+
+
+
+
+
+
+if(
+
+odd===2 ||
+
+odd===3
+
+){
+
+
+
+score+=5;
+
+
+
+}
+
+
+
+
+
+
+return score;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+calculate(ticket){
+
+
+
+let score=0;
+
+
+
+
+
+
+
+score+=this.structureScore(
+
+ticket.front
+
 );
 
 
 
-let frequency=
+score+=this.frequencyScore(
 
-this.frequencyScore(
 ticket
+
 );
 
 
 
+score+=this.riskScore(
 
+ticket
 
-let final=
-
-
-
-structure*0.6
-
-+
-
-frequency*0.4;
+);
 
 
 
+score+=this.markovScore(
+
+ticket
+
+);
 
 
 
-// 防止同分
+score+=this.theoryScore(
+
+ticket
+
+);
 
 
-final +=
-
-Math.random()*3;
 
 
 
@@ -335,7 +707,7 @@ Math.random()*3;
 
 return Number(
 
-final.toFixed(2)
+score.toFixed(2)
 
 );
 
@@ -355,23 +727,44 @@ simulate(){
 
 
 
-let result=[];
+let results=[];
+
 
 
 
 
 
 for(
+
 let i=0;
-i<this.simulations;
+
+i<this.times;
+
 i++
+
 ){
 
 
 
-let ticket=
+let ticket={
 
-this.generate();
+
+
+front:
+
+this.createFront(),
+
+
+
+back:
+
+this.createBack()
+
+
+
+};
+
+
 
 
 
@@ -379,13 +772,15 @@ this.generate();
 
 ticket.score=
 
-this.score(ticket);
+this.calculate(ticket);
 
 
 
 
 
-result.push(ticket);
+
+
+results.push(ticket);
 
 
 
@@ -398,7 +793,8 @@ result.push(ticket);
 
 
 
-result.sort(
+
+results.sort(
 
 (a,b)=>
 
@@ -413,44 +809,25 @@ b.score-a.score
 
 
 
-let output=[];
-
-
-let cache={};
+return {
 
 
 
+agent:this.name,
 
 
 
-for(let item of result){
+simulation:this.times,
 
 
 
-let key=
+top:
 
-item.front.join(",")
-
-+
-
-"|"
-
-+
-
-item.back.join(",");
+results.slice(0,20)
 
 
 
-
-
-if(!cache[key]){
-
-
-
-cache[key]=true;
-
-
-output.push(item);
+};
 
 
 
@@ -460,16 +837,11 @@ output.push(item);
 
 
 
-if(output.length>=20)
-
-break;
 
 
 
-}
 
-
-
+status(){
 
 
 
@@ -477,17 +849,10 @@ return {
 
 
 
-engine:this.name,
+name:this.name,
 
 
-count:this.simulations,
-
-
-method:
-
-"Structure + Frequency AI",
-
-top:output
+simulation:this.times
 
 
 

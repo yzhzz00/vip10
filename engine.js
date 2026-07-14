@@ -3,9 +3,11 @@
 
 大乐透智能分析系统
 
-V71.0 CORE ENGINE
+V71.1
 
-Frequency AI接入版
+AI Engine Core
+
+核心控制引擎
 
 ================================
 */
@@ -14,23 +16,23 @@ Frequency AI接入版
 class AIEngine {
 
 
-
 constructor(){
 
 
-this.version="V71.0";
+    this.version="V71.1";
 
 
-this.dlt=[];
+    this.dlt=[];
 
 
-this.agents={};
+    this.ready=false;
 
 
-this.ready=false;
+    this.agents={};
 
 
 }
+
 
 
 
@@ -41,20 +43,34 @@ this.ready=false;
 async init(){
 
 
-await this.loadData();
+
+    console.log(
+        "AIEngine init start"
+    );
 
 
-this.loadAgents();
+
+    await this.loadData();
 
 
-this.ready=true;
 
 
-return true;
+    this.registerAgents();
+
+
+
+    this.loadFrequency();
+
+
+
+    this.ready=true;
+
+
+
+    return true;
 
 
 }
-
 
 
 
@@ -67,21 +83,135 @@ async loadData(){
 
 
 
-let response=
+    let response=
 
-await fetch(
-"data/dlt.txt?v=710"
-);
-
-
+    await fetch(
+        "data/dlt.txt?v=711"
+    );
 
 
-if(!response.ok){
+
+    if(!response.ok){
 
 
-throw new Error(
-"大乐透数据读取失败"
-);
+        throw new Error(
+            "大乐透历史数据读取失败"
+        );
+
+
+    }
+
+
+
+
+
+
+
+    let text=
+
+    await response.text();
+
+
+
+
+
+    let lines=
+
+    text.trim().split(/\n+/);
+
+
+
+
+
+    this.dlt=[];
+
+
+
+
+
+
+    lines.forEach(line=>{
+
+
+        let arr=
+
+        line.trim().split(/\s+/);
+
+
+
+
+
+
+        if(arr.length>=9){
+
+
+
+            this.dlt.push({
+
+
+
+                issue:arr[0],
+
+
+
+                date:arr[1],
+
+
+
+                front:[
+
+
+
+                    Number(arr[2]),
+
+                    Number(arr[3]),
+
+                    Number(arr[4]),
+
+                    Number(arr[5]),
+
+                    Number(arr[6])
+
+
+                ],
+
+
+
+                back:[
+
+
+
+                    Number(arr[7]),
+
+                    Number(arr[8])
+
+
+                ]
+
+
+
+            });
+
+
+
+        }
+
+
+
+    });
+
+
+
+
+
+
+    console.log(
+
+        "历史数据:",
+        this.dlt.length
+
+    );
+
 
 
 }
@@ -89,76 +219,108 @@ throw new Error(
 
 
 
-let text=
-
-await response.text();
-
-
-
-
-let lines=
-
-text.trim()
-.split(/\n+/);
 
 
 
 
 
-this.dlt=[];
+registerAgents(){
+
+
+
+    this.agents={};
 
 
 
 
 
+    if(window.MasterAgent){
 
-lines.forEach(line=>{
+        this.agents.master=
 
+        window.MasterAgent;
 
-
-let arr=
-
-line.trim()
-.split(/\s+/);
+    }
 
 
 
+    if(window.TrendAgent){
 
+        this.agents.trend=
 
-if(arr.length>=9){
+        window.TrendAgent;
 
-
-
-this.dlt.push({
-
-
-
-issue:arr[0],
+    }
 
 
 
-front:[
+    if(window.StructureAgent){
 
-Number(arr[2]),
-Number(arr[3]),
-Number(arr[4]),
-Number(arr[5]),
-Number(arr[6])
+        this.agents.structure=
 
-],
+        window.StructureAgent;
+
+    }
 
 
 
-back:[
+    if(window.MarkovAgent){
 
-Number(arr[7]),
-Number(arr[8])
+        this.agents.markov=
 
-]
+        window.MarkovAgent;
+
+    }
 
 
 
-});
+    if(window.RiskAgent){
+
+        this.agents.risk=
+
+        window.RiskAgent;
+
+    }
+
+
+
+    if(window.ReviewAgent){
+
+        this.agents.review=
+
+        window.ReviewAgent;
+
+    }
+
+
+
+    if(window.TheoryAgent){
+
+        this.agents.theory=
+
+        window.TheoryAgent;
+
+    }
+
+
+
+    if(window.ConfidenceAgent){
+
+        this.agents.confidence=
+
+        window.ConfidenceAgent;
+
+    }
+
+
+
+    if(window.CriticAgent){
+
+        this.agents.critic=
+
+        window.CriticAgent;
+
+    }
 
 
 
@@ -166,98 +328,33 @@ Number(arr[8])
 
 
 
-});
 
 
 
 
-}
 
 
+loadFrequency(){
 
 
 
+    if(
 
+        window.FrequencyEngine
 
+    ){
 
 
-loadAgents(){
 
+        FrequencyEngine.load(
 
+            this.dlt
 
-this.agents={};
+        );
 
 
 
-let list={
-
-
-
-master:"MasterAgent",
-
-
-trend:"TrendAgent",
-
-
-structure:"StructureAgent",
-
-
-markov:"MarkovAgent",
-
-
-risk:"RiskAgent",
-
-
-review:"ReviewAgent",
-
-
-confidence:"ConfidenceAgent",
-
-
-critic:"CriticAgent",
-
-
-theory:"TheoryAgent",
-
-
-montecarlo:"MonteCarloEngine",
-
-
-frequency:"FrequencyEngine"
-
-
-
-};
-
-
-
-
-
-
-for(let key in list){
-
-
-
-let obj=
-
-window[list[key]];
-
-
-
-if(obj){
-
-
-this.agents[key]=obj;
-
-
-}
-
-
-
-}
-
-
-
+    }
 
 
 
@@ -275,112 +372,75 @@ async analyze(){
 
 
 
-let meeting={};
+    let result={
 
 
 
+        version:this.version,
 
 
 
-if(this.agents.trend)
+        agents:Object.keys(
 
-meeting.trend=
+            this.agents
 
-this.agents.trend.analyze(
-this.dlt
-);
+        ),
 
 
 
+        models:{},
 
 
 
-if(this.agents.structure)
+        simulation:null,
 
-meeting.structure=
 
-this.agents.structure.analyze(
-this.dlt
-);
 
+        decision:null,
 
 
 
+        critic:null
 
 
-if(this.agents.markov)
 
-meeting.markov=
+    };
 
-this.agents.markov.analyze(
-this.dlt
-);
 
 
 
 
 
 
-if(this.agents.risk)
 
-meeting.risk=
+// 各AI模型分析
 
-this.agents.risk.analyze(
-this.dlt
-);
 
 
+for(let key in this.agents){
 
 
 
+    let agent=
 
+    this.agents[key];
 
-if(this.agents.review)
 
-meeting.review=
 
-this.agents.review.analyze(
-this.dlt
-);
+    if(agent.analyze){
 
 
 
+        result.models[key]=
 
+        agent.analyze(
 
+            this.dlt
 
+        );
 
 
-if(this.agents.theory)
-
-meeting.theory=
-
-this.agents.theory.analyze(
-this.dlt
-);
-
-
-
-
-
-
-
-
-
-// Frequency AI
-
-
-if(this.agents.frequency){
-
-
-
-meeting.frequency=
-
-this.agents.frequency.analyze(
-
-this.dlt
-
-);
-
+    }
 
 
 }
@@ -396,68 +456,22 @@ this.dlt
 // Monte Carlo
 
 
-let simulation={};
+
+if(
+
+window.MonteCarloEngine
+
+){
 
 
 
+    result.simulation=
 
-
-if(this.agents.montecarlo){
-
-
-
-// 注入频率数据
-
-
-if(this.agents.frequency){
-
-
-
-this.agents.montecarlo.frequency=
-
-this.agents.frequency;
+    MonteCarloEngine.simulate();
 
 
 
 }
-
-
-
-simulation=
-
-this.agents.montecarlo.simulate();
-
-
-
-}
-
-
-
-
-
-
-meeting.montecarlo=
-
-simulation;
-
-
-
-
-
-
-
-
-
-// Confidence
-
-
-if(this.agents.confidence)
-
-meeting.confidence=
-
-this.agents.confidence.analyze(
-meeting
-);
 
 
 
@@ -470,32 +484,26 @@ meeting
 // Master
 
 
-let decision={};
+
+if(
+
+this.agents.master
+
+&&
+
+this.agents.master.decide
+
+){
 
 
 
+    result.decision=
 
+    this.agents.master.decide(
 
+        result
 
-if(this.agents.master){
-
-
-
-decision=
-
-this.agents.master.analyze({
-
-
-
-models:meeting,
-
-
-simulation:simulation
-
-
-
-});
-
+    );
 
 
 }
@@ -511,27 +519,26 @@ simulation:simulation
 // Critic
 
 
-let critic={};
+
+if(
+
+this.agents.critic
+
+&&
+
+this.agents.critic.analyze
+
+){
 
 
 
+    result.critic=
 
+    this.agents.critic.analyze(
 
+        result.decision
 
-if(this.agents.critic){
-
-
-
-critic=
-
-this.agents.critic.analyze(
-
-decision,
-
-meeting
-
-);
-
+    );
 
 
 }
@@ -541,36 +548,7 @@ meeting
 
 
 
-
-
-
-return {
-
-
-
-version:this.version,
-
-
-history:this.dlt.length,
-
-
-agents:Object.keys(this.agents),
-
-
-meeting:meeting,
-
-
-simulation:simulation,
-
-
-decision:decision,
-
-
-critic:critic
-
-
-
-};
+return result;
 
 
 
@@ -595,10 +573,17 @@ return {
 version:this.version,
 
 
+
 data:this.dlt.length,
 
 
-agents:Object.keys(this.agents),
+
+agents:Object.keys(
+
+this.agents
+
+),
+
 
 
 ready:this.ready
@@ -610,6 +595,8 @@ ready:this.ready
 
 
 }
+
+
 
 
 

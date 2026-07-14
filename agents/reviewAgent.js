@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V70.9
+V71.1
 
 Review AI
 
-开奖反馈学习版
+开奖复盘学习模块
 
 ================================
 */
@@ -35,46 +35,34 @@ this.history=[];
 
 
 
-savePrediction(prediction){
+
+savePrediction(data){
 
 
 
-let record={
+this.history.push({
+
+
+
+type:"prediction",
+
+
+
+data:data,
 
 
 
 time:new Date()
-.toLocaleString(),
+
+.toLocaleString()
 
 
 
-prediction:prediction
+});
 
 
 
-};
-
-
-
-
-
-this.history.push(record);
-
-
-
-
-
-localStorage.setItem(
-
-"dlt_prediction_history",
-
-JSON.stringify(this.history)
-
-);
-
-
-
-return record;
+return true;
 
 
 
@@ -88,7 +76,57 @@ return record;
 
 
 
-analyze(data){
+saveResult(result){
+
+
+
+this.history.push({
+
+
+
+type:"result",
+
+
+
+data:result,
+
+
+
+time:new Date()
+
+.toLocaleString()
+
+
+
+});
+
+
+
+return true;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+compare(prediction,actual){
+
+
+
+if(
+
+!prediction ||
+
+!actual
+
+){
 
 
 
@@ -96,18 +134,7 @@ return {
 
 
 
-reason:[
-
-
-"等待开奖反馈",
-
-"记录预测结果与实际结果差异",
-
-"为自主学习提供样本"
-
-
-
-]
+error:"数据不足"
 
 
 
@@ -121,11 +148,6 @@ reason:[
 
 
 
-
-
-
-
-compare(prediction,real){
 
 
 
@@ -138,15 +160,24 @@ let backHit=0;
 
 
 
-prediction.front.forEach(n=>{
 
 
-if(real.front.includes(n)){
+prediction.front.forEach(num=>{
+
+
+
+if(
+
+actual.front.includes(num)
+
+){
+
 
 
 frontHit++;
 
 
+
 }
 
 
@@ -158,79 +189,28 @@ frontHit++;
 
 
 
-prediction.back.forEach(n=>{
+
+prediction.back.forEach(num=>{
 
 
-if(real.back.includes(n)){
+
+if(
+
+actual.back.includes(num)
+
+){
+
 
 
 backHit++;
 
 
+
 }
 
 
 
 });
-
-
-
-
-
-
-
-
-let predictOdd=
-
-prediction.front.filter(
-
-n=>n%2!==0
-
-).length;
-
-
-
-
-
-let realOdd=
-
-real.front.filter(
-
-n=>n%2!==0
-
-).length;
-
-
-
-
-
-
-
-
-let predictSum=
-
-prediction.front.reduce(
-
-(a,b)=>a+b,
-
-0
-
-);
-
-
-
-
-
-
-let realSum=
-
-real.front.reduce(
-
-(a,b)=>a+b,
-
-0
-
-);
 
 
 
@@ -241,33 +221,40 @@ real.front.reduce(
 
 
 return {
+
+
+
+agent:this.name,
 
 
 
 frontHit:frontHit,
 
 
+
 backHit:backHit,
 
 
 
-oddDifference:
-
-predictOdd-realOdd,
+totalHit:
 
 
 
-sumDifference:
-
-predictSum-realSum,
+frontHit+backHit,
 
 
 
-score:
+level:
 
-frontHit*10+
 
-backHit*15
+
+this.getLevel(
+
+frontHit,
+
+backHit
+
+)
 
 
 
@@ -275,6 +262,9 @@ backHit*15
 
 
 
+
+
+
 }
 
 
@@ -284,33 +274,92 @@ backHit*15
 
 
 
-learn(result){
+
+getLevel(front,back){
 
 
 
-let weight=100;
+if(
+
+front===5 && back===2
+
+){
 
 
 
-if(result.score<20){
+return "一等奖命中";
 
-
-weight-=10;
 
 
 }
 
 
 
-if(Math.abs(result.sumDifference)>30){
+if(
+
+front===5 && back>=1
+
+){
 
 
-weight-=5;
+
+return "二等奖级别";
+
 
 
 }
 
 
+
+if(
+
+front>=4
+
+){
+
+
+
+return "高等奖级别";
+
+
+
+}
+
+
+
+if(
+
+front>=3
+
+){
+
+
+
+return "小奖级别";
+
+
+
+}
+
+
+
+
+
+return "未命中";
+
+
+
+}
+
+
+
+
+
+
+
+
+
+analyze(history){
 
 
 
@@ -318,12 +367,29 @@ return {
 
 
 
-adjustWeight:weight,
+agent:this.name,
 
 
-message:
 
-"根据开奖反馈调整模型权重"
+sampleCount:
+
+this.history.length,
+
+
+
+last:
+
+
+
+this.history.slice(-10),
+
+
+
+strategy:
+
+
+
+"预测结果与开奖反馈对比学习"
 
 
 
@@ -332,6 +398,9 @@ message:
 
 
 }
+
+
+
 
 
 

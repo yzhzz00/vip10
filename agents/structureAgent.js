@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V70.2
+V71.1
 
 Structure AI
 
-号码结构分析模型
+号码结构分析模块
 
 ================================
 */
@@ -23,10 +23,10 @@ constructor(){
 this.name="Structure AI";
 
 
-this.confidence=0.62;
-
-
 }
+
+
+
 
 
 
@@ -37,19 +37,64 @@ analyze(history){
 
 
 
-let result={
+if(
+
+!history ||
+
+history.length===0
+
+){
 
 
 
-agent:this.name,
+return {
+
+error:"暂无历史数据"
+
+};
 
 
 
-confidence:this.confidence,
+}
 
 
 
-reason:[]
+
+
+
+
+let recent=
+
+history.slice(-100);
+
+
+
+
+
+
+
+
+let oddPattern={};
+
+
+let zone={};
+
+
+let sumList=[];
+
+
+
+
+
+
+let size={
+
+
+
+small:0,
+
+
+big:0
 
 
 
@@ -60,19 +105,85 @@ reason:[]
 
 
 
-if(!history || history.length===0){
 
 
 
-result.reason.push(
-
-"暂无历史结构数据"
-
-);
+recent.forEach(item=>{
 
 
 
-return result;
+let front=item.front;
+
+
+
+
+
+
+
+let odd=
+
+front.filter(
+
+n=>n%2!==0
+
+).length;
+
+
+
+
+
+
+let even=
+
+5-odd;
+
+
+
+
+
+
+
+let pattern=
+
+odd+":"+even;
+
+
+
+
+
+
+oddPattern[pattern]=
+
+(oddPattern[pattern]||0)+1;
+
+
+
+
+
+
+
+front.forEach(num=>{
+
+
+
+// 大小
+
+
+if(num<=17){
+
+
+
+size.small++;
+
+
+
+}
+
+else{
+
+
+
+size.big++;
 
 
 
@@ -83,9 +194,62 @@ return result;
 
 
 
-result.reason.push(
+// 三区
 
-"分析奇偶结构"
+
+if(num<=12){
+
+
+
+zone.zone1=
+
+(zone.zone1||0)+1;
+
+
+
+}
+
+else if(num<=24){
+
+
+
+zone.zone2=
+
+(zone.zone2||0)+1;
+
+
+
+}
+
+else{
+
+
+
+zone.zone3=
+
+(zone.zone3||0)+1;
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+let sum=
+
+front.reduce(
+
+(a,b)=>a+b,
+
+0
 
 );
 
@@ -93,9 +257,35 @@ result.reason.push(
 
 
 
-result.reason.push(
 
-"分析三区分布"
+sumList.push(sum);
+
+
+
+});
+
+
+
+
+
+
+
+
+let avgSum=
+
+Math.round(
+
+sumList.reduce(
+
+(a,b)=>a+b,
+
+0
+
+)
+
+/
+
+sumList.length
 
 );
 
@@ -103,28 +293,129 @@ result.reason.push(
 
 
 
-result.reason.push(
-
-"分析号码组合形态"
-
-);
 
 
 
 
+let bestPattern=
 
-result.reason.push(
+Object.keys(
 
-"结构模型等待理论库增强"
+oddPattern
 
-);
+).sort(
+
+(a,b)=>
+
+oddPattern[b]-oddPattern[a]
+
+)[0];
 
 
 
 
 
 
-return result;
+
+
+
+return {
+
+
+
+agent:this.name,
+
+
+
+period:100,
+
+
+
+
+oddEven:{
+
+
+
+most:
+
+bestPattern,
+
+
+
+distribution:
+
+oddPattern
+
+
+
+},
+
+
+
+
+size:{
+
+
+
+small:size.small,
+
+
+big:size.big
+
+
+
+},
+
+
+
+
+
+zone:zone,
+
+
+
+
+
+
+sum:{
+
+
+
+average:avgSum,
+
+
+
+range:
+
+avgSum>=80 && avgSum<=120
+
+?
+
+"正常和值"
+
+:
+
+"偏离和值"
+
+
+
+},
+
+
+
+
+
+
+strategy:
+
+
+
+"结构多维评分"
+
+
+
+};
+
 
 
 
@@ -133,6 +424,7 @@ return result;
 
 
 
+
 }
 
 
@@ -140,7 +432,6 @@ return result;
 
 
 
-
-window.StructureAgent =
+window.StructureAgent=
 
 new StructureAgent();

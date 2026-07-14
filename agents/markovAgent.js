@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V70.2
+V71.1
 
 Markov AI
 
-历史转移分析模型
+号码转移分析模块
 
 ================================
 */
@@ -16,17 +16,15 @@ Markov AI
 class MarkovAgent {
 
 
-
 constructor(){
 
 
 this.name="Markov AI";
 
 
-this.confidence=0.55;
-
-
 }
+
+
 
 
 
@@ -37,7 +35,260 @@ analyze(history){
 
 
 
-let result={
+if(
+
+!history ||
+
+history.length<2
+
+){
+
+
+
+return {
+
+
+
+error:"历史数据不足"
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+let transition={};
+
+
+
+
+
+
+for(
+
+let i=0;
+
+i<history.length-1;
+
+i++
+
+){
+
+
+
+let current=
+
+history[i].front;
+
+
+
+let next=
+
+history[i+1].front;
+
+
+
+
+
+
+
+
+current.forEach(from=>{
+
+
+
+if(!transition[from]){
+
+
+
+transition[from]={};
+
+
+
+}
+
+
+
+
+
+
+next.forEach(to=>{
+
+
+
+if(!transition[from][to]){
+
+
+
+transition[from][to]=0;
+
+
+
+}
+
+
+
+transition[from][to]++;
+
+
+
+});
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+let probability={};
+
+
+
+
+
+
+
+
+for(let from in transition){
+
+
+
+let total=0;
+
+
+
+
+
+for(let to in transition[from]){
+
+
+
+total+=transition[from][to];
+
+
+
+}
+
+
+
+
+
+
+probability[from]={};
+
+
+
+
+
+
+for(let to in transition[from]){
+
+
+
+probability[from][to]=
+
+
+
+Number(
+
+(
+
+transition[from][to]
+
+/
+
+total
+
+)
+
+.toFixed(3)
+
+);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+// 最近一期作为参考
+
+
+let last=
+
+history[history.length-1];
+
+
+
+
+
+
+
+
+let suggestion={};
+
+
+
+
+
+
+
+
+last.front.forEach(num=>{
+
+
+
+if(probability[num]){
+
+
+
+suggestion[num]=
+
+probability[num];
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+
+
+return {
 
 
 
@@ -45,11 +296,43 @@ agent:this.name,
 
 
 
-confidence:this.confidence,
+sample:
+
+history.length,
 
 
 
-reason:[]
+lastFront:
+
+last.front,
+
+
+
+transitionCount:
+
+Object.keys(
+
+transition
+
+).length,
+
+
+
+probability:
+
+probability,
+
+
+
+latestSuggestion:
+
+suggestion,
+
+
+
+strategy:
+
+"上一期→下一期 Markov 转移模型"
 
 
 
@@ -60,64 +343,6 @@ reason:[]
 
 
 
-if(!history || history.length<2){
-
-
-
-result.reason.push(
-
-"历史数据不足"
-
-);
-
-
-
-return result;
-
-
-
-}
-
-
-
-
-
-
-result.reason.push(
-
-"分析上一期到下一期号码转移"
-
-);
-
-
-
-
-
-result.reason.push(
-
-"计算号码出现迁移概率"
-
-);
-
-
-
-
-
-result.reason.push(
-
-"等待蒙特卡罗概率融合"
-
-);
-
-
-
-
-
-
-return result;
-
-
-
 }
 
 
@@ -131,7 +356,6 @@ return result;
 
 
 
-
-window.MarkovAgent =
+window.MarkovAgent=
 
 new MarkovAgent();

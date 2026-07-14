@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V70.2
+V71.1
 
 Trend AI
 
-趋势走势分析模型
+趋势分析模块
 
 ================================
 */
@@ -16,16 +16,17 @@ Trend AI
 class TrendAgent {
 
 
+
 constructor(){
 
 
 this.name="Trend AI";
 
 
-this.confidence=0.6;
-
-
 }
+
+
+
 
 
 
@@ -36,19 +37,19 @@ analyze(history){
 
 
 
-let result={
+if(
+!history ||
+history.length===0
+
+){
 
 
 
-agent:this.name,
+return {
 
 
 
-confidence:this.confidence,
-
-
-
-reason:[]
+error:"暂无历史数据"
 
 
 
@@ -56,23 +57,132 @@ reason:[]
 
 
 
+}
 
 
 
 
-if(!history || history.length===0){
 
 
 
-result.reason.push(
 
-"暂无历史数据"
+let recent=
+
+history.slice(
+
+-100
 
 );
 
 
 
-return result;
+
+
+
+
+let front={};
+
+
+
+
+
+
+recent.forEach(item=>{
+
+
+
+item.front.forEach(num=>{
+
+
+
+if(!front[num]){
+
+
+
+front[num]=0;
+
+
+
+}
+
+
+
+front[num]++;
+
+
+
+});
+
+
+
+});
+
+
+
+
+
+
+
+
+
+let hot=[];
+
+
+let cold=[];
+
+
+
+
+
+
+
+
+for(let i=1;i<=35;i++){
+
+
+
+let count=
+
+front[i] || 0;
+
+
+
+
+
+
+if(count>=15){
+
+
+
+hot.push({
+
+num:i,
+
+count:count
+
+});
+
+
+
+}
+
+
+
+if(count<=5){
+
+
+
+cold.push({
+
+num:i,
+
+count:count
+
+});
+
+
+
+}
 
 
 
@@ -83,7 +193,10 @@ return result;
 
 
 
-let last =
+
+
+
+let latest=
 
 history[history.length-1];
 
@@ -91,38 +204,72 @@ history[history.length-1];
 
 
 
-result.reason.push(
-
-"已分析历史走势"
-
-);
 
 
 
 
-
-result.reason.push(
-
-"当前采用动态趋势评分"
-
-);
+return {
 
 
 
-
-
-result.reason.push(
-
-"等待周期模型增强"
-
-);
+agent:this.name,
 
 
 
+historyCount:history.length,
 
 
 
-return result;
+recentPeriod:100,
+
+
+
+hotNumbers:
+
+hot.sort(
+
+(a,b)=>
+
+b.count-a.count
+
+).slice(0,10),
+
+
+
+coldNumbers:
+
+cold.slice(0,10),
+
+
+
+latest:
+
+
+
+{
+
+
+front:latest.front,
+
+
+back:latest.back
+
+
+
+},
+
+
+
+
+strategy:
+
+
+
+"动态趋势评分"
+
+
+
+};
 
 
 
@@ -130,6 +277,8 @@ return result;
 
 
 
+
+
 }
 
 
@@ -137,6 +286,6 @@ return result;
 
 
 
-window.TrendAgent =
+window.TrendAgent=
 
 new TrendAgent();

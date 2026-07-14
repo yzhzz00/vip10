@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V70.5
+V71.1
 
 Critic AI
 
-自我否定 / 风险审查模型
+自我审查风险模块
 
 ================================
 */
@@ -30,50 +30,104 @@ this.name="Critic AI";
 
 
 
-analyze(decision,models){
 
 
 
-let reasons=[];
-
-
-let score=0.5;
+analyze(decision){
 
 
 
-
-
-// 检查模型意见数量
-
-
-if(models){
+let confidence=0.60;
 
 
 
-let count=
-
-Object.keys(models).length;
+let challenges=[];
 
 
-
-if(count>=5){
+let risks=[];
 
 
 
-reasons.push(
-
-"多模型参与，降低单模型偏差"
-
-);
 
 
-score+=0.1;
+
+
+
+
+if(!decision){
+
+
+
+return {
+
+
+
+agent:this.name,
+
+
+
+confidence:0.50,
+
+
+
+level:"等待决策",
+
+
+
+challenge:[
+
+"暂无Master AI决策数据"
+
+],
+
+
+
+risk:[
+
+"等待分析完成"
+
+]
+
+
+
+};
+
 
 
 }
 
 
 
+
+
+
+
+
+// 检查Master推荐
+
+
+if(
+
+decision.decision &&
+
+decision.decision.recommend
+
+){
+
+
+
+confidence+=0.05;
+
+
+
+challenges.push(
+
+"Master AI已生成候选方案"
+
+);
+
+
+
 }
 
 
@@ -82,46 +136,113 @@ score+=0.1;
 
 
 
-// 风险提示
+
+// 检查备用方案
 
 
-reasons.push(
+if(
 
-"检查号码冷热分布风险"
+decision.decision &&
+
+decision.decision.backup &&
+
+decision.decision.backup.length>0
+
+){
+
+
+
+confidence+=0.03;
+
+
+
+challenges.push(
+
+"存在多组备用方案，降低单点风险"
 
 );
 
-
-
-reasons.push(
-
-"检查结构重复风险"
-
-);
-
-
-
-reasons.push(
-
-"检查预测过度集中风险"
-
-);
-
-
-
-
-
-
-
-// 限制最高信心
-
-if(score>0.8){
-
-
-score=0.8;
 
 
 }
+
+
+
+
+
+
+
+
+// 风险审查
+
+
+risks.push(
+
+"不要盲目相信历史规律"
+
+);
+
+
+
+risks.push(
+
+"避免单一模型决定结果"
+
+);
+
+
+
+risks.push(
+
+"彩票存在随机波动"
+
+);
+
+
+
+risks.push(
+
+"避免号码过度集中"
+
+);
+
+
+
+
+
+
+
+
+
+let level="需要重新评估";
+
+
+
+
+
+
+if(confidence>=0.70){
+
+
+
+level="较高信心";
+
+
+
+}
+
+else if(confidence>=0.60){
+
+
+
+level="中等信心";
+
+
+
+}
+
+
+
 
 
 
@@ -140,46 +261,27 @@ confidence:
 
 Number(
 
-(score*100)
-
-.toFixed(2)
+confidence.toFixed(2)
 
 ),
 
 
 
-level:
-
-score>=0.7
-
-?
-
-"通过"
-
-:
-
-"需要重新评估",
+level:level,
 
 
 
-
-challenge:[
-
-
-
-"不要盲目相信趋势模型",
-
-"避免单一规律推断未来",
-
-"保留随机性风险"
+challenge:challenges,
 
 
 
-],
+risk:risks,
 
 
 
-reason:reasons
+strategy:
+
+"AI反向验证与风险控制"
 
 
 
@@ -187,7 +289,6 @@ reason:reasons
 
 
 
-}
 
 
 
@@ -197,7 +298,14 @@ reason:reasons
 
 
 
+}
 
-window.CriticAgent =
+
+
+
+
+
+
+window.CriticAgent=
 
 new CriticAgent();

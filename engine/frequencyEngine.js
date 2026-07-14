@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V71.0
+V71.1
 
-Frequency AI Engine
+Frequency Engine
 
-历史频率评分模块
+历史频率分析模块
 
 ================================
 */
@@ -18,15 +18,12 @@ class FrequencyEngine {
 
 constructor(){
 
+    this.name = "Frequency Engine";
 
-this.name="Frequency AI";
+    this.frontFrequency = {};
+    this.backFrequency = {};
 
-
-this.frontFrequency={};
-
-
-this.backFrequency={};
-
+    this.loaded = false;
 
 }
 
@@ -35,89 +32,80 @@ this.backFrequency={};
 
 
 
-analyze(history){
+load(history){
+
+
+    this.frontFrequency = {};
+    this.backFrequency = {};
+
+
+    if(!history || history.length === 0){
+
+        return false;
+
+    }
 
 
 
-this.frontFrequency={};
-
-this.backFrequency={};
+    history.forEach(item=>{
 
 
+        // 前区
+
+        if(item.front){
+
+            item.front.forEach(num=>{
 
 
+                if(!this.frontFrequency[num]){
 
-// 初始化
+                    this.frontFrequency[num]=0;
 
-
-for(let i=1;i<=35;i++){
-
-
-this.frontFrequency[i]=0;
+                }
 
 
-}
+                this.frontFrequency[num]++;
 
 
+            });
 
-for(let i=1;i<=12;i++){
-
-
-this.backFrequency[i]=0;
-
-
-}
-
-
-
-
-
-
-history.forEach(item=>{
-
-
-
-item.front.forEach(n=>{
-
-
-this.frontFrequency[n]++;
-
-
-});
-
-
-
-
-item.back.forEach(n=>{
-
-
-this.backFrequency[n]++;
-
-
-});
-
-
-
-});
+        }
 
 
 
 
 
+        // 后区
 
-return {
+        if(item.back){
 
-
-
-front:this.frontFrequency,
-
-
-back:this.backFrequency
+            item.back.forEach(num=>{
 
 
+                if(!this.backFrequency[num]){
 
-};
+                    this.backFrequency[num]=0;
 
+                }
+
+
+                this.backFrequency[num]++;
+
+
+            });
+
+        }
+
+
+
+    });
+
+
+
+    this.loaded=true;
+
+
+    return true;
 
 
 }
@@ -129,72 +117,10 @@ back:this.backFrequency
 
 
 
-
-frontScore(number){
-
+getFrontFrequency(num){
 
 
-let count=
-
-this.frontFrequency[number] || 0;
-
-
-
-
-
-
-// 频率标准化
-
-
-let score=50;
-
-
-
-
-
-if(count>350){
-
-
-
-score+=15;
-
-
-}
-
-else if(count>300){
-
-
-
-score+=10;
-
-
-}
-
-else if(count>250){
-
-
-
-score+=5;
-
-
-}
-
-else if(count<200){
-
-
-
-score-=5;
-
-
-}
-
-
-
-
-
-
-return score;
-
+    return this.frontFrequency[num] || 0;
 
 
 }
@@ -206,53 +132,10 @@ return score;
 
 
 
-
-backScore(number){
-
+getBackFrequency(num){
 
 
-let count=
-
-this.backFrequency[number] || 0;
-
-
-
-let score=50;
-
-
-
-
-
-if(count>180){
-
-
-score+=15;
-
-
-}
-
-else if(count>140){
-
-
-score+=8;
-
-
-}
-
-else if(count<90){
-
-
-score-=5;
-
-
-}
-
-
-
-
-
-return score;
-
+    return this.backFrequency[num] || 0;
 
 
 }
@@ -263,50 +146,193 @@ return score;
 
 
 
-ticketScore(ticket){
+
+getFrontRank(){
+
+
+    let result=[];
+
+
+    for(let i=1;i<=35;i++){
+
+
+        result.push({
+
+            number:i,
+
+            count:this.getFrontFrequency(i)
+
+        });
+
+
+    }
 
 
 
-let score=0;
+    return result.sort(
+
+        (a,b)=>b.count-a.count
+
+    );
 
 
-
-ticket.front.forEach(n=>{
-
-
-
-score+=this.frontScore(n);
-
-
-
-});
+}
 
 
 
 
 
 
-ticket.back.forEach(n=>{
+
+
+getBackRank(){
+
+
+    let result=[];
+
+
+    for(let i=1;i<=12;i++){
+
+
+        result.push({
+
+            number:i,
+
+            count:this.getBackFrequency(i)
+
+        });
+
+
+    }
 
 
 
-score+=this.backScore(n);
+    return result.sort(
+
+        (a,b)=>b.count-a.count
+
+    );
+
+
+}
 
 
 
-});
+
+
+
+
+
+score(ticket){
+
+
+    let score=0;
+
+
+
+    if(!this.loaded){
+
+        return score;
+
+    }
+
+
+
+
+    ticket.front.forEach(num=>{
+
+
+        let count=
+
+        this.getFrontFrequency(num);
+
+
+
+        if(count>=80){
+
+            score+=3;
+
+        }
+
+        else if(count>=50){
+
+            score+=2;
+
+        }
+
+        else if(count<=20){
+
+            score-=1;
+
+        }
+
+
+    });
 
 
 
 
 
 
-return Number(
 
-(score/7).toFixed(2)
+    ticket.back.forEach(num=>{
 
-);
 
+        let count=
+
+        this.getBackFrequency(num);
+
+
+
+        if(count>=40){
+
+            score+=2;
+
+        }
+
+        else if(count<=10){
+
+            score-=1;
+
+        }
+
+
+    });
+
+
+
+
+
+    return score;
+
+
+}
+
+
+
+
+
+
+
+
+status(){
+
+
+    return {
+
+        engine:this.name,
+
+        loaded:this.loaded,
+
+        frontNumbers:Object.keys(
+            this.frontFrequency
+        ).length,
+
+        backNumbers:Object.keys(
+            this.backFrequency
+        ).length
+
+    };
 
 
 }
@@ -319,8 +345,6 @@ return Number(
 
 
 
-
-
-window.FrequencyEngine=
+window.FrequencyEngine =
 
 new FrequencyEngine();

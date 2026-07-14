@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V70.6
+V71.1
 
 Theory AI
 
-大乐透理论库模型
+大乐透理论库模块
 
 ================================
 */
@@ -30,36 +30,20 @@ this.name="Theory AI";
 
 
 
+
+
+
 analyze(history){
 
 
 
-let result={
+if(
 
+!history ||
 
+history.length===0
 
-oddEven:{},
-
-size:{},
-
-zone:{},
-
-sum:{},
-
-repeat:{},
-
-consecutive:{}
-
-
-
-};
-
-
-
-
-
-
-if(!history || history.length===0){
+){
 
 
 
@@ -67,14 +51,7 @@ return {
 
 
 
-agent:this.name,
-
-
-reason:[
-
-"暂无历史数据"
-
-]
+error:"暂无历史数据"
 
 
 
@@ -90,160 +67,159 @@ reason:[
 
 
 
-let latest=
 
-history[history.length-1];
+let recent=
 
+history.slice(-100);
 
 
 
 
 
 
-// 奇偶分析
+let odd={};
 
 
-let odd=0;
+let size={};
 
-let even=0;
 
+let zones={};
 
 
-latest.front.forEach(num=>{
 
+let sums=[];
 
 
-if(Number(num)%2===0){
 
 
-even++;
 
 
-}else{
 
 
-odd++;
 
+recent.forEach(item=>{
 
-}
 
 
+let front=item.front;
 
-});
 
 
 
 
 
-result.oddEven={
 
 
+// 奇偶
 
-odd:odd,
 
+let oddCount=
 
-even:even,
+front.filter(
 
+n=>n%2!==0
 
-pattern:
+).length;
 
-`${odd}:${even}`
 
 
 
-};
 
 
+let evenCount=
 
+5-oddCount;
 
 
 
 
 
 
-// 大小分析
+let oddPattern=
 
-let small=0;
+oddCount+":"+evenCount;
 
-let big=0;
 
 
 
-latest.front.forEach(num=>{
 
 
+odd[oddPattern]=
 
-if(Number(num)<=17){
+(odd[oddPattern]||0)+1;
 
 
-small++;
 
 
-}else{
 
 
-big++;
 
 
-}
 
 
+// 大小
 
-});
 
+let small=
 
+front.filter(
 
+n=>n<=17
 
+).length;
 
-result.size={
 
 
 
-small:small,
 
 
-big:big,
+let big=
 
+5-small;
 
-pattern:
 
-`${small}:${big}`
 
 
 
-};
 
+let sizePattern=
 
+small+":"+big;
 
 
 
 
 
 
+size[sizePattern]=
 
-// 三区分析
+(size[sizePattern]||0)+1;
 
 
-let zone1=0;
 
-let zone2=0;
 
-let zone3=0;
 
 
 
 
-latest.front.forEach(num=>{
 
 
-num=Number(num);
+
+// 三区
+
+
+front.forEach(num=>{
 
 
 
 if(num<=12){
 
 
-zone1++;
+
+zones.zone1=
+
+(zones.zone1||0)+1;
+
 
 
 }
@@ -251,7 +227,11 @@ zone1++;
 else if(num<=24){
 
 
-zone2++;
+
+zones.zone2=
+
+(zones.zone2||0)+1;
+
 
 
 }
@@ -259,7 +239,11 @@ zone2++;
 else{
 
 
-zone3++;
+
+zones.zone3=
+
+(zones.zone3||0)+1;
+
 
 
 }
@@ -269,24 +253,6 @@ zone3++;
 });
 
 
-
-
-
-result.zone={
-
-
-
-zone1:zone1,
-
-
-zone2:zone2,
-
-
-zone3:zone3
-
-
-
-};
 
 
 
@@ -299,14 +265,23 @@ zone3:zone3
 // 和值
 
 
-let sum=0;
+let sum=
+
+front.reduce(
+
+(a,b)=>a+b,
+
+0
+
+);
 
 
 
-latest.front.forEach(num=>{
 
 
-sum+=Number(num);
+
+sums.push(sum);
+
 
 
 });
@@ -315,37 +290,27 @@ sum+=Number(num);
 
 
 
-result.sum={
 
 
 
-value:sum,
 
+let avgSum=
 
-range:
+Math.round(
 
-sum<80
+sums.reduce(
 
-?
+(a,b)=>a+b,
 
-"低和值"
+0
 
-:
+)
 
-sum>120
+/
 
-?
+sums.length
 
-"高和值"
-
-:
-
-"正常和值"
-
-
-
-};
-
+);
 
 
 
@@ -362,28 +327,132 @@ agent:this.name,
 
 
 
-confidence:0.65,
+period:100,
 
 
 
-theory:result,
 
 
 
-reason:[
+oddEven:{
+
+
+
+pattern:
+
+this.maxKey(odd),
+
+
+
+detail:odd
+
+
+
+},
+
+
+
+
+
+
+
+size:{
+
+
+
+pattern:
+
+this.maxKey(size),
+
+
+
+detail:size
+
+
+
+},
+
+
+
+
+
+
+
+zone:zones,
+
+
+
+
+
+
+
+sum:{
+
+
+
+value:avgSum,
+
+
+
+range:
+
+avgSum>=80 && avgSum<=120
+
+?
+
+"正常和值"
+
+:
+
+"偏离和值"
+
+
+
+},
+
+
+
+
+
+
+
+
+theoryCheck:[
+
 
 
 "奇偶结构理论分析完成",
 
+
+
 "大小比例理论分析完成",
+
+
 
 "三区分布理论分析完成",
 
-"和值模型分析完成",
 
-"等待蒙特卡罗融合"
 
-]
+"和值模型分析完成"
+
+
+
+],
+
+
+
+
+
+
+
+
+strategy:
+
+
+
+"理论结构验证"
+
+
 
 
 
@@ -391,12 +460,46 @@ reason:[
 
 
 
-}
 
 
 
 }
 
+
+
+
+
+
+
+
+
+maxKey(obj){
+
+
+
+return Object.keys(obj)
+
+.sort(
+
+(a,b)=>
+
+obj[b]-obj[a]
+
+)[0]
+
+|| "";
+
+
+
+}
+
+
+
+
+
+
+
+}
 
 
 
