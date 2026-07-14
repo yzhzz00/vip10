@@ -6,12 +6,11 @@
 
 <meta charset="UTF-8">
 
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 
 <title>
-彩票智能分析系统 V60.0
+彩票智能分析系统 V60 CORE
 </title>
 
 
@@ -25,12 +24,13 @@
 <body>
 
 
+
 <div class="container">
 
 
 
 <h1>
-彩票智能分析系统 V60.0
+彩票智能分析系统 V60 CORE
 </h1>
 
 
@@ -46,13 +46,10 @@
 
 
 <p>
-
 大乐透历史数据：
 
 <span id="dataStatus">
-
-等待加载
-
+加载中
 </span>
 
 </p>
@@ -60,13 +57,10 @@
 
 
 <p>
-
 数据期数：
 
 <span id="dataCount">
-
 0
-
 </span>
 
 期
@@ -74,8 +68,8 @@
 </p>
 
 
-
 </div>
+
 
 
 
@@ -87,7 +81,7 @@
 
 
 <h2>
-AI预测分析
+AI智能分析
 </h2>
 
 
@@ -100,17 +94,27 @@ AI预测分析
 
 
 
+
+<div id="progress">
+
+
+</div>
+
+
+
+
 <div id="predictResult">
 
 
-等待预测结果
+等待分析...
 
 
 </div>
 
 
-
 </div>
+
+
 
 
 
@@ -130,14 +134,15 @@ AI多维分析报告
 <div id="aiReport">
 
 
-等待AI分析...
+等待生成...
 
 
 </div>
 
 
-
 </div>
+
+
 
 
 
@@ -149,14 +154,14 @@ AI多维分析报告
 
 
 <h2>
-历史训练
+历史滚动回测
 </h2>
 
 
 
 <button onclick="startTrain()">
 
-开始滚动历史回测
+开始历史回测
 
 </button>
 
@@ -166,14 +171,14 @@ AI多维分析报告
 <div id="trainResult">
 
 
-等待训练
+等待回测
+
+</div>
 
 
 </div>
 
 
-
-</div>
 
 
 
@@ -186,7 +191,19 @@ AI多维分析报告
 
 <h2>
 开奖反馈学习
+
+
 </h2>
+
+
+
+
+<p>
+
+输入真实开奖号码
+
+</p>
+
 
 
 
@@ -194,7 +211,7 @@ AI多维分析报告
 
 id="realResult"
 
-placeholder="例如：03 08 17 26 33 + 05 11"
+placeholder="例如 07 22 29 30 33 01 09"
 
 >
 
@@ -211,7 +228,7 @@ placeholder="例如：03 08 17 26 33 + 05 11"
 
 <p id="learningStatus">
 
-等待反馈
+等待开奖学习
 
 </p>
 
@@ -225,11 +242,14 @@ placeholder="例如：03 08 17 26 33 + 05 11"
 
 
 
+
+
 <div class="box">
 
 
 <h2>
-V60 AI模块
+V60 CORE模型
+
 </h2>
 
 
@@ -238,12 +258,12 @@ V60 AI模块
 
 
 <li>
-大乐透2895期历史数据分析
+动态频率模型
 </li>
 
 
 <li>
-动态频率模型
+号码趋势模型
 </li>
 
 
@@ -253,17 +273,27 @@ V60 AI模块
 
 
 <li>
-和值趋势模型
+和值概率模型
 </li>
 
 
 <li>
-奇偶结构分析
+奇偶结构模型
 </li>
 
 
 <li>
-三区结构分析
+三区结构模型
+</li>
+
+
+<li>
+连号概率模型
+</li>
+
+
+<li>
+重号概率模型
 </li>
 
 
@@ -273,17 +303,17 @@ V60 AI模块
 
 
 <li>
-号码综合评分
+后区独立评分模型
 </li>
 
 
 <li>
-后区独立分析
+100万组蒙特卡罗模拟
 </li>
 
 
 <li>
-历史反馈学习接口
+开奖反馈自学习
 </li>
 
 
@@ -297,28 +327,34 @@ V60 AI模块
 
 
 
+
+
 <div class="box">
 
 
 <h2>
-系统状态
+系统版本
 </h2>
+
 
 
 <p>
 
-V60.0 AI Engine Running
+V60 CORE AI Engine Running
 
 </p>
 
 
-</div>
-
-
-
-
 
 </div>
+
+
+
+
+
+
+</div>
+
 
 
 
@@ -326,6 +362,7 @@ V60.0 AI Engine Running
 
 
 <script src="engine.js"></script>
+
 
 <script src="script.js"></script>
 

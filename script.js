@@ -1,30 +1,27 @@
 /*
-=================================
+================================================
 
-彩票智能分析系统 V60.0
+彩票智能分析系统 V60 CORE
 
-页面控制脚本
+页面控制程序
 
-=================================
+================================================
 */
 
 
-let dltData=[];
-
-let pl5Data=[];
+let systemReady=false;
 
 
 
-
-
-
+// ==============================
 // 页面启动
+// ==============================
 
-window.onload=function(){
+
+window.onload=async()=>{
 
 
-initSystem();
-
+await initSystem();
 
 
 };
@@ -34,45 +31,12 @@ initSystem();
 
 
 
-
-
-
-// =============================
-// 初始化系统
-// =============================
+// ==============================
+// 初始化
+// ==============================
 
 
 async function initSystem(){
-
-
-
-try{
-
-
-
-await LotteryEngine.loadDLT();
-
-
-
-await LotteryEngine.loadPL5();
-
-
-
-
-
-dltData=
-
-LotteryEngine.dlt;
-
-
-
-pl5Data=
-
-LotteryEngine.pl5;
-
-
-
-
 
 
 
@@ -86,20 +50,27 @@ document.getElementById(
 
 
 
-let count=
-
-document.getElementById(
-
-"dataCount"
-
-);
+try{
 
 
+
+status.innerHTML=
+
+"正在加载大乐透数据...";
 
 
 
 
-if(status){
+
+await AIEngine.init();
+
+
+
+
+
+systemReady=true;
+
+
 
 
 
@@ -109,38 +80,16 @@ status.innerHTML=
 
 
 
-}
 
 
 
+document.getElementById(
 
+"dataCount"
 
-if(count){
+).innerHTML=
 
-
-
-count.innerHTML=
-
-dltData.length;
-
-
-
-}
-
-
-
-
-
-
-
-console.log(
-
-"系统初始化完成"
-
-);
-
-
-
+AIEngine.dlt.length;
 
 
 
@@ -156,20 +105,6 @@ console.log(e);
 
 
 
-
-
-let status=
-
-document.getElementById(
-
-"dataStatus"
-
-);
-
-
-
-if(status)
-
 status.innerHTML=
 
 "数据加载失败";
@@ -180,6 +115,235 @@ status.innerHTML=
 
 
 
+}
+
+
+
+
+
+
+
+
+
+// ==============================
+// 开始AI分析
+// ==============================
+
+
+async function startPredict(){
+
+
+
+if(!systemReady){
+
+
+
+alert(
+
+"系统未加载完成"
+
+);
+
+
+
+return;
+
+
+
+}
+
+
+
+
+
+
+let progress=
+
+document.getElementById(
+
+"progress"
+
+);
+
+
+
+let resultBox=
+
+document.getElementById(
+
+"predictResult"
+
+);
+
+
+
+
+
+
+resultBox.innerHTML=
+
+"正在启动AI模型...";
+
+
+
+
+
+let timer=0;
+
+
+
+let interval=
+
+setInterval(()=>{
+
+
+
+timer+=2;
+
+
+
+if(timer>90)
+
+timer=90;
+
+
+
+if(progress)
+
+progress.innerHTML=
+
+`
+
+<div class="progress-bar">
+
+<div style="width:${timer}%">
+
+${timer}%
+
+</div>
+
+</div>
+
+`;
+
+
+
+},300);
+
+
+
+
+
+
+
+
+setTimeout(async()=>{
+
+
+
+clearInterval(interval);
+
+
+
+
+
+resultBox.innerHTML=
+
+"正在执行100万组蒙特卡罗模拟...";
+
+
+
+
+
+
+let result=
+
+AIEngine.monteCarlo(
+
+1000000,
+
+(p)=>{
+
+
+if(progress){
+
+
+progress.innerHTML=
+
+`
+
+<div class="progress-bar">
+
+<div style="width:${p}%">
+
+${p}%
+
+</div>
+
+</div>
+
+
+`;
+
+
+
+}
+
+
+
+}
+
+);
+
+
+
+
+
+
+clearInterval(interval);
+
+
+
+
+
+
+showResult(result);
+
+
+
+
+
+
+if(progress){
+
+
+
+progress.innerHTML=
+
+`
+
+<div class="progress-bar">
+
+<div style="width:100%">
+
+100% 完成
+
+</div>
+
+</div>
+
+`;
+
+
+
+}
+
+
+
+
+
+},1000);
+
 
 
 }
@@ -192,14 +356,12 @@ status.innerHTML=
 
 
 
+// ==============================
+// 显示预测结果
+// ==============================
 
 
-// =============================
-// 预测按钮
-// =============================
-
-
-function startPredict(){
+function showResult(data){
 
 
 
@@ -213,25 +375,6 @@ document.getElementById(
 
 
 
-let report=
-
-document.getElementById(
-
-"aiReport"
-
-);
-
-
-
-
-
-let result=
-
-LotteryEngine.predict();
-
-
-
-
 
 
 let html="";
@@ -240,9 +383,7 @@ let html="";
 
 
 
-result.forEach((item,index)=>{
-
-
+data.forEach((x,i)=>{
 
 
 
@@ -253,7 +394,7 @@ html+=`
 
 <h3>
 
-方案${index+1}
+方案${i+1}
 
 </h3>
 
@@ -263,7 +404,7 @@ html+=`
 
 前区：
 
-${item.front.join(" ")}
+${x.front.join(" ")}
 
 </p>
 
@@ -273,7 +414,7 @@ ${item.front.join(" ")}
 
 后区：
 
-${item.back.join(" ")}
+${x.back.join(" ")}
 
 </p>
 
@@ -281,9 +422,9 @@ ${item.back.join(" ")}
 
 <p>
 
-AI评分：
+AI综合评分：
 
-${item.score}
+${x.score}
 
 </p>
 
@@ -300,86 +441,12 @@ ${item.score}
 
 
 
-
-
 box.innerHTML=
 
 html;
 
 
 
-
-
-
-
-
-let r=
-
-LotteryEngine.report();
-
-
-
-
-
-report.innerHTML=
-
-`
-
-版本：
-
-${r.version}
-
-<br>
-
-历史数据：
-
-${r.history}期
-
-<br><br>
-
-
-历史平均和值：
-
-${r.sum.average}
-
-<br>
-
-
-最新和值：
-
-${r.sum.last}
-
-<br><br>
-
-
-号码评分TOP10：
-
-<br>
-
-${
-
-r.top.map(
-
-x=>
-
-x.number+
-
-"("+
-
-x.score+
-
-")"
-
-).join("<br>")
-
-}
-
-`;
-
-
-
-
-
 }
 
 
@@ -390,11 +457,9 @@ x.score+
 
 
 
-
-
-// =============================
-// 简单回测入口
-// =============================
+// ==============================
+// 历史回测
+// ==============================
 
 
 function startTrain(){
@@ -411,12 +476,9 @@ document.getElementById(
 
 
 
+let r=
 
-
-if(!box)
-
-return;
-
+AIEngine.backtest(100);
 
 
 
@@ -426,60 +488,29 @@ box.innerHTML=
 
 `
 
-AI滚动分析启动...
+回测周期：
 
-<br><br>
-
-历史：
-
-${LotteryEngine.dlt.length}
-
-期
+${r.period}期
 
 <br>
 
-模型：
+前区3中：
 
-频率
+${r.hit3}
 
-+
+<br>
 
-遗漏
+前区4中：
 
-+
+${r.hit4}
 
-和值
+<br>
 
-+
+前区5中：
 
-马尔可夫
-
-`;
-
-
-
-
-
-
-setTimeout(()=>{
-
-
-
-box.innerHTML+=
-
-`
-
-<br><br>
-
-分析完成
+${r.hit5}
 
 `;
-
-
-
-},1500);
-
-
 
 
 
@@ -493,11 +524,9 @@ box.innerHTML+=
 
 
 
-
-
-// =============================
+// ==============================
 // 开奖反馈
-// =============================
+// ==============================
 
 
 function saveFeedback(){
@@ -510,45 +539,61 @@ document.getElementById(
 
 "realResult"
 
+).value;
+
+
+
+
+if(!input)
+
+return;
+
+
+
+
+let arr=
+
+input.split(/\s+/);
+
+
+
+
+
+
+let front=
+
+arr.slice(0,5);
+
+
+
+let back=
+
+arr.slice(5,7);
+
+
+
+
+
+AIEngine.feedback(
+
+front,
+
+back
+
 );
 
 
 
-let status=
+
+
 
 document.getElementById(
 
 "learningStatus"
 
-);
+).innerHTML=
 
-
-
-
-
-if(input.value){
-
-
-
-localStorage.setItem(
-
-"lastResult",
-
-input.value
-
-);
-
-
-
-
-
-status.innerHTML=
-
-"开奖反馈已保存";
-
-
-
-}
+"开奖反馈完成，模型参数已更新";
 
 
 

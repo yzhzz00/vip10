@@ -1,11 +1,11 @@
 /*
-================================
+====================================
 
-彩票智能分析系统 V60.0
+彩票智能分析系统 V60 CORE
 
 Mobile UI
 
-================================
+====================================
 */
 
 
@@ -26,7 +26,7 @@ margin:0;
 padding:0;
 
 
-background:#f3f4f6;
+background:#f1f5f9;
 
 
 font-family:
@@ -36,7 +36,7 @@ Arial,
 sans-serif;
 
 
-color:#222;
+color:#1f2937;
 
 
 }
@@ -44,14 +44,10 @@ color:#222;
 
 
 
-
 .container{
 
 
-width:100%;
-
-
-max-width:620px;
+max-width:650px;
 
 
 margin:auto;
@@ -72,7 +68,7 @@ h1{
 text-align:center;
 
 
-font-size:26px;
+font-size:25px;
 
 
 color:#2563eb;
@@ -112,10 +108,10 @@ padding-bottom:8px;
 .box{
 
 
-background:white;
+background:#ffffff;
 
 
-border-radius:14px;
+border-radius:15px;
 
 
 padding:15px;
@@ -126,8 +122,7 @@ margin-bottom:15px;
 
 box-shadow:
 
-
-0 3px 12px
+0 3px 15px
 
 rgba(0,0,0,0.08);
 
@@ -147,7 +142,7 @@ width:100%;
 height:45px;
 
 
-border:none;
+border:0;
 
 
 border-radius:10px;
@@ -162,23 +157,21 @@ color:white;
 font-size:16px;
 
 
-margin:10px 0;
-
-
-cursor:pointer;
+margin-top:10px;
 
 
 }
 
 
 
-button:hover{
+button:active{
 
 
-opacity:.9;
+transform:scale(.98);
 
 
 }
+
 
 
 
@@ -193,15 +186,15 @@ width:100%;
 height:42px;
 
 
+padding:10px;
+
+
 border-radius:8px;
 
 
 border:
 
-1px solid #d1d5db;
-
-
-padding:10px;
+1px solid #cbd5e1;
 
 
 font-size:15px;
@@ -226,8 +219,6 @@ font-weight:bold;
 
 
 
-
-
 #dataCount{
 
 
@@ -243,28 +234,76 @@ font-weight:bold;
 
 
 
-#predictResult,
+/*
+========================
+
+进度条
+
+========================
+*/
 
 
-#aiReport,
+.progress-bar{
 
 
-#trainResult,
+height:25px;
 
 
-#learningStatus{
+background:#e5e7eb;
 
 
-line-height:1.8;
+border-radius:15px;
 
 
-margin-top:10px;
+overflow:hidden;
+
+
+margin:15px 0;
 
 
 }
 
 
 
+.progress-bar div{
+
+
+height:100%;
+
+
+background:#2563eb;
+
+
+color:white;
+
+
+text-align:center;
+
+
+line-height:25px;
+
+
+font-size:13px;
+
+
+transition:.3s;
+
+
+}
+
+
+
+
+
+
+
+/*
+========================
+
+预测方案
+
+========================
+*/
 
 
 .plan-card{
@@ -279,13 +318,12 @@ border-radius:12px;
 padding:12px;
 
 
-margin-bottom:12px;
+margin-top:12px;
 
 
 border-left:
 
-
-4px solid #2563eb;
+5px solid #2563eb;
 
 
 }
@@ -293,11 +331,10 @@ border-left:
 
 
 
-
 .plan-card h3{
 
 
-margin:0 0 8px;
+margin:0;
 
 
 color:#2563eb;
@@ -308,17 +345,48 @@ color:#2563eb;
 
 
 
-
 .plan-card p{
 
 
-margin:5px 0;
+margin:8px 0;
 
 
 font-size:16px;
 
 
 }
+
+
+
+
+
+/*
+========================
+
+文本区域
+
+========================
+*/
+
+
+#aiReport,
+
+
+#trainResult,
+
+
+#learningStatus,
+
+
+#predictResult{
+
+
+line-height:1.8;
+
+
+}
+
+
 
 
 
