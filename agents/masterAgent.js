@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V70.8
+V71.1
 
 Master AI
 
-总控决策升级版
+多候选决策版
 
 ================================
 */
@@ -24,6 +24,7 @@ this.name="Master AI";
 
 
 }
+
 
 
 
@@ -51,55 +52,47 @@ data.simulation || {};
 
 
 
-let confidence=0.65;
+let candidates=
 
-
-
-let reasons=[];
-
-
-
-
-
-
-// =====================
-// Monte Carlo
-// =====================
-
-
-let recommend=null;
+simulation.top || [];
 
 
 
 
 
 
-if(
-simulation &&
-simulation.top &&
-simulation.top.length>0
-){
+
+if(candidates.length===0){
 
 
 
-recommend=
-
-simulation.top[0];
+return {
 
 
 
+agent:this.name,
+
+confidence:0.5,
 
 
-confidence+=0.05;
+decision:{
 
 
 
+strategy:"等待候选生成",
 
-reasons.push(
 
-"采用Monte Carlo最高评分候选"
+recommend:null,
 
-);
+
+backup:[]
+
+
+}
+
+
+
+};
 
 
 
@@ -113,12 +106,144 @@ reasons.push(
 
 
 
+
 // =====================
-// Theory AI
+// 候选重新评分
 // =====================
+
+
+let ranked=
+
+candidates.map(item=>{
+
+
+
+let score=item.score;
+
+
+
+// Theory加权
 
 
 if(models.theory){
+
+
+score+=3;
+
+
+}
+
+
+
+// Frequency加权
+
+
+if(models.frequency){
+
+
+score+=2;
+
+
+}
+
+
+
+// Markov加权
+
+
+if(models.markov){
+
+
+score+=2;
+
+
+}
+
+
+
+// Risk
+
+
+if(models.risk){
+
+
+score-=1;
+
+
+}
+
+
+
+
+
+return {
+
+
+
+...item,
+
+
+finalScore:Number(
+
+score.toFixed(2)
+
+)
+
+
+
+};
+
+
+
+});
+
+
+
+
+
+
+
+
+
+ranked.sort(
+
+(a,b)=>
+
+b.finalScore-a.finalScore
+
+);
+
+
+
+
+
+
+
+
+
+let main=ranked[0];
+
+
+
+
+
+let backup=
+
+ranked.slice(1,6);
+
+
+
+
+
+
+
+
+
+let confidence=
+
+0.65;
+
+
 
 
 
@@ -126,109 +251,31 @@ confidence+=0.03;
 
 
 
-reasons.push(
+if(models.theory)
 
-"理论结构验证完成"
-
-);
+confidence+=0.03;
 
 
 
-}
+if(models.frequency)
+
+confidence+=0.03;
 
 
 
-
-
-
-
-
-
-// =====================
-// Markov
-// =====================
-
-
-if(models.markov){
-
-
+if(models.markov)
 
 confidence+=0.02;
 
 
 
-reasons.push(
-
-"Markov转移模型参与"
-
-);
 
 
 
-}
-
-
-
-
-
-
-
-
-
-// =====================
-// Confidence
-// =====================
-
-
-if(models.confidence){
-
-
-
-confidence=
-
-(
-confidence+
-
-models.confidence.confidence/100
-
-)
-
-/
-
-2;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// 限制范围
-
-
-if(confidence>0.85){
+if(confidence>0.85)
 
 
 confidence=0.85;
-
-
-}
-
-
-
-if(confidence<0.5){
-
-
-confidence=0.5;
-
-
-}
 
 
 
@@ -265,43 +312,78 @@ decision:{
 
 strategy:
 
-"Monte Carlo + Theory + Markov综合决策",
-
-
-
-
-
-recommend:
-
-recommend
-?
-
-{
-
-front:
-
-recommend.front,
-
-back:
-
-recommend.back,
-
-score:
-
-recommend.score
-
-}
-
-:
-
-"暂无候选",
+"Monte Carlo + Frequency + Theory + Markov综合决策",
 
 
 
 
 
 
-reasons:reasons
+recommend:{
+
+
+
+front:main.front,
+
+
+back:main.back,
+
+
+score:main.finalScore
+
+
+
+},
+
+
+
+
+
+
+backup:
+
+backup.map(item=>({
+
+
+
+front:item.front,
+
+
+back:item.back,
+
+
+score:item.finalScore
+
+
+
+})),
+
+
+
+
+
+
+reasons:[
+
+
+
+"Monte Carlo候选池生成",
+
+
+"Frequency历史频率校正",
+
+
+"Theory结构验证",
+
+
+"Markov趋势辅助判断",
+
+
+"Risk风险过滤"
+
+
+
+]
 
 
 
