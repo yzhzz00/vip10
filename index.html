@@ -10,7 +10,7 @@
 
 
 <title>
-彩票智能分析系统 V35.8
+彩票智能分析系统 V35.8.1
 </title>
 
 
@@ -20,7 +20,9 @@
 </head>
 
 
+
 <body>
+
 
 
 <div class="container">
@@ -28,8 +30,9 @@
 
 
 <h1>
-彩票智能分析系统 V35.8
+彩票智能分析系统 V35.8.1
 </h1>
+
 
 
 
@@ -54,6 +57,7 @@
 <br>
 
 
+
 排列五历史数据：
 
 <span id="pl5Status">
@@ -64,11 +68,13 @@
 <br>
 
 
+
 数据期数：
 
 <span id="dataCount">
 0
 </span>
+
 
 
 </div>
@@ -81,21 +87,9 @@
 
 <button id="predictBtn">
 
-开始 V35.8 智能分析
+开始 V35.8.1 智能分析
 
 </button>
-
-
-
-
-
-<button id="feedbackBtn">
-
-开奖反馈
-
-</button>
-
-
 
 
 
@@ -119,8 +113,8 @@
 </div>
 
 
-</div>
 
+</div>
 
 
 
@@ -147,6 +141,18 @@ type="text"
 placeholder="例如：03 08 17 26 33 + 07 10"
 
 />
+
+
+
+
+<br>
+
+
+<button id="feedbackBtn">
+
+保存开奖反馈
+
+</button>
 
 
 
@@ -191,7 +197,7 @@ placeholder="例如：03 08 17 26 33 + 07 10"
 
 
 <div class="title">
-V35.8 系统模块
+V35.8.1 系统模块
 </div>
 
 
@@ -201,9 +207,7 @@ V35.8 系统模块
 
 <li>数据读取模块</li>
 
-<li>大乐透历史2895期分析</li>
-
-<li>号码概率模型</li>
+<li>大乐透2895期历史分析</li>
 
 <li>历史频率评分</li>
 
@@ -214,6 +218,8 @@ V35.8 系统模块
 <li>贝叶斯权重模型</li>
 
 <li>马尔可夫转移模型</li>
+
+<li>号码概率模型</li>
 
 <li>号码结构过滤</li>
 
@@ -235,12 +241,13 @@ V35.8 系统模块
 
 <li>三方案差异化</li>
 
-<li>开奖反馈学习接口</li>
+<li>开奖反馈接口</li>
 
 <li>历史回测接口</li>
 
 
 </ul>
+
 
 
 </div>
@@ -264,7 +271,7 @@ V35.8 系统模块
 
 <div id="systemStatus">
 
-V35.8 等待启动
+V35.8.1等待启动
 
 </div>
 
@@ -277,7 +284,6 @@ V35.8 等待启动
 
 
 
-
 </div>
 
 
@@ -287,14 +293,13 @@ V35.8 等待启动
 
 
 
-<!-- 先加载底层模型 -->
 
-<script src="engine.js?v=358"></script>
+<!-- 注意加载顺序 -->
+
+<script src="engine.js?v=3581"></script>
 
 
-<!-- 页面控制 -->
-
-<script src="script.js?v=358"></script>
+<script src="script.js?v=3581"></script>
 
 
 
