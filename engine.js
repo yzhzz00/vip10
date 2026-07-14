@@ -3,9 +3,9 @@
 
 大乐透智能分析系统
 
-V70.7 CORE ENGINE
+V71.0 CORE ENGINE
 
-Monte Carlo AI接入版
+Frequency AI接入版
 
 ================================
 */
@@ -18,7 +18,7 @@ class AIEngine {
 constructor(){
 
 
-this.version="V70.7";
+this.version="V71.0";
 
 
 this.dlt=[];
@@ -38,9 +38,7 @@ this.ready=false;
 
 
 
-
 async init(){
-
 
 
 await this.loadData();
@@ -72,9 +70,8 @@ async loadData(){
 let response=
 
 await fetch(
-"data/dlt.txt?v=707"
+"data/dlt.txt?v=710"
 );
-
 
 
 
@@ -92,7 +89,6 @@ throw new Error(
 
 
 
-
 let text=
 
 await response.text();
@@ -100,10 +96,10 @@ await response.text();
 
 
 
-
 let lines=
 
-text.trim().split(/\n+/);
+text.trim()
+.split(/\n+/);
 
 
 
@@ -116,15 +112,14 @@ this.dlt=[];
 
 
 
-
-for(let line of lines){
+lines.forEach(line=>{
 
 
 
 let arr=
 
-line.trim().split(/\s+/);
-
+line.trim()
+.split(/\s+/);
 
 
 
@@ -144,11 +139,11 @@ issue:arr[0],
 
 front:[
 
-arr[2],
-arr[3],
-arr[4],
-arr[5],
-arr[6]
+Number(arr[2]),
+Number(arr[3]),
+Number(arr[4]),
+Number(arr[5]),
+Number(arr[6])
 
 ],
 
@@ -156,8 +151,8 @@ arr[6]
 
 back:[
 
-arr[7],
-arr[8]
+Number(arr[7]),
+Number(arr[8])
 
 ]
 
@@ -171,7 +166,7 @@ arr[8]
 
 
 
-}
+});
 
 
 
@@ -194,103 +189,75 @@ this.agents={};
 
 
 
+let list={
 
 
-if(window.MasterAgent)
 
-this.agents.master=
+master:"MasterAgent",
 
-window.MasterAgent;
 
+trend:"TrendAgent",
 
 
+structure:"StructureAgent",
 
 
-if(window.TrendAgent)
+markov:"MarkovAgent",
 
-this.agents.trend=
 
-window.TrendAgent;
+risk:"RiskAgent",
 
 
+review:"ReviewAgent",
 
 
+confidence:"ConfidenceAgent",
 
-if(window.StructureAgent)
 
-this.agents.structure=
+critic:"CriticAgent",
 
-window.StructureAgent;
 
+theory:"TheoryAgent",
 
 
+montecarlo:"MonteCarloEngine",
 
 
-if(window.MarkovAgent)
+frequency:"FrequencyEngine"
 
-this.agents.markov=
 
-window.MarkovAgent;
 
+};
 
 
 
 
-if(window.RiskAgent)
 
-this.agents.risk=
 
-window.RiskAgent;
+for(let key in list){
 
 
 
+let obj=
 
+window[list[key]];
 
-if(window.ReviewAgent)
 
-this.agents.review=
 
-window.ReviewAgent;
+if(obj){
 
 
+this.agents[key]=obj;
 
 
+}
 
-if(window.ConfidenceAgent)
 
-this.agents.confidence=
 
-window.ConfidenceAgent;
+}
 
 
 
-
-
-if(window.CriticAgent)
-
-this.agents.critic=
-
-window.CriticAgent;
-
-
-
-
-
-if(window.TheoryAgent)
-
-this.agents.theory=
-
-window.TheoryAgent;
-
-
-
-
-
-if(window.MonteCarloEngine)
-
-this.agents.montecarlo=
-
-window.MonteCarloEngine;
 
 
 
@@ -315,8 +282,6 @@ let meeting={};
 
 
 
-// 趋势
-
 if(this.agents.trend)
 
 meeting.trend=
@@ -329,8 +294,6 @@ this.dlt
 
 
 
-
-// 结构
 
 if(this.agents.structure)
 
@@ -345,8 +308,6 @@ this.dlt
 
 
 
-// 转移
-
 if(this.agents.markov)
 
 meeting.markov=
@@ -359,8 +320,6 @@ this.dlt
 
 
 
-
-// 风险
 
 if(this.agents.risk)
 
@@ -375,7 +334,6 @@ this.dlt
 
 
 
-// 复盘
 
 if(this.agents.review)
 
@@ -390,7 +348,7 @@ this.dlt
 
 
 
-// 理论
+
 
 if(this.agents.theory)
 
@@ -406,23 +364,36 @@ this.dlt
 
 
 
-// 信心
 
-if(this.agents.confidence)
 
-meeting.confidence=
+// Frequency AI
 
-this.agents.confidence.analyze(
-meeting
+
+if(this.agents.frequency){
+
+
+
+meeting.frequency=
+
+this.agents.frequency.analyze(
+
+this.dlt
+
 );
 
 
 
+}
 
 
 
 
-// Monte Carlo模拟
+
+
+
+
+
+// Monte Carlo
 
 
 let simulation={};
@@ -435,6 +406,23 @@ if(this.agents.montecarlo){
 
 
 
+// 注入频率数据
+
+
+if(this.agents.frequency){
+
+
+
+this.agents.montecarlo.frequency=
+
+this.agents.frequency;
+
+
+
+}
+
+
+
 simulation=
 
 this.agents.montecarlo.simulate();
@@ -442,6 +430,7 @@ this.agents.montecarlo.simulate();
 
 
 }
+
 
 
 
@@ -459,7 +448,26 @@ simulation;
 
 
 
-// Master AI
+// Confidence
+
+
+if(this.agents.confidence)
+
+meeting.confidence=
+
+this.agents.confidence.analyze(
+meeting
+);
+
+
+
+
+
+
+
+
+
+// Master
 
 
 let decision={};
@@ -482,9 +490,6 @@ this.agents.master.analyze({
 models:meeting,
 
 
-history:this.dlt.length,
-
-
 simulation:simulation
 
 
@@ -503,7 +508,7 @@ simulation:simulation
 
 
 
-// Critic AI
+// Critic
 
 
 let critic={};
@@ -521,14 +526,9 @@ critic=
 
 this.agents.critic.analyze(
 
-
-
 decision,
 
-
 meeting
-
-
 
 );
 
@@ -554,33 +554,19 @@ version:this.version,
 history:this.dlt.length,
 
 
+agents:Object.keys(this.agents),
+
 
 meeting:meeting,
-
 
 
 simulation:simulation,
 
 
-
 decision:decision,
 
 
-
-critic:critic,
-
-
-
-message:
-
-"AI会议+理论+蒙特卡罗完成",
-
-
-
-
-agents:Object.keys(
-this.agents
-)
+critic:critic
 
 
 
@@ -612,9 +598,7 @@ version:this.version,
 data:this.dlt.length,
 
 
-agents:Object.keys(
-this.agents
-),
+agents:Object.keys(this.agents),
 
 
 ready:this.ready
@@ -636,12 +620,7 @@ ready:this.ready
 
 
 
+
 window.AIEngine=
 
 new AIEngine();
-
-
-
-console.log(
-"V70.7 ENGINE READY"
-);

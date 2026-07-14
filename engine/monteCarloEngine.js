@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V70.8
+V71.0
 
 Monte Carlo AI Engine
 
-多维评分版
+Frequency融合版
 
 ================================
 */
@@ -24,6 +24,9 @@ this.name="Monte Carlo AI";
 
 
 this.simulations=100000;
+
+
+this.frequency=null;
 
 
 }
@@ -54,7 +57,7 @@ Math.random()*(max-min+1)
 
 
 
-createUniqueNumbers(count,min,max){
+unique(count,min,max){
 
 
 
@@ -66,18 +69,14 @@ while(arr.length<count){
 
 
 
-let n=
-
-this.random(min,max);
+let n=this.random(min,max);
 
 
 
 if(!arr.includes(n)){
 
 
-
 arr.push(n);
-
 
 
 }
@@ -104,7 +103,7 @@ return arr.sort(
 
 
 
-generateTicket(){
+generate(){
 
 
 
@@ -112,9 +111,7 @@ return {
 
 
 
-front:
-
-this.createUniqueNumbers(
+front:this.unique(
 5,
 1,
 35
@@ -122,9 +119,7 @@ this.createUniqueNumbers(
 
 
 
-back:
-
-this.createUniqueNumbers(
+back:this.unique(
 2,
 1,
 12
@@ -146,12 +141,12 @@ this.createUniqueNumbers(
 
 
 
+// =====================
+// 结构评分
+// =====================
 
 
-// 综合评分模型
-
-
-score(ticket){
+structureScore(ticket){
 
 
 
@@ -159,37 +154,22 @@ let score=50;
 
 
 
-let front=
-
-ticket.front;
-
-
-
-
-
-
-
-// ==================
-// 奇偶结构
-// ==================
-
-
 let odd=
 
-front.filter(
+ticket.front.filter(
 
-n=>n%2!==0
+n=>n%2
 
 ).length;
+
+
 
 
 
 if(odd===2 || odd===3){
 
 
-
 score+=8;
-
 
 
 }
@@ -209,59 +189,9 @@ score-=5;
 
 
 
-
-// ==================
-// 大小结构
-// ==================
-
-
-let small=
-
-front.filter(
-
-n=>n<=17
-
-).length;
-
-
-
-if(
-small===2 ||
-small===3
-){
-
-
-
-score+=8;
-
-
-
-}
-
-else{
-
-
-score-=4;
-
-
-}
-
-
-
-
-
-
-
-
-
-// ==================
-// 和值模型
-// ==================
-
-
 let sum=
 
-front.reduce(
+ticket.front.reduce(
 
 (a,b)=>a+b,
 
@@ -271,28 +201,12 @@ front.reduce(
 
 
 
-if(
-sum>=85 &&
-sum<=115
-){
 
 
-
-score+=12;
-
+if(sum>=85 && sum<=115){
 
 
-}
-
-else if(
-sum>=70 &&
-sum<=130
-){
-
-
-
-score+=5;
-
+score+=10;
 
 
 }
@@ -312,56 +226,7 @@ score-=5;
 
 
 
-
-// ==================
-// 连号概率
-// ==================
-
-
-let link=0;
-
-
-
-for(
-let i=1;
-i<front.length;
-i++
-){
-
-
-
-if(
-front[i]-front[i-1]===1
-){
-
-
-link++;
-
-
-}
-
-
-
-}
-
-
-
-
-if(link===1){
-
-
-
-score+=5;
-
-
-
-}
-
-else if(link>=3){
-
-
-
-score-=5;
+return score;
 
 
 
@@ -375,65 +240,33 @@ score-=5;
 
 
 
-// ==================
-// 分布平衡
-// ==================
+// =====================
+// Frequency评分
+// =====================
 
 
-let zones=[0,0,0];
-
-
-
-front.forEach(n=>{
+frequencyScore(ticket){
 
 
 
-if(n<=12)
-
-zones[0]++;
-
-
-else if(n<=24)
-
-zones[1]++;
-
-
-else
-
-zones[2]++;
+if(!this.frequency){
 
 
 
-});
-
-
-
-
-
-
-let maxZone=
-
-Math.max(...zones);
-
-
-
-
-
-
-if(maxZone<=3){
-
-
-
-score+=8;
+return 50;
 
 
 
 }
 
-else{
 
 
-score-=3;
+
+
+return this.frequency.ticketScore(
+ticket
+);
+
 
 
 }
@@ -446,15 +279,54 @@ score-=3;
 
 
 
-// ==================
-// 随机微调
-// 防止大量同分
-// ==================
+// =====================
+// 综合评分
+// =====================
 
 
-score +=
+score(ticket){
 
-Math.random()*6;
+
+
+let structure=
+
+this.structureScore(
+ticket
+);
+
+
+
+let frequency=
+
+this.frequencyScore(
+ticket
+);
+
+
+
+
+
+let final=
+
+
+
+structure*0.6
+
++
+
+frequency*0.4;
+
+
+
+
+
+
+// 防止同分
+
+
+final +=
+
+Math.random()*3;
 
 
 
@@ -463,7 +335,7 @@ Math.random()*6;
 
 return Number(
 
-score.toFixed(2)
+final.toFixed(2)
 
 );
 
@@ -489,7 +361,6 @@ let result=[];
 
 
 
-
 for(
 let i=0;
 i<this.simulations;
@@ -500,7 +371,7 @@ i++
 
 let ticket=
 
-this.generateTicket();
+this.generate();
 
 
 
@@ -527,9 +398,6 @@ result.push(ticket);
 
 
 
-// 排序
-
-
 result.sort(
 
 (a,b)=>
@@ -545,15 +413,11 @@ b.score-a.score
 
 
 
-
-// 去除重复组合
-
-
-let unique=[];
-
+let output=[];
 
 
 let cache={};
+
 
 
 
@@ -586,7 +450,7 @@ if(!cache[key]){
 cache[key]=true;
 
 
-unique.push(item);
+output.push(item);
 
 
 
@@ -596,15 +460,13 @@ unique.push(item);
 
 
 
-if(unique.length>=20)
+if(output.length>=20)
 
 break;
 
 
 
 }
-
-
 
 
 
@@ -621,7 +483,11 @@ engine:this.name,
 count:this.simulations,
 
 
-top:unique
+method:
+
+"Structure + Frequency AI",
+
+top:output
 
 
 
