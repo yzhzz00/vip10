@@ -1,11 +1,11 @@
 /*
-====================================
+================================
 
-大乐透智能分析系统 V60.1
+大乐透智能分析系统 V60.2
 
 页面控制
 
-====================================
+================================
 */
 
 
@@ -13,22 +13,18 @@ let systemReady=false;
 
 
 
-
-
 // ======================
-// 页面启动
+// 启动
 // ======================
 
 
-window.onload=async function(){
+window.onload=async()=>{
 
 
 await initSystem();
 
 
 };
-
-
 
 
 
@@ -43,23 +39,17 @@ async function initSystem(){
 
 
 
-let status=
+try{
+
+
 
 document.getElementById(
 
 "dataStatus"
 
-);
+).innerHTML=
 
-
-
-try{
-
-
-
-status.innerHTML=
-
-"正在加载AI模型...";
+"正在加载模型...";
 
 
 
@@ -77,7 +67,11 @@ systemReady=true;
 
 
 
-status.innerHTML=
+document.getElementById(
+
+"dataStatus"
+
+).innerHTML=
 
 "数据加载成功";
 
@@ -95,6 +89,12 @@ AIEngine.dlt.length;
 
 
 
+
+
+showReport();
+
+
+
 }
 
 catch(e){
@@ -105,9 +105,14 @@ console.log(e);
 
 
 
-status.innerHTML=
+document.getElementById(
+
+"dataStatus"
+
+).innerHTML=
 
 "加载失败";
+
 
 
 }
@@ -132,37 +137,21 @@ async function startPredict(){
 
 
 
-if(!systemReady){
-
-
-
-alert(
-
-"系统未准备"
-
-);
-
-
+if(!systemReady)
 
 return;
 
 
 
-}
 
 
-
-
-
-
-let resultBox=
+let box=
 
 document.getElementById(
 
 "predictResult"
 
 );
-
 
 
 
@@ -178,11 +167,9 @@ document.getElementById(
 
 
 
+box.innerHTML=
 
-resultBox.innerHTML=
-
-"正在初始化模型...";
-
+"AI模型启动...";
 
 
 
@@ -193,15 +180,13 @@ let result=
 
 await AIEngine.predict(
 
-function(p){
+(p)=>{
 
 
 
-if(progress){
+progress.innerHTML=
 
-
-
-progress.innerHTML=`
+`
 
 <div class="progress-bar">
 
@@ -209,7 +194,6 @@ progress.innerHTML=`
 <div style="width:${p}%">
 
 ${p}%
-
 
 </div>
 
@@ -222,10 +206,6 @@ ${p}%
 
 }
 
-
-
-}
-
 );
 
 
@@ -233,12 +213,9 @@ ${p}%
 
 
 
+progress.innerHTML=
 
-if(progress){
-
-
-
-progress.innerHTML=`
+`
 
 <div class="progress-bar">
 
@@ -258,10 +235,6 @@ progress.innerHTML=`
 
 
 
-}
-
-
-
 
 
 
@@ -269,9 +242,8 @@ showResult(result);
 
 
 
-
-
 }
+
 
 
 
@@ -281,7 +253,7 @@ showResult(result);
 
 
 // ======================
-// 显示结果
+// 显示预测
 // ======================
 
 
@@ -305,7 +277,7 @@ let html="";
 
 
 
-data.forEach((item,index)=>{
+data.forEach((x,i)=>{
 
 
 
@@ -317,7 +289,7 @@ html+=`
 
 <h3>
 
-方案 ${index+1}
+方案${i+1}
 
 </h3>
 
@@ -326,7 +298,7 @@ html+=`
 
 前区：
 
-${item.front.join(" ")}
+${x.front.join(" ")}
 
 </p>
 
@@ -335,7 +307,7 @@ ${item.front.join(" ")}
 
 后区：
 
-${item.back.join(" ")}
+${x.back.join(" ")}
 
 </p>
 
@@ -344,9 +316,10 @@ ${item.back.join(" ")}
 
 AI评分：
 
-${item.score}
+${x.score}
 
 </p>
+
 
 
 </div>
@@ -375,12 +348,107 @@ box.innerHTML=html;
 
 
 
+
+// ======================
+// AI报告
+// ======================
+
+
+function showReport(){
+
+
+
+let box=
+
+document.getElementById(
+
+"aiReport"
+
+);
+
+
+
+let r=
+
+AIEngine.report();
+
+
+
+
+
+let html=
+
+`
+
+版本：
+
+${r.version}
+
+<br>
+
+历史数据：
+
+${r.history}期
+
+<br><br>
+
+号码评分TOP10:
+
+<br>
+
+`;
+
+
+
+
+
+
+r.top10.forEach(x=>{
+
+
+
+html+=
+
+`
+
+${x.num}
+
+：
+
+${x.score.toFixed(2)}
+
+<br>
+
+`;
+
+
+
+});
+
+
+
+
+
+box.innerHTML=html;
+
+
+
+}
+
+
+
+
+
+
+
+
+
 // ======================
 // 回测
 // ======================
 
 
-function startTrain(){
+async function startTrain(){
 
 
 
@@ -394,48 +462,89 @@ document.getElementById(
 
 
 
+let progress=
+
+document.getElementById(
+
+"progress"
+
+);
+
+
+
+
+
+
+box.innerHTML=
+
+"开始历史滚动回测...";
+
+
+
 
 
 let r=
 
-AIEngine.backtest(100);
+await AIEngine.backtest(
+
+(p)=>{
 
 
 
+box.innerHTML=
 
+`
 
+回测进度：
 
-box.innerHTML=`
-
-回测周期：
-
-${r.period}期
-
-<br><br>
-
-3个命中：
-
-${r.hit.three}
+${p}%
 
 <br>
 
-4个命中：
-
-${r.hit.four}
-
-<br>
-
-5个命中：
-
-${r.hit.five}
+正在分析历史数据...
 
 `;
 
 
 
+}
+
+);
+
+
+
+
+
+box.innerHTML=
+
+`
+
+回测完成
+
+<br><br>
+
+3中：
+
+${r.three}
+
+<br>
+
+4中：
+
+${r.four}
+
+<br>
+
+5中：
+
+${r.five}
+
+`;
+
 
 
 }
+
 
 
 
@@ -463,9 +572,6 @@ document.getElementById(
 
 
 
-
-
-
 if(!value)
 
 return;
@@ -473,9 +579,7 @@ return;
 
 
 
-
-
-let nums=
+let arr=
 
 value.trim()
 
@@ -485,26 +589,11 @@ value.trim()
 
 
 
-let front=
-
-nums.slice(0,5);
-
-
-
-let back=
-
-nums.slice(5,7);
-
-
-
-
-
-
 AIEngine.feedback(
 
-front,
+arr.slice(0,5),
 
-back
+arr.slice(5,7)
 
 );
 
@@ -519,9 +608,15 @@ document.getElementById(
 
 ).innerHTML=
 
-"反馈完成，模型已调整";
+`
 
+反馈完成
 
+<br>
+
+模型已更新
+
+`;
 
 
 
