@@ -14,19 +14,46 @@
 body{
 font-family:"Microsoft YaHei",Arial;
 padding:20px;
+background:#f7f7f7;
 line-height:1.8;
 }
 
-button{
-padding:10px 20px;
-font-size:18px;
+
+.container{
+max-width:900px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:10px;
 }
 
+
+button{
+
+font-size:18px;
+padding:12px 25px;
+cursor:pointer;
+
+}
+
+
 .box{
+
 border:1px solid #ddd;
 padding:15px;
 margin-top:15px;
+border-radius:8px;
+
 }
+
+
+.title{
+
+font-size:24px;
+font-weight:bold;
+
+}
+
 
 </style>
 
@@ -36,16 +63,37 @@ margin-top:15px;
 <body>
 
 
-<h1>彩票智能分析系统 V30.1</h1>
+<div class="container">
+
+
+<div class="title">
+
+彩票智能分析系统 V30.1
+
+</div>
+
 
 
 <div class="box">
 
-<h2>数据状态</h2>
+<h3>数据状态</h3>
 
-<p>大乐透历史数据：已加载</p>
+大乐透历史数据：已加载
 
-<p>排列五历史数据：已加载</p>
+<br>
+
+排列五历史数据：已加载
+
+<br>
+
+数据期数：
+
+<span id="dataCount">
+
+等待读取
+
+</span>
+
 
 </div>
 
@@ -54,15 +102,18 @@ margin-top:15px;
 
 <button onclick="startAnalysis()">
 
-开始V30.1智能分析
+开始 V30.1 智能分析
 
 </button>
 
 
 
+
 <div class="box">
 
-<h2>分析结果</h2>
+
+<h3>分析结果</h3>
+
 
 <div id="result">
 
@@ -70,51 +121,83 @@ margin-top:15px;
 
 </div>
 
+
 </div>
+
 
 
 
 
 <div class="box">
 
-<h2>V30.1自动学习模块</h2>
+
+<h3>V30.1 校准模型</h3>
+
 
 <ul>
 
-<li>滚动历史回测</li>
+<li>前区综合评分模型</li>
 
-<li>预测结果对比</li>
+<li>后区独立评分模型</li>
 
-<li>命中统计分析</li>
+<li>冷热动态分析</li>
 
-<li>模型权重自动调整</li>
+<li>遗漏周期模型</li>
 
-<li>频率模型表现记录</li>
+<li>时间衰减模型</li>
 
-<li>趋势模型表现记录</li>
+<li>贝叶斯概率更新</li>
 
-<li>结构模型表现记录</li>
+<li>马尔可夫转移矩阵</li>
 
-<li>融合模型排行榜</li>
+<li>号码位置矩阵</li>
 
-<li>学习参数保存</li>
+<li>和值结构模型</li>
+
+<li>奇偶结构模型</li>
+
+<li>三区结构模型</li>
+
+<li>连号重号过滤</li>
+
+<li>反人类选号过滤</li>
+
+<li>蒙特卡罗组合筛选</li>
+
+<li>方案差异化优化</li>
+
+<li>500期滚动回测</li>
+
+<li>权重自动调整</li>
+
+<li>学习记录保存</li>
+
 
 </ul>
+
 
 </div>
 
 
 
 
+
 <div class="box">
 
-<h2>模型状态</h2>
+
+<h3>模型状态</h3>
+
 
 <div id="modelStatus">
 
 等待运行...
 
 </div>
+
+
+</div>
+
+
 
 </div>
 
