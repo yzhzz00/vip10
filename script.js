@@ -1,14 +1,16 @@
 async function startAnalysis(){
 
 const result=document.getElementById("result");
+const status=document.getElementById("modelStatus");
 
-result.innerHTML="正在运行 V30.0全模块融合模型...";
+
+result.innerHTML="V30.1 FINAL模型启动中...";
 
 
 try{
 
 
-const res=await fetch("data/dlt_raw.txt?v=3000");
+const res=await fetch("data/dlt_raw.txt?v=3011");
 
 const text=await res.text();
 
@@ -25,11 +27,10 @@ let nums=line.match(/\b\d{2}\b/g);
 
 
 
-if(nums && nums.length>=7){
+if(nums&&nums.length>=7){
 
 
 let a=nums.slice(-7);
-
 
 
 data.push({
@@ -47,25 +48,23 @@ back:a.slice(5,7)
 
 
 
-
 if(data.length===0){
 
-throw new Error("历史数据读取失败");
+throw new Error("数据为空");
 
 }
 
 
 
 
-
-// ======================
-// 自动权重
-// ======================
+// =======================
+// 权重系统
+// =======================
 
 
 let weight=JSON.parse(
 
-localStorage.getItem("v30_weight")
+localStorage.getItem("v301_final_weight")
 
 ||
 
@@ -75,13 +74,13 @@ freq:0.20,
 
 trend:0.18,
 
-bayes:0.15,
+miss:0.12,
 
-markov:0.20,
+structure:0.18,
 
-structure:0.17,
+markov:0.17,
 
-miss:0.10
+bayes:0.15
 
 })
 
@@ -92,12 +91,12 @@ miss:0.10
 
 
 
-// ======================
-// 前区统计
-// ======================
+// =======================
+// 频率
+// =======================
 
 
-function frontCount(arr){
+function frequency(arr){
 
 
 let c={};
@@ -117,9 +116,7 @@ arr.forEach(d=>{
 
 d.front.forEach(n=>{
 
-
 c[n]++;
-
 
 });
 
@@ -136,69 +133,22 @@ return c;
 
 
 
-// ======================
-// 后区统计
-// ======================
+
+// =======================
+// 趋势
+// =======================
 
 
-function backCount(arr){
+function trend(arr){
 
 
-let c={};
-
-
-
-for(let i=1;i<=12;i++){
-
-
-c[String(i).padStart(2,"0")]=0;
-
-
-}
-
-
-
-arr.forEach(d=>{
-
-
-d.back.forEach(n=>{
-
-
-c[n]++;
-
-
-});
-
-
-});
-
-
-
-return c;
-
-}
-
-
-
-
-
-// ======================
-// 时间衰减
-// ======================
-
-
-function decayScore(arr){
-
-
-let s={};
+let t={};
 
 
 
 for(let i=1;i<=35;i++){
 
-
-s[String(i).padStart(2,"0")]=0;
-
+t[String(i).padStart(2,"0")]=0;
 
 }
 
@@ -208,14 +158,14 @@ s[String(i).padStart(2,"0")]=0;
 arr.forEach((d,index)=>{
 
 
-let w=Math.exp(-index/300);
+let w=1/(index+1);
 
 
 
 d.front.forEach(n=>{
 
 
-s[n]+=w;
+t[n]+=w;
 
 
 });
@@ -225,7 +175,7 @@ s[n]+=w;
 
 
 
-return s;
+return t;
 
 }
 
@@ -233,9 +183,10 @@ return s;
 
 
 
-// ======================
+
+// =======================
 // 遗漏
-// ======================
+// =======================
 
 
 function omission(arr){
@@ -247,13 +198,9 @@ let o={};
 
 for(let i=1;i<=35;i++){
 
-
 o[String(i).padStart(2,"0")]=arr.length;
 
-
 }
-
-
 
 
 
@@ -265,12 +212,9 @@ arr[i].front.forEach(n=>{
 
 if(o[n]===arr.length){
 
-
 o[n]=i;
 
-
 }
-
 
 
 });
@@ -283,48 +227,20 @@ o[n]=i;
 return o;
 
 }
-// ======================
-// 贝叶斯评分
-// ======================
-
-
-function bayesScore(count,total){
-
-
-let result={};
-
-
-
-for(let n in count){
-
-
-let p=(count[n]+1)/(total+35);
-
-
-result[n]=p*1000;
-
-
-}
-
-
-
-return result;
-
-}
 
 
 
 
 
-// ======================
-// 马尔可夫矩阵
-// ======================
+// =======================
+// 马尔可夫
+// =======================
 
 
 function markov(arr){
 
 
-let matrix={};
+let m={};
 
 
 
@@ -333,21 +249,21 @@ for(let i=1;i<=35;i++){
 
 let a=String(i).padStart(2,"0");
 
-
-matrix[a]={};
+m[a]={};
 
 
 
 for(let j=1;j<=35;j++){
 
 
-matrix[a][String(j).padStart(2,"0")]=0;
+m[a][String(j).padStart(2,"0")]=0;
 
 
 }
 
 
 }
+
 
 
 
@@ -355,20 +271,13 @@ matrix[a][String(j).padStart(2,"0")]=0;
 for(let i=0;i<arr.length-1;i++){
 
 
-
-let current=arr[i].front;
-
-let next=arr[i+1].front;
+arr[i].front.forEach(a=>{
 
 
-
-current.forEach(a=>{
-
-
-next.forEach(b=>{
+arr[i+1].front.forEach(b=>{
 
 
-matrix[a][b]++;
+m[a][b]++;
 
 
 });
@@ -381,38 +290,44 @@ matrix[a][b]++;
 
 
 
-return matrix;
-
+return m;
 
 }
+// =======================
+// 模型初始化
+// =======================
 
+let freq=frequency(data);
 
-
-
-
-// ======================
-// 模型计算
-// ======================
-
-
-let freq=frontCount(data);
-
-
-let trend=decayScore(data);
-
+let trendData=trend(data);
 
 let miss=omission(data);
-
-
-let bayes=bayesScore(freq,data.length);
-
 
 let markovData=markov(data);
 
 
 
+let bayes={};
 
-let finalScore={};
+
+for(let n in freq){
+
+bayes[n]=
+
+((freq[n]+1)/(data.length+35))*100;
+
+
+}
+
+
+
+
+// =======================
+// 单号综合评分
+// =======================
+
+
+let numberScore={};
 
 
 
@@ -426,25 +341,23 @@ let move=0;
 
 for(let x in markovData[n]){
 
-
 move+=markovData[n][x];
-
 
 }
 
 
 
-finalScore[n]=
+numberScore[n]=
 
 freq[n]*weight.freq
 
 +
 
-trend[n]*weight.trend
+trendData[n]*weight.trend
 
 +
 
-bayes[n]*weight.bayes
+(1/(miss[n]+1))*100*weight.miss
 
 +
 
@@ -452,8 +365,7 @@ move*weight.markov
 
 +
 
-(1/(miss[n]+1))*100*weight.miss;
-
+bayes[n]*weight.bayes;
 
 
 }
@@ -461,28 +373,23 @@ move*weight.markov
 
 
 
-
-
-// ======================
+// =======================
 // 结构评分
-// ======================
+// =======================
 
 
-function structureScore(nums){
+function structure(nums){
 
 
-
-let score=0;
-
+let s=0;
 
 
-// 奇偶
 
 let odd=
 
 nums.filter(
 
-n=>parseInt(n)%2
+x=>parseInt(x)%2===1
 
 ).length;
 
@@ -490,20 +397,13 @@ n=>parseInt(n)%2
 
 if(odd>=2&&odd<=3){
 
-score+=20;
+s+=20;
 
 }
 
 
 
-
-// 三区
-
-let a=0;
-
-let b=0;
-
-let c=0;
+let a=0,b=0,c=0;
 
 
 
@@ -535,20 +435,17 @@ c++;
 
 if(a>0&&b>0&&c>0){
 
-score+=20;
+s+=20;
 
 }
 
 
 
-
-// 和值
-
 let sum=
 
 nums.reduce(
 
-(x,y)=>x+parseInt(y),
+(t,n)=>t+parseInt(n),
 
 0
 
@@ -558,14 +455,13 @@ nums.reduce(
 
 if(sum>=80&&sum<=150){
 
-score+=15;
+s+=15;
 
 }
 
 
 
-return score;
-
+return s;
 
 }
 
@@ -573,28 +469,26 @@ return score;
 
 
 
-// ======================
-// 组合评价
-// ======================
+// =======================
+// 组合评分
+// =======================
 
 
 function evaluate(nums){
 
 
 
-let detail={
+let d={
 
 freq:0,
 
 trend:0,
 
+miss:0,
+
 bayes:0,
 
-markov:0,
-
-structure:0,
-
-miss:0
+structure:0
 
 };
 
@@ -603,58 +497,66 @@ miss:0
 nums.forEach(n=>{
 
 
-detail.freq+=freq[n]*weight.freq;
+d.freq+=freq[n]*weight.freq;
 
-detail.trend+=trend[n]*weight.trend;
+d.trend+=trendData[n]*weight.trend;
 
-detail.bayes+=bayes[n]*weight.bayes;
+d.miss+=(1/(miss[n]+1))*100*weight.miss;
+
+d.bayes+=bayes[n]*weight.bayes;
 
 
 });
 
 
 
-detail.structure=
+d.structure=
 
-structureScore(nums);
+structure(nums)*weight.structure;
 
 
 
 let total=
 
-detail.freq+
+d.freq+
 
-detail.trend+
+d.trend+
 
-detail.bayes+
+d.miss+
 
-detail.structure;
+d.bayes+
+
+d.structure;
 
 
 
-return{
+return {
 
-total:total,
+score:total,
 
-detail:detail
+detail:d
 
 };
 
 
-
 }
-// ======================
-// 蒙特卡罗组合模拟
-// ======================
+
+
+
+
+
+// =======================
+// 蒙特卡罗组合
+// =======================
 
 
 let pool=
 
-Object.keys(finalScore)
+Object.keys(numberScore)
 
 .sort(
 
-(a,b)=>finalScore[b]-finalScore[a]
+(a,b)=>numberScore[b]-numberScore[a]
 
 )
 
@@ -662,17 +564,11 @@ Object.keys(finalScore)
 
 
 
-
 let simulations=[];
 
 
 
-// 当前浏览器安全运行量
-// 后续可升级 WebWorker 百万模拟
-
-
 for(let i=0;i<100000;i++){
-
 
 
 let temp=[...pool];
@@ -682,7 +578,6 @@ let nums=[];
 
 
 while(nums.length<5){
-
 
 
 let index=Math.floor(
@@ -695,10 +590,7 @@ Math.random()*temp.length
 
 nums.push(temp[index]);
 
-
-
 temp.splice(index,1);
-
 
 
 }
@@ -709,7 +601,7 @@ nums.sort();
 
 
 
-let ev=evaluate(nums);
+let e=evaluate(nums);
 
 
 
@@ -717,9 +609,9 @@ simulations.push({
 
 front:nums,
 
-score:ev.total,
+score:e.score,
 
-detail:ev.detail
+detail:e.detail
 
 });
 
@@ -727,9 +619,6 @@ detail:ev.detail
 }
 
 
-
-
-// 排序
 
 simulations.sort(
 
@@ -739,22 +628,15 @@ simulations.sort(
 
 
 
-
-
-// ======================
-// 三方案差异化
-// ======================
-
-
 let plans=[];
 
 
 
-for(let item of simulations){
+for(let x of simulations){
 
 
 
-let duplicate=false;
+let same=false;
 
 
 
@@ -762,7 +644,7 @@ for(let p of plans){
 
 
 
-let same=item.front.filter(
+let c=x.front.filter(
 
 n=>p.front.includes(n)
 
@@ -770,25 +652,20 @@ n=>p.front.includes(n)
 
 
 
-if(same>=3){
+if(c>=3){
 
-duplicate=true;
+same=true;
+
+}
+
 
 }
 
 
 
-}
+if(!same){
 
-
-
-if(!duplicate){
-
-
-
-plans.push(item);
-
-
+plans.push(x);
 
 }
 
@@ -802,17 +679,47 @@ break;
 
 
 }
+// =======================
+// 后区评分
+// =======================
+
+
+function backScore(arr){
+
+
+let b={};
 
 
 
+for(let i=1;i<=12;i++){
+
+b[String(i).padStart(2,"0")]=0;
+
+}
 
 
-// ======================
-// 后区模型
-// ======================
+
+arr.forEach(d=>{
 
 
-let back=backCount(data);
+d.back.forEach(n=>{
+
+b[n]++;
+
+});
+
+
+});
+
+
+
+return b;
+
+}
+
+
+
+let back=backScore(data);
 
 
 
@@ -835,11 +742,9 @@ Object.keys(back)
 plans.forEach((p,i)=>{
 
 
-
 p.back=
 
 backPool.slice(i,i+2);
-
 
 
 });
@@ -848,16 +753,139 @@ backPool.slice(i,i+2);
 
 
 
-// ======================
-// 自动学习记录
-// ======================
+
+
+// =======================
+// 滚动回测
+// =======================
+
+
+let test={
+
+three:0,
+
+four:0,
+
+five:0
+
+};
+
+
+
+let totalTest=0;
+
+
+
+for(let i=500;i<data.length;i++){
+
+
+
+let history=
+
+data.slice(0,i);
+
+
+
+let f=
+
+frequency(history);
+
+
+
+let pred=
+
+Object.keys(f)
+
+.sort(
+
+(a,b)=>f[b]-f[a]
+
+)
+
+.slice(0,5);
+
+
+
+let real=
+
+data[i].front;
+
+
+
+let hit=
+
+pred.filter(
+
+n=>real.includes(n)
+
+).length;
+
+
+
+if(hit>=3){
+
+test.three++;
+
+}
+
+
+if(hit>=4){
+
+test.four++;
+
+}
+
+
+if(hit===5){
+
+test.five++;
+
+}
+
+
+
+totalTest++;
+
+
+}
+
+
+
+
+
+// =======================
+// 自动调整权重
+// =======================
+
+
+if(test.four>5){
+
+
+weight.structure+=0.01;
+
+weight.trend+=0.01;
+
+
+}
+
+
+
+if(test.three<30){
+
+
+weight.freq+=0.01;
+
+
+}
+
+
 
 
 localStorage.setItem(
 
-"v30_last_result",
+"v301_final_weight",
 
-JSON.stringify(plans)
+JSON.stringify(weight)
 
 );
 
@@ -866,16 +894,19 @@ JSON.stringify(plans)
 
 
 
-// ======================
+
+// =======================
 // 输出
-// ======================
+// =======================
 
 
 let html="";
 
 
 
-html+="<h3>V30.0全模块融合模型</h3>";
+html+="<h3>彩票智能分析系统 V30.1 FINAL</h3>";
+
+
 
 html+="数据期数："+data.length+"期<br><br>";
 
@@ -885,61 +916,56 @@ html+="<h3>最终推荐</h3>";
 
 
 
-
-
 plans.forEach((p,i)=>{
 
 
-
-html+="方案"+(i+1)+"："
-
-+p.front.join(" ")
-
-+" + "
-
-+p.back.join(" ")
-
-+"<br>";
+html+="方案"+(i+1)+"：";
 
 
 
-html+="综合评分："
-
-+(p.score/10).toFixed(1)
-
-+"分<br>";
+html+=p.front.join(" ");
 
 
 
-html+="频率贡献："
-
-+p.detail.freq.toFixed(1)
-
-+"<br>";
+html+=" + ";
 
 
 
-html+="趋势贡献："
-
-+p.detail.trend.toFixed(1)
-
-+"<br>";
+html+=p.back.join(" ");
 
 
 
-html+="贝叶斯贡献："
-
-+p.detail.bayes.toFixed(1)
-
-+"<br>";
+html+="<br>";
 
 
 
-html+="结构贡献："
+html+="综合评分：";
 
-+p.detail.structure.toFixed(1)
+html+=(p.score/10).toFixed(1);
 
-+"<br><br>";
+html+="分<br>";
+
+
+
+html+="频率贡献：";
+
+html+=p.detail.freq.toFixed(1);
+
+
+
+html+=" 趋势：";
+
+html+=p.detail.trend.toFixed(1);
+
+
+
+html+=" 结构：";
+
+html+=p.detail.structure.toFixed(1);
+
+
+
+html+="<br><br>";
 
 
 
@@ -948,16 +974,43 @@ html+="结构贡献："
 
 
 
-html+="模型状态：运行完成<br>";
 
-html+="蒙特卡罗模拟：100000次<br>";
+html+="<h3>滚动回测</h3>";
 
-html+="学习记录：已保存";
+
+
+html+="测试期数："+totalTest+"<br>";
+
+
+
+html+="3个以上前区："+test.three+"次<br>";
+
+
+
+html+="4个以上前区："+test.four+"次<br>";
+
+
+
+html+="5个前区："+test.five+"次<br><br>";
+
+
+
+
+
+html+="模型状态：学习完成<br>";
+
+html+="权重已保存";
+
 
 
 
 result.innerHTML=html;
 
+
+
+status.innerHTML=
+
+"V30.1 FINAL运行完成";
 
 
 }catch(e){
@@ -966,11 +1019,10 @@ result.innerHTML=html;
 
 result.innerHTML=
 
-"运行失败："+e.message;
+"错误："+e.message;
 
 
 
 }
-
 
 }

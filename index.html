@@ -7,25 +7,25 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>彩票智能分析系统 V30.0</title>
+<title>彩票智能分析系统 V30.1</title>
 
 <style>
 
 body{
-font-family:Arial,"Microsoft YaHei";
+font-family:"Microsoft YaHei",Arial;
 padding:20px;
 line-height:1.8;
 }
 
 button{
-font-size:18px;
 padding:10px 20px;
+font-size:18px;
 }
 
-#result{
-margin-top:20px;
-padding:15px;
+.box{
 border:1px solid #ddd;
+padding:15px;
+margin-top:15px;
 }
 
 </style>
@@ -36,8 +36,10 @@ border:1px solid #ddd;
 <body>
 
 
-<h1>彩票智能分析系统 V30.0</h1>
+<h1>彩票智能分析系统 V30.1</h1>
 
+
+<div class="box">
 
 <h2>数据状态</h2>
 
@@ -45,17 +47,22 @@ border:1px solid #ddd;
 
 <p>排列五历史数据：已加载</p>
 
+</div>
+
+
+
 
 <button onclick="startAnalysis()">
 
-开始V30智能分析
+开始V30.1智能分析
 
 </button>
 
 
 
-<h2>分析结果</h2>
+<div class="box">
 
+<h2>分析结果</h2>
 
 <div id="result">
 
@@ -63,63 +70,57 @@ border:1px solid #ddd;
 
 </div>
 
+</div>
 
 
 
-<h2>V30.0全模块融合模型</h2>
 
+<div class="box">
+
+<h2>V30.1自动学习模块</h2>
 
 <ul>
 
-<li>前区概率评分引擎</li>
-
-<li>后区深度评分引擎</li>
-
-<li>冷热号动态分析</li>
-
-<li>遗漏周期分析</li>
-
-<li>时间衰减模型</li>
-
-<li>贝叶斯概率更新</li>
-
-<li>马尔可夫转移矩阵</li>
-
-<li>号码位置矩阵</li>
-
-<li>和值概率模型</li>
-
-<li>奇偶结构模型</li>
-
-<li>三区结构模型</li>
-
-<li>连号重号分析</li>
-
-<li>前后区联合概率</li>
-
-<li>反人类选号过滤</li>
-
-<li>蒙特卡罗模拟</li>
-
-<li>历史相似期匹配</li>
-
-<li>百万级组合筛选接口</li>
-
 <li>滚动历史回测</li>
 
-<li>自动权重调整</li>
+<li>预测结果对比</li>
 
-<li>预测反馈学习</li>
+<li>命中统计分析</li>
 
-<li>模型竞技排行榜</li>
+<li>模型权重自动调整</li>
 
-<li>学习记录保存</li>
+<li>频率模型表现记录</li>
+
+<li>趋势模型表现记录</li>
+
+<li>结构模型表现记录</li>
+
+<li>融合模型排行榜</li>
+
+<li>学习参数保存</li>
 
 </ul>
 
+</div>
 
 
-<script src="script.js?v=3000"></script>
+
+
+<div class="box">
+
+<h2>模型状态</h2>
+
+<div id="modelStatus">
+
+等待运行...
+
+</div>
+
+</div>
+
+
+
+<script src="script.js?v=3010"></script>
 
 
 </body>
