@@ -1,8 +1,8 @@
 /*
 ======================================
-彩票智能分析系统 V35.8.3
+彩票智能分析系统 V35.9
 engine.js
-模型优化版
+历史回测模块版
 ======================================
 */
 
@@ -10,13 +10,13 @@ engine.js
 const DLTEngine={
 
 
-version:"V35.8.3",
+version:"V35.9",
 
 
-seed:3583,
+seed:3590,
 
 
-cacheKey:"DLT_V3583_RESULT",
+cacheKey:"DLT_V359_RESULT",
 
 
 data:[],
@@ -34,15 +34,16 @@ markov:{},
 
 
 
+
 random(){
 
 
 this.seed =
 (
-this.seed * 9301 +
+this.seed*9301+
 49297
-)
-%233280;
+)%233280;
+
 
 
 return this.seed/233280;
@@ -55,7 +56,9 @@ return this.seed/233280;
 
 
 
+
 init(data){
+
 
 
 this.data=data||[];
@@ -70,7 +73,7 @@ this.backScore={};
 this.markov={};
 
 
-this.seed=3583;
+this.seed=3590;
 
 
 
@@ -103,7 +106,9 @@ this.normalize();
 
 
 
+
 initNumber(){
+
 
 
 for(
@@ -113,15 +118,20 @@ i++
 ){
 
 
+
 let n=
 String(i)
 .padStart(2,"0");
 
 
+
 this.frontScore[n]=0;
 
 
+
 }
+
+
 
 
 
@@ -133,12 +143,15 @@ i++
 ){
 
 
+
 let n=
 String(i)
 .padStart(2,"0");
 
 
+
 this.backScore[n]=0;
+
 
 
 }
@@ -161,6 +174,7 @@ this.backScore[n]=0;
 frequencyModel(){
 
 
+
 this.data.forEach(item=>{
 
 
@@ -181,6 +195,7 @@ this.backScore[n]+=25;
 
 
 });
+
 
 
 });
@@ -208,7 +223,6 @@ Object.keys(
 this.frontScore
 )
 .forEach(n=>{
-
 
 
 let miss=0;
@@ -240,7 +254,9 @@ break;
 miss++;
 
 
+
 }
+
 
 
 
@@ -294,16 +310,12 @@ if(
 this.frontScore[n]!==undefined
 ){
 
-
 this.frontScore[n]+=12;
-
 
 }
 
 
-
 });
-
 
 
 
@@ -314,12 +326,9 @@ if(
 this.backScore[n]!==undefined
 ){
 
-
 this.backScore[n]+=10;
 
-
 }
-
 
 
 });
@@ -339,7 +348,7 @@ this.backScore[n]+=10;
 
 
 // ==============================
-// 马尔可夫转移
+// 马尔可夫
 // ==============================
 
 
@@ -366,6 +375,7 @@ this.data[i].front;
 
 
 
+
 before.forEach(a=>{
 
 
@@ -374,9 +384,7 @@ if(
 !this.markov[a]
 ){
 
-
 this.markov[a]={};
-
 
 }
 
@@ -386,14 +394,11 @@ this.markov[a]={};
 after.forEach(b=>{
 
 
-
 if(
 !this.markov[a][b]
 ){
 
-
 this.markov[a][b]=0;
-
 
 }
 
@@ -435,21 +440,19 @@ backModel(){
 this.data.forEach(item=>{
 
 
+
 item.back.forEach(n=>{
 
 
 if(
 this.backScore[n]!==undefined
 ){
-
 
 this.backScore[n]+=30;
 
-
 }
 
 
-
 });
 
 
@@ -457,39 +460,6 @@ this.backScore[n]+=30;
 });
 
 
-
-
-
-
-let recent30 =
-this.data.slice(-30);
-
-
-
-
-recent30.forEach(item=>{
-
-
-item.back.forEach(n=>{
-
-
-if(
-this.backScore[n]!==undefined
-){
-
-
-this.backScore[n]+=15;
-
-
-}
-
-
-
-});
-
-
-
-});
 
 
 
@@ -502,7 +472,7 @@ this.backScore[n]+=15;
 
 
 // ==============================
-// 权重标准化
+// 标准化
 // ==============================
 
 
@@ -510,7 +480,7 @@ normalize(){
 
 
 
-let max=
+let max =
 Math.max(
 ...Object.values(
 this.frontScore
@@ -528,6 +498,7 @@ let n in this.frontScore
 
 
 this.frontScore[n]=
+
 Number(
 
 (
@@ -550,11 +521,16 @@ max
 
 
 
-let max2=
+
+
+let max2 =
+
 Math.max(
+
 ...Object.values(
 this.backScore
 )
+
 );
 
 
@@ -568,6 +544,7 @@ let n in this.backScore
 
 
 this.backScore[n]=
+
 Number(
 
 (
@@ -597,11 +574,11 @@ max2
 
 
 // ==============================
-// 前区候选
+// 前区池
 // ==============================
 
 
-getTopNumbers(limit=20){
+getPool(){
 
 
 
@@ -610,13 +587,15 @@ this.frontScore
 )
 
 .sort(
+
 (a,b)=>
-this.frontScore[b]
--
+
+this.frontScore[b]-
 this.frontScore[a]
+
 )
 
-.slice(0,limit);
+.slice(0,20);
 
 
 
@@ -629,16 +608,16 @@ this.frontScore[a]
 
 
 // ==============================
-// 前区生成
+// 生成组合
 // ==============================
 
 
-generateCombination(){
+generateFront(){
 
 
 
 let pool =
-this.getTopNumbers(20);
+this.getPool();
 
 
 
@@ -646,28 +625,26 @@ let result=[];
 
 
 
-let count=0;
-
-
-
 while(
-result.length<5 &&
-count<200
+result.length<5
 ){
-
-
-count++;
 
 
 
 let n =
+
 pool[
+
 Math.floor(
-this.random()
-*
+
+this.random()*
 pool.length
+
 )
+
 ];
+
+
 
 
 
@@ -687,9 +664,91 @@ result.push(n);
 
 
 
+
+
 return result.sort(
 
 (a,b)=>
+
+Number(a)-Number(b)
+
+);
+
+
+
+},
+
+
+
+
+
+
+
+// ==============================
+// 后区生成
+// ==============================
+
+
+generateBack(){
+
+
+
+let pool =
+Object.keys(
+this.backScore
+);
+
+
+
+let result=[];
+
+
+
+while(
+result.length<2
+){
+
+
+
+let n =
+
+pool[
+
+Math.floor(
+
+this.random()*
+pool.length
+
+)
+
+];
+
+
+
+
+
+if(
+!result.includes(n)
+){
+
+
+result.push(n);
+
+
+}
+
+
+
+}
+
+
+
+
+
+return result.sort(
+
+(a,b)=>
+
 Number(a)-Number(b)
 
 );
@@ -698,11 +757,11 @@ Number(a)-Number(b)
 
 },
 // ==============================
-// 前区评分
+// 组合评分
 // ==============================
 
 
-combinationScore(nums){
+score(nums){
 
 
 let score=70;
@@ -721,15 +780,12 @@ score +=
 
 
 
+
 // 奇偶
 
-let arr =
-nums.map(Number);
-
-
 let odd =
-arr.filter(
-n=>n%2===1
+nums.filter(
+n=>Number(n)%2===1
 )
 .length;
 
@@ -747,31 +803,36 @@ score+=8;
 
 
 
+
 // 三区
 
-let a=0;
 
-let b=0;
+let z1=0;
+let z2=0;
+let z3=0;
 
-let c=0;
 
 
-arr.forEach(n=>{
+nums.forEach(n=>{
+
+
+n=Number(n);
+
 
 
 if(n<=12){
 
-a++;
+z1++;
 
 }
 else if(n<=24){
 
-b++;
+z2++;
 
 }
 else{
 
-c++;
+z3++;
 
 }
 
@@ -782,7 +843,9 @@ c++;
 
 
 if(
-a>0&&b>0&&c>0
+z1>0&&
+z2>0&&
+z3>0
 ){
 
 score+=8;
@@ -792,11 +855,14 @@ score+=8;
 
 
 
+
+
 // 和值
 
 let sum =
-arr.reduce(
-(x,y)=>x+y,
+nums.reduce(
+(a,b)=>
+a+Number(b),
 0
 );
 
@@ -814,7 +880,6 @@ score+=6;
 
 
 
-
 if(score>100){
 
 score=100;
@@ -827,246 +892,6 @@ score=100;
 return Number(
 score.toFixed(2)
 );
-
-
-},
-
-
-
-
-
-
-
-// ==============================
-// 后区组合评分
-// ==============================
-
-
-backScoreCalc(nums){
-
-
-
-let score=70;
-
-
-
-nums.forEach(n=>{
-
-
-score +=
-(this.backScore[n]||0)
-/20;
-
-
-});
-
-
-
-let a=
-Number(nums[0]);
-
-let b=
-Number(nums[1]);
-
-
-
-let span =
-b-a;
-
-
-
-if(
-span>=3 &&
-span<=10
-){
-
-score+=8;
-
-
-}
-
-
-
-let sum =
-a+b;
-
-
-
-if(
-sum>=8 &&
-sum<=18
-){
-
-score+=8;
-
-
-}
-
-
-
-if(score>100){
-
-score=100;
-
-
-}
-
-
-
-return Number(
-score.toFixed(2)
-);
-
-
-
-},
-
-
-
-
-
-
-
-// ==============================
-// 生成后区候选
-// ==============================
-
-
-generateBackCandidates(){
-
-
-
-let pool =
-Object.keys(
-this.backScore
-);
-
-
-
-let list=[];
-
-
-
-
-for(
-let i=0;
-i<100;
-i++
-){
-
-
-
-let arr=[];
-
-
-
-while(
-arr.length<2
-){
-
-
-let n =
-pool[
-Math.floor(
-this.random()
-*
-pool.length
-)
-];
-
-
-
-if(
-!arr.includes(n)
-){
-
-arr.push(n);
-
-
-}
-
-
-
-}
-
-
-
-arr.sort(
-(a,b)=>
-Number(a)-Number(b)
-);
-
-
-
-
-list.push({
-
-nums:arr,
-
-score:this.backScoreCalc(arr)
-
-});
-
-
-
-}
-
-
-
-
-list.sort(
-(a,b)=>
-b.score-a.score
-);
-
-
-
-
-
-return list;
-
-
-
-},
-
-
-
-
-
-
-
-// ==============================
-// 相似过滤
-// ==============================
-
-
-sameCount(a,b){
-
-
-
-let c=0;
-
-
-
-a.forEach(n=>{
-
-
-if(
-b.includes(n)
-){
-
-c++;
-
-
-}
-
-
-
-});
-
-
-
-return c;
 
 
 
@@ -1099,23 +924,28 @@ i++
 
 
 
-let nums =
-this.generateCombination();
+let front =
+this.generateFront();
 
 
 
 list.push({
 
-nums:nums,
+
+front:front,
+
 
 score:
-this.combinationScore(nums)
+this.score(front)
+
+
 
 });
 
 
 
 }
+
 
 
 
@@ -1127,69 +957,9 @@ b.score-a.score
 
 
 
-let result=[];
 
 
-
-for(
-let item of list
-){
-
-
-
-let same=false;
-
-
-
-for(
-let old of result
-){
-
-
-if(
-this.sameCount(
-item.nums,
-old.nums
-)>=3
-){
-
-same=true;
-
-
-}
-
-
-
-}
-
-
-
-
-if(!same){
-
-
-result.push(item);
-
-
-}
-
-
-
-if(
-result.length>=3
-){
-
-break;
-
-
-}
-
-
-}
-
-
-
-return result;
+return list.slice(0,3);
 
 
 
@@ -1202,7 +972,243 @@ return result;
 
 
 // ==============================
-// 主入口
+// 历史回测
+// ==============================
+
+
+backTest(testCount=500){
+
+
+
+let total=0;
+
+
+let hit3=0;
+
+
+let hit4=0;
+
+
+let hit5=0;
+
+
+let back1=0;
+
+
+let back2=0;
+
+
+
+
+
+
+let start =
+this.data.length-testCount;
+
+
+
+if(start<50){
+
+start=50;
+
+}
+
+
+
+
+
+for(
+let i=start;
+i<this.data.length;
+i++
+){
+
+
+
+let train =
+this.data.slice(
+0,
+i
+);
+
+
+
+
+let real =
+this.data[i];
+
+
+
+
+this.init(train);
+
+
+
+
+let predict =
+this.generateFront();
+
+
+
+
+
+let same=0;
+
+
+
+predict.forEach(n=>{
+
+
+if(
+real.front.includes(n)
+){
+
+same++;
+
+
+}
+
+
+
+});
+
+
+
+
+
+if(same>=3){
+
+hit3++;
+
+}
+
+
+
+if(same>=4){
+
+hit4++;
+
+}
+
+
+
+if(same===5){
+
+hit5++;
+
+}
+
+
+
+
+
+let backSame=0;
+
+
+
+predictBack:
+{
+
+let b =
+this.generateBack();
+
+
+
+b.forEach(n=>{
+
+
+if(
+real.back.includes(n)
+){
+
+backSame++;
+
+
+}
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+if(backSame>=1){
+
+back1++;
+
+}
+
+
+
+if(backSame===2){
+
+back2++;
+
+}
+
+
+
+total++;
+
+
+
+}
+
+
+
+
+
+return{
+
+
+testCount:total,
+
+
+front3:hit3,
+
+
+front4:hit4,
+
+
+front5:hit5,
+
+
+back1:back1,
+
+
+back2:back2,
+
+
+rate:
+Number(
+(
+hit3/total*100
+
+)
+.toFixed(2)
+)
+
+
+};
+
+
+
+},
+
+
+
+
+
+
+
+// ==============================
+// 主运行
 // ==============================
 
 
@@ -1233,18 +1239,8 @@ this.data
 
 
 
-
-
-let front =
+let result =
 this.monteCarlo(20000);
-
-
-
-
-
-let backs =
-this.generateBackCandidates();
-
 
 
 
@@ -1254,28 +1250,20 @@ let output=[];
 
 
 
-
-for(
-let i=0;
-i<3;
-i++
-){
+result.forEach(item=>{
 
 
 
 output.push({
 
 
-front:
-front[i].nums,
+front:item.front,
 
 
-back:
-backs[i].nums,
+back:this.generateBack(),
 
 
-score:
-front[i].score
+score:item.score
 
 
 
@@ -1283,9 +1271,7 @@ front[i].score
 
 
 
-}
-
-
+});
 
 
 
@@ -1313,23 +1299,8 @@ return output;
 
 
 
-status(){
-
-
-return{
-
-version:this.version,
-
-periods:this.data.length
-
 };
 
-
-}
-
-
-
-};
 
 
 

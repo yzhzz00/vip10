@@ -1,13 +1,13 @@
 /*
 ======================================
-彩票智能分析系统 V35.8.3
+彩票智能分析系统 V35.9
 script.js
+历史回测接口版
 ======================================
 */
 
 
 let dltData=[];
-
 
 
 
@@ -23,6 +23,7 @@ loadDLTData();
 
 
 
+
 document
 .getElementById("predictBtn")
 .onclick=function(){
@@ -30,6 +31,19 @@ document
 startAnalysis();
 
 };
+
+
+
+
+
+document
+.getElementById("backTestBtn")
+.onclick=function(){
+
+startBackTest();
+
+};
+
 
 
 
@@ -65,16 +79,15 @@ async function loadDLTData(){
 try{
 
 
-let response =
+let res =
 await fetch(
-"data/dlt_raw.txt?v=3583"
+"data/dlt_raw.txt?v=359"
 );
 
 
 
 let text =
-await response.text();
-
+await res.text();
 
 
 
@@ -93,7 +106,6 @@ document
 
 
 
-
 document
 .getElementById("dataCount")
 .innerHTML=
@@ -107,24 +119,23 @@ document
 .getElementById("systemStatus")
 .innerHTML=
 
-"V35.8.3数据模块运行正常";
+"V35.9数据模块运行正常";
 
 
 
 }
-catch(error){
+catch(e){
 
 
 
 document
 .getElementById("systemStatus")
 .innerHTML=
-
 "数据加载失败";
 
 
 
-console.log(error);
+console.log(e);
 
 
 
@@ -143,7 +154,7 @@ console.log(error);
 
 
 // ==============================
-// 大乐透数据解析
+// 数据解析
 // ==============================
 
 
@@ -183,7 +194,6 @@ return;
 
 
 
-
 let front=[];
 
 let back=[];
@@ -199,6 +209,7 @@ i++
 ){
 
 
+
 front.push(
 
 String(
@@ -211,7 +222,6 @@ Number(p[i])
 
 
 }
-
 
 
 
@@ -241,12 +251,9 @@ Number(p[i])
 
 
 
-
 arr.push({
 
-
 front:front,
-
 
 back:back
 
@@ -261,8 +268,8 @@ back:back
 
 
 
-
 return arr;
+
 
 
 }
@@ -276,7 +283,7 @@ return arr;
 
 
 // ==============================
-// 开始分析
+// 开始预测
 // ==============================
 
 
@@ -288,11 +295,9 @@ if(
 dltData.length===0
 ){
 
-
 alert(
-"大乐透数据未加载"
+"数据未加载"
 );
-
 
 
 return;
@@ -303,22 +308,16 @@ return;
 
 
 
-
-
-
-let resultBox =
+let box =
 document.getElementById("result");
 
 
 
 
+box.innerHTML=
 
-
-resultBox.innerHTML=
-
-"V35.8.3模型运行中...<br>"+
+"V35.9模型运行中...<br>"+
 "蒙特卡罗模拟20000组...";
-
 
 
 
@@ -329,12 +328,9 @@ setTimeout(()=>{
 
 
 
-try{
-
-
-
 DLTEngine.data =
 dltData;
+
 
 
 
@@ -345,25 +341,7 @@ DLTEngine.run();
 
 
 
-
 showResult(result);
-
-
-
-}
-catch(e){
-
-
-resultBox.innerHTML=
-"运行错误："+e;
-
-
-
-console.log(e);
-
-
-
-}
 
 
 
@@ -382,7 +360,7 @@ console.log(e);
 
 
 // ==============================
-// 输出结果
+// 显示预测
 // ==============================
 
 
@@ -394,13 +372,9 @@ let html="";
 
 
 
-
-
 html+=
 
-"<b>彩票智能分析系统 V35.8.3</b><br><br>";
-
-
+"<b>彩票智能分析系统 V35.9</b><br><br>";
 
 
 
@@ -412,21 +386,15 @@ dltData.length+
 
 
 
-
-
 html+=
 
 "蒙特卡罗模拟：20000组<br><br>";
 
 
 
-
-
 html+=
 
 "<b>最终推荐</b><br><br>";
-
-
 
 
 
@@ -445,11 +413,9 @@ html+=
 
 
 
-
 html+=
 
 item.front.join(" ");
-
 
 
 
@@ -459,11 +425,9 @@ html+=
 
 
 
-
 html+=
 
 item.back.join(" ");
-
 
 
 
@@ -473,19 +437,11 @@ html+=
 
 
 
-
 html+=
 
 "综合评分："+
 item.score+
-"分";
-
-
-
-
-html+=
-
-"<br><br>";
+"分<br><br>";
 
 
 
@@ -495,12 +451,9 @@ html+=
 
 
 
-
-
 html+=
 
-"模型状态：V35.8.3综合模型完成";
-
+"模型状态：V35.9综合模型完成";
 
 
 
@@ -513,17 +466,165 @@ html;
 
 
 
+}
 
 
 
 
+
+
+
+
+
+// ==============================
+// 历史回测
+// ==============================
+
+
+function startBackTest(){
+
+
+
+if(
+dltData.length===0
+){
+
+alert(
+"数据未加载"
+);
+
+
+return;
+
+
+}
+
+
+
+
+let box =
 document
-.getElementById("systemStatus")
-.innerHTML=
+.getElementById("backTestResult");
 
-"V35.8.3模型运行成功<br>"+
-dltData.length+
-"期历史数据参与计算";
+
+
+
+box.innerHTML=
+
+"正在执行历史回测...<br>"+
+"测试500期数据...";
+
+
+
+
+
+setTimeout(()=>{
+
+
+
+DLTEngine.data =
+dltData;
+
+
+
+
+let report =
+DLTEngine.backTest(500);
+
+
+
+
+
+
+let html="";
+
+
+
+html+=
+
+"<b>V35.9历史回测报告</b><br><br>";
+
+
+
+html+=
+
+"测试期数："+
+
+report.testCount+
+
+"<br>";
+
+
+
+html+=
+
+"前区3中："+
+
+report.front3+
+
+"次<br>";
+
+
+
+html+=
+
+"前区4中："+
+
+report.front4+
+
+"次<br>";
+
+
+
+html+=
+
+"前区5中："+
+
+report.front5+
+
+"次<br><br>";
+
+
+
+html+=
+
+"后区中1："+
+
+report.back1+
+
+"次<br>";
+
+
+
+html+=
+
+"后区中2："+
+
+report.back2+
+
+"次<br><br>";
+
+
+
+html+=
+
+"模型表现率："+
+
+report.rate+
+
+"%";
+
+
+
+
+
+
+box.innerHTML=
+html;
+
+
+
+},100);
 
 
 
@@ -564,12 +665,10 @@ alert(
 );
 
 
-
 return;
 
 
 }
-
 
 
 
@@ -581,7 +680,6 @@ localStorage.setItem(
 value
 
 );
-
 
 
 
