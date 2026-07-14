@@ -3,16 +3,15 @@
 
 大乐透智能分析系统
 
-V70.5 CORE SCRIPT
+V70.6 CORE SCRIPT
 
-Critic AI显示版
+Theory AI显示版
 
 ================================
 */
 
 
 let systemReady=false;
-
 
 
 
@@ -31,10 +30,7 @@ document.getElementById(
 
 
 
-
 await window.AIEngine.init();
-
-
 
 
 
@@ -42,8 +38,6 @@ await window.AIEngine.init();
 let status=
 
 window.AIEngine.status();
-
-
 
 
 
@@ -60,7 +54,6 @@ document.getElementById(
 ).innerHTML=
 
 "系统加载成功";
-
 
 
 
@@ -95,6 +88,7 @@ ${status.agents.join(" / ")}
 
 
 
+
 document.getElementById(
 "agentList"
 ).innerHTML=
@@ -102,7 +96,6 @@ document.getElementById(
 status.agents.join(
 "<br>"
 );
-
 
 
 
@@ -123,7 +116,6 @@ document.getElementById(
 ).innerHTML=
 
 "加载失败："+e.message;
-
 
 
 }
@@ -147,11 +139,9 @@ async function startPredict(){
 if(!systemReady){
 
 
-
 alert(
 "系统未启动"
 );
-
 
 
 return;
@@ -167,6 +157,7 @@ return;
 let result=
 
 await window.AIEngine.analyze();
+
 
 
 
@@ -189,13 +180,19 @@ AI多模型会议报告
 
 
 
+
+// Trend AI
+
+
 if(result.meeting.trend){
 
 
 
 html+=`
 
-<b>Trend AI 趋势分析</b>
+<b>
+Trend AI 趋势分析
+</b>
 
 <br>
 
@@ -211,13 +208,22 @@ ${result.meeting.trend.reason.join("<br>")}
 
 
 
+
+
+
+
+// Structure AI
+
+
 if(result.meeting.structure){
 
 
 
 html+=`
 
-<b>Structure AI 结构分析</b>
+<b>
+Structure AI 结构分析
+</b>
 
 <br>
 
@@ -233,13 +239,22 @@ ${result.meeting.structure.reason.join("<br>")}
 
 
 
+
+
+
+
+// Markov AI
+
+
 if(result.meeting.markov){
 
 
 
 html+=`
 
-<b>Markov AI 转移分析</b>
+<b>
+Markov AI 转移分析
+</b>
 
 <br>
 
@@ -255,13 +270,22 @@ ${result.meeting.markov.reason.join("<br>")}
 
 
 
+
+
+
+
+// Risk AI
+
+
 if(result.meeting.risk){
 
 
 
 html+=`
 
-<b>Risk AI 风险分析</b>
+<b>
+Risk AI 风险分析
+</b>
 
 <br>
 
@@ -277,13 +301,22 @@ ${result.meeting.risk.reason.join("<br>")}
 
 
 
+
+
+
+
+// Review AI
+
+
 if(result.meeting.review){
 
 
 
 html+=`
 
-<b>Review AI 复盘分析</b>
+<b>
+Review AI 复盘分析
+</b>
 
 <br>
 
@@ -300,6 +333,90 @@ ${result.meeting.review.reason.join("<br>")}
 
 
 
+
+
+
+// Theory AI
+
+
+if(result.meeting.theory){
+
+
+
+html+=`
+
+<h3>
+Theory AI 大乐透理论库
+</h3>
+
+
+
+奇偶结构：
+
+${JSON.stringify(
+
+result.meeting.theory.theory.oddEven
+
+)}
+
+<br><br>
+
+
+大小结构：
+
+${JSON.stringify(
+
+result.meeting.theory.theory.size
+
+)}
+
+<br><br>
+
+
+三区分布：
+
+${JSON.stringify(
+
+result.meeting.theory.theory.zone
+
+)}
+
+<br><br>
+
+
+和值分析：
+
+${JSON.stringify(
+
+result.meeting.theory.theory.sum
+
+)}
+
+<br><br>
+
+
+理论说明：
+
+<br>
+
+${result.meeting.theory.reason.join("<br>")}
+
+
+<br><br>
+
+`;
+
+}
+
+
+
+
+
+
+
+
+
+// Confidence AI
 
 
 if(result.meeting.confidence){
@@ -329,8 +446,6 @@ ${result.meeting.confidence.level}
 <br><br>
 
 `;
-
-
 
 }
 
@@ -375,6 +490,7 @@ null,
 
 
 
+
 // Critic AI
 
 
@@ -405,10 +521,9 @@ ${result.critic.level}
 <br><br>
 
 
-<b>挑战意见：</b>
+挑战意见：
 
 <br>
-
 
 ${result.critic.challenge.join("<br>")}
 
@@ -416,21 +531,16 @@ ${result.critic.challenge.join("<br>")}
 <br><br>
 
 
-<b>风险提醒：</b>
+风险提醒：
 
 <br>
-
 
 ${result.critic.reason.join("<br>")}
 
 
-
 `;
 
-
-
 }
-
 
 
 
@@ -466,7 +576,6 @@ AI会议完成
 
 ${result.version}
 
-
 <br>
 
 参与模型：
@@ -474,9 +583,6 @@ ${result.version}
 ${result.agents.join(" / ")}
 
 `;
-
-
-
 
 
 
@@ -504,7 +610,6 @@ document.getElementById(
 
 
 
-
 localStorage.setItem(
 
 "dlt_feedback",
@@ -523,7 +628,6 @@ document.getElementById(
 ).innerHTML=
 
 "开奖反馈已保存";
-
 
 
 }

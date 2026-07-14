@@ -8,11 +8,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>
-大乐透智能分析系统 V70.5 AI CORE
+大乐透智能分析系统 V70.6 AI CORE
 </title>
 
 
-<link rel="stylesheet" href="style.css?v=705">
+<link rel="stylesheet" href="style.css?v=706">
 
 
 </head>
@@ -27,7 +27,7 @@
 <h1>
 大乐透智能分析系统
 <br>
-V70.5 AI CORE
+V70.6 AI CORE
 </h1>
 
 
@@ -126,7 +126,6 @@ AI多维分析报告
 </h2>
 
 
-
 <input
 
 id="realResult"
@@ -143,6 +142,7 @@ placeholder="输入真实开奖号码"
 保存开奖反馈
 
 </button>
+
 
 
 
@@ -191,48 +191,52 @@ V70 AI Agent模型
 
 
 
-<!-- =========================
-     V70.5 Agent加载
-========================= -->
+<!-- =======================
+ V70.6 AI Agent加载
+======================= -->
 
 
-<script src="agents/masterAgent.js?v=705"></script>
+<script src="agents/masterAgent.js?v=706"></script>
 
-<script src="agents/trendAgent.js?v=705"></script>
+<script src="agents/trendAgent.js?v=706"></script>
 
-<script src="agents/structureAgent.js?v=705"></script>
+<script src="agents/structureAgent.js?v=706"></script>
 
-<script src="agents/markovAgent.js?v=705"></script>
+<script src="agents/markovAgent.js?v=706"></script>
 
-<script src="agents/riskAgent.js?v=705"></script>
+<script src="agents/riskAgent.js?v=706"></script>
 
-<script src="agents/reviewAgent.js?v=705"></script>
-
-
-<!-- 信心指数模型 -->
-
-<script src="agents/confidenceAgent.js?v=705"></script>
+<script src="agents/reviewAgent.js?v=706"></script>
 
 
-<!-- 自我否定模型 -->
+<!-- 信心指数 -->
 
-<script src="agents/criticAgent.js?v=705"></script>
-
-
+<script src="agents/confidenceAgent.js?v=706"></script>
 
 
+<!-- 自我否定 -->
+
+<script src="agents/criticAgent.js?v=706"></script>
 
 
-<!-- =========================
-     核心
-========================= -->
+<!-- 大乐透理论库 -->
+
+<script src="agents/theoryAgent.js?v=706"></script>
 
 
-<script src="engine.js?v=705"></script>
-
-<script src="script.js?v=705"></script>
 
 
+
+
+
+<!-- =======================
+ CORE
+======================= -->
+
+
+<script src="engine.js?v=706"></script>
+
+<script src="script.js?v=706"></script>
 
 
 

@@ -3,9 +3,9 @@
 
 大乐透智能分析系统
 
-V70.5 CORE ENGINE
+V70.6 CORE ENGINE
 
-Critic AI 自我否定版
+Theory AI 理论库接入版
 
 ================================
 */
@@ -14,11 +14,10 @@ Critic AI 自我否定版
 class AIEngine {
 
 
-
 constructor(){
 
 
-this.version="V70.5";
+this.version="V70.6";
 
 
 this.dlt=[];
@@ -39,7 +38,6 @@ this.ready=false;
 
 
 async init(){
-
 
 
 await this.loadData();
@@ -70,8 +68,9 @@ async loadData(){
 let response=
 
 await fetch(
-"data/dlt.txt?v=705"
+"data/dlt.txt?v=706"
 );
+
 
 
 
@@ -88,7 +87,6 @@ throw new Error(
 
 
 
-
 let text=
 
 await response.text();
@@ -96,12 +94,9 @@ await response.text();
 
 
 
-
 let lines=
 
 text.trim().split(/\n+/);
-
-
 
 
 
@@ -165,13 +160,11 @@ arr[8]
 
 
 
-
 }
 
 
 
 }
-
 
 
 
@@ -252,6 +245,16 @@ window.CriticAgent;
 
 
 
+// 新增 Theory AI
+
+if(window.TheoryAgent)
+
+this.agents.theory=
+
+window.TheoryAgent;
+
+
+
 }
 
 
@@ -273,6 +276,7 @@ let meeting={};
 
 
 
+// 趋势
 
 if(this.agents.trend)
 
@@ -288,6 +292,8 @@ this.dlt
 
 
 
+// 结构
+
 if(this.agents.structure)
 
 meeting.structure=
@@ -301,6 +307,8 @@ this.dlt
 
 
 
+
+// 马尔可夫
 
 if(this.agents.markov)
 
@@ -316,6 +324,8 @@ this.dlt
 
 
 
+// 风险
+
 if(this.agents.risk)
 
 meeting.risk=
@@ -329,6 +339,8 @@ this.dlt
 
 
 
+
+// 复盘
 
 if(this.agents.review)
 
@@ -344,9 +356,23 @@ this.dlt
 
 
 
+// 理论库
+
+if(this.agents.theory)
+
+meeting.theory=
+
+this.agents.theory.analyze(
+this.dlt
+);
 
 
-// Confidence AI
+
+
+
+
+
+// 信心评分
 
 if(this.agents.confidence)
 
@@ -363,8 +389,7 @@ meeting
 
 
 
-// Master AI初步决策
-
+// Master AI
 
 let decision={};
 
@@ -381,13 +406,16 @@ decision=
 this.agents.master.analyze({
 
 
+
 models:meeting,
 
 
 history:this.dlt.length
 
 
+
 });
+
 
 
 }
@@ -399,8 +427,7 @@ history:this.dlt.length
 
 
 
-// Critic AI反向审查
-
+// Critic AI
 
 let critic={};
 
@@ -426,6 +453,7 @@ meeting
 );
 
 
+
 }
 
 
@@ -445,23 +473,18 @@ version:this.version,
 history:this.dlt.length,
 
 
-
 meeting:meeting,
-
 
 
 decision:decision,
 
 
-
 critic:critic,
-
 
 
 message:
 
-"AI会议+自我审查完成",
-
+"AI会议+理论库分析完成",
 
 
 
@@ -476,7 +499,6 @@ this.agents
 
 
 }
-
 
 
 
@@ -530,7 +552,5 @@ new AIEngine();
 
 
 console.log(
-
-"V70.5 ENGINE READY"
-
+"V70.6 ENGINE READY"
 );
