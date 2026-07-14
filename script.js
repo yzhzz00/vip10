@@ -1,300 +1,296 @@
 async function startAnalysis(){
 
-    let result = document.getElementById("result");
+const result=document.getElementById("result");
 
-    result.innerHTML = "正在分析数据...";
+result.innerHTML="正在分析数据...";
 
 
-    try{
+try{
 
-        let response = await fetch("data/dlt_raw.txt?v=3000");
 
-        let text = await response.text();
+const response=await fetch("data/dlt_raw.txt?v=102");
 
 
-        let lines = text.split("\n");
+const text=await response.text();
 
-        let data = [];
 
+const lines=text.split("\n");
 
-        // 数据清洗
-        lines.forEach(line=>{
 
-            let nums = line.match(/\b\d{2}\b/g);
+let data=[];
 
 
-            if(nums && nums.length >= 7){
+// 清洗数据
 
-                let arr = nums.slice(-7);
+lines.forEach(line=>{
 
 
-                let front = arr.slice(0,5);
+let nums=line.match(/\b\d{2}\b/g);
 
-                let back = arr.slice(5,7);
 
+if(nums && nums.length>=7){
 
-                data.push({
 
-                    front:front,
+let arr=nums.slice(-7);
 
-                    back:back
 
-                });
+data.push({
 
-            }
+front:arr.slice(0,5),
 
-        });
+back:arr.slice(5,7)
 
+});
 
 
-        // 前区频率
+}
 
-        let count={};
 
+});
 
-        for(let i=1;i<=35;i++){
 
-            let n=i.toString().padStart(2,"0");
 
-            count[n]=0;
+// 频率
 
-        }
+let count={};
 
 
+for(let i=1;i<=35;i++){
 
-        data.forEach(item=>{
+let n=i.toString().padStart(2,"0");
 
-            item.front.forEach(n=>{
+count[n]=0;
 
-                if(count[n]!==undefined){
+}
 
-                    count[n]++;
 
-                }
 
-            });
+data.forEach(item=>{
 
-        });
+item.front.forEach(n=>{
 
+count[n]++;
 
+});
 
-        // 热号
+});
 
-        let hot = Object.entries(count)
 
-        .sort((a,b)=>b[1]-a[1])
 
-        .slice(0,10);
 
+// 热号
 
+let hot=Object.entries(count)
 
-        // 冷号
+.sort((a,b)=>b[1]-a[1])
 
-        let cold = Object.entries(count)
+.slice(0,10);
 
-        .sort((a,b)=>a[1]-b[1])
 
-        .slice(0,10);
 
 
+// 冷号
 
-        // 当前遗漏
+let cold=Object.entries(count)
 
-        let miss={};
+.sort((a,b)=>a[1]-b[1])
 
+.slice(0,10);
 
-        for(let i=1;i<=35;i++){
 
-            let n=i.toString().padStart(2,"0");
 
-            miss[n]=0;
 
+// 遗漏
 
-            for(let j=0;j<data.length;j++){
+let miss={};
 
-                if(data[j].front.includes(n)){
 
-                    break;
+for(let i=1;i<=35;i++){
 
-                }
+let n=i.toString().padStart(2,"0");
 
-                miss[n]++;
+miss[n]=0;
 
-            }
 
-        }
+for(let j=0;j<data.length;j++){
 
+if(data[j].front.includes(n)){
 
+break;
 
-        // 和值
+}
 
-        let totalSum=0;
+miss[n]++;
 
+}
 
-        data.forEach(item=>{
+}
 
-            item.front.forEach(n=>{
 
-                totalSum+=parseInt(n);
 
-            });
 
-        });
+// 和值
 
+let sumTotal=0;
 
 
-        let avgSum=(totalSum/data.length).toFixed(2);
+data.forEach(item=>{
 
+item.front.forEach(n=>{
 
+sumTotal+=Number(n);
 
-        // 奇偶
+});
 
-        let odd=0;
+});
 
-        let even=0;
 
+let avg=(sumTotal/data.length).toFixed(2);
 
-        data.forEach(item=>{
 
-            item.front.forEach(n=>{
 
-                if(parseInt(n)%2==0){
 
-                    even++;
+// 奇偶
 
-                }else{
+let odd=0;
 
-                    odd++;
+let even=0;
 
-                }
 
-            });
+data.forEach(item=>{
 
-        });
+item.front.forEach(n=>{
 
+if(Number(n)%2){
 
+odd++;
 
-        // 三区
+}else{
 
-        let zone1=0;
+even++;
 
-        let zone2=0;
+}
 
-        let zone3=0;
+});
 
+});
 
-        data.forEach(item=>{
 
 
-            item.front.forEach(n=>{
 
-                let x=parseInt(n);
+// 三区
 
+let zone=[0,0,0];
 
-                if(x<=12){
 
-                    zone1++;
+data.forEach(item=>{
 
-                }
+item.front.forEach(n=>{
 
-                else if(x<=24){
+let x=Number(n);
 
-                    zone2++;
 
-                }
+if(x<=12){
 
-                else{
+zone[0]++;
 
-                    zone3++;
+}else if(x<=24){
 
-                }
+zone[1]++;
 
-            });
+}else{
 
-        });
+zone[2]++;
 
+}
 
+});
 
-        let html="";
+});
 
 
-        html+="<h3>数据检测</h3>";
 
-        html+="有效开奖："+data.length+"期<br>";
 
 
+let html="";
 
-        html+="<h3>大乐透前区热号TOP10</h3>";
 
-        hot.forEach((x,i)=>{
+html+=`<h3>数据检测</h3>`;
 
-            html+=`${i+1}. ${x[0]} 出现 ${x[1]} 次<br>`;
+html+=`有效开奖：${data.length}期<br>`;
 
-        });
 
 
+html+=`<h3>热号TOP10</h3>`;
 
-        html+="<h3>大乐透前区冷号TOP10</h3>";
+hot.forEach((x,i)=>{
 
-        cold.forEach((x,i)=>{
+html+=`${i+1}. ${x[0]} ${x[1]}次<br>`;
 
-            html+=`${i+1}. ${x[0]} 出现 ${x[1]} 次<br>`;
+});
 
-        });
 
 
+html+=`<h3>冷号TOP10</h3>`;
 
-        html+="<h3>当前遗漏TOP10</h3>";
+cold.forEach((x,i)=>{
 
-        Object.entries(miss)
+html+=`${i+1}. ${x[0]} ${x[1]}次<br>`;
 
-        .sort((a,b)=>b[1]-a[1])
+});
 
-        .slice(0,10)
 
-        .forEach((x,i)=>{
 
-            html+=`${i+1}. ${x[0]} 遗漏 ${x[1]} 期<br>`;
+html+=`<h3>当前遗漏TOP10</h3>`;
 
-        });
+Object.entries(miss)
 
+.sort((a,b)=>b[1]-a[1])
 
+.slice(0,10)
 
-        html+="<h3>和值分析</h3>";
+.forEach((x,i)=>{
 
-        html+="平均和值："+avgSum+"<br>";
+html+=`${i+1}. ${x[0]} 遗漏${x[1]}期<br>`;
 
+});
 
 
-        html+="<h3>奇偶分析</h3>";
 
-        html+="奇数数量："+odd+"<br>";
+html+=`<h3>和值分析</h3>`;
 
-        html+="偶数数量："+even+"<br>";
+html+=`平均和值：${avg}<br>`;
 
 
 
-        html+="<h3>三区分布</h3>";
+html+=`<h3>奇偶分析</h3>`;
 
-        html+="一区01-12："+zone1+"<br>";
+html+=`奇数：${odd}<br>`;
 
-        html+="二区13-24："+zone2+"<br>";
+html+=`偶数：${even}<br>`;
 
-        html+="三区25-35："+zone3+"<br>";
 
 
+html+=`<h3>三区分布</h3>`;
 
-        result.innerHTML=html;
+html+=`一区01-12：${zone[0]}<br>`;
 
+html+=`二区13-24：${zone[1]}<br>`;
 
-    }
+html+=`三区25-35：${zone[2]}<br>`;
 
 
-    catch(e){
 
-        result.innerHTML="分析失败："+e.message;
+result.innerHTML=html;
 
-    }
+
+}
+
+catch(error){
+
+result.innerHTML="分析失败："+error;
+
+}
 
 
 }
