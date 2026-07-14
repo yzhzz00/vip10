@@ -1,18 +1,25 @@
-// ======================================
-// 彩票智能分析系统 V35.8
-// script.js
-// 页面控制层
-// ======================================
+/*
+======================================
+彩票智能分析系统 V35.8.1 Mobile
+script.js
+======================================
+*/
 
 
 let dltData=[];
 
 
 
+
+// ==============================
+// 页面启动
+// ==============================
+
+
 window.onload=function(){
 
 
-    loadData();
+    loadDLTData();
 
 
 
@@ -20,9 +27,7 @@ window.onload=function(){
     .getElementById("predictBtn")
     .onclick=function(){
 
-
         startAnalysis();
-
 
     };
 
@@ -32,12 +37,9 @@ window.onload=function(){
     .getElementById("feedbackBtn")
     .onclick=function(){
 
-
-        feedback();
-
+        saveFeedback();
 
     };
-
 
 
 };
@@ -48,82 +50,86 @@ window.onload=function(){
 
 
 
+
 // ==============================
-// 加载大乐透数据
+// 加载数据
 // ==============================
 
 
-async function loadData(){
+async function loadDLTData(){
 
 
-    try{
+try{
 
 
-        let res =
-        await fetch(
-        "data/dlt_raw.txt?v=358"
-        );
-
-
-
-        let text =
-        await res.text();
+    let res =
+    await fetch(
+        "data/dlt_raw.txt?v=3581"
+    );
 
 
 
-
-        dltData =
-        parseData(text);
-
+    let text =
+    await res.text();
 
 
 
-
-        document
-        .getElementById("dltStatus")
-        .innerHTML=
-        "已加载";
+    dltData =
+    parseDLT(text);
 
 
 
 
-        document
-        .getElementById("dataCount")
-        .innerHTML=
-        dltData.length;
+
+    document
+    .getElementById("dltStatus")
+    .innerHTML=
+    "已加载";
 
 
 
 
-        document
-        .getElementById("systemStatus")
-        .innerHTML=
-        "V35.8数据模块运行正常";
+
+    document
+    .getElementById("dataCount")
+    .innerHTML=
+    dltData.length;
 
 
 
 
-    }
-    catch(e){
 
+    document
+    .getElementById("systemStatus")
+    .innerHTML=
 
+    "V35.8.1数据模块运行正常";
 
-        document
-        .getElementById("systemStatus")
-        .innerHTML=
-        "数据读取失败";
-
-
-
-        console.log(e);
-
-
-
-    }
 
 
 
 }
+catch(e){
+
+
+
+    document
+    .getElementById("systemStatus")
+    .innerHTML=
+
+    "数据加载失败";
+
+
+    console.log(e);
+
+
+
+}
+
+
+}
+
+
 
 
 
@@ -136,121 +142,121 @@ async function loadData(){
 // ==============================
 
 
-function parseData(text){
+function parseDLT(text){
 
 
 
-    let arr=[];
+let arr=[];
 
 
 
-    text
-    .split(/\r?\n/)
-    .forEach(line=>{
-
-
-
-        let a =
-        line.trim()
-        .split(/\s+/);
+let lines =
+text.split(/\r?\n/);
 
 
 
 
 
-        if(a.length<9)
+lines.forEach(line=>{
+
+
+    let p =
+    line.trim()
+    .split(/\s+/);
+
+
+
+
+    if(p.length<9){
+
         return;
 
+    }
 
 
 
 
-        let front=[];
+    let front=[];
 
-        let back=[];
-
-
+    let back=[];
 
 
 
 
-        for(
+
+
+    for(
         let i=2;
         i<=6;
         i++
-        ){
+    ){
 
 
-            front.push(
+        front.push(
+
             String(
-            Number(a[i])
+                Number(p[i])
             )
             .padStart(2,"0")
-            );
+
+        );
+
+
+    }
 
 
 
-        }
 
 
 
-
-
-
-        for(
+    for(
         let i=7;
         i<=8;
         i++
-        ){
+    ){
 
 
-            back.push(
+        back.push(
+
             String(
-            Number(a[i])
+                Number(p[i])
             )
             .padStart(2,"0")
-            );
+
+        );
+
+
+    }
 
 
 
-        }
 
 
+    arr.push({
 
+        front:front,
 
-
-
-        arr.push({
-
-
-            front:front,
-
-
-            back:back
-
-
-
-        });
-
-
+        back:back
 
     });
 
 
 
 
+});
 
-    return arr;
 
+
+
+
+return arr;
 
 
 }
-// ======================================
-// V35.8 script.js
-// Part 2/3
-// 调用 engine.js
-// 输出预测结果
-// ======================================
+
+
+
+
 
 
 
@@ -265,121 +271,90 @@ function startAnalysis(){
 
 
 
-    if(dltData.length===0){
+if(
+dltData.length===0
+){
 
 
-        alert(
-        "大乐透数据未加载"
-        );
+alert(
+"数据未加载"
+);
 
 
-        return;
+return;
+
+
+}
+
+
+
+
+
+
+let box =
+document.getElementById(
+"result"
+);
+
+
+
+
+
+box.innerHTML=
+
+"V35.8.1模型运行中...<br>"+
+"蒙特卡罗模拟20000组...";
+
+
+
+
+
+
+
+
+setTimeout(()=>{
+
+
+
+    try{
+
+
+
+        DLTEngine.data =
+        dltData;
+
+
+
+
+        let result =
+        DLTEngine.run();
+
+
+
+
+
+        showResult(result);
+
+
+
+    }
+    catch(e){
+
+
+
+        box.innerHTML=
+        "模型错误："+e;
+
+
+
+        console.log(e);
 
 
     }
 
 
 
-
-
-
-    let resultBox =
-    document.getElementById(
-    "result"
-    );
-
-
-
-
-
-
-    resultBox.innerHTML =
-
-    "正在运行 V35.8 综合模型...<br>" +
-
-    "蒙特卡罗模拟：100000组<br>" +
-
-    "请稍候...";
-
-
-
-
-
-
-
-
-    setTimeout(()=>{
-
-
-
-        try{
-
-
-
-
-
-            // 加载数据到引擎
-
-
-            DLTEngine.data =
-            dltData;
-
-
-
-
-
-
-            // 执行模型
-
-
-            let result =
-            DLTEngine.run();
-
-
-
-
-
-
-
-            showResult(result);
-
-
-
-
-
-
-
-        }
-        catch(e){
-
-
-
-
-
-            resultBox.innerHTML=
-
-            "模型运行错误："+
-            e;
-
-
-
-
-
-            console.log(e);
-
-
-
-
-
-        }
-
-
-
-
-
-    },100);
-
-
+},100);
 
 
 
@@ -398,203 +373,135 @@ function startAnalysis(){
 // ==============================
 
 
-function showResult(result){
+function showResult(data){
 
 
 
-    let html="";
+let html="";
 
 
 
 
+html+=
 
-    html +=
+"<b>彩票智能分析系统 V35.8.1</b><br><br>";
 
-    "<b>彩票智能分析系统 V35.8</b><br><br>";
 
 
+html+=
 
+"数据期数："+
+dltData.length+
+"期<br><br>";
 
 
-    html +=
 
-    "数据期数："+
-    dltData.length+
-    "期<br><br>";
+html+=
 
+"蒙特卡罗模拟：20000组<br><br>";
 
 
 
+html+=
 
-    html +=
+"<b>最终推荐</b><br><br>";
 
-    "蒙特卡罗模拟：100000组<br><br>";
 
 
 
 
 
-    html +=
 
-    "<b>最终推荐</b><br><br>";
+data.forEach((item,index)=>{
 
 
 
+html+=
 
+"方案"+
+(index+1)+
+"：";
 
 
 
+html+=
 
+item.front.join(" ");
 
-    if(!result ||
-       result.length===0){
 
 
+html+=
 
-        html +=
+" + ";
 
-        "暂无符合条件方案";
 
 
+html+=
 
-    }
-    else{
+item.back.join(" ");
 
 
 
+html+=
 
+"<br>";
 
 
-        result.forEach(
-        (item,index)=>{
 
+html+=
 
+"综合评分："+
+item.score+
+"分";
 
 
 
+html+=
 
-            html +=
+"<br><br>";
 
-            "方案"+
-            (index+1)+
-            "：";
 
 
+});
 
 
 
 
-            html +=
 
-            item.front.join(" ");
 
+html+=
 
+"模型状态：V35.8.1 Mobile完成";
 
 
 
 
-            html +=
 
-            " + ";
+document
+.getElementById("result")
+.innerHTML=
+html;
 
 
 
 
 
 
-            html +=
+document
+.getElementById("systemStatus")
+.innerHTML=
 
-            item.back.join(" ");
-
-
-
-
-
-
-            html +=
-
-            "<br>";
-
-
-
-
-
-
-            html +=
-
-            "综合评分："+
-            item.score+
-            "分";
-
-
-
-
-
-
-
-            html +=
-
-            "<br><br>";
-
-
-
-
-
-
-        });
-
-
-
-
-
-
-    }
-
-
-
-
-
-
-
-
-    html +=
-
-    "模型状态：V35.8综合模型完成";
-
-
-
-
-
-
-
-
-    document
-    .getElementById("result")
-    .innerHTML=
-    html;
-
-
-
-
-
-
-
-    document
-    .getElementById("systemStatus")
-    .innerHTML=
-
-    "V35.8模型运行成功<br>"+
-    dltData.length+
-    "期历史数据参与计算";
+"V35.8.1模型运行成功<br>"+
+dltData.length+
+"期历史数据参与计算";
 
 
 
 }
-// ======================================
-// V35.8 script.js
-// Part 3/3
-// 反馈学习 + 回测接口
-// ======================================
+
+
+
+
 
 
 
@@ -605,64 +512,29 @@ function showResult(result){
 // ==============================
 
 
-function feedback(){
+function saveFeedback(){
 
 
 
-    let input =
-    document.getElementById(
-    "realResult"
-    );
-
-
-
-
-
-    if(
-    !input ||
-    input.value.trim()===""
-    ){
-
-
-
-        alert(
-        "请输入开奖结果"
-        );
-
-
-
-        return;
-
-
-
-    }
+let value =
+document
+.getElementById("realResult")
+.value
+.trim();
 
 
 
 
 
-
-    let value =
-    input.value.trim();
+if(!value){
 
 
+alert(
+"请输入开奖结果"
+);
 
 
-
-
-    document
-    .getElementById(
-    "learningStatus"
-    )
-    .innerHTML=
-
-    "已记录开奖反馈："+
-    value+
-    "<br>"+
-    "V35.8学习接口等待训练";
-
-
-
+return;
 
 
 }
@@ -672,149 +544,25 @@ function feedback(){
 
 
 
+localStorage.setItem(
 
+"DLT_FEEDBACK",
 
+value
 
-// ==============================
-// 历史回测
-// ==============================
-
-
-function runBackTest(){
-
-
-
-    if(dltData.length===0){
-
-
-
-        return;
-
-
-
-    }
+);
 
 
 
 
 
+document
+.getElementById("learningStatus")
+.innerHTML=
 
-
-    DLTEngine.data =
-    dltData;
-
-
-
-
-
-
-
-    let result =
-    DLTEngine.backTest();
-
-
-
-
-
-
-
-    console.log(
-    "回测结果:",
-    result
-    );
-
-
-
-
-
-
-    document
-    .getElementById(
-    "learningStatus"
-    )
-    .innerHTML=
-
-
-
-    "历史回测完成<br>"+
-
-    "测试期数："+
-
-    result.periods+
-
-    "<br>"+
-
-    "3个号码以上命中："+
-
-    result.hit3+
-
-    "<br>"+
-
-    "4个号码以上命中："+
-
-    result.hit4+
-
-    "<br>"+
-
-    "5个号码命中："+
-
-    result.hit5;
+"已保存开奖反馈："+
+value;
 
 
 
 }
-
-
-
-
-
-
-
-
-
-// ==============================
-// 获取模型状态
-// ==============================
-
-
-function getSystemInfo(){
-
-
-
-    if(
-    typeof DLTEngine==="undefined"
-    ){
-
-
-        return;
-
-
-    }
-
-
-
-
-
-    let info =
-    DLTEngine.status();
-
-
-
-
-
-    console.log(info);
-
-
-
-}
-
-
-
-
-
-
-
-
-// ======================================
-// V35.8 script.js END
-// ======================================

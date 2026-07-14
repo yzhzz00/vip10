@@ -1,7 +1,9 @@
-/* ======================================
-   彩票智能分析系统 V35.8.1
-   style.css
-====================================== */
+/*
+======================================
+彩票智能分析系统 V35.8.1 Mobile
+style.css
+======================================
+*/
 
 
 *{
@@ -12,12 +14,13 @@
 
 
 
+
 body{
 
 
     margin:0;
 
-    padding:20px;
+    padding:15px;
 
     background:#f2f5fa;
 
@@ -37,29 +40,29 @@ body{
 
 
 
-
 .container{
 
 
+    width:100%;
+
     max-width:900px;
 
-    margin:0 auto;
+    margin:auto;
 
-    background:#ffffff;
+    background:#fff;
 
-    padding:22px;
+    padding:18px;
 
-    border-radius:16px;
+    border-radius:15px;
 
     box-shadow:
 
-    0 6px 25px
+    0 5px 20px
 
-    rgba(0,0,0,0.08);
+    rgba(0,0,0,.08);
 
 
 }
-
 
 
 
@@ -71,11 +74,11 @@ h1{
 
     text-align:center;
 
-    font-size:26px;
-
     color:#1677ff;
 
-    margin-bottom:25px;
+    font-size:24px;
+
+    margin:10px 0 25px;
 
 
 }
@@ -91,13 +94,13 @@ h1{
 
     background:#fafafa;
 
-    border:1px solid #e6e6e6;
+    border:1px solid #e5e5e5;
 
     border-radius:12px;
 
-    padding:16px;
+    padding:15px;
 
-    margin-top:18px;
+    margin-bottom:15px;
 
 
 }
@@ -107,17 +110,16 @@ h1{
 
 
 
-
 .title{
 
 
-    font-size:18px;
+    font-size:17px;
 
     font-weight:bold;
 
     color:#333;
 
-    margin-bottom:12px;
+    margin-bottom:10px;
 
 
 }
@@ -133,9 +135,9 @@ button{
 
     width:100%;
 
-    height:48px;
+    height:45px;
 
-    margin-top:15px;
+    margin:10px 0;
 
     border:none;
 
@@ -148,9 +150,6 @@ button{
     font-size:16px;
 
     cursor:pointer;
-
-
-    transition:.2s;
 
 
 }
@@ -194,7 +193,7 @@ input{
 
     width:100%;
 
-    height:45px;
+    height:42px;
 
     padding:10px;
 
@@ -202,14 +201,9 @@ input{
 
     border:1px solid #ccc;
 
-    font-size:16px;
-
-    outline:none;
-
+    font-size:15px;
 
 }
-
-
 
 
 
@@ -219,6 +213,8 @@ input:focus{
 
 
     border-color:#1677ff;
+
+    outline:none;
 
 
 }
@@ -248,17 +244,17 @@ span{
 #result{
 
 
-    min-height:130px;
+    background:white;
 
-    background:#fff;
+    padding:12px;
 
     border-radius:10px;
 
-    padding:15px;
+    min-height:120px;
 
     line-height:2;
 
-    font-size:16px;
+    font-size:15px;
 
 
 }
@@ -274,7 +270,7 @@ span{
 
     color:#1677ff;
 
-    font-size:20px;
+    font-size:18px;
 
 
 }
@@ -288,9 +284,9 @@ span{
 #learningStatus{
 
 
-    line-height:1.8;
-
     color:#555;
+
+    line-height:1.8;
 
 
 }
@@ -324,7 +320,7 @@ ul{
 
     margin:0;
 
-    padding-left:25px;
+    padding-left:22px;
 
 
 }
@@ -338,7 +334,7 @@ ul{
 li{
 
 
-    line-height:2;
+    line-height:1.9;
 
     color:#555;
 
@@ -351,13 +347,17 @@ li{
 
 
 
-/* 推荐方案样式 */
+/* 手机优化 */
 
 
-#result br{
+@media(max-width:600px){
 
 
-    line-height:2;
+
+body{
+
+
+    padding:8px;
 
 
 }
@@ -365,81 +365,59 @@ li{
 
 
 
+.container{
 
 
-
-/* 手机适配 */
-
-
-@media(max-width:600px){
+    padding:14px;
 
 
-
-    body{
-
-
-        padding:10px;
-
-
-    }
+}
 
 
 
 
-    .container{
+h1{
 
 
-        padding:15px;
+    font-size:21px;
 
 
-    }
-
-
-
-
-
-    h1{
-
-
-        font-size:22px;
-
-
-    }
+}
 
 
 
 
-    .title{
+.title{
 
 
-        font-size:16px;
+    font-size:16px;
 
 
-    }
-
-
-
-
-    #result{
-
-
-        font-size:14px;
-
-
-    }
+}
 
 
 
-    button{
+
+#result{
 
 
-        height:45px;
+    font-size:14px;
 
 
-        font-size:15px;
+}
 
 
-    }
+
+button{
+
+
+    height:43px;
+
+    font-size:15px;
+
+
+}
+
 
 
 }
