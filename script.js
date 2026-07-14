@@ -2,13 +2,13 @@ async function startAnalysis(){
 
 const result=document.getElementById("result");
 
-result.innerHTML="正在运行 V21.0多模型竞技系统...";
+result.innerHTML="正在运行 V22.0稳定评分模型...";
 
 
 try{
 
 
-const res=await fetch("data/dlt_raw.txt?v=2100");
+const res=await fetch("data/dlt_raw.txt?v=2200");
 
 const text=await res.text();
 
@@ -19,13 +19,13 @@ let data=[];
 text.split("\n").forEach(line=>{
 
 
-let n=line.match(/\b\d{2}\b/g);
+let nums=line.match(/\b\d{2}\b/g);
 
 
-if(n&&n.length>=7){
+if(nums&&nums.length>=7){
 
 
-let a=n.slice(-7);
+let a=nums.slice(-7);
 
 
 data.push({
@@ -45,65 +45,29 @@ back:a.slice(5,7)
 
 if(data.length===0){
 
-throw new Error("数据读取失败");
+throw new Error("历史数据读取失败");
 
 }
 
 
 
 
-// ======================
-// 模型权重
-// ======================
+// ====================
+// 基础统计
+// ====================
 
 
-let weights=JSON.parse(
-
-localStorage.getItem("v21_weights")
-
-||
-
-JSON.stringify({
-
-freq:20,
-
-trend:20,
-
-miss:15,
-
-structure:20,
-
-markov:15,
-
-anti:10
-
-})
-
-);
+function countFront(arr){
 
 
-
-
-
-// ======================
-// 前区统计
-// ======================
-
-
-function frontCount(arr){
-
-
-let c={};
+let obj={};
 
 
 for(let i=1;i<=35;i++){
 
-let n=String(i).padStart(2,"0");
-
-c[n]=0;
+obj[String(i).padStart(2,"0")]=0;
 
 }
-
 
 
 arr.forEach(d=>{
@@ -111,7 +75,7 @@ arr.forEach(d=>{
 
 d.front.forEach(n=>{
 
-c[n]++;
+obj[n]++;
 
 });
 
@@ -119,30 +83,22 @@ c[n]++;
 });
 
 
-return c;
+return obj;
 
 }
 
 
 
 
-
-// ======================
-// 后区统计
-// ======================
+function countBack(arr){
 
 
-function backCount(arr){
-
-
-let c={};
+let obj={};
 
 
 for(let i=1;i<=12;i++){
 
-let n=String(i).padStart(2,"0");
-
-c[n]=0;
+obj[String(i).padStart(2,"0")]=0;
 
 }
 
@@ -152,7 +108,7 @@ arr.forEach(d=>{
 
 d.back.forEach(n=>{
 
-c[n]++;
+obj[n]++;
 
 });
 
@@ -160,69 +116,104 @@ c[n]++;
 });
 
 
-return c;
+return obj;
 
 }
 
 
 
 
-// ======================
-// 综合评分
-// ======================
+// ====================
+// 遗漏评分
+// ====================
 
 
-function modelScore(arr){
+function missScore(arr){
 
 
-let all=frontCount(arr);
+let last={};
 
 
-let recent=frontCount(arr.slice(0,100));
+for(let i=1;i<=35;i++){
+
+last[String(i).padStart(2,"0")]=999;
+
+}
+
+
+
+for(let i=0;i<arr.length;i++){
+
+
+arr[i].front.forEach(n=>{
+
+
+if(last[n]===999){
+
+last[n]=i;
+
+}
+
+
+});
+
+
+}
+
+
+
+return last;
+
+}
+
+
+
+
+// ====================
+// 马尔可夫趋势
+// ====================
+
+
+function markovScore(arr){
 
 
 let score={};
 
 
+for(let i=1;i<=35;i++){
 
-for(let n in all){
-
-
-score[n]=
-
-all[n]*weights.freq
-
-+
-
-recent[n]*weights.trend;
-
-
-
-// 结构奖励
-
-if(
-
-(parseInt(n)<=12)
-
-||
-
-(parseInt(n)>=25)
-
-){
-
-score[n]+=weights.structure;
+score[String(i).padStart(2,"0")]=0;
 
 }
 
 
 
-// 反冷门过滤
+for(let i=0;i<arr.length-1;i++){
 
-if(all[n]<300){
 
-score[n]+=weights.anti;
+let current=arr[i].front;
+
+let next=arr[i+1].front;
+
+
+
+current.forEach(a=>{
+
+
+next.forEach(b=>{
+
+
+if(a===b){
+
+score[b]+=1;
 
 }
+
+
+});
+
+
+});
 
 
 }
@@ -231,143 +222,133 @@ score[n]+=weights.anti;
 
 return score;
 
-
 }
 
 
 
 
-// 后区评分
+// ====================
+// 综合评分
+// ====================
 
 
-function backScore(arr){
+let freq=countFront(data);
+
+let recent=countFront(data.slice(0,100));
+
+let miss=missScore(data);
+
+let markov=markovScore(data);
 
 
-let c=backCount(arr);
+
+let score={};
 
 
-return c;
+
+for(let n in freq){
+
+
+score[n]=
+
+freq[n]*0.35
+
++
+
+recent[n]*0.25
+
++
+
+markov[n]*0.25
+
++
+
+(1/(miss[n]+1))*100*0.15;
+
 
 
 }
-// ======================
-// 选号
-// ======================
+// ====================
+// 组合评分
+// ====================
 
 
-function pick(arr,num){
+function combinationScore(nums){
 
 
-let pool=[...arr];
-
-let r=[];
+let s=0;
 
 
-while(r.length<num){
+// 号码总评分
 
+nums.forEach(n=>{
 
-let i=Math.floor(Math.random()*pool.length);
+s+=score[n];
 
-
-r.push(pool[i]);
-
-
-pool.splice(i,1);
-
-
-}
-
-
-return r.sort();
-
-}
-
-
-
-
-// ======================
-// 蒙特卡罗筛选
-// ======================
-
-
-function monte(frontPool,backPool){
-
-
-let best=null;
-
-
-let bestValue=-1;
-
-
-
-for(let i=0;i<10000;i++){
-
-
-let f=pick(frontPool,5);
-
-let b=pick(backPool,2);
-
-
-
-let value=0;
+});
 
 
 
 // 奇偶结构
 
-let odd=f.filter(n=>parseInt(n)%2).length;
+let odd=nums.filter(n=>parseInt(n)%2===1).length;
 
 
 if(odd>=2&&odd<=3){
 
-value+=10;
+s+=20;
 
 }
 
 
 
-// 区间结构
+// 三区结构
 
-let low=f.filter(n=>parseInt(n)<=12).length;
-
-let mid=f.filter(n=>parseInt(n)>12&&parseInt(n)<=24).length;
-
-let high=f.filter(n=>parseInt(n)>24).length;
+let a=0,b=0,c=0;
 
 
-if(low>0&&mid>0&&high>0){
-
-value+=10;
-
-}
+nums.forEach(n=>{
 
 
-
-value+=Math.random()*20;
-
+let x=parseInt(n);
 
 
-if(value>bestValue){
+if(x<=12)a++;
 
-bestValue=value;
+else if(x<=24)b++;
 
-best={
+else c++;
 
-front:f,
 
-back:b
+});
 
-};
 
-}
+if(a>0&&b>0&&c>0){
 
+s+=20;
 
 }
 
 
 
-return best;
+// 和值范围
 
+let sum=nums.reduce(
+
+(x,y)=>x+parseInt(y),0
+
+);
+
+
+if(sum>=80&&sum<=140){
+
+s+=15;
+
+}
+
+
+
+return s;
 
 }
 
@@ -375,34 +356,108 @@ return best;
 
 
 
-let frontScore=modelScore(data);
-
-
-let backScoreData=backScore(data);
-
+// ====================
+// 固定排序选号
+// ====================
 
 
 let frontPool=
 
-Object.entries(frontScore)
+Object.keys(score)
 
-.sort((a,b)=>b[1]-a[1])
+.sort((a,b)=>score[b]-score[a])
 
-.slice(0,20)
+.slice(0,18);
 
-.map(x=>x[0]);
+
+
+
+
+let candidates=[];
+
+
+
+for(let i=0;i<frontPool.length;i++){
+
+for(let j=i+1;j<frontPool.length;j++){
+
+for(let k=j+1;k<frontPool.length;k++){
+
+
+
+let arr=[
+
+frontPool[i],
+
+frontPool[j],
+
+frontPool[k]
+
+];
+
+
+
+let temp=frontPool.filter(
+
+x=>!arr.includes(x)
+
+).slice(0,2);
+
+
+
+if(temp.length===2){
+
+
+let nums=arr.concat(temp).sort();
+
+
+candidates.push({
+
+nums:nums,
+
+value:combinationScore(nums)
+
+});
+
+
+}
+
+
+
+}
+
+}
+
+}
+
+
+
+
+// 排序取前三
+
+candidates.sort(
+
+(a,b)=>b.value-a.value
+
+);
+
+
+
+let backCountData=countBack(data);
 
 
 
 let backPool=
 
-Object.entries(backScoreData)
+Object.keys(backCountData)
 
-.sort((a,b)=>b[1]-a[1])
+.sort(
 
-.slice(0,8)
+(a,b)=>backCountData[b]-backCountData[a]
 
-.map(x=>x[0]);
+)
+
+.slice(0,8);
 
 
 
@@ -411,141 +466,46 @@ Object.entries(backScoreData)
 let plans=[];
 
 
+
 for(let i=0;i<3;i++){
 
-plans.push(
 
-monte(frontPool,backPool)
-
-);
-
-}
+plans.push({
 
 
+front:candidates[i].nums,
 
 
+back:
+
+backPool.slice(i,i+2),
 
 
-// ======================
-// 回测
-// ======================
+score:
 
-
-let hit={
-
-"3+0":0,
-"3+1":0,
-"4+0":0,
-"4+1":0,
-"5+0":0,
-"5+1":0,
-"5+2":0
-
-};
-
-
-
-data.slice(-500).forEach(real=>{
-
-
-plans.forEach(p=>{
-
-
-let f=p.front.filter(
-
-x=>real.front.includes(x)
-
-).length;
-
-
-
-let b=p.back.filter(
-
-x=>real.back.includes(x)
-
-).length;
-
-
-
-let key=f+"+"+b;
-
-
-
-if(hit[key]!==undefined){
-
-hit[key]++;
-
-}
+candidates[i].value
 
 
 });
 
 
-});
-
-
-
-
-
-// ======================
-// 自动学习
-// ======================
-
-
-if(hit["4+1"]>0){
-
-
-weights.structure+=1;
-
-weights.markov+=1;
-
-
-}else{
-
-
-weights.freq+=1;
-
-
 }
 
 
 
 
-localStorage.setItem(
 
-"v21_weights",
-
-JSON.stringify(weights)
-
-);
-
-
-
-
-
-// ======================
+// ====================
 // 输出
-// ======================
+// ====================
 
 
 let html="";
 
 
-html+="<h3>V21.0多模型竞技系统</h3>";
+html+="<h3>V22.0稳定评分模型</h3>";
 
 html+="数据期数："+data.length+"期<br><br>";
-
-
-
-html+="<h3>模型权重</h3>";
-
-
-
-for(let k in weights){
-
-html+=k+"："+weights[k]+"<br>";
-
-}
 
 
 
@@ -558,33 +518,31 @@ plans.forEach((p,i)=>{
 
 html+=
 
-"方案"+(i+1)+"："+
+"方案"+(i+1)+"："
 
-p.front.join(" ")
++p.front.join(" ")
 
 +" + "
 
 +p.back.join(" ")
 
-+"<br>";
++"<br>"
+
++"综合评分："
+
++p.score.toFixed(2)
+
++"<br><br>";
+
 
 });
 
 
 
-html+="<h3>500期回测</h3>";
+html+="模型状态：固定评分排序完成<br>";
 
+html+="重复点击结果保持一致";
 
-
-for(let k in hit){
-
-html+=k+"："+hit[k]+"次<br>";
-
-}
-
-
-
-html+="<br>学习状态：已保存";
 
 
 result.innerHTML=html;
