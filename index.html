@@ -7,54 +7,103 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>彩票智能分析系统 V30.4</title>
+<title>彩票智能分析系统 V31.0</title>
 
 
 <style>
 
 body{
+
 font-family:"Microsoft YaHei",Arial;
-background:#f4f4f4;
+
+background:#f3f3f3;
+
 padding:20px;
+
 }
+
 
 .container{
+
 max-width:900px;
+
 margin:auto;
+
 background:white;
+
 padding:20px;
+
 border-radius:12px;
+
 }
+
+
 
 h1{
+
 text-align:center;
+
 }
+
+
 
 button{
+
 width:100%;
+
 padding:15px;
+
 font-size:18px;
+
 border-radius:8px;
+
 cursor:pointer;
+
 }
+
+
 
 .box{
+
 margin-top:20px;
+
 padding:15px;
+
 border:1px solid #ddd;
+
 border-radius:10px;
+
 background:#fafafa;
+
 }
 
+
+
 .title{
+
 font-size:20px;
+
 font-weight:bold;
+
 margin-bottom:10px;
+
 }
+
+
+
+li{
+
+line-height:1.8;
+
+}
+
+
 
 </style>
 
+
 </head>
+
 
 
 <body>
@@ -63,17 +112,23 @@ margin-bottom:10px;
 <div class="container">
 
 
+
 <h1>
-彩票智能分析系统 V30.4
+彩票智能分析系统 V31.0
 </h1>
+
 
 
 
 <div class="box">
 
+
 <div class="title">
+
 数据状态
+
 </div>
+
 
 大乐透历史数据：已加载
 
@@ -86,7 +141,9 @@ margin-bottom:10px;
 数据期数：
 
 <span id="dataCount">
+
 等待读取
+
 </span>
 
 
@@ -95,9 +152,12 @@ margin-bottom:10px;
 
 
 
+
+
+
 <button onclick="startAnalysis()">
 
-开始 V30.4 智能分析
+开始 V31.0 智能分析
 
 </button>
 
@@ -106,10 +166,15 @@ margin-bottom:10px;
 
 
 
+
+
 <div class="box">
 
+
 <div class="title">
+
 分析结果
+
 </div>
 
 
@@ -128,33 +193,36 @@ margin-bottom:10px;
 
 
 
+
 <div class="box">
 
 
 <div class="title">
-V30.4 平衡优化模型
+
+V31.0智能融合模型
+
 </div>
+
 
 
 <ul>
 
-<li>频率评分 20%</li>
 
-<li>趋势评分 20%</li>
+<li>历史频率评分模型</li>
 
-<li>遗漏评分 15%</li>
+<li>近期趋势分析模型</li>
 
-<li>结构评分 20%</li>
+<li>遗漏周期模型</li>
 
-<li>马尔可夫评分 15%</li>
+<li>贝叶斯概率更新</li>
 
-<li>冷热平衡 10%</li>
+<li>马尔可夫转移矩阵</li>
 
-<li>前区综合评分</li>
+<li>前区综合评分引擎</li>
 
-<li>后区独立评分</li>
+<li>后区独立评分引擎</li>
 
-<li>号码分散度分析</li>
+<li>号码分布分析</li>
 
 <li>奇偶结构模型</li>
 
@@ -162,13 +230,13 @@ V30.4 平衡优化模型
 
 <li>和值概率模型</li>
 
-<li>连号控制</li>
+<li>连号过滤</li>
 
-<li>反极端过滤</li>
+<li>反极端结构过滤</li>
 
 <li>蒙特卡罗组合筛选</li>
 
-<li>三方案差异化</li>
+<li>三方案差异化优化</li>
 
 <li>500期滚动回测</li>
 
@@ -183,12 +251,18 @@ V30.4 平衡优化模型
 
 
 
+
+
+
 <div class="box">
 
 
 <div class="title">
+
 模型状态
+
 </div>
+
 
 
 <div id="modelStatus">
@@ -198,18 +272,23 @@ V30.4 平衡优化模型
 </div>
 
 
-</div>
-
-
 
 </div>
 
 
 
 
-<script src="script.js?v=3040"></script>
+</div>
+
+
+
+
+
+<script src="script.js?v=3101"></script>
+
 
 
 </body>
+
 
 </html>
