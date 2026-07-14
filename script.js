@@ -1,7 +1,7 @@
 // ======================================
-// 彩票智能分析系统 V35.6.1
-// 蒙特卡罗优化修正版
-// Part 1
+// 彩票智能分析系统 V35.6.3
+// 大乐透真实数据解析版
+// Part 1/4
 // ======================================
 
 
@@ -17,47 +17,62 @@ let loaded = false;
 
 
 
-
-
 // ================================
 // 页面启动
 // ================================
 
-window.onload = function(){
+
+window.onload=function(){
 
 
     initSystem();
 
 
 
-    let btn1=document.getElementById("predictBtn");
+    let predictBtn =
+    document.getElementById("predictBtn");
 
-    if(btn1){
 
-        btn1.onclick=function(){
+
+    if(predictBtn){
+
+
+        predictBtn.onclick=function(){
+
 
             runPrediction();
 
+
         };
+
 
     }
 
 
 
-    let btn2=document.getElementById("feedbackBtn");
+    let feedbackBtn =
+    document.getElementById("feedbackBtn");
 
-    if(btn2){
 
-        btn2.onclick=function(){
+
+    if(feedbackBtn){
+
+
+        feedbackBtn.onclick=function(){
+
 
             saveFeedback();
 
+
         };
+
 
     }
 
 
+
 };
+
 
 
 
@@ -84,7 +99,8 @@ async function initSystem(){
 
     document.getElementById("systemStatus").innerHTML=
 
-    "V35.6.1模型运行正常";
+    "V35.6.3 数据模块运行正常";
+
 
 
 }
@@ -96,7 +112,7 @@ async function initSystem(){
 
 
 // ================================
-// 大乐透数据读取
+// 读取大乐透数据
 // ================================
 
 
@@ -107,23 +123,32 @@ async function loadDLT(){
 try{
 
 
-let res=await fetch(
-"data/dlt_raw.txt?v=3561"
+let response =
+await fetch(
+"data/dlt_raw.txt?v=3563"
 );
 
 
 
-let text=await res.text();
+let text =
+await response.text();
 
 
 
-dltData=parseDLT(text);
+
+
+dltData =
+parseDLT(text);
+
+
 
 
 
 document.getElementById("dltStatus").innerHTML=
 
 "已加载";
+
+
 
 
 
@@ -135,7 +160,8 @@ dltData.length;
 
 }
 
-catch(e){
+catch(error){
+
 
 
 document.getElementById("dltStatus").innerHTML=
@@ -143,11 +169,17 @@ document.getElementById("dltStatus").innerHTML=
 "读取失败";
 
 
-}
+
+console.log(error);
 
 
 
 }
+
+
+
+}
+
 
 
 
@@ -156,7 +188,7 @@ document.getElementById("dltStatus").innerHTML=
 
 
 // ================================
-// 排列五读取
+// 读取排列五
 // ================================
 
 
@@ -166,13 +198,15 @@ async function loadPL5(){
 try{
 
 
-let res=await fetch(
-"data/pl5_raw.txt?v=3561"
+let response =
+await fetch(
+"data/pl5_raw.txt?v=3563"
 );
 
 
 
-await res.text();
+await response.text();
+
 
 
 
@@ -181,20 +215,21 @@ document.getElementById("pl5Status").innerHTML=
 "已加载";
 
 
-}
 
-catch(e){
+}catch(e){
 
 
 document.getElementById("pl5Status").innerHTML=
 
-"读取失败";
+"未加载";
 
 
 }
 
 
+
 }
+
 
 
 
@@ -203,7 +238,9 @@ document.getElementById("pl5Status").innerHTML=
 
 
 // ================================
-// 数据解析
+// 大乐透数据解析
+// 适配：
+// 07001 2007-05-30 22 24 29 31 35 04 11
 // ================================
 
 
@@ -211,11 +248,14 @@ function parseDLT(text){
 
 
 
-let arr=[];
+let result=[];
 
 
 
-let lines=text.split("\n");
+let lines =
+text.split(/\r?\n/);
+
+
 
 
 
@@ -223,34 +263,114 @@ lines.forEach(function(line){
 
 
 
-let nums=line.match(/\d+/g);
+let arr =
+line.trim()
+.split(/\s+/);
 
 
 
-if(nums && nums.length>=7){
+
+
+// 最少9列
+
+if(arr.length < 9){
+
+
+return;
+
+
+}
 
 
 
-arr.push({
-
-
-front:
-nums.slice(0,5)
-.map(function(n){
-
-return n.padStart(2,"0");
-
-}),
 
 
 
-back:
-nums.slice(5,7)
-.map(function(n){
+let front=[];
 
-return n.padStart(2,"0");
 
-})
+let back=[];
+
+
+
+
+
+// 前区第3-7列
+
+for(let i=2;i<=6;i++){
+
+
+
+let n=parseInt(arr[i]);
+
+
+
+if(!isNaN(n)){
+
+
+
+front.push(
+String(n).padStart(2,"0")
+);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+// 后区第8-9列
+
+for(let i=7;i<=8;i++){
+
+
+
+let n=parseInt(arr[i]);
+
+
+
+if(!isNaN(n)){
+
+
+
+back.push(
+String(n).padStart(2,"0")
+);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+if(front.length===5 &&
+back.length===2){
+
+
+
+result.push({
+
+
+
+front:front,
+
+
+back:back
+
 
 
 });
@@ -265,7 +385,10 @@ return n.padStart(2,"0");
 
 
 
-return arr;
+
+
+return result;
+
 
 
 }
@@ -288,13 +411,19 @@ function runPrediction(){
 if(!loaded){
 
 
-alert("数据未加载");
+
+alert(
+"数据未加载"
+);
+
 
 
 return;
 
 
 }
+
+
 
 
 
@@ -311,16 +440,15 @@ showResult();
 
 
 }
-
-
-
-
-
+// ======================================
+// V35.6.3 Part 2/4
+// 历史频率 + 趋势评分模型
+// ======================================
 
 
 
 // ================================
-// 建立评分模型
+// 建立模型
 // ================================
 
 
@@ -335,6 +463,10 @@ backScore={};
 
 
 
+
+
+// 初始化前区
+
 for(let i=1;i<=35;i++){
 
 
@@ -348,6 +480,10 @@ String(i).padStart(2,"0")
 }
 
 
+
+
+
+// 初始化后区
 
 for(let i=1;i<=12;i++){
 
@@ -366,29 +502,22 @@ String(i).padStart(2,"0")
 
 
 
-// 全历史频率
+
+
+// ================================
+// 历史频率评分
+// ================================
+
 
 dltData.forEach(function(item){
 
 
 
-item.front.forEach(function(n){
-
-
-frontScore[n]+=1;
-
-
-});
+item.front.forEach(function(num){
 
 
 
-item.back.forEach(function(n){
-
-
-backScore[n]+=1;
-
-
-});
+frontScore[num]+=1;
 
 
 
@@ -398,28 +527,12 @@ backScore[n]+=1;
 
 
 
-
-// 最近趋势权重
-
-dltData.slice(-300)
-.forEach(function(item){
+item.back.forEach(function(num){
 
 
 
-item.front.forEach(function(n){
+backScore[num]+=1;
 
-
-frontScore[n]+=3;
-
-
-});
-
-
-
-item.back.forEach(function(n){
-
-
-backScore[n]+=3;
 
 
 });
@@ -432,10 +545,114 @@ backScore[n]+=3;
 
 
 
-normalize(frontScore);
 
 
-normalize(backScore);
+
+
+// ================================
+// 最近趋势强化
+// 最近100期权重增加
+// ================================
+
+
+let recent =
+dltData.slice(-100);
+
+
+
+
+recent.forEach(function(item){
+
+
+
+item.front.forEach(function(num){
+
+
+
+frontScore[num]+=3;
+
+
+
+});
+
+
+
+
+
+item.back.forEach(function(num){
+
+
+
+backScore[num]+=3;
+
+
+
+});
+
+
+
+});
+
+
+
+
+
+
+
+
+// ================================
+// 最近30期超级权重
+// ================================
+
+
+let hot =
+dltData.slice(-30);
+
+
+
+
+hot.forEach(function(item){
+
+
+
+item.front.forEach(function(num){
+
+
+
+frontScore[num]+=5;
+
+
+
+});
+
+
+
+
+
+item.back.forEach(function(num){
+
+
+
+backScore[num]+=5;
+
+
+
+});
+
+
+
+});
+
+
+
+
+
+
+
+normalizeScore(frontScore);
+
+
+normalizeScore(backScore);
 
 
 
@@ -447,23 +664,31 @@ normalize(backScore);
 
 
 
+
 // ================================
-// 评分归一化
+// 分数归一化
 // ================================
 
 
-function normalize(obj){
+function normalizeScore(obj){
 
 
 
-let values=Object.values(obj);
+let values =
+Object.values(obj);
 
 
 
-let max=Math.max.apply(null,values);
+
+let max =
+Math.max(...values);
 
 
-let min=Math.min.apply(null,values);
+
+let min =
+Math.min(...values);
+
+
 
 
 
@@ -475,10 +700,15 @@ for(let key in obj){
 if(max===min){
 
 
+
 obj[key]=50;
 
 
-}else{
+
+}
+
+else{
+
 
 
 obj[key]=
@@ -486,17 +716,99 @@ obj[key]=
 ((obj[key]-min)/(max-min))*100;
 
 
+
+}
+
+
+
 }
 
 
 
 }
+
+
+
+
+
+
+
+
+// ================================
+// 获取冷热排序
+// ================================
+
+
+function sortScore(obj){
+
+
+
+return Object.keys(obj)
+.sort(function(a,b){
+
+
+
+return obj[b]-obj[a];
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+// ================================
+// 简单遗漏评分
+// ================================
+
+
+function omissionScore(num){
+
+
+
+let count=0;
+
+
+
+for(let i=dltData.length-1;i>=0;i--){
+
+
+
+if(dltData[i].front.includes(num)){
+
+
+
+break;
+
+
+}
+
+
+
+count++;
+
+
+
+}
+
+
+
+return count;
+
 
 
 }
 // ======================================
-// V35.6.1 Part 2
-// 蒙特卡罗组合筛选核心
+// V35.6.3 Part 3/4
+// 蒙特卡罗组合筛选
 // ======================================
 
 
@@ -514,7 +826,10 @@ let candidates=[];
 
 
 
-let pool=Object.keys(frontScore);
+let frontPool =
+Object.keys(frontScore);
+
+
 
 
 
@@ -524,69 +839,31 @@ for(let i=0;i<100000;i++){
 
 
 
-let combo=randomFront(pool);
+let combo =
+generateFront(frontPool);
 
 
 
-if(checkStructure(combo)){
 
 
+let score =
+calculateCombinationScore(combo);
 
-let score=calculateScore(combo);
+
 
 
 
 candidates.push({
 
 
+
 nums:combo,
+
 
 
 score:score
 
 
-});
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-// 如果过滤过严，备用全部候选
-
-if(candidates.length<100){
-
-
-
-candidates=[];
-
-
-
-for(let i=0;i<5000;i++){
-
-
-
-let combo=randomFront(pool);
-
-
-
-candidates.push({
-
-
-
-nums:combo,
-
-
-score:calculateScore(combo)
-
-
 
 });
 
@@ -596,28 +873,28 @@ score:calculateScore(combo)
 
 
 
-}
 
 
 
-
-
-
-// 排序
+// 按评分降序
 
 candidates.sort(function(a,b){
+
 
 
 return b.score-a.score;
 
 
+
 });
 
 
 
 
 
-// 三方案差异化
+
+
+// 三方案去重
 
 finalPlans=[];
 
@@ -628,19 +905,24 @@ let selected=[];
 
 
 
+
+
 for(let item of candidates){
 
 
 
-let duplicate=false;
+let same=false;
 
 
 
-selected.forEach(function(old){
+
+
+for(let old of selected){
 
 
 
-let same=0;
+let count=0;
+
 
 
 
@@ -651,7 +933,9 @@ item.nums.forEach(function(n){
 if(old.includes(n)){
 
 
-same++;
+
+count++;
+
 
 
 }
@@ -664,28 +948,32 @@ same++;
 
 
 
-if(same>=4){
+if(count>=4){
 
 
-duplicate=true;
+
+same=true;
+
 
 
 }
 
 
 
-});
+}
 
 
 
 
 
 
-if(!duplicate){
+
+if(!same){
 
 
 
 finalPlans.push(item);
+
 
 
 selected.push(item.nums);
@@ -697,12 +985,20 @@ selected.push(item.nums);
 
 
 
+
+
 if(finalPlans.length>=3){
+
 
 
 break;
 
 
+
+}
+
+
+
 }
 
 
@@ -710,9 +1006,6 @@ break;
 }
 
 
-
-
-}
 
 
 
@@ -722,11 +1015,11 @@ break;
 
 
 // ================================
-// 随机生成前区5个号码
+// 根据评分随机生成前区
 // ================================
 
 
-function randomFront(pool){
+function generateFront(pool){
 
 
 
@@ -738,20 +1031,64 @@ while(result.length<5){
 
 
 
-let index=Math.floor(
-Math.random()*pool.length
-);
+let total=0;
 
 
 
-let num=pool[index];
+pool.forEach(function(n){
 
 
 
-if(!result.includes(num)){
+total+=frontScore[n]+1;
 
 
-result.push(num);
+
+});
+
+
+
+
+
+
+
+let random =
+Math.random()*total;
+
+
+
+
+
+
+let sum=0;
+
+
+
+for(let n of pool){
+
+
+
+sum+=frontScore[n]+1;
+
+
+
+if(sum>=random){
+
+
+
+if(!result.includes(n)){
+
+
+
+result.push(n);
+
+
+
+}
+
+
+
+break;
+
 
 
 }
@@ -759,13 +1096,21 @@ result.push(num);
 
 
 }
+
+
+
+}
+
+
 
 
 
 result.sort(function(a,b){
 
 
+
 return Number(a)-Number(b);
+
 
 
 });
@@ -775,6 +1120,7 @@ return Number(a)-Number(b);
 return result;
 
 
+
 }
 
 
@@ -785,107 +1131,72 @@ return result;
 
 
 // ================================
-// 结构过滤
+// 组合综合评分
 // ================================
 
 
-function checkStructure(arr){
+function calculateCombinationScore(arr){
 
 
 
-let nums=arr.map(Number);
+let score=0;
+
+
+
+let nums =
+arr.map(Number);
 
 
 
 
 
-// 奇偶
 
-let odd=nums.filter(function(n){
+
+// 号码基础评分
+
+arr.forEach(function(n){
+
+
+
+score+=frontScore[n];
+
+
+
+});
+
+
+
+score=
+score/5;
+
+
+
+
+
+
+
+// 奇偶结构
+
+let odd =
+nums.filter(function(n){
+
 
 
 return n%2===1;
+
 
 
 }).length;
 
 
 
-if(odd===0 || odd===5){
 
 
-return false;
-
-
-}
+if(odd===2 || odd===3){
 
 
 
-
-
-// 和值
-
-let sum=nums.reduce(function(a,b){
-
-
-return a+b;
-
-
-},0);
-
-
-
-if(sum<60 || sum>180){
-
-
-return false;
-
-
-}
-
-
-
-
-
-
-// 跨度
-
-let span=
-
-nums[4]-nums[0];
-
-
-
-if(span<8 || span>34){
-
-
-return false;
-
-
-}
-
-
-
-
-
-// 连号限制
-
-
-let link=0;
-
-
-
-for(let i=1;i<nums.length;i++){
-
-
-
-if(nums[i]-nums[i-1]===1){
-
-
-link++;
-
-
-}
+score+=10;
 
 
 
@@ -893,63 +1204,54 @@ link++;
 
 
 
-if(link>=4){
 
 
-return false;
+
+
+// 三区结构
+
+let zone1=0;
+
+let zone2=0;
+
+let zone3=0;
+
+
+
+
+
+nums.forEach(function(n){
+
+
+
+if(n<=12){
+
+
+
+zone1++;
+
 
 
 }
 
+else if(n<=24){
 
 
 
-
-return true;
+zone2++;
 
 
 
 }
 
+else{
 
 
+zone3++;
 
-
-
-
-
-// ================================
-// 综合评分
-// ================================
-
-
-function calculateScore(arr){
-
-
-
-let total=0;
-
-
-
-arr.forEach(function(n){
-
-
-
-let value=Number(frontScore[n]);
-
-
-
-if(isNaN(value)){
-
-
-value=0;
 
 
 }
-
-
-
-total+=value;
 
 
 
@@ -958,22 +1260,16 @@ total+=value;
 
 
 
-let score=
-
-total/5;
 
 
-
-
+if(zone1>0 &&
+zone2>0 &&
+zone3>0){
 
 
 
-// 结构奖励
+score+=10;
 
-if(checkStructure(arr)){
-
-
-score+=15;
 
 
 }
@@ -982,42 +1278,103 @@ score+=15;
 
 
 
-// 分散奖励
-
-let span=
-
-Number(arr[4])-Number(arr[0]);
 
 
+// 和值
 
-if(span>=18){
+let sum =
+nums.reduce(function(a,b){
+
+
+
+return a+b;
+
+
+
+},0);
+
+
+
+
+
+if(sum>=90 && sum<=160){
+
+
+
+score+=10;
+
+
+
+}
+
+
+
+
+
+
+
+// 跨度
+
+let span =
+nums[4]-nums[0];
+
+
+
+
+
+if(span>=15 && span<=30){
+
 
 
 score+=5;
 
 
+
 }
 
 
 
 
 
-// 限制范围
+
+
+
+// 遗漏加权
+
+arr.forEach(function(n){
+
+
+
+let miss =
+omissionScore(n);
+
+
+
+if(miss>10){
+
+
+
+score+=2;
+
+
+
+}
+
+
+
+});
+
+
+
+
+
 
 if(score>100){
 
 
+
 score=100;
 
-
-}
-
-
-
-if(score<0){
-
-
-score=0;
 
 
 }
@@ -1031,8 +1388,8 @@ return score;
 
 }
 // ======================================
-// V35.6.1 Part 3
-// 后区评分 + 输出 + 反馈
+// V35.6.3 Part 4/4
+// 后区推荐 + 页面输出 + 反馈
 // ======================================
 
 
@@ -1046,16 +1403,8 @@ function getBackNumbers(){
 
 
 
-let list=Object.keys(backScore)
-.sort(function(a,b){
-
-
-
-return backScore[b]-backScore[a];
-
-
-
-});
+let list =
+sortScore(backScore);
 
 
 
@@ -1072,7 +1421,7 @@ return list.slice(0,2);
 
 
 // ================================
-// 输出结果
+// 输出预测结果
 // ================================
 
 
@@ -1084,21 +1433,33 @@ let html="";
 
 
 
-html+="<b>彩票智能分析系统 V35.6.1</b><br><br>";
+html +=
+
+"<b>彩票智能分析系统 V35.6.3</b><br><br>";
 
 
 
-html+="数据期数："+
+html +=
+
+"数据期数："+
+
 dltData.length+
+
 "期<br><br>";
 
 
 
-html+="蒙特卡罗模拟：100000组<br><br>";
+html +=
+
+"蒙特卡罗模拟：100000组<br><br>";
 
 
 
-html+="最终推荐<br><br>";
+html +=
+
+"最终推荐<br><br>";
+
+
 
 
 
@@ -1108,11 +1469,15 @@ if(finalPlans.length===0){
 
 
 
-html+="暂无方案";
+html +=
+
+"暂无方案";
 
 
 
-}else{
+}
+
+else{
 
 
 
@@ -1120,35 +1485,67 @@ finalPlans.forEach(function(item,index){
 
 
 
-html+="方案"+
+
+
+html +=
+
+"方案"+
+
 (index+1)+
+
 "：";
 
 
 
-html+=item.nums.join(" ");
+
+
+html +=
+
+item.nums.join(" ");
 
 
 
-html+=" + ";
+
+
+html +=
+
+" + ";
 
 
 
-html+=getBackNumbers().join(" ");
+
+
+html +=
+
+getBackNumbers().join(" ");
 
 
 
-html+="<br>";
+
+
+html +=
+
+"<br>";
 
 
 
-html+="综合评分："+
+
+
+html +=
+
+"综合评分："+
+
 item.score.toFixed(2)+
+
 "分";
 
 
 
-html+="<br><br>";
+
+
+html +=
+
+"<br><br>";
 
 
 
@@ -1162,53 +1559,72 @@ html+="<br><br>";
 
 
 
-html+="模型状态：V35.6.1 蒙特卡罗优化完成";
+
+html +=
+
+"模型状态：V35.6.3真实数据分析完成";
 
 
 
 
 
-let result=document.getElementById("result");
+
+let result =
+document.getElementById("result");
 
 
 
 if(result){
 
 
+
 result.innerHTML=html;
 
 
-}
-
-
-
-
-let learn=document.getElementById("learningStatus");
-
-
-
-if(learn){
-
-
-learn.innerHTML="等待开奖反馈学习";
-
 
 }
 
 
 
 
-let status=document.getElementById("systemStatus");
+
+
+let status =
+document.getElementById("systemStatus");
 
 
 
 if(status){
 
 
+
 status.innerHTML=
 
-"V35.6.1模型运行成功<br>"+
-"100000次组合筛选开启";
+"V35.6.3模型运行成功<br>"+
+"2895期历史数据参与计算";
+
+
+}
+
+
+
+
+
+
+
+let learn =
+document.getElementById("learningStatus");
+
+
+
+if(learn){
+
+
+
+learn.innerHTML=
+
+"等待开奖反馈学习";
+
 
 
 }
@@ -1234,43 +1650,52 @@ function saveFeedback(){
 
 
 
-let input=document.getElementById(
-"realResult"
-);
+let input =
+document.getElementById("realResult");
 
 
 
 if(!input){
 
 
+
 return;
+
 
 
 }
 
 
 
-let value=input.value;
-
-
-
-if(!value){
-
-
-alert("请输入开奖结果");
-
-
-return;
-
-
-}
+let value =
+input.value.trim();
 
 
 
 
-let learn=document.getElementById(
-"learningStatus"
+
+if(value===""){
+
+
+
+alert(
+"请输入开奖结果"
 );
+
+
+
+return;
+
+
+
+}
+
+
+
+
+
+let learn =
+document.getElementById("learningStatus");
 
 
 
@@ -1288,12 +1713,15 @@ learn.innerHTML=
 
 
 
+
+
 }
 
 
 
 
 
+
 // ======================================
-// V35.6.1 END
+// V35.6.3 END
 // ======================================
