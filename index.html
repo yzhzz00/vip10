@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="zh-CN">
 
 <head>
@@ -8,16 +7,15 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-
 <title>
-彩票智能分析系统 V60.2 CORE
+大乐透智能分析系统 V70 AI Agent
 </title>
 
 
 <link rel="stylesheet" href="style.css">
 
-</head>
 
+</head>
 
 
 <body>
@@ -26,14 +24,13 @@
 <div class="container">
 
 
-
 <h1>
-彩票智能分析系统 V60.2 CORE
+大乐透智能分析系统 V70 AI Agent
 </h1>
 
 
 
-
+<!-- 数据状态 -->
 
 <div class="box">
 
@@ -53,7 +50,6 @@
 </p>
 
 
-
 <p>
 历史期数：
 
@@ -66,7 +62,6 @@
 </p>
 
 
-
 </div>
 
 
@@ -74,24 +69,21 @@
 
 
 
-
-
+<!-- AI预测 -->
 
 <div class="box">
 
 
 <h2>
-AI智能预测
+AI智能预测中心
 </h2>
-
 
 
 <button onclick="startPredict()">
 
-开始 V60 AI分析
+启动 V70 AI分析
 
 </button>
-
 
 
 
@@ -101,10 +93,9 @@ AI智能预测
 
 
 
-
 <div id="predictResult">
 
-等待分析...
+等待AI决策...
 
 </div>
 
@@ -117,14 +108,13 @@ AI智能预测
 
 
 
-
-
+<!-- AI报告 -->
 
 <div class="box">
 
 
 <h2>
-AI分析报告
+AI多维分析报告
 </h2>
 
 
@@ -145,15 +135,15 @@ AI分析报告
 
 
 
-
+<!-- 回测 -->
 
 <div class="box">
 
 
 <h2>
 历史滚动回测
-</h2>
 
+</h2>
 
 
 <button onclick="startTrain()">
@@ -161,7 +151,6 @@ AI分析报告
 开始历史回测
 
 </button>
-
 
 
 
@@ -181,33 +170,33 @@ AI分析报告
 
 
 
-
+<!-- 反馈学习 -->
 
 <div class="box">
 
 
 <h2>
 开奖反馈学习
+
 </h2>
 
 
 
 <p>
-
-输入真实大乐透开奖号码
-
+输入真实开奖号码：
 </p>
-
-
 
 
 <input
 
 id="realResult"
 
-placeholder="例如 07 22 29 30 33 01 09"
+placeholder="例如：03 08 22 30 35 01 09"
 
 >
+
+
+<br><br>
 
 
 
@@ -219,12 +208,11 @@ placeholder="例如 07 22 29 30 33 01 09"
 
 
 
-
-<p id="learningStatus">
+<div id="learningStatus">
 
 等待反馈...
 
-</p>
+</div>
 
 
 
@@ -237,12 +225,14 @@ placeholder="例如 07 22 29 30 33 01 09"
 
 
 
+<!-- Agent状态 -->
+
 
 <div class="box">
 
 
 <h2>
-V60.2 CORE模型
+V70 AI Agent模型
 
 </h2>
 
@@ -252,76 +242,39 @@ V60.2 CORE模型
 
 
 <li>
-历史频率评分
+Master AI：总控决策
 </li>
 
 
 <li>
-号码趋势走向
+Trend AI：趋势走势分析
 </li>
 
 
 <li>
-遗漏周期分析
+Structure AI：号码结构分析
 </li>
 
 
 <li>
-冷热号平衡
+Markov AI：历史转移分析
 </li>
 
 
 <li>
-和值概率模型
+Risk AI：风险过滤
 </li>
 
 
 <li>
-奇偶结构分析
-</li>
-
-
-<li>
-三区结构分析
-</li>
-
-
-<li>
-连号概率分析
-</li>
-
-
-<li>
-重号概率分析
-</li>
-
-
-<li>
-马尔可夫转移模型
-</li>
-
-
-<li>
-后区独立模型
-</li>
-
-
-<li>
-固定随机种子蒙特卡罗模拟
-</li>
-
-
-<li>
-开奖反馈自学习
+Review AI：开奖复盘学习
 </li>
 
 
 </ul>
 
 
-
 </div>
-
 
 
 
@@ -335,17 +288,22 @@ V60.2 CORE模型
 
 <h2>
 系统状态
-</h2>
 
+</h2>
 
 
 <p>
 
-V60.2 CORE ENGINE RUNNING
+V70 MULTI AGENT CORE RUNNING
 
 </p>
 
 
+</div>
+
+
+
+
 
 </div>
 
@@ -354,13 +312,24 @@ V60.2 CORE ENGINE RUNNING
 
 
 
-</div>
+
+<!-- Agent加载 -->
+
+<script src="agents/masterAgent.js"></script>
+
+<script src="agents/trendAgent.js"></script>
+
+<script src="agents/structureAgent.js"></script>
+
+<script src="agents/markovAgent.js"></script>
+
+<script src="agents/riskAgent.js"></script>
+
+<script src="agents/reviewAgent.js"></script>
 
 
 
-
-
-
+<!-- 核心 -->
 
 <script src="engine.js"></script>
 
@@ -369,5 +338,6 @@ V60.2 CORE ENGINE RUNNING
 
 
 </body>
+
 
 </html>

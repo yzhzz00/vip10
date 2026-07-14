@@ -1,69 +1,27 @@
 /*
-================================
+=====================================
 
-大乐透智能分析系统 V60.2
+大乐透智能分析系统 V70
 
-页面控制
+前端控制层
 
-================================
+=====================================
 */
 
 
-let systemReady=false;
 
-
-
-// ======================
-// 启动
-// ======================
+// ==========================
+// 页面初始化
+// ==========================
 
 
 window.onload=async()=>{
 
 
-await initSystem();
-
-
-};
-
-
-
-
-
-// ======================
-// 初始化
-// ======================
-
-
-async function initSystem(){
-
-
-
 try{
 
 
-
-document.getElementById(
-
-"dataStatus"
-
-).innerHTML=
-
-"正在加载模型...";
-
-
-
-
-
 await AIEngine.init();
-
-
-
-
-
-systemReady=true;
-
-
 
 
 
@@ -89,19 +47,13 @@ AIEngine.dlt.length;
 
 
 
-
-
-showReport();
-
-
-
 }
 
 catch(e){
 
 
 
-console.log(e);
+console.error(e);
 
 
 
@@ -119,7 +71,7 @@ document.getElementById(
 
 
 
-}
+};
 
 
 
@@ -127,21 +79,12 @@ document.getElementById(
 
 
 
-
-// ======================
-// 开始预测
-// ======================
+// ==========================
+// AI预测
+// ==========================
 
 
 async function startPredict(){
-
-
-
-if(!systemReady)
-
-return;
-
-
 
 
 
@@ -166,10 +109,39 @@ document.getElementById(
 
 
 
-
 box.innerHTML=
 
-"AI模型启动...";
+"AI多智能体分析启动...";
+
+
+
+
+progress.innerHTML=`
+
+<div class="progress-bar">
+
+<div id="bar">
+
+0%
+
+</div>
+
+</div>
+
+`;
+
+
+
+
+
+let bar=
+
+document.getElementById(
+
+"bar"
+
+);
+
 
 
 
@@ -180,27 +152,13 @@ let result=
 
 await AIEngine.predict(
 
-(p)=>{
+p=>{
 
 
-
-progress.innerHTML=
-
-`
-
-<div class="progress-bar">
+bar.style.width=p+"%";
 
 
-<div style="width:${p}%">
-
-${p}%
-
-</div>
-
-
-</div>
-
-`;
+bar.innerHTML=p+"%";
 
 
 
@@ -209,65 +167,6 @@ ${p}%
 );
 
 
-
-
-
-
-progress.innerHTML=
-
-`
-
-<div class="progress-bar">
-
-
-<div style="width:100%">
-
-
-100% 完成
-
-
-</div>
-
-
-</div>
-
-`;
-
-
-
-
-
-
-showResult(result);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================
-// 显示预测
-// ======================
-
-
-function showResult(data){
-
-
-
-let box=
-
-document.getElementById(
-
-"predictResult"
-
-);
 
 
 
@@ -277,7 +176,7 @@ let html="";
 
 
 
-data.forEach((x,i)=>{
+result.forEach((x,i)=>{
 
 
 
@@ -289,7 +188,7 @@ html+=`
 
 <h3>
 
-方案${i+1}
+方案 ${i+1}
 
 </h3>
 
@@ -321,8 +220,8 @@ ${x.score}
 </p>
 
 
-
 </div>
+
 
 
 `;
@@ -335,7 +234,17 @@ ${x.score}
 
 
 
+
+
 box.innerHTML=html;
+
+
+
+
+
+
+
+showReport();
 
 
 
@@ -347,54 +256,49 @@ box.innerHTML=html;
 
 
 
-
-
-// ======================
+// ==========================
 // AI报告
-// ======================
+// ==========================
 
 
 function showReport(){
 
 
 
-let box=
-
-document.getElementById(
-
-"aiReport"
-
-);
-
-
-
-let r=
+let report=
 
 AIEngine.report();
 
 
 
 
+let html=`
 
-let html=
-
-`
+<p>
 
 版本：
 
-${r.version}
+${report.version}
 
-<br>
+</p>
+
+
+<p>
 
 历史数据：
 
-${r.history}期
+${report.history}
 
-<br><br>
+期
 
-号码评分TOP10:
+</p>
 
-<br>
+
+<h3>
+
+号码评分TOP10
+
+</h3>
 
 `;
 
@@ -402,22 +306,21 @@ ${r.history}期
 
 
 
-
-r.top10.forEach(x=>{
-
+report.top10.forEach(x=>{
 
 
-html+=
 
-`
+html+=`
+
+<p>
 
 ${x.num}
 
 ：
 
-${x.score.toFixed(2)}
+${x.score}
 
-<br>
+</p>
 
 `;
 
@@ -429,7 +332,13 @@ ${x.score.toFixed(2)}
 
 
 
-box.innerHTML=html;
+document.getElementById(
+
+"aiReport"
+
+).innerHTML=
+
+html;
 
 
 
@@ -441,11 +350,9 @@ box.innerHTML=html;
 
 
 
-
-
-// ======================
-// 回测
-// ======================
+// ==========================
+// 历史回测
+// ==========================
 
 
 async function startTrain(){
@@ -462,33 +369,21 @@ document.getElementById(
 
 
 
-let progress=
-
-document.getElementById(
-
-"progress"
-
-);
-
-
-
-
 
 
 box.innerHTML=
 
-"开始历史滚动回测...";
+"回测启动...";
 
 
 
 
 
-let r=
+let result=
 
 await AIEngine.backtest(
 
-(p)=>{
-
+p=>{
 
 
 box.innerHTML=
@@ -499,10 +394,6 @@ box.innerHTML=
 
 ${p}%
 
-<br>
-
-正在分析历史数据...
-
 `;
 
 
@@ -515,29 +406,40 @@ ${p}%
 
 
 
-box.innerHTML=
+box.innerHTML=`
 
-`
+<p>
 
 回测完成
 
-<br><br>
+</p>
 
-3中：
 
-${r.three}
+<p>
 
-<br>
+3个命中：
 
-4中：
+${result.three}
 
-${r.four}
+</p>
 
-<br>
 
-5中：
+<p>
 
-${r.five}
+4个命中：
+
+${result.four}
+
+</p>
+
+
+<p>
+
+5个命中：
+
+${result.five}
+
+</p>
 
 `;
 
@@ -551,11 +453,9 @@ ${r.five}
 
 
 
-
-
-// ======================
-// 开奖反馈
-// ======================
+// ==========================
+// 保存开奖反馈
+// ==========================
 
 
 function saveFeedback(){
@@ -572,13 +472,6 @@ document.getElementById(
 
 
 
-if(!value)
-
-return;
-
-
-
-
 let arr=
 
 value.trim()
@@ -589,11 +482,51 @@ value.trim()
 
 
 
+if(arr.length<7){
+
+
+
+alert(
+
+"请输入完整开奖号码"
+
+);
+
+
+
+return;
+
+
+
+}
+
+
+
+
+
+let front=
+
+arr.slice(0,5);
+
+
+
+let back=
+
+arr.slice(5,7);
+
+
+
+
+
+
+
+let result=
+
 AIEngine.feedback(
 
-arr.slice(0,5),
+front,
 
-arr.slice(5,7)
+back
 
 );
 
@@ -608,15 +541,15 @@ document.getElementById(
 
 ).innerHTML=
 
-`
+"反馈学习完成";
 
-反馈完成
 
-<br>
 
-模型已更新
+console.log(
 
-`;
+result
+
+);
 
 
 

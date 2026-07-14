@@ -1,95 +1,273 @@
-彩票智能分析系统 V60.1 CORE
+/*
+================================================
 
-数据状态
+大乐透智能分析系统 V70
 
-大乐透数据： 数据加载成功
+MULTI AGENT CORE ENGINE
 
-历史期数： 2895 期
+核心引擎
 
-AI智能分析
-
-开始 V60 AI分析
-100% 完成
-方案 1
-前区： 03 05 22 29 33
-后区： 06 09
-AI评分： 520.2
-方案 2
-前区： 03 05 22 29 33
-后区： 01 12
-AI评分： 520.2
-方案 3
-前区： 03 05 22 29 33
-后区： 04 01
-AI评分： 520.2
-AI分析报告
-
-等待生成...
-历史回测
-
-开始滚动回测
-回测周期： 100期
-
-3个命中： 0
-4个命中： 0
-5个命中： 0
-开奖反馈学习
-
-输入真实开奖号码：
-
- 保存开奖反馈
-等待反馈...
-
-V60 CORE模型
-
-动态频率模型
-趋势走向模型
-遗漏周期模型
-和值概率模型
-奇偶结构模型
-三区结构模型
-连号概率模型
-重号概率模型
-马尔可夫转移模型
-后区独立模型
-蒙特卡罗模拟
-开奖反馈学习
-系统状态
-// ======================
-// 建立评分缓存
-// ======================
+================================================
+*/
 
 
-buildCache(){
+class AIEngine{
 
 
-this.cache={
+constructor(){
 
-frequency:{},
 
-trend:{},
+this.version="V70.0";
 
-omit:{}
+
+// 大乐透数据
+
+this.dlt=[];
+
+
+// 学习数据
+
+this.learning={
+
+weights:{
+
+
+trend:0.2,
+
+structure:0.2,
+
+markov:0.2,
+
+frequency:0.2,
+
+risk:0.2
+
+
+}
+
 
 };
 
 
 
-for(let i=1;i<=35;i++){
+// AI专家
+
+this.agents={};
 
 
 
-let n=
+// AI记忆
 
-String(i).padStart(2,"0");
+this.memory={
+
+};
+
+
+}
 
 
 
-this.cache.frequency[n]=0;
+// ============================
+// 初始化
+// ============================
 
-this.cache.trend[n]=0;
 
-this.cache.omit[n]=0;
+async init(){
+
+
+await this.loadData();
+
+
+
+this.initAgents();
+
+
+
+this.buildFrequency();
+
+
+
+console.log(
+
+"V70 Agent系统启动"
+
+);
+
+
+
+return true;
+
+
+}
+
+
+
+
+
+
+
+// ============================
+// 加载大乐透数据
+// ============================
+
+
+async loadData(){
+
+
+
+try{
+
+
+let res=
+
+await fetch(
+
+"data/dlt.txt"
+
+);
+
+
+
+let text=
+
+await res.text();
+
+
+
+this.dlt=
+
+this.parseDLT(text);
+
+
+
+console.log(
+
+"大乐透数据加载:",
+
+this.dlt.length
+
+);
+
+
+
+}
+
+catch(e){
+
+
+console.log(
+
+"数据读取失败",
+
+e
+
+);
+
+
+
+this.dlt=[];
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+// ============================
+// 数据解析
+// ============================
+
+
+parseDLT(text){
+
+
+
+let lines=
+
+text.split("\n");
+
+
+
+let arr=[];
+
+
+
+lines.forEach(line=>{
+
+
+
+let p=
+
+line.trim()
+
+.split(/\s+/);
+
+
+
+
+if(p.length>=9){
+
+
+
+arr.push({
+
+
+
+period:p[0],
+
+
+
+date:p[1],
+
+
+
+front:[
+
+p[2],
+
+p[3],
+
+p[4],
+
+p[5],
+
+p[6]
+
+],
+
+
+
+back:[
+
+p[7],
+
+p[8]
+
+]
+
+
+
+});
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+return arr;
 
 
 
@@ -101,7 +279,109 @@ this.cache.omit[n]=0;
 
 
 
-// 频率
+// ============================
+// 加载AI专家
+// ============================
+
+
+initAgents(){
+
+
+
+this.agents={
+
+
+
+master:
+
+window.MasterAgent,
+
+
+
+trend:
+
+window.TrendAgent,
+
+
+
+structure:
+
+window.StructureAgent,
+
+
+
+markov:
+
+window.MarkovAgent,
+
+
+
+risk:
+
+window.RiskAgent,
+
+
+
+review:
+
+window.ReviewAgent
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+
+
+// ============================
+// 频率基础模型
+// ============================
+
+
+buildFrequency(){
+
+
+
+this.frequency={};
+
+
+
+for(
+
+let i=1;
+
+i<=35;
+
+i++
+
+){
+
+
+let n=
+
+String(i)
+
+.padStart(2,"0");
+
+
+
+this.frequency[n]=0;
+
+
+}
+
+
+
+
+
 
 this.dlt.forEach(item=>{
 
@@ -111,138 +391,7 @@ item.front.forEach(n=>{
 
 
 
-this.cache.frequency[n]++;
-
-
-
-});
-
-
-
-});
-
-
-
-
-
-
-
-// 趋势
-
-let last100=
-
-this.dlt.slice(-100);
-
-
-
-last100.forEach((item,index)=>{
-
-
-
-item.front.forEach(n=>{
-
-
-
-this.cache.trend[n]+=
-
-(index+1)/100;
-
-
-
-});
-
-
-
-});
-
-
-
-
-
-
-
-// 遗漏
-
-for(let n in this.cache.omit){
-
-
-
-for(let i=this.dlt.length-1;i>=0;i--){
-
-
-
-if(this.dlt[i].front.includes(n))
-
-break;
-
-
-
-this.cache.omit[n]++;
-
-
-
-}
-
-
-
-}
-
-
-
-},
-
-
-
-
-
-
-
-// ======================
-// 马尔可夫
-// ======================
-
-
-buildMarkov(){
-
-
-let map={};
-
-
-
-for(let i=0;i<this.dlt.length-1;i++){
-
-
-
-let a=this.dlt[i].front;
-
-
-let b=this.dlt[i+1].front;
-
-
-
-
-
-a.forEach(x=>{
-
-
-
-if(!map[x])
-
-map[x]={};
-
-
-
-b.forEach(y=>{
-
-
-
-if(!map[x][y])
-
-map[x][y]=0;
-
-
-
-map[x][y]++;
+this.frequency[n]++;
 
 
 
@@ -258,128 +407,30 @@ map[x][y]++;
 
 
 
-this.markov=map;
 
 
 
-},
 
+// ============================
+// 获取号码池
+// ============================
 
 
+getNumberPool(){
 
-
-
-
-// ======================
-// 单号综合评分
-// ======================
-
-
-numberScore(n){
-
-
-
-let w=
-
-this.learning.weights || {
-
-
-
-frequency:.2,
-
-trend:.2,
-
-omit:.2,
-
-markov:.2,
-
-structure:.2
-
-};
-
-
-
-
-
-
-let hot=
-
-this.cache.frequency[n];
-
-
-
-let trend=
-
-this.cache.trend[n];
-
-
-
-let omit=
-
-this.cache.omit[n];
-
-
-
-
-
-
-// 热号适当压制
-
-let coldBonus=
-
-omit>15?10:0;
-
-
-
-
-
-return (
-
-hot*w.frequency
-
-+
-
-trend*w.trend
-
-+
-
-omit*w.omit
-
-+
-
-coldBonus
-
-);
-
-
-
-},
-
-
-
-
-
-
-
-// ======================
-// 候选号码
-// ======================
-
-
-candidatePool(){
 
 
 let arr=[];
 
 
 
-for(let i=1;i<=35;i++){
+Object.keys(
 
+this.frequency
 
+)
 
-let n=
-
-String(i).padStart(2,"0");
+.forEach(n=>{
 
 
 
@@ -390,7 +441,9 @@ arr.push({
 num:n,
 
 
-score:this.numberScore(n)
+score:
+
+this.frequency[n]
 
 
 
@@ -398,7 +451,8 @@ score:this.numberScore(n)
 
 
 
-}
+});
+
 
 
 
@@ -417,51 +471,289 @@ return arr;
 
 
 
-},
-// ======================
-// 生成前区
-// ======================
-
-
-generateFront(pool,mode){
-
-
-
-let result=[];
-
-
-
-let start=0;
-
-
-
-// 三种策略错开
-
-if(mode===1){
-
-start=0;
-
-}
-
-
-if(mode===2){
-
-start=5;
-
-}
-
-
-if(mode===3){
-
-start=10;
-
 }
 
 
 
 
 
-while(result.length<5){
+}
+/*
+
+================================================
+
+V70 多智能体决策核心
+
+================================================
+
+*/
+
+
+// ============================
+// AI综合分析
+// ============================
+
+
+agentAnalysis(){
+
+
+
+let result={};
+
+
+
+let trend={};
+
+let structure={};
+
+let markov={};
+
+
+
+
+
+
+// 趋势AI
+
+if(this.agents.trend){
+
+
+
+trend=
+
+this.agents.trend.analyze(
+
+this.dlt
+
+);
+
+
+
+}
+
+
+
+
+
+
+// 结构AI
+
+if(this.agents.structure){
+
+
+
+structure=
+
+this.agents.structure.analyze(
+
+this.dlt
+
+);
+
+
+
+}
+
+
+
+
+
+
+// 马尔可夫AI
+
+if(this.agents.markov){
+
+
+
+markov=
+
+this.agents.markov.analyze(
+
+this.dlt
+
+);
+
+
+
+}
+
+
+
+
+
+
+result.models=[
+
+
+
+trend,
+
+structure,
+
+markov
+
+
+
+];
+
+
+
+
+
+
+
+// Master AI决策
+
+
+if(this.agents.master){
+
+
+
+result.master=
+
+this.agents.master.decision(
+
+result.models
+
+);
+
+
+
+}
+
+
+
+return result;
+
+
+
+}
+
+
+
+
+
+
+
+// ============================
+// 候选号码生成
+// ============================
+
+
+generateCandidate(strategy){
+
+
+
+let pool=
+
+this.getNumberPool();
+
+
+
+
+
+let numbers=[];
+
+
+
+
+
+let weightPool=[];
+
+
+
+
+
+pool.forEach(x=>{
+
+
+
+let weight=x.score;
+
+
+
+// 根据策略调整
+
+
+
+if(strategy==="hot"){
+
+
+
+if(
+
+x.score>80
+
+)
+
+weight*=1.5;
+
+
+
+}
+
+
+
+
+if(strategy==="cold"){
+
+
+
+if(
+
+x.score<50
+
+)
+
+weight*=1.5;
+
+
+
+}
+
+
+
+
+
+for(
+
+let i=0;
+
+i<Math.max(
+
+1,
+
+Math.floor(weight/10)
+
+);
+
+i++
+
+){
+
+
+
+weightPool.push(
+
+x.num
+
+);
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+while(numbers.length<5){
 
 
 
@@ -469,31 +761,30 @@ let index=
 
 Math.floor(
 
-this.random()*20
+Math.random()
 
-)
+*
 
-+start;
+weightPool.length
 
-
-
-if(index>=pool.length)
-
-index=pool.length-1;
+);
 
 
 
 let n=
 
-pool[index].num;
+weightPool[index];
 
 
 
 
-if(!result.includes(n)){
+
+if(!numbers.includes(n)){
 
 
-result.push(n);
+
+numbers.push(n);
+
 
 
 }
@@ -504,7 +795,10 @@ result.push(n);
 
 
 
-return result.sort(
+
+
+
+return numbers.sort(
 
 (a,b)=>
 
@@ -514,7 +808,7 @@ Number(a)-Number(b)
 
 
 
-},
+}
 
 
 
@@ -522,9 +816,9 @@ Number(a)-Number(b)
 
 
 
-// ======================
-// 后区
-// ======================
+// ============================
+// 后区生成
+// ============================
 
 
 generateBack(){
@@ -535,13 +829,23 @@ let arr=[];
 
 
 
-for(let i=1;i<=12;i++){
+for(
+
+let i=1;
+
+i<=12;
+
+i++
+
+){
 
 
 
 arr.push(
 
-String(i).padStart(2,"0")
+String(i)
+
+.padStart(2,"0")
 
 );
 
@@ -553,57 +857,57 @@ String(i).padStart(2,"0")
 
 
 
-let a=
+let result=[];
+
+
+
+
+
+while(result.length<2){
+
+
+
+let n=
+
+arr[
 
 Math.floor(
 
-this.random()*12
+Math.random()
 
-);
+*
 
+arr.length
 
-
-let b=
-
-Math.floor(
-
-this.random()*12
-
-);
-
-
-
-
-
-
-while(b===a){
-
-
-b=
-
-Math.floor(
-
-this.random()*12
-
-);
-
-
-}
-
-
-
-
-return [
-
-arr[a],
-
-arr[b]
+)
 
 ];
 
 
 
-},
+
+if(!result.includes(n)){
+
+
+
+result.push(n);
+
+
+
+}
+
+
+
+}
+
+
+
+
+return result;
+
+
+
+}
 
 
 
@@ -611,23 +915,369 @@ arr[b]
 
 
 
-// ======================
-// 组合评分
-// ======================
+
+// ============================
+// 风险过滤
+// ============================
 
 
-comboScore(front,back){
+checkRisk(front){
 
 
 
-let score=0;
+if(this.agents.risk){
 
+
+
+return this.agents.risk.check(
+
+front
+
+);
+
+
+
+}
+
+
+
+
+
+return {
+
+
+pass:true,
+
+
+risk:0
+
+
+};
+
+
+
+}
+/*
+
+================================================
+
+V70 预测核心
+
+Master AI + 蒙特卡罗筛选
+
+================================================
+
+*/
+
+
+
+// ============================
+// 主预测入口
+// ============================
+
+
+async predict(progress){
+
+
+
+let analysis=
+
+this.agentAnalysis();
+
+
+
+
+
+let strategy=
+
+"balanced";
+
+
+
+
+
+if(
+
+analysis.master &&
+
+analysis.master.strategy
+
+){
+
+
+strategy=
+
+analysis.master.strategy;
+
+
+
+}
+
+
+
+
+
+
+let candidates=[];
+
+
+
+let total=50000;   // 候选模拟数量
+
+
+
+
+
+for(
+
+let i=0;
+
+i<total;
+
+i++
+
+){
+
+
+
+let front=
+
+this.generateCandidate(
+
+strategy
+
+);
+
+
+
+let risk=
+
+this.checkRisk(
+
+front
+
+);
+
+
+
+
+
+if(
+
+risk.pass
+
+){
+
+
+
+let back=
+
+this.generateBack();
+
+
+
+
+let score=
+
+this.scoreCandidate(
+
+front,
+
+back,
+
+analysis
+
+);
+
+
+
+
+
+candidates.push({
+
+
+
+front,
+
+
+back,
+
+
+score
+
+
+
+});
+
+
+
+}
+
+
+
+if(progress && i%500===0){
+
+
+
+progress(
+
+Math.floor(
+
+i/total*100
+
+)
+
+);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+// 分数排序
+
+
+candidates.sort(
+
+(a,b)=>
+
+b.score-a.score
+
+);
+
+
+
+
+
+
+// 去除重复方案
+
+
+let result=[];
+
+
+
+let cache={};
+
+
+
+
+
+
+for(let item of candidates){
+
+
+
+let key=
+
+item.front.join("-")
+
++
+
+item.back.join("-");
+
+
+
+
+
+if(!cache[key]){
+
+
+
+result.push(item);
+
+
+
+cache[key]=true;
+
+
+
+}
+
+
+
+if(result.length>=3)
+
+break;
+
+
+
+}
+
+
+
+
+
+
+
+this.lastPrediction=result;
+
+
+
+this.lastAnalysis=analysis;
+
+
+
+return result;
+
+
+
+}
+
+
+
+
+
+
+
+// ============================
+// 综合评分
+// ============================
+
+
+scoreCandidate(
+
+front,
+
+back,
+
+analysis
+
+){
+
+
+
+let score=500;
+
+
+
+// 频率评分
 
 
 front.forEach(n=>{
 
 
-score+=this.numberScore(n);
+
+if(this.frequency[n]){
+
+
+
+score+=
+
+this.frequency[n]*0.8;
+
+
+
+}
+
 
 
 });
@@ -635,6 +1285,112 @@ score+=this.numberScore(n);
 
 
 
+
+
+
+// 趋势加权
+
+
+if(
+
+analysis.models[0]
+
+&&
+
+analysis.models[0].rise
+
+){
+
+
+
+front.forEach(n=>{
+
+
+
+if(
+
+analysis.models[0]
+
+.rise
+
+.includes(n)
+
+){
+
+
+
+score+=20;
+
+
+
+}
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+// 马尔可夫
+
+
+if(
+
+analysis.models[2]
+
+&&
+
+analysis.models[2].nextHot
+
+){
+
+
+
+front.forEach(n=>{
+
+
+
+if(
+
+analysis.models[2]
+
+.nextHot
+
+.includes(n)
+
+){
+
+
+
+score+=15;
+
+
+
+}
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+// 结构奖励
 
 
 let sum=
@@ -652,11 +1408,19 @@ a+Number(b),
 
 
 
-// 和值接近90-95增加
 
-score-=
+if(sum>=80 && sum<=110){
 
-Math.abs(sum-92)*0.8;
+
+
+score+=30;
+
+
+
+}
+
+
+
 
 
 
@@ -668,279 +1432,30 @@ score.toFixed(2)
 
 
 
-},
-
-
-
-
-
-
-
-// ======================
-// 稳定蒙特卡罗
-// ======================
-
-
-async predict(callback){
-
-
-
-let pool=
-
-this.candidatePool();
-
-
-
-let result=[];
-
-
-
-let total=1000000;
-
-
-
-let batch=5000;
-
-
-
-for(
-
-let i=0;
-
-i<total;
-
-i+=batch
-
-){
-
-
-
-for(
-
-let j=0;
-
-j<batch;
-
-j++
-
-){
-
-
-
-let mode=
-
-(j%3)+1;
-
-
-
-
-let front=
-
-this.generateFront(
-
-pool,
-
-mode
-
-);
-
-
-
-let back=
-
-this.generateBack();
-
-
-
-result.push({
-
-
-
-front,
-
-
-back,
-
-
-score:
-
-this.comboScore(
-
-front,
-
-back
-
-),
-
-
-
-type:
-
-"方案"+mode
-
-
-
-});
-
-
-
-}
-
-
-
-
-if(callback){
-
-
-
-callback(
-
-Math.floor(
-
-i/total*100
-
-)
-
-);
-
-
-
-}
-
-
-
-await new Promise(
-
-r=>
-
-setTimeout(r,5)
-
-);
-
-
-
 }
 
 
 
 
 
-result.sort(
 
-(a,b)=>
 
-b.score-a.score
-
-);
-
-
-
-
-
-
-// 去除重复前区
-
-let final=[];
-
-
-
-result.forEach(x=>{
-
-
-
-let same=
-
-final.some(y=>
-
-
-
-y.front.join()==
-
-x.front.join()
-
-);
-
-
-
-if(!same && final.length<3){
-
-
-
-final.push(x);
-
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-this.predictHistory.records.push({
-
-
-
-time:
-
-Date.now(),
-
-
-
-result:final
-
-
-
-});
-
-
-
-
-
-localStorage.setItem(
-
-"predict_history",
-
-JSON.stringify(
-
-this.predictHistory
-
-)
-
-);
-
-
-
-
-
-return final;
-
-
-
-},
-
-
-
-
-
-
-
-// ======================
+// ============================
 // AI报告
-// ======================
+// ============================
 
 
 report(){
 
 
 
-let pool=
+let top=
 
-this.candidatePool();
+this.getNumberPool()
+
+.slice(0,10);
+
+
 
 
 
@@ -951,13 +1466,23 @@ return {
 version:this.version,
 
 
+
 history:this.dlt.length,
 
 
 
-top10:
+top10:top.map(x=>({
 
-pool.slice(0,10)
+
+
+num:x.num,
+
+
+score:x.score
+
+
+
+}))
 
 
 
@@ -965,25 +1490,31 @@ pool.slice(0,10)
 
 
 
-},
+}
+/*
+
+================================================
+
+V70 学习闭环
+
+回测 + 开奖反馈 + 导出
+
+================================================
+
+*/
 
 
 
+// ============================
+// 历史回测
+// ============================
 
 
-
-
-// ======================
-// 回测
-// ======================
-
-
-async backtest(callback){
+async backtest(progress){
 
 
 
 let total=100;
-
 
 
 let result={
@@ -992,7 +1523,9 @@ let result={
 
 three:0,
 
+
 four:0,
+
 
 five:0
 
@@ -1004,84 +1537,25 @@ five:0
 
 
 
+for(
 
-for(let i=0;i<total;i++){
+let i=100;
 
+i<this.dlt.length;
 
+i++
 
-if(callback){
-
-
-
-callback(i);
-
-
-
-}
-
-
-
-
-
-await new Promise(
-
-r=>
-
-setTimeout(r,10)
-
-);
-
-
-
-}
-
-
-
-
-
-if(callback)
-
-callback(100);
-
-
-
-
-
-
-return result;
-
-
-
-},
-
-
-
-
-
-
-
-// ======================
-// 反馈学习
-// ======================
-
-
-feedback(front,back){
+){
 
 
 
 let history=
 
-JSON.parse(
+this.dlt.slice(
 
-localStorage.getItem(
+0,
 
-"predict_history"
-
-)
-
-||
-
-'{"records":[]}'
+i
 
 );
 
@@ -1089,31 +1563,24 @@ localStorage.getItem(
 
 
 
-if(!history.records.length)
+let real=
 
-return;
-
-
+this.dlt[i];
 
 
 
 
-let last=
 
-history.records[
+let prediction=
 
-history.records.length-1
-
-];
-
-
-
+await this.predict();
 
 
 
 let best=
 
-last.result[0];
+prediction[0];
+
 
 
 
@@ -1127,9 +1594,19 @@ best.front.forEach(n=>{
 
 
 
-if(front.includes(n))
+if(
+
+real.front.includes(n)
+
+){
+
+
 
 hit++;
+
+
+
+}
 
 
 
@@ -1140,20 +1617,51 @@ hit++;
 
 
 
-if(hit>=3){
+if(hit>=3)
+
+result.three++;
 
 
 
-this.learning.weights.trend+=0.01;
+if(hit>=4)
+
+result.four++;
+
+
+
+if(hit>=5)
+
+result.five++;
+
+
+
+
+
+
+let p=
+
+Math.floor(
+
+(i/this.dlt.length)*100
+
+);
+
+
+
+if(progress)
+
+progress(p);
 
 
 
 }
 
-else{
 
 
-this.learning.weights.omit+=0.01;
+
+
+return result;
+
 
 
 }
@@ -1162,17 +1670,84 @@ this.learning.weights.omit+=0.01;
 
 
 
-localStorage.setItem(
 
-"learning",
 
-JSON.stringify(
+// ============================
+// 开奖反馈学习
+// ============================
 
-this.learning
+
+feedback(front,back){
+
+
+
+if(
+
+!this.lastPrediction
 
 )
 
-);
+return;
+
+
+
+let result=
+
+this.lastPrediction[0];
+
+
+
+
+
+let hit=0;
+
+
+
+result.front.forEach(n=>{
+
+
+
+if(front.includes(n)){
+
+
+
+hit++;
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+
+let review={
+
+
+
+hit,
+
+
+predict:
+
+result,
+
+
+real:{
+
+
+
+front,
+
+
+back
 
 
 
@@ -1187,6 +1762,118 @@ this.learning
 
 
 
+
+let log;
+
+
+
+if(this.agents.review){
+
+
+
+log=
+
+this.agents.review.review(
+
+result.front,
+
+front
+
+);
+
+
+
+}
+
+
+
+
+
+this.memory.lastReview={
+
+
+
+review,
+
+
+log
+
+
+
+};
+
+
+
+
+
+
+console.log(
+
+"V70学习完成",
+
+this.memory
+
+);
+
+
+
+
+return this.memory;
+
+
+
+}
+
+
+
+
+
+
+
+
+// ============================
+// 获取系统状态
+// ============================
+
+
+status(){
+
+
+
+return {
+
+
+
+version:this.version,
+
+
+data:this.dlt.length,
+
+
+agents:Object.keys(
+
+this.agents
+
+)
+
+
+
+};
+
+
+
+}
+
+
+
+}
+
+
+
+
+// 创建实例
+
+
 window.AIEngine=
 
-AIEngine;
+new AIEngine();
