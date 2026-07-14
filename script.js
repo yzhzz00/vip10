@@ -1,49 +1,30 @@
 /*
-====================================
+================================
 
 大乐透智能分析系统
 
-V70.2 DEBUG SCRIPT
+V70 TEST SCRIPT
 
-初始化检测版
+初始化测试版
 
-====================================
+================================
 */
 
 
-let systemReady = false;
+let systemReady=false;
 
 
 
-
-
-window.onload = async function(){
-
-
-await initSystem();
-
-
-};
-
-
-
-
-
-
-
-
-
-async function initSystem(){
-
+window.onload=async function(){
 
 
 try{
 
 
+document.getElementById("dataStatus").innerHTML=
 
-showDataStatus(
-"正在启动 V70.2..."
-);
+"正在加载AI核心...";
+
 
 
 
@@ -52,7 +33,8 @@ await AIEngine.init();
 
 
 
-let status =
+
+let status=
 
 AIEngine.status();
 
@@ -66,127 +48,15 @@ systemReady=true;
 
 
 
-showDataStatus(
-"系统加载成功"
-);
+document.getElementById("dataStatus").innerHTML=
 
+"加载成功";
 
 
 
 
-showSystemStatus(status);
 
-
-
-
-
-}
-
-catch(error){
-
-
-
-systemReady=false;
-
-
-
-
-showDataStatus(
-
-"初始化失败：" +
-
-error.message
-
-);
-
-
-
-
-showSystemStatus({
-
-version:"ERROR",
-
-data:0,
-
-agents:[]
-
-});
-
-
-
-
-
-console.log(
-"初始化错误",
-error
-);
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function showDataStatus(text){
-
-
-
-let box =
-
-document.getElementById(
-"dataStatus"
-);
-
-
-
-if(box){
-
-
-box.innerHTML=text;
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function showSystemStatus(status){
-
-
-
-let box =
-
-document.getElementById(
-"systemStatus"
-);
-
-
-
-if(box){
-
-
-
-box.innerHTML=
-
+document.getElementById("systemStatus").innerHTML=
 
 `
 
@@ -194,155 +64,19 @@ box.innerHTML=
 
 ${status.version}
 
+<br>
+
+数据：
+
+${status.data}期
 
 <br>
 
+状态：
 
-历史数据：
-
-${status.data} 期
-
-
-<br>
-
-
-模型：
-
-${
-
-status.agents.length
-
-?
-
-status.agents.join(",")
-
-:
-
-"未加载"
-
-}
-
+正常
 
 `;
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================
-// AI分析按钮
-// ======================
-
-
-async function startPredict(){
-
-
-
-if(!systemReady){
-
-
-
-alert(
-"系统未准备完成"
-);
-
-
-
-return;
-
-
-
-}
-
-
-
-
-
-let box =
-
-document.getElementById(
-"predictResult"
-);
-
-
-
-
-
-if(box){
-
-
-box.innerHTML=
-
-"AI分析启动中...";
-
-
-}
-
-
-
-
-
-try{
-
-
-
-let result =
-
-await AIEngine.analyze();
-
-
-
-
-
-if(box){
-
-
-
-box.innerHTML=
-
-`
-
-<h3>
-V70.2分析完成
-</h3>
-
-
-历史数据：
-
-${result.history}
-
-
-<br><br>
-
-
-${
-
-JSON.stringify(
-
-result
-
-)
-
-}
-
-
-`;
-
-
-
-}
 
 
 
@@ -354,20 +88,13 @@ catch(e){
 
 
 
-if(box){
+document.getElementById("dataStatus").innerHTML=
+
+"加载失败：" + e.message;
 
 
 
-box.innerHTML=
-
-"分析失败："+e.message;
-
-
-}
-
-
-
-}
+console.log(e);
 
 
 
@@ -375,33 +102,55 @@ box.innerHTML=
 
 
 
+};
 
 
 
 
 
 
-// ======================
-// 开奖反馈
-// ======================
+
+function startPredict(){
+
+
+
+if(!systemReady){
+
+
+alert("系统未准备完成");
+
+
+return;
+
+
+}
+
+
+
+document.getElementById("predictResult").innerHTML=
+
+"测试成功，AI分析入口正常";
+
+
+
+}
+
+
+
+
 
 
 function saveFeedback(){
 
 
 
-let input =
+let input=
 
-document.getElementById(
-"realResult"
-);
-
+document.getElementById("realResult");
 
 
 
 if(!input)return;
-
-
 
 
 
@@ -415,27 +164,9 @@ input.value
 
 
 
-
-
-let box =
-
-document.getElementById(
-"learningStatus"
-);
-
-
-
-if(box){
-
-
-
-box.innerHTML=
+document.getElementById("learningStatus").innerHTML=
 
 "反馈保存成功";
-
-
-}
-
 
 
 }
