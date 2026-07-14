@@ -1,46 +1,64 @@
 /*
-V70 TEST SCRIPT
+================================
+
+大乐透智能分析系统
+
+V70.2 CORE SCRIPT
+
+启动版
+
+================================
 */
 
 
-window.onload=function(){
-
-
-if(typeof AIEngine==="undefined"){
-
-
-document.getElementById(
-"dataStatus"
-).innerHTML=
-
-"AIEngine不存在";
-
-
-return;
-
-
-}
+let systemReady=false;
 
 
 
+
+window.onload=async function(){
+
+
+try{
 
 
 document.getElementById(
 "dataStatus"
 ).innerHTML=
 
-"AIEngine加载成功";
+"AI系统启动中...";
+
+
+
+
+await AIEngine.init();
 
 
 
 
 
-AIEngine.init()
+let status=
 
-.then(()=>{
+AIEngine.status();
 
 
-let s=AIEngine.status();
+
+
+
+systemReady=true;
+
+
+
+
+
+
+document.getElementById(
+"dataStatus"
+).innerHTML=
+
+"大乐透数据加载成功";
+
+
 
 
 
@@ -51,32 +69,163 @@ document.getElementById(
 `
 
 版本：
-${s.version}
+
+${status.version}
+
 
 <br>
 
-数据：
-${s.data}
+
+历史数据：
+
+${status.data}期
+
+
+<br>
+
+
+模型：
+
+${status.agents.join(" / ")}
 
 `;
 
 
 
-})
 
-.catch(e=>{
+
+}
+
+catch(e){
+
 
 
 document.getElementById(
-"systemStatus"
+"dataStatus"
 ).innerHTML=
 
-"错误："+e.message;
+"加载失败："+e.message;
 
 
 
-});
+console.log(e);
+
+
+
+}
 
 
 
 };
+
+
+
+
+
+
+
+async function startPredict(){
+
+
+
+if(!systemReady){
+
+
+alert(
+"系统还未启动完成"
+);
+
+
+return;
+
+
+}
+
+
+
+
+let result=
+
+await AIEngine.analyze();
+
+
+
+
+
+document.getElementById(
+"predictResult"
+).innerHTML=
+
+`
+
+<h3>
+AI分析完成
+</h3>
+
+
+版本：
+
+${result.version}
+
+
+<br>
+
+
+历史：
+
+${result.history}期
+
+
+<br>
+
+
+状态：
+
+${result.message}
+
+
+`;
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+function saveFeedback(){
+
+
+
+let value=
+
+document.getElementById(
+"realResult"
+).value;
+
+
+
+localStorage.setItem(
+
+"dlt_feedback",
+
+value
+
+);
+
+
+
+document.getElementById(
+"learningStatus"
+).innerHTML=
+
+"反馈保存成功";
+
+
+}
