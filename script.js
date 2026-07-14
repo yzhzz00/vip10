@@ -1,19 +1,16 @@
 // ======================================
-// 彩票智能分析系统 V35.5
-// 真实评分模型
-// Part 1
+// 彩票智能分析系统 V35.5 修正版
 // ======================================
 
-
 let dltData = [];
+
 let frontScore = {};
+
 let backScore = {};
 
 let finalPlans = [];
 
 let loaded = false;
-
-
 
 
 
@@ -25,41 +22,27 @@ window.onload = function(){
 
 
 
-
-
-// ================================
-// 初始化系统
-// ================================
-
+// 初始化
 
 async function initSystem(){
 
+    await loadDLT();
 
-await loadDLT();
-
-await loadPL5();
-
-
-loaded = true;
+    await loadPL5();
 
 
+    loaded = true;
 
-document.getElementById("systemStatus").innerHTML =
 
-"V35.5 数据系统运行正常";
+    document.getElementById("systemStatus").innerHTML =
+    "V35.5 修正版运行正常";
 
 
 }
 
 
 
-
-
-
-// ================================
 // 读取大乐透
-// ================================
-
 
 async function loadDLT(){
 
@@ -68,7 +51,7 @@ try{
 
 
 let res = await fetch(
-"data/dlt_raw.txt?v=3550"
+"data/dlt_raw.txt?v=3551"
 );
 
 
@@ -88,9 +71,7 @@ dltData.length;
 
 
 
-}
-
-catch(e){
+}catch(e){
 
 
 document.getElementById("dltStatus").innerHTML =
@@ -104,13 +85,7 @@ document.getElementById("dltStatus").innerHTML =
 
 
 
-
-
-
-// ================================
 // 读取排列五
-// ================================
-
 
 async function loadPL5(){
 
@@ -119,7 +94,7 @@ try{
 
 
 let res = await fetch(
-"data/pl5_raw.txt?v=3550"
+"data/pl5_raw.txt?v=3551"
 );
 
 
@@ -131,9 +106,7 @@ document.getElementById("pl5Status").innerHTML =
 "已加载";
 
 
-}
-
-catch(e){
+}catch(e){
 
 
 document.getElementById("pl5Status").innerHTML =
@@ -148,13 +121,7 @@ document.getElementById("pl5Status").innerHTML =
 
 
 
-
-
-
-// ================================
 // 大乐透解析
-// ================================
-
 
 function parseDLT(text){
 
@@ -189,7 +156,6 @@ nums.slice(5,7)
 }
 
 
-
 });
 
 
@@ -201,14 +167,40 @@ return arr;
 
 
 
+// 按钮
+
+document.addEventListener(
+"DOMContentLoaded",
+function(){
+
+
+document.getElementById(
+"predictBtn"
+).onclick=function(){
+
+runPrediction();
+
+};
+
+
+
+document.getElementById(
+"feedbackBtn"
+).onclick=function(){
+
+saveFeedback();
+
+};
+
+
+
+});
 
 
 
 
-// ================================
-// 点击预测
-// ================================
 
+// 开始预测
 
 function runPrediction(){
 
@@ -216,7 +208,8 @@ function runPrediction(){
 if(!loaded){
 
 
-alert("数据未加载完成");
+alert("数据未加载");
+
 
 return;
 
@@ -241,15 +234,9 @@ showResult();
 
 
 
-
-
-// ================================
-// 建立评分模型
-// ================================
-
+// 建立评分
 
 function buildScore(){
-
 
 
 frontScore={};
@@ -257,10 +244,6 @@ frontScore={};
 backScore={};
 
 
-
-
-
-// 初始化
 
 for(let i=1;i<=35;i++){
 
@@ -291,14 +274,13 @@ String(i).padStart(2,"0")
 
 // 历史频率
 
-
 dltData.forEach(item=>{
 
 
 item.front.forEach(n=>{
 
 
-frontScore[n]+=40;
+frontScore[n]+=1;
 
 
 });
@@ -307,7 +289,7 @@ frontScore[n]+=40;
 item.back.forEach(n=>{
 
 
-backScore[n]+=40;
+backScore[n]+=1;
 
 
 });
@@ -319,22 +301,16 @@ backScore[n]+=40;
 
 
 
+// 最近趋势
 
-
-// 最近300期趋势
-
-
-let recent=dltData.slice(-300);
-
-
-
-recent.forEach(item=>{
+dltData.slice(-300)
+.forEach(item=>{
 
 
 item.front.forEach(n=>{
 
 
-frontScore[n]+=30;
+frontScore[n]+=2;
 
 
 });
@@ -343,42 +319,13 @@ frontScore[n]+=30;
 item.back.forEach(n=>{
 
 
-backScore[n]+=30;
+backScore[n]+=2;
 
 
 });
 
 
 });
-
-
-
-
-
-
-
-// 最近遗漏修正
-
-
-let last=dltData.slice(-50);
-
-
-
-last.forEach(item=>{
-
-
-item.front.forEach(n=>{
-
-
-frontScore[n]+=10;
-
-
-});
-
-
-});
-
-
 
 
 
@@ -395,31 +342,37 @@ normalize(backScore);
 
 
 
-
-
-// ================================
-// 评分归一化
-// ================================
-
+// 标准化
 
 function normalize(obj){
 
 
-let values=Object.values(obj);
+let arr=Object.values(obj);
 
 
-let max=Math.max(...values);
+let max=Math.max(...arr);
 
-let min=Math.min(...values);
-
-
-
-for(let k in obj){
+let min=Math.min(...arr);
 
 
-obj[k]=
 
-((obj[k]-min)/(max-min))*100;
+for(let key in obj){
+
+
+if(max===min){
+
+
+obj[key]=50;
+
+
+}else{
+
+
+obj[key]=
+((obj[key]-min)/(max-min))*100;
+
+
+}
 
 
 }
@@ -427,23 +380,23 @@ obj[k]=
 
 }
 // ======================================
-// V35.5 Part 2
-// 组合生成 + 结构过滤
+// V35.5 修正版 Part 2
+// 组合生成 + 输出
 // ======================================
 
 
-// ================================
-// 生成候选组合
-// ================================
 
+// 生成方案
 
 function generatePlans(){
 
 
 let pool = Object.keys(frontScore)
-.sort((a,b)=>{
+.sort(function(a,b){
+
 
 return frontScore[b]-frontScore[a];
+
 
 });
 
@@ -453,78 +406,42 @@ let candidates=[];
 
 
 
-// 避免只取最高号码
-for(let i=0;i<pool.length-4;i++){
+
+// 组合搜索
+
+for(let a=0;a<pool.length;a++){
+
+
+for(let b=a+1;b<pool.length;b++){
+
+
+for(let c=b+1;c<pool.length;c++){
+
+
+for(let d=c+1;d<pool.length;d++){
+
+
+for(let e=d+1;e<pool.length;e++){
 
 
 
 let arr=[
 
-pool[i],
-pool[i+1],
-pool[i+2],
-pool[i+3],
-pool[i+4]
+pool[a],
+pool[b],
+pool[c],
+pool[d],
+pool[e]
 
 ];
 
 
 
-arr.sort((a,b)=>parseInt(a)-parseInt(b));
+arr.sort(function(x,y){
 
-
-
-if(checkStructure(arr)){
-
-
-
-candidates.push({
-
-nums:arr,
-
-score:calculateCombinationScore(arr)
+return Number(x)-Number(y);
 
 });
-
-
-}
-
-
-
-}
-
-
-
-
-
-// 增加不同位置组合
-
-for(let i=0;i<pool.length;i+=3){
-
-
-
-let arr=[];
-
-
-
-for(let j=i;j<pool.length;j+=5){
-
-
-if(arr.length<5){
-
-arr.push(pool[j]);
-
-}
-
-
-}
-
-
-
-if(arr.length===5){
-
-
-arr.sort((a,b)=>parseInt(a)-parseInt(b));
 
 
 
@@ -543,23 +460,30 @@ score:calculateCombinationScore(arr)
 }
 
 
-}
-
-
 
 }
 
+}
+
+}
+
+}
+
+}
 
 
 
 
 // 排序
 
-candidates.sort((a,b)=>{
+candidates.sort(function(a,b){
+
 
 return b.score-a.score;
 
+
 });
+
 
 
 
@@ -567,13 +491,11 @@ return b.score-a.score;
 finalPlans=[];
 
 
-
 let used=[];
 
 
 
 for(let item of candidates){
-
 
 
 let same=false;
@@ -586,12 +508,14 @@ for(let old of used){
 let count=0;
 
 
-item.nums.forEach(n=>{
+item.nums.forEach(function(n){
 
 
 if(old.includes(n)){
 
+
 count++;
+
 
 }
 
@@ -602,19 +526,22 @@ count++;
 
 if(count>=4){
 
+
 same=true;
 
+
 }
 
 
 }
+
 
 
 
 if(!same){
 
 
-finalPlans.push(item.nums);
+finalPlans.push(item);
 
 
 used.push(item.nums);
@@ -624,7 +551,8 @@ used.push(item.nums);
 
 
 
-if(finalPlans.length===3){
+
+if(finalPlans.length>=3){
 
 
 break;
@@ -637,6 +565,7 @@ break;
 }
 
 
+
 }
 
 
@@ -647,10 +576,7 @@ break;
 
 
 
-// ================================
 // 结构过滤
-// ================================
-
 
 function checkStructure(arr){
 
@@ -660,12 +586,16 @@ let nums=arr.map(Number);
 
 
 
-
 // 奇偶
 
-let odd=
 
-nums.filter(n=>n%2===1).length;
+let odd=nums.filter(function(n){
+
+
+return n%2===1;
+
+
+}).length;
 
 
 
@@ -681,33 +611,37 @@ return false;
 
 
 
-
 // 三区
 
-let z1=0;
 
-let z2=0;
+let zone1=0;
 
-let z3=0;
+let zone2=0;
+
+let zone3=0;
 
 
 
-nums.forEach(n=>{
+nums.forEach(function(n){
 
 
 if(n<=12){
 
-z1++;
 
-}
-else if(n<=24){
+zone1++;
 
-z2++;
 
-}
-else{
+}else if(n<=24){
 
-z3++;
+
+zone2++;
+
+
+}else{
+
+
+zone3++;
+
 
 }
 
@@ -717,20 +651,13 @@ z3++;
 
 
 
+if(zone1===0 || zone2===0 || zone3===0){
 
-// 必须覆盖三区
-
-if(
-z1===0 ||
-z2===0 ||
-z3===0
-){
 
 return false;
 
 
 }
-
 
 
 
@@ -739,24 +666,23 @@ return false;
 // 和值
 
 
-let sum=
-
-nums.reduce(
-(a,b)=>a+b,
-0
-);
+let sum=nums.reduce(function(a,b){
 
 
+return a+b;
 
-if(sum<90 || sum>160){
+
+},0);
+
+
+
+if(sum<80 || sum>170){
 
 
 return false;
 
 
 }
-
-
 
 
 
@@ -772,9 +698,7 @@ let link=0;
 for(let i=1;i<nums.length;i++){
 
 
-if(
-nums[i]-nums[i-1]===1
-){
+if(nums[i]-nums[i-1]===1){
 
 
 link++;
@@ -797,9 +721,6 @@ return false;
 
 
 
-
-
-
 return true;
 
 
@@ -812,11 +733,7 @@ return true;
 
 
 
-
-// ================================
-// 组合评分
-// ================================
-
+// 组合评分（修复NaN）
 
 function calculateCombinationScore(arr){
 
@@ -826,10 +743,25 @@ let score=0;
 
 
 
-arr.forEach(n=>{
+arr.forEach(function(n){
 
 
-score+=frontScore[n];
+let value=Number(frontScore[n]);
+
+
+
+if(isNaN(value)){
+
+
+value=0;
+
+
+}
+
+
+
+score+=value;
+
 
 
 });
@@ -837,13 +769,11 @@ score+=frontScore[n];
 
 
 
-// 平均
 
-score=score/5;
-
+score=score/arr.length;
 
 
-// 结构奖励
+
 
 
 if(checkStructure(arr)){
@@ -856,10 +786,21 @@ score+=15;
 
 
 
+
 if(score>100){
 
 
 score=100;
+
+
+}
+
+
+
+if(score<0){
+
+
+score=0;
 
 
 }
@@ -877,20 +818,15 @@ return score;
 
 
 
-// ================================
-// 后区选择
-// ================================
 
+
+// 后区
 
 function getBackNumbers(){
 
 
-
-let arr=
-
-Object.keys(backScore)
-
-.sort((a,b)=>{
+let arr=Object.keys(backScore)
+.sort(function(a,b){
 
 
 return backScore[b]-backScore[a];
@@ -909,48 +845,6 @@ arr[1]
 
 
 }
-// ======================================
-// V35.5 Part 3
-// 输出 + 反馈学习
-// ======================================
-
-
-
-// ================================
-// 页面按钮绑定
-// ================================
-
-
-document.addEventListener(
-"DOMContentLoaded",
-function(){
-
-
-
-document.getElementById(
-"predictBtn"
-).onclick=function(){
-
-runPrediction();
-
-};
-
-
-
-
-document.getElementById(
-"feedbackBtn"
-).onclick=function(){
-
-saveFeedback();
-
-};
-
-
-
-}
-
-);
 
 
 
@@ -958,10 +852,7 @@ saveFeedback();
 
 
 
-// ================================
-// 显示预测结果
-// ================================
-
+// 显示结果
 
 function showResult(){
 
@@ -971,49 +862,42 @@ let html="";
 
 
 
-html+=
-"<b>彩票智能分析系统 V35.5</b><br><br>";
+html+="<b>彩票智能分析系统 V35.5</b><br><br>";
 
 
 
-html+=
-"数据期数："
-+
-dltData.length
-+
+html+="数据期数："+
+dltData.length+
 "期<br><br>";
 
 
 
-html+=
-"最终推荐<br><br>";
+html+="最终推荐<br><br>";
 
 
 
 
-
-finalPlans.forEach(
-(plan,index)=>{
+if(finalPlans.length===0){
 
 
-let score=
-
-calculateCombinationScore(plan);
+html+="暂无符合条件组合";
 
 
+}else{
 
-html+=
 
-"方案"+
-(index+1)
-+
+
+finalPlans.forEach(function(plan,index){
+
+
+
+html+="方案"+
+(index+1)+
 "：";
 
 
 
-html+=
-
-plan.join(" ");
+html+=plan.nums.join(" ");
 
 
 
@@ -1021,9 +905,7 @@ html+=" + ";
 
 
 
-html+=
-
-getBackNumbers().join(" ");
+html+=getBackNumbers().join(" ");
 
 
 
@@ -1031,60 +913,36 @@ html+="<br>";
 
 
 
-html+=
-
-"综合评分："
-+
-score.toFixed(2)
-+
-"分";
+html+="综合评分："+
+plan.score.toFixed(2)+
+"分<br><br>";
 
 
 
-html+="<br><br>";
+});
 
 
 
 }
 
-);
+
+
+html+="模型状态：V35.5修正版完成";
 
 
 
-
-
-html+=
-
-"模型状态：V35.5真实评分完成";
+document.getElementById("result").innerHTML=html;
 
 
 
-
-document.getElementById(
-"result"
-).innerHTML=html;
-
-
-
-
-
-
-document.getElementById(
-"learningStatus"
-).innerHTML=
+document.getElementById("learningStatus").innerHTML=
 
 "等待开奖反馈学习";
 
 
+document.getElementById("systemStatus").innerHTML=
 
-
-
-
-document.getElementById(
-"systemStatus"
-).innerHTML=
-
-"V35.5运行成功<br>评分模型开启";
+"V35.5评分模型运行成功";
 
 
 
@@ -1096,19 +954,13 @@ document.getElementById(
 
 
 
-
-// ================================
-// 开奖反馈
-// ================================
-
+// 反馈
 
 function saveFeedback(){
 
 
 
-let value=
-
-document.getElementById(
+let value=document.getElementById(
 "realResult"
 ).value;
 
@@ -1117,16 +969,13 @@ document.getElementById(
 if(!value){
 
 
-alert(
-"请输入开奖号码"
-);
+alert("请输入开奖结果");
 
 
 return;
 
 
 }
-
 
 
 
