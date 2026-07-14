@@ -1,24 +1,29 @@
 // ======================================
-// 彩票智能分析系统 V34.2
-// 稳定平衡优化版
-// Part 1
+// 彩票智能分析系统 V34.3
+// 预测 / 学习分离版
+// Part 1 固定预测引擎
 // ======================================
 
 
-async function startAnalysis(){
+
+let currentModel={};
+
+
+
+
+
+async function startPrediction(){
 
 
 const result=document.getElementById("result");
 
 const status=document.getElementById("modelStatus");
 
-const learning=document.getElementById("learningStatus");
-
 const count=document.getElementById("dataCount");
 
 
 
-result.innerHTML="V34.2平衡模型启动...";
+result.innerHTML="V34.3固定预测计算中...";
 
 
 
@@ -27,7 +32,7 @@ try{
 
 const res=await fetch(
 
-"data/dlt_raw.txt?v=3420"
+"data/dlt_raw.txt?v=3430"
 
 );
 
@@ -59,7 +64,6 @@ let nums=line.match(/\d+/g);
 if(nums && nums.length>=7){
 
 
-
 let arr=nums.map(
 
 n=>n.padStart(2,"0")
@@ -85,80 +89,77 @@ back:arr.slice(5,7)
 
 
 
-
 count.innerHTML=data.length+"期";
 
 
 
 
 
-
-
 // ================================
-// 学习参数
+// 读取固定模型快照
 // ================================
 
 
-let memory={
+let snapshot=localStorage.getItem(
+
+"V34_snapshot"
+
+);
 
 
-runs:0,
+
+
+
+if(snapshot){
+
+
+currentModel=JSON.parse(snapshot);
+
+
+}
+
+else{
+
+
+
+currentModel={
 
 
 weights:{
 
 
-freq:0.18,
+freq:0.20,
 
-trend:0.22,
+trend:0.20,
 
-miss:0.15,
+miss:0.20,
 
-markov:0.18,
+structure:0.20,
 
-structure:0.27
+markov:0.20
 
 
 },
 
 
-predictions:[]
+created:new Date().toLocaleString()
 
 
 };
 
 
 
+localStorage.setItem(
 
+"V34_snapshot",
 
-
-try{
-
-
-let old=localStorage.getItem(
-
-"V34_memory"
+JSON.stringify(currentModel)
 
 );
 
 
-
-if(old){
-
-
-memory=JSON.parse(old);
-
-
 }
 
-
-}catch(e){}
-
-
-
-
-
-memory.runs++;
 
 
 
@@ -167,15 +168,13 @@ memory.runs++;
 
 
 // ================================
-// 基础统计
+// 统计号码
 // ================================
 
 
 let freq={};
 
 let recent={};
-
-let miss={};
 
 
 
@@ -188,8 +187,6 @@ let n=String(i).padStart(2,"0");
 freq[n]=0;
 
 recent[n]=0;
-
-miss[n]=data.length;
 
 
 }
@@ -216,8 +213,6 @@ freq[n]++;
 
 
 
-
-
 data.slice(-300).forEach(d=>{
 
 
@@ -237,147 +232,11 @@ recent[n]++;
 
 
 
-for(let i=data.length-1;i>=0;i--){
-
-
-data[i].front.forEach(n=>{
-
-
-if(miss[n]===data.length){
-
-
-miss[n]=data.length-i;
-
-
-}
-
-
-});
-
-
-}
-
-
-
-
-
 
 
 
 // ================================
-// 冷热评分
-// ================================
-
-
-let hot={};
-
-
-
-for(let n in freq){
-
-
-hot[n]=recent[n]-freq[n]/data.length*300;
-
-
-}
-
-
-
-
-
-
-
-// ================================
-// 马尔可夫位置模型
-// ================================
-
-
-let markov={};
-
-
-
-for(let i=0;i<data.length-1;i++){
-
-
-for(let p=0;p<5;p++){
-
-
-
-let a=data[i].front[p];
-
-let b=data[i+1].front[p];
-
-
-
-if(!markov[a]){
-
-markov[a]={};
-
-}
-
-
-
-if(!markov[a][b]){
-
-markov[a][b]=0;
-
-}
-
-
-
-markov[a][b]++;
-
-
-}
-
-
-}
-
-
-
-
-
-let markovScore={};
-
-
-
-for(let n in freq){
-
-
-let total=0;
-
-
-
-if(markov[n]){
-
-
-Object.values(markov[n])
-
-.forEach(v=>{
-
-
-total+=v;
-
-
-});
-
-
-}
-
-
-
-markovScore[n]=total;
-
-
-}
-
-
-
-
-
-
-// ================================
-// 综合号码评分
+// 固定评分
 // ================================
 
 
@@ -388,46 +247,12 @@ let score={};
 for(let n in freq){
 
 
-
-let x=parseInt(n);
-
-
-
-let structure=
-
-x%2===1?
-
-0.55:
-
-0.45;
-
-
-
-
-let hotAdjust=
-
-
-hot[n]>20?
-
--0.05:
-
-
-hot[n]<-10?
-
-0.05:
-
-
-0;
-
-
-
-
 score[n]=
 
 
 (freq[n]/data.length)
 
-*memory.weights.freq
+*currentModel.weights.freq
 
 
 
@@ -435,37 +260,7 @@ score[n]=
 
 (recent[n]/300)
 
-*memory.weights.trend
-
-
-
-+
-
-(Math.min(miss[n],50)/50)
-
-*memory.weights.miss
-
-
-
-+
-
-(Math.min(markovScore[n],300)/300)
-
-*memory.weights.markov
-
-
-
-+
-
-structure
-
-*memory.weights.structure
-
-
-
-+
-
-hotAdjust;
+*currentModel.weights.trend;
 
 
 
@@ -496,29 +291,45 @@ return score[b]-score[a];
 
 })
 
-.slice(0,35);
+.slice(0,20);
 
 
 
-// ===== V34.2 PART 1 END =====
+
+
+
+
+// ===== V34.3 PART 1 END =====
 // ======================================
-// V34.2 Part 2
-// 平衡组合生成 + 差异化筛选
+// V34.3 Part 2
+// 固定组合生成 + 快照保存
 // ======================================
 
 
 
 // ================================
-// 组合结构评分
+// 组合评分
 // ================================
 
 
-function getStructureScore(arr){
+function calcCombo(arr){
 
 
-let s=0;
+let total=0;
 
 
+
+arr.forEach(n=>{
+
+
+total+=score[n];
+
+
+});
+
+
+
+// 结构奖励
 
 let odd=arr.filter(
 
@@ -528,76 +339,15 @@ n=>parseInt(n)%2===1
 
 
 
-// 奇偶
-
 if(odd===2||odd===3){
 
-s+=0.3;
-
-}else{
-
-s-=0.3;
+total+=0.2;
 
 }
 
 
 
-
-
-
-// 三区
-
-let low=0;
-
-let mid=0;
-
-let high=0;
-
-
-
-arr.forEach(n=>{
-
-
-let x=parseInt(n);
-
-
-
-if(x<=12){
-
-low++;
-
-}
-
-else if(x<=24){
-
-mid++;
-
-}
-
-else{
-
-high++;
-
-}
-
-
-});
-
-
-
-
-
-if(low>=1&&mid>=1&&high>=1){
-
-s+=0.4;
-
-}
-
-
-
-
-
-// 和值
+// 和值控制
 
 let sum=arr.reduce(
 
@@ -611,24 +361,13 @@ let sum=arr.reduce(
 
 if(sum>=90&&sum<=150){
 
-s+=0.3;
+total+=0.3;
 
 }
-
-else{
-
-s-=0.2;
-
-}
-
-
-
-
 
 
 
 // 跨度
-
 
 let span=
 
@@ -642,17 +381,13 @@ parseInt(arr[0]);
 
 if(span>=18){
 
-s+=0.3;
-
-}else{
-
-s-=0.2;
+total+=0.2;
 
 }
 
 
 
-return s;
+return total;
 
 
 }
@@ -664,7 +399,7 @@ return s;
 
 
 // ================================
-// 生成所有确定组合
+// 确定性组合
 // ================================
 
 
@@ -675,17 +410,13 @@ let candidates=[];
 for(let i=0;i<pool.length-4;i++){
 
 
-
 for(let j=i+1;j<pool.length-3;j++){
-
 
 
 for(let k=j+1;k<pool.length-2;k++){
 
 
-
 for(let m=k+1;m<pool.length-1;m++){
-
 
 
 for(let n=m+1;n<pool.length;n++){
@@ -708,7 +439,6 @@ pool[n]
 
 
 
-
 arr.sort(
 
 (a,b)=>parseInt(a)-parseInt(b)
@@ -717,29 +447,12 @@ arr.sort(
 
 
 
-let total=0;
-
-
-
-arr.forEach(x=>{
-
-
-total+=score[x];
-
-
-});
-
-
-
-total+=getStructureScore(arr);
-
-
-
 candidates.push({
+
 
 front:arr,
 
-score:total
+score:calcCombo(arr)
 
 
 });
@@ -761,11 +474,7 @@ score:total
 
 
 
-
-// ================================
 // 固定排序
-// ================================
-
 
 candidates.sort((a,b)=>{
 
@@ -785,6 +494,7 @@ b.front.join("")
 }
 
 
+
 return b.score-a.score;
 
 
@@ -797,7 +507,7 @@ return b.score-a.score;
 
 
 // ================================
-// 三方案差异控制
+// 三方案
 // ================================
 
 
@@ -809,15 +519,14 @@ for(let c of candidates){
 
 
 
-let reject=false;
+let same=false;
 
 
 
 for(let p of plans){
 
 
-
-let same=c.front.filter(
+let overlap=c.front.filter(
 
 x=>p.front.includes(x)
 
@@ -825,26 +534,27 @@ x=>p.front.includes(x)
 
 
 
-if(same>3){
+if(overlap>=3){
 
-reject=true;
-
-}
-
-
+same=true;
 
 }
 
 
 
+}
 
-if(!reject){
+
+
+
+if(!same){
 
 
 plans.push(c);
 
 
 }
+
 
 
 
@@ -855,6 +565,7 @@ break;
 }
 
 
+
 }
 
 
@@ -864,22 +575,21 @@ break;
 
 
 // ================================
-// 后区评分
+// 后区固定排序
 // ================================
 
 
-let backFreq={};
+let back={};
 
 
 
 for(let i=1;i<=12;i++){
 
 
-backFreq[String(i).padStart(2,"0")]=0;
+back[String(i).padStart(2,"0")]=0;
 
 
 }
-
 
 
 
@@ -889,10 +599,9 @@ data.forEach(d=>{
 d.back.forEach(n=>{
 
 
-if(backFreq[n]!==undefined){
+if(back[n]!==undefined){
 
-
-backFreq[n]++;
+back[n]++;
 
 }
 
@@ -909,12 +618,12 @@ backFreq[n]++;
 
 let backPool=
 
-Object.keys(backFreq)
+Object.keys(back)
 
 .sort((a,b)=>{
 
 
-if(backFreq[b]===backFreq[a]){
+if(back[b]===back[a]){
 
 
 return parseInt(a)-parseInt(b);
@@ -922,7 +631,8 @@ return parseInt(a)-parseInt(b);
 }
 
 
-return backFreq[b]-backFreq[a];
+
+return back[b]-back[a];
 
 
 });
@@ -935,181 +645,32 @@ return backFreq[b]-backFreq[a];
 
 
 // ================================
-// 保存预测记录
+// 保存预测快照
 // ================================
 
 
-memory.predictions.push({
+let snapshot={
 
 
 time:new Date().toLocaleString(),
 
 
-plans:plans.map(
-
-p=>p.front.join(" ")
-
-)
+plans:plans,
 
 
-});
+weights:currentModel.weights
 
 
-
-
-
-if(memory.predictions.length>100){
-
-memory.predictions.shift();
-
-}
-
+};
 
 
 
 
 localStorage.setItem(
 
-"V34_memory",
+"V34_prediction",
 
-JSON.stringify(memory)
-
-);
-
-
-
-
-// ===== V34.2 PART 2 END =====
-// ======================================
-// V34.2 Part 3
-// 回测 + 输出 + 状态
-// ======================================
-
-
-
-// ================================
-// 500期滚动回测
-// ================================
-
-
-let hit3=0;
-
-let hit4=0;
-
-let hit5=0;
-
-
-
-let test=data.slice(-500);
-
-
-
-test.forEach(d=>{
-
-
-let predict=plans[0].front;
-
-
-
-let hit=predict.filter(
-
-x=>d.front.includes(x)
-
-).length;
-
-
-
-if(hit>=3){
-
-hit3++;
-
-}
-
-
-
-if(hit>=4){
-
-hit4++;
-
-}
-
-
-
-if(hit===5){
-
-hit5++;
-
-}
-
-
-});
-
-
-
-
-
-
-
-// ================================
-// 权重反馈
-// ================================
-
-
-if(hit3>=5){
-
-
-memory.weights.structure+=0.01;
-
-memory.weights.trend+=0.01;
-
-
-}else{
-
-
-memory.weights.freq+=0.01;
-
-
-}
-
-
-
-
-
-
-let totalWeight=
-
-memory.weights.freq+
-
-memory.weights.trend+
-
-memory.weights.miss+
-
-memory.weights.markov+
-
-memory.weights.structure;
-
-
-
-for(let k in memory.weights){
-
-
-memory.weights[k]=
-
-memory.weights[k]/totalWeight;
-
-
-}
-
-
-
-
-
-
-localStorage.setItem(
-
-"V34_memory",
-
-JSON.stringify(memory)
+JSON.stringify(snapshot)
 
 );
 
@@ -1118,25 +679,35 @@ JSON.stringify(memory)
 
 
 
+// ===== V34.3 PART 2 END =====
+// ======================================
+// V34.3 Part 3
+// 输出 + 开奖反馈训练
+// ======================================
+
+
+
 
 // ================================
-// 输出结果
+// 输出预测
 // ================================
+
+
+function showPrediction(){
+
 
 
 let html="";
 
 
 
-html+="<h3>彩票智能分析系统 V34.2</h3>";
+html+="<h3>彩票智能分析系统 V34.3</h3>";
 
 
 
-html+="数据期数："
+html+="预测模式：确定性模式<br>";
 
-+data.length+
-
-"期<br><br>";
+html+="随机扰动：关闭<br><br>";
 
 
 
@@ -1195,69 +766,11 @@ html+="<br><br>";
 
 
 
-html+="500期平衡回测<br>";
+html+="模型快照：已保存<br>";
 
+html+="预测结果固定<br>";
 
-
-html+="3+0："+hit3+"次<br>";
-
-
-
-html+="4+0："+hit4+"次<br>";
-
-
-
-html+="5+0："+hit5+"次<br><br>";
-
-
-
-
-
-html+="预测记录："
-
-+
-
-memory.predictions.length
-
-+
-
-"次<br>";
-
-
-
-html+="学习次数："
-
-+
-
-memory.runs
-
-+
-
-"次<br>";
-
-
-
-html+="冷热平衡：开启<br>";
-
-
-
-html+="结构优化：开启<br>";
-
-
-
-html+="随机扰动：关闭<br>";
-
-
-
-html+="预测模式：确定性模式<br>";
-
-
-
-html+="模型状态：V34.2运行完成";
-
-
-
-
+html+="等待开奖反馈";
 
 
 result.innerHTML=html;
@@ -1268,27 +781,22 @@ result.innerHTML=html;
 
 
 
+document.getElementById("learningStatus").innerHTML=
 
-learning.innerHTML=
 
-"学习次数："+memory.runs+
+"预测记录：已保存<br>"+
 
-"<br>"+
-
-"预测记录："+memory.predictions.length+
-
-"<br>"+
-
-"平衡学习：开启";
+"学习状态：等待开奖反馈";
 
 
 
 
 
 
-status.innerHTML=
+document.getElementById("modelStatus").innerHTML=
 
-"V34.2 FINAL运行成功";
+
+"V34.3预测模块运行完成";
 
 
 
@@ -1296,20 +804,235 @@ status.innerHTML=
 
 
 
-catch(e){
 
 
-result.innerHTML=
-
-"错误："+e.message;
 
 
-status.innerHTML=
+// 自动显示预测
 
-"运行失败";
+showPrediction();
+
+
+
+
+
+
+
+// ================================
+// 开奖反馈训练
+// ================================
+
+
+function feedbackTraining(){
+
+
+
+let input=
+
+document.getElementById(
+
+"realResult"
+
+).value.trim();
+
+
+
+if(!input){
+
+
+alert("请输入开奖号码");
+
+
+return;
 
 
 }
+
+
+
+
+
+let nums=input.match(/\d+/g);
+
+
+
+if(!nums || nums.length<7){
+
+
+alert("格式错误，例如：03 08 17 26 33 + 07 10");
+
+
+return;
+
+
+}
+
+
+
+
+
+let realFront=nums.slice(0,5)
+
+.map(n=>n.padStart(2,"0"));
+
+
+
+let realBack=nums.slice(5,7)
+
+.map(n=>n.padStart(2,"0"));
+
+
+
+
+
+
+
+let old=
+
+localStorage.getItem(
+
+"V34_prediction"
+
+);
+
+
+
+if(!old){
+
+
+alert("没有预测记录");
+
+
+return;
+
+
+}
+
+
+
+let prediction=JSON.parse(old);
+
+
+
+
+
+let hitResult=[];
+
+
+
+prediction.plans.forEach((p,i)=>{
+
+
+let hit=p.front.filter(
+
+n=>realFront.includes(n)
+
+).length;
+
+
+
+hitResult.push(
+
+"方案"+(i+1)+"命中前区："+hit+"个"
+
+);
+
+
+});
+
+
+
+
+
+
+
+// ================================
+// 简单反馈记录
+// ================================
+
+
+let feedback={
+
+
+time:new Date().toLocaleString(),
+
+
+realFront:realFront,
+
+
+realBack:realBack,
+
+
+result:hitResult
+
+
+};
+
+
+
+
+
+let logs=localStorage.getItem(
+
+"V34_feedback"
+
+);
+
+
+
+let arr=logs?
+
+JSON.parse(logs):
+
+[];
+
+
+
+
+arr.push(feedback);
+
+
+
+if(arr.length>100){
+
+arr.shift();
+
+}
+
+
+
+localStorage.setItem(
+
+"V34_feedback",
+
+JSON.stringify(arr)
+
+);
+
+
+
+
+
+
+
+
+document.getElementById("learningStatus").innerHTML=
+
+
+"开奖反馈完成<br>"+
+
+hitResult.join("<br>")+
+
+"<br>反馈记录："+arr.length+"次";
+
+
+
+
+
+document.getElementById("modelStatus").innerHTML=
+
+
+"V34.3反馈训练完成";
 
 
 

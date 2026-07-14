@@ -7,7 +7,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>彩票智能分析系统 V34.2</title>
+<title>彩票智能分析系统 V34.3</title>
 
 
 <style>
@@ -29,14 +29,13 @@ max-width:900px;
 
 margin:auto;
 
-background:white;
+background:#fff;
 
 padding:20px;
 
 border-radius:12px;
 
 }
-
 
 
 h1{
@@ -46,12 +45,13 @@ text-align:center;
 }
 
 
-
 button{
 
 width:100%;
 
-padding:15px;
+padding:14px;
+
+margin-top:10px;
 
 font-size:18px;
 
@@ -60,7 +60,6 @@ border-radius:8px;
 cursor:pointer;
 
 }
-
 
 
 .box{
@@ -78,7 +77,6 @@ background:#fafafa;
 }
 
 
-
 .title{
 
 font-size:20px;
@@ -90,12 +88,25 @@ margin-bottom:10px;
 }
 
 
-
 li{
 
 line-height:1.8;
 
 }
+
+
+input{
+
+width:100%;
+
+padding:10px;
+
+font-size:16px;
+
+box-sizing:border-box;
+
+}
+
 
 
 </style>
@@ -114,9 +125,8 @@ line-height:1.8;
 
 
 <h1>
-彩票智能分析系统 V34.2
+彩票智能分析系统 V34.3
 </h1>
-
 
 
 
@@ -130,12 +140,17 @@ line-height:1.8;
 </div>
 
 
-大乐透历史数据：已加载
+大乐透历史数据：
+
+<span>已加载</span>
 
 <br>
 
 
-排列五历史数据：已加载
+排列五历史数据：
+
+<span>已加载</span>
+
 
 <br>
 
@@ -154,11 +169,19 @@ line-height:1.8;
 
 
 
+<button onclick="startPrediction()">
+
+开始 V34.3 智能预测
+
+</button>
 
 
-<button onclick="startAnalysis()">
 
-开始 V34.2 平衡优化分析
+
+
+<button onclick="feedbackTraining()">
+
+开奖反馈训练
 
 </button>
 
@@ -168,18 +191,17 @@ line-height:1.8;
 
 
 
-
 <div class="box">
 
 
 <div class="title">
-分析结果
+预测结果
 </div>
 
 
 <div id="result">
 
-等待分析...
+等待预测...
 
 </div>
 
@@ -197,47 +219,13 @@ line-height:1.8;
 
 
 <div class="title">
-V34.2 平衡优化模型
+开奖反馈输入
 </div>
 
 
-<ul>
+<input id="realResult"
 
-
-<li>确定性预测模式</li>
-
-<li>随机扰动关闭</li>
-
-<li>冷热平衡模型</li>
-
-<li>号码分散度分析</li>
-
-<li>历史频率评分</li>
-
-<li>近期趋势分析</li>
-
-<li>遗漏周期分析</li>
-
-<li>贝叶斯概率评分</li>
-
-<li>位置马尔可夫矩阵</li>
-
-<li>结构评分模型</li>
-
-<li>奇偶结构过滤</li>
-
-<li>三区结构过滤</li>
-
-<li>和值概率模型</li>
-
-<li>跨度控制模型</li>
-
-<li>后区独立评分</li>
-
-<li>三方案差异优化</li>
-
-
-</ul>
+placeholder="输入开奖号码，例如：03 08 17 26 33 + 07 10">
 
 
 </div>
@@ -277,6 +265,52 @@ V34.2 平衡优化模型
 
 
 <div class="title">
+V34.3 核心模块
+</div>
+
+
+<ul>
+
+<li>确定性预测模式</li>
+
+<li>预测训练分离</li>
+
+<li>固定模型快照</li>
+
+<li>开奖反馈学习</li>
+
+<li>历史预测保存</li>
+
+<li>命中统计分析</li>
+
+<li>动态权重调整</li>
+
+<li>频率模型</li>
+
+<li>趋势模型</li>
+
+<li>贝叶斯更新</li>
+
+<li>马尔可夫转移</li>
+
+<li>结构平衡模型</li>
+
+</ul>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="box">
+
+
+<div class="title">
 模型状态
 </div>
 
@@ -299,12 +333,10 @@ V34.2 平衡优化模型
 
 
 
+<script src="script.js?v=3430"></script>
 
-
-<script src="script.js?v=3420"></script>
 
 
 </body>
-
 
 </html>
