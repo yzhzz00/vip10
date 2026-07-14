@@ -1,6 +1,6 @@
 /*
 ====================================
-彩票智能分析系统 V50.0 Mobile
+彩票智能分析系统 V50.5 Mobile
 
 界面样式
 ====================================
@@ -8,9 +8,7 @@
 
 
 *{
-
 box-sizing:border-box;
-
 }
 
 
@@ -36,14 +34,13 @@ color:#222;
 
 
 
-
 .container{
 
 max-width:900px;
 
 margin:auto;
 
-background:#fff;
+background:#ffffff;
 
 padding:16px;
 
@@ -51,10 +48,9 @@ border-radius:18px;
 
 box-shadow:
 
-0 8px 25px rgba(0,0,0,.10);
+0 8px 25px rgba(0,0,0,.1);
 
 }
-
 
 
 
@@ -76,7 +72,6 @@ margin:12px 0 22px;
 
 
 
-
 .box{
 
 background:#f9fbff;
@@ -90,7 +85,6 @@ padding:16px;
 margin-bottom:15px;
 
 }
-
 
 
 
@@ -174,7 +168,6 @@ background:#fff;
 
 
 
-
 input:focus{
 
 outline:none;
@@ -201,7 +194,7 @@ font-weight:bold;
 
 #result{
 
-background:#ffffff;
+background:#fff;
 
 border-left:
 
@@ -235,7 +228,7 @@ color:#0958d9;
 
 #backTestResult{
 
-background:#ffffff;
+background:#fff;
 
 border-left:
 
@@ -305,8 +298,9 @@ line-height:1.9;
 
 
 
-@media(max-width:600px){
+/* 手机适配 */
 
+@media(max-width:600px){
 
 
 body{
@@ -314,8 +308,6 @@ body{
 padding:5px;
 
 }
-
-
 
 
 
@@ -329,15 +321,11 @@ border-radius:14px;
 
 
 
-
-
 h1{
 
 font-size:20px;
 
 }
-
-
 
 
 
@@ -351,15 +339,11 @@ font-size:15px;
 
 
 
-
-
 .box{
 
 padding:12px;
 
 }
-
-
 
 
 

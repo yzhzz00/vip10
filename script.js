@@ -1,6 +1,6 @@
 /*
 ====================================
-彩票智能分析系统 V50.0 Mobile
+彩票智能分析系统 V50.5 Mobile
 
 页面控制
 ====================================
@@ -8,6 +8,7 @@
 
 
 let dltData=[];
+
 
 
 
@@ -43,7 +44,6 @@ document
 
 
 
-
 // ======================
 // 加载数据
 // ======================
@@ -57,7 +57,7 @@ try{
 let res=
 
 await fetch(
-"data/dlt_raw.txt?v500"
+"data/dlt_raw.txt?v505"
 );
 
 
@@ -90,7 +90,7 @@ document
 .getElementById("systemStatus")
 .innerHTML=
 
-"V50.0数据模块运行正常";
+"V50.5数据模块运行正常";
 
 
 
@@ -110,8 +110,6 @@ document
 
 
 }
-
-
 
 
 
@@ -147,9 +145,12 @@ p.length<9
 
 
 
+
+
 let front=[];
 
 let back=[];
+
 
 
 
@@ -170,6 +171,7 @@ String(Number(p[i]))
 
 
 }
+
 
 
 
@@ -246,6 +248,7 @@ return;
 
 
 
+
 let box=
 
 document
@@ -254,11 +257,13 @@ document
 
 
 
+
 box.innerHTML=
 
-"V50.0模型启动...<br>"+
-"评分引擎计算...<br>"+
+"V50.5模型启动...<br>"+
+"评分计算中...<br>"+
 "100000组蒙特卡罗模拟...";
+
 
 
 
@@ -280,7 +285,8 @@ plans=>{
 
 let html=
 
-"<b>彩票智能分析系统 V50.0 Mobile</b><br><br>";
+"<b>彩票智能分析系统 V50.5 Mobile</b><br><br>";
+
 
 
 
@@ -295,9 +301,13 @@ dltData.length+
 
 
 
+
+
 html+=
 
 "蒙特卡罗模拟：100000组<br><br>";
+
+
 
 
 
@@ -307,8 +317,8 @@ html+="<b>最终推荐</b><br><br>";
 
 
 
-plans.forEach((p,i)=>{
 
+plans.forEach((p,i)=>{
 
 
 html+=
@@ -335,6 +345,8 @@ p.back.join(" ")
 
 
 
+
+
 html+=
 
 "综合指数："+
@@ -342,6 +354,8 @@ html+=
 p.indexScore+
 
 "<br>";
+
+
 
 
 
@@ -364,7 +378,7 @@ p.type+
 
 html+=
 
-"模型状态：V50.0 Build2综合模型完成";
+"模型状态：V50.5综合模型完成";
 
 
 
@@ -392,10 +406,11 @@ box.innerHTML=html;
 
 
 // ======================
-// 回测
+// 滚动回测
 // ======================
 
 function startBackTest(){
+
 
 
 let box=
@@ -409,7 +424,7 @@ document
 
 box.innerHTML=
 
-"V50.0滚动回测中...";
+"V50.5滚动回测中...";
 
 
 
@@ -429,7 +444,7 @@ result=>{
 
 let html=
 
-"<b>V50.0历史回测报告</b><br><br>";
+"<b>V50.5历史回测报告</b><br><br>";
 
 
 
@@ -526,7 +541,6 @@ box.innerHTML=html;
 
 
 
-
 // ======================
 // 开奖反馈
 // ======================
@@ -562,6 +576,7 @@ return;
 
 
 
+
 DLTEngine.feedback(value);
 
 
@@ -572,7 +587,7 @@ document
 .getElementById("learningStatus")
 .innerHTML=
 
-"V50.0反馈保存成功："+value;
+"V50.5反馈保存成功："+value;
 
 
 
