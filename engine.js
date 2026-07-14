@@ -1,14 +1,15 @@
 /*
 ====================================
-彩票智能分析系统 V50.6.1 Mobile
+彩票智能分析系统 V50.7 Mobile
 
-回测优化版
+核心引擎
 
 升级：
-1. 预测100000组
-2. 回测轻量化
-3. 手机异步运行
-4. 测试数量修复
+1. 动态权重评分
+2. 热号衰减
+3. 遗漏补偿
+4. 候选池过滤
+5. 蒙特卡罗进度反馈
 ====================================
 */
 
@@ -16,7 +17,7 @@
 const DLTEngine={
 
 
-version:"V50.6.1",
+version:"V50.7",
 
 
 data:[],
@@ -31,10 +32,13 @@ miss:{},
 backScore:{},
 
 
-backMiss:{},
-
-
 records:[],
+
+
+
+// 进度回调
+progress:null,
+
 
 
 
@@ -55,13 +59,12 @@ this.miss={};
 
 this.backScore={};
 
-this.backMiss={};
-
 
 this.analyse();
 
 
 },
+
 
 
 
@@ -92,37 +95,14 @@ let num=
 String(n).padStart(2,"0");
 
 
+
 this.frequency[num]=0;
+
 
 this.miss[num]=0;
 
 
 }
-
-
-
-
-
-for(
-let n=1;
-n<=12;
-n++
-){
-
-
-let num=
-
-String(n).padStart(2,"0");
-
-
-this.backScore[num]=0;
-
-this.backMiss[num]=0;
-
-
-}
-
-
 
 
 
@@ -156,7 +136,9 @@ this.frequency[n]+=weight;
 item.back.forEach(n=>{
 
 
-this.backScore[n]+=weight;
+this.backScore[n]=
+
+(this.backScore[n]||0)+weight;
 
 
 });
@@ -171,8 +153,7 @@ this.backScore[n]+=weight;
 
 
 
-
-// 前区遗漏
+// 遗漏计算
 
 
 for(
@@ -187,6 +168,7 @@ let num=
 String(n).padStart(2,"0");
 
 
+
 let miss=0;
 
 
@@ -198,11 +180,15 @@ i--
 ){
 
 
+
 if(
 this.data[i].front.includes(num)
-)
+){
 
 break;
+
+}
+
 
 
 miss++;
@@ -214,58 +200,6 @@ miss++;
 
 this.miss[num]=miss;
 
-
-}
-
-
-
-
-
-
-
-
-
-// 后区遗漏
-
-
-for(
-let n=1;
-n<=12;
-n++
-){
-
-
-let num=
-
-String(n).padStart(2,"0");
-
-
-let miss=0;
-
-
-
-for(
-let i=this.data.length-1;
-i>=0;
-i--
-){
-
-
-if(
-this.data[i].back.includes(num)
-)
-
-break;
-
-
-miss++;
-
-
-}
-
-
-
-this.backMiss[num]=miss;
 
 
 }
@@ -280,8 +214,11 @@ this.backMiss[num]=miss;
 
 
 
+
+
+
 // ======================
-// 前区评分
+// 单号码评分
 // ======================
 
 numberScore(num){
@@ -291,9 +228,18 @@ let score=0;
 
 
 
-score+=this.frequency[num];
+
+// 动态频率
+
+score+=
+
+this.frequency[num];
 
 
+
+
+
+// 遗漏补偿
 
 score+=
 
@@ -313,15 +259,23 @@ this.miss[num],
 
 
 
+
+// 热号衰减
+
+
 if(
+
 this.frequency[num]>80
+
 ){
 
 
 score-=
 
 (
+
 this.frequency[num]-80
+
 )
 
 *
@@ -333,7 +287,10 @@ this.frequency[num]-80
 
 
 
+
+
 return score;
+
 
 
 },
@@ -344,71 +301,18 @@ return score;
 
 
 
+
+
+
 // ======================
-// 后区评分
-// ======================
-
-backNumberScore(num){
-
-
-let score=0;
-
-
-
-score+=this.backScore[num];
-
-
-
-score+=
-
-Math.min(
-
-this.backMiss[num],
-
-15
-
-)
-
-*
-
-0.6;
-
-
-
-
-
-if(
-this.backScore[num]>50
-){
-
-
-score-=
-
-(
-this.backScore[num]-50
-)
-
-*
-
-0.4;
-
-
-}
-
-
-
-return score;
-
-
-},
-// ======================
-// 前区组合评分
+// 组合评分
 // ======================
 
 comboScore(combo){
 
 
 let score=0;
+
 
 
 
@@ -424,7 +328,9 @@ score+=this.numberScore(n);
 
 
 
+
 // 奇偶结构
+
 
 let odd=
 
@@ -437,8 +343,11 @@ n=>Number(n)%2===1
 
 
 if(
+
 odd===2 ||
+
 odd===3
+
 ){
 
 score+=10;
@@ -458,6 +367,7 @@ score-=8;
 
 
 // 三区结构
+
 
 let zone=[0,0,0];
 
@@ -491,22 +401,23 @@ zone[2]++;
 
 
 
-if(
+let active=
+
 zone.filter(
+
 x=>x>0
-).length===3
-){
+
+).length;
+
+
+
+if(active===3)
 
 score+=15;
 
+else
 
-}else{
-
-
-score-=8;
-
-
-}
+score-=10;
 
 
 
@@ -515,6 +426,7 @@ score-=8;
 
 
 // 和值
+
 
 let sum=
 
@@ -529,78 +441,66 @@ combo.reduce(
 
 
 if(
-sum>=80 &&
-sum<=160
-){
+
+sum>=90 &&
+
+sum<=180
+
+)
 
 score+=10;
 
-
-}else{
-
+else
 
 score-=5;
 
 
-}
 
 
 
 
 
-return score;
+// 连号
 
 
-},
-
-
-
+let link=0;
 
 
 
-
-// ======================
-// 后区评分
-// ======================
-
-backComboScore(back){
-
-
-let score=0;
-
-
-
-back.forEach(n=>{
-
-
-score+=this.backNumberScore(n);
-
-
-});
-
-
-
-
-
-
-let odd=
-
-back.filter(
-
-n=>Number(n)%2===1
-
-).length;
-
+for(
+let i=1;
+i<combo.length;
+i++
+){
 
 
 if(
-odd===1
-){
 
-score+=8;
+Number(combo[i])-
+
+Number(combo[i-1])
+
+===1
+
+)
+
+link++;
 
 
 }
+
+
+
+
+
+if(link<=2)
+
+score+=8;
+
+else
+
+score-=8;
+
 
 
 
@@ -608,39 +508,6 @@ return score;
 
 
 },
-
-
-
-
-
-
-
-// ======================
-// 总评分
-// ======================
-
-fullScore(front,back){
-
-
-return (
-
-this.comboScore(front)*0.8
-
-+
-
-this.backComboScore(back)*0.2
-
-);
-
-
-},
-
-
-
-
-
-
-
 // ======================
 // 候选过滤
 // ======================
@@ -654,20 +521,24 @@ front.map(Number);
 
 
 
-if(
-nums.length!==5
-)
+
+
+if(nums.length!==5)
 
 return false;
 
 
 
 
+
 if(
+
 new Set(nums).size!==5
+
 )
 
 return false;
+
 
 
 
@@ -680,6 +551,11 @@ nums.sort(
 
 
 
+
+
+
+
+// 和值过滤
 
 
 let sum=
@@ -695,14 +571,23 @@ nums.reduce(
 
 
 if(
+
 sum<70 ||
+
 sum>160
+
 )
 
 return false;
 
 
 
+
+
+
+
+
+// 奇偶过滤
 
 
 let odd=
@@ -716,8 +601,11 @@ n=>n%2!==0
 
 
 if(
+
 odd<2 ||
+
 odd>3
+
 )
 
 return false;
@@ -726,10 +614,100 @@ return false;
 
 
 
+
+
+// 三区过滤
+
+
+let zone=[0,0,0];
+
+
+
+nums.forEach(n=>{
+
+
+if(n<=12)
+
+zone[0]++;
+
+else if(n<=24)
+
+zone[1]++;
+
+else
+
+zone[2]++;
+
+
+});
+
+
+
+
+
+let active=
+
+zone.filter(
+
+x=>x>0
+
+).length;
+
+
+
+if(active<2)
+
+return false;
+
+
+
+
+
+
+
+
+// 连号过滤
+
+
+let link=0;
+
+
+
+for(
+let i=1;
+i<nums.length;
+i++
+){
+
+
+if(
+
+nums[i]-nums[i-1]===1
+
+)
+
+link++;
+
+
+}
+
+
+
+
+if(link>2)
+
+return false;
+
+
+
+
 return true;
 
 
+
 },
+
+
 
 
 
@@ -749,8 +727,11 @@ let arr=[];
 
 
 while(
+
 arr.length<5
+
 ){
+
 
 
 let n=
@@ -758,17 +739,23 @@ let n=
 String(
 
 Math.floor(
+
 Math.random()*35
+
 )+1
 
 )
+
 .padStart(2,"0");
 
 
 
 
+
 if(
+
 !arr.includes(n)
+
 )
 
 arr.push(n);
@@ -780,14 +767,21 @@ arr.push(n);
 
 
 
+
 return arr.sort(
 
-(a,b)=>Number(a)-Number(b)
+(a,b)=>
+
+Number(a)-Number(b)
 
 );
 
 
+
 },
+
+
+
 
 
 
@@ -802,13 +796,17 @@ return arr.sort(
 randomBack(){
 
 
+
 let arr=[];
 
 
 
 while(
+
 arr.length<2
+
 ){
+
 
 
 let n=
@@ -816,17 +814,23 @@ let n=
 String(
 
 Math.floor(
+
 Math.random()*12
+
 )+1
 
 )
+
 .padStart(2,"0");
 
 
 
 
+
 if(
+
 !arr.includes(n)
+
 )
 
 arr.push(n);
@@ -838,14 +842,21 @@ arr.push(n);
 
 
 
+
+
 return arr.sort(
 
-(a,b)=>Number(a)-Number(b)
+(a,b)=>
+
+Number(a)-Number(b)
 
 );
 
 
+
 },
+
+
 
 
 
@@ -860,6 +871,7 @@ return arr.sort(
 similar(a,b){
 
 
+
 let count=0;
 
 
@@ -868,11 +880,12 @@ a.forEach(n=>{
 
 
 if(
+
 b.includes(n)
+
 )
 
 count++;
-
 
 
 });
@@ -880,6 +893,7 @@ count++;
 
 
 return count;
+
 
 
 },
@@ -890,16 +904,24 @@ return count;
 
 
 
+
+
+
 // ======================
-// 蒙特卡罗模拟
+// 蒙特卡罗模拟 V50.7
 // ======================
 
 simulate(total,callback){
 
 
+
 let pool=[];
 
+
 let count=0;
+
+
+
 
 
 
@@ -909,7 +931,7 @@ let timer=setInterval(()=>{
 
 for(
 let i=0;
-i<200;
+i<500;
 i++
 ){
 
@@ -929,16 +951,11 @@ front=this.randomFront();
 }
 
 while(
+
 !this.filterCandidate(front)
+
 );
 
-
-
-
-
-let back=
-
-this.randomBack();
 
 
 
@@ -947,13 +964,7 @@ this.randomBack();
 
 let score=
 
-this.fullScore(
-
-front,
-
-back
-
-);
+this.comboScore(front);
 
 
 
@@ -964,15 +975,45 @@ pool.push({
 
 front,
 
-back,
+
+back:this.randomBack(),
+
 
 score
+
 
 });
 
 
 
+
+
 count++;
+
+
+
+
+
+
+
+
+// 进度反馈
+
+
+if(this.progress){
+
+
+this.progress(
+
+count,
+
+total
+
+);
+
+
+}
+
 
 
 
@@ -983,8 +1024,12 @@ count++;
 
 
 
+
+
 if(
+
 count>=total
+
 ){
 
 
@@ -993,11 +1038,17 @@ clearInterval(timer);
 
 
 
+
+
 pool.sort(
 
-(a,b)=>b.score-a.score
+(a,b)=>
+
+b.score-a.score
 
 );
+
+
 
 
 
@@ -1013,7 +1064,7 @@ this.generatePlans(pool)
 
 
 
-},5);
+},10);
 
 
 
@@ -1035,8 +1086,6 @@ pool[0];
 
 
 
-
-
 plans.push({
 
 ...stable,
@@ -1050,13 +1099,21 @@ type:"stable"
 
 
 
+
+
+// 均衡方案
+
+
 for(
+
 let item of pool
+
 ){
 
 
 
 if(
+
 this.similar(
 
 stable.front,
@@ -1064,6 +1121,7 @@ stable.front,
 item.front
 
 )<=2
+
 ){
 
 
@@ -1080,31 +1138,70 @@ type:"balance"
 break;
 
 
-}
-
-
 
 }
 
 
 
+}
 
 
 
 
-let cold=
 
-pool[pool.length-1];
+
+
+
+// 博冷方案
+
+
+let coldList=
+
+[...pool].reverse();
+
+
+
+
+for(
+
+let item of coldList
+
+){
+
+
+
+if(
+
+this.similar(
+
+stable.front,
+
+item.front
+
+)<=2
+
+){
 
 
 
 plans.push({
 
-...cold,
+...item,
 
 type:"cold"
 
 });
+
+
+break;
+
+
+
+}
+
+
+
+}
 
 
 
@@ -1113,8 +1210,11 @@ type:"cold"
 
 
 while(
+
 plans.length<3
+
 ){
+
 
 
 plans.push(
@@ -1138,6 +1238,9 @@ plans[0].score||1;
 
 
 
+
+
+
 plans.forEach(p=>{
 
 
@@ -1146,11 +1249,13 @@ p.indexScore=
 Number(
 
 (
+
 70+
 
 p.score/max*30
 
 )
+
 .toFixed(2)
 
 );
@@ -1163,7 +1268,9 @@ p.score/max*30
 
 
 
+
 return plans;
+
 
 
 },
@@ -1174,12 +1281,14 @@ return plans;
 
 
 
+
+
+
 // ======================
-// V50.6.1 回测优化
+// 滚动回测
 // ======================
 
 rollingBackTest(period,callback){
-
 
 
 let history=[...this.data];
@@ -1195,6 +1304,8 @@ Math.max(
 history.length-period
 
 );
+
+
 
 
 
@@ -1225,28 +1336,35 @@ best:0
 
 
 
-let index=start;
+let i=start;
 
 
 
-let runTest=()=>{
 
 
-if(
-index>=history.length
+let run=setInterval(()=>{
+
+
+
+let end=
+
+Math.min(
+
+i+5,
+
+history.length
+
+);
+
+
+
+
+
+while(
+
+i<end
+
 ){
-
-
-
-callback(report);
-
-
-return;
-
-
-}
-
-
 
 
 
@@ -1256,16 +1374,17 @@ history.slice(
 
 0,
 
-index
+i
 
 );
 
 
 
+
+
 let real=
 
-history[index];
-
+history[i];
 
 
 
@@ -1278,17 +1397,17 @@ this.init(train);
 
 
 
-// 回测减少计算量
-
 this.simulate(
 
-200,
+1000,
 
 plans=>{
 
 
 
 let best=0;
+
+
 
 
 
@@ -1303,7 +1422,9 @@ p.front.forEach(n=>{
 
 
 if(
+
 real.front.includes(n)
+
 )
 
 same++;
@@ -1315,8 +1436,12 @@ same++;
 
 
 
+
+
 if(
+
 same>best
+
 )
 
 best=same;
@@ -1331,25 +1456,19 @@ best=same;
 
 
 
-if(
-best>=3
-)
+if(best>=3)
 
 report.hit3++;
 
 
 
-if(
-best>=4
-)
+if(best>=4)
 
 report.hit4++;
 
 
 
-if(
-best===5
-)
+if(best===5)
 
 report.hit5++;
 
@@ -1357,15 +1476,15 @@ report.hit5++;
 
 
 
-
-if(
-best>report.best
-)
+if(best>report.best)
 
 report.best=best;
 
 
 
+}
+
+);
 
 
 
@@ -1373,22 +1492,9 @@ report.test++;
 
 
 
-index++;
+i++;
 
 
-
-
-
-
-// 延迟释放手机CPU
-
-setTimeout(
-
-runTest,
-
-20
-
-);
 
 
 
@@ -1396,21 +1502,34 @@ runTest,
 
 
 
-);
+
+
+if(
+
+i>=history.length
+
+){
 
 
 
-};
+clearInterval(run);
 
 
 
+callback(report);
 
 
-runTest();
+
+}
+
+
+
+},100);
 
 
 
 },
+
 
 
 
@@ -1430,27 +1549,29 @@ backTest(callback){
 
 let periods=[100,300,500];
 
-
 let result=[];
 
 
-let i=0;
+let index=0;
 
 
 
 let next=()=>{
 
 
+
 if(
-i>=periods.length
+
+index>=periods.length
+
 ){
 
 
 
 callback(result);
 
-
 return;
+
 
 
 }
@@ -1459,20 +1580,24 @@ return;
 
 
 
+
 this.rollingBackTest(
 
-periods[i],
+periods[index],
 
 r=>{
+
 
 
 result.push(r);
 
 
-i++;
+
+index++;
 
 
 next();
+
 
 
 }
@@ -1485,11 +1610,13 @@ next();
 
 
 
-
 next();
 
 
+
 },
+
+
 
 
 
@@ -1519,8 +1646,8 @@ value
 
 
 
-this.records.push({
 
+this.records.push({
 
 time:
 
@@ -1538,9 +1665,10 @@ result:nums
 
 
 
+
 localStorage.setItem(
 
-"V5061_FEEDBACK",
+"V507_FEEDBACK",
 
 JSON.stringify(
 
@@ -1560,6 +1688,9 @@ this.records
 
 
 
+
+
+
 // ======================
 // 状态
 // ======================
@@ -1567,8 +1698,7 @@ this.records
 status(){
 
 
-
-return{
+return {
 
 
 version:this.version,
@@ -1583,11 +1713,13 @@ feedback:this.records.length
 };
 
 
+
 }
 
 
 
 };
+
 
 
 

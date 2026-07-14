@@ -1,6 +1,6 @@
 /*
 ====================================
-彩票智能分析系统 V50.6.1 Mobile
+彩票智能分析系统 V50.7 Mobile
 
 页面控制
 ====================================
@@ -12,10 +12,12 @@ let dltData=[];
 
 
 
+
 window.onload=function(){
 
 
 loadData();
+
 
 
 document
@@ -44,8 +46,6 @@ document
 
 
 
-
-
 // ======================
 // 加载数据
 // ======================
@@ -59,7 +59,7 @@ try{
 let res=
 
 await fetch(
-"data/dlt_raw.txt?v5061"
+"data/dlt_raw.txt?v507"
 );
 
 
@@ -67,8 +67,6 @@ await fetch(
 let text=
 
 await res.text();
-
-
 
 
 
@@ -80,20 +78,13 @@ dltData=parseData(text);
 
 document
 .getElementById("dltStatus")
-.innerHTML=
-
-"已加载";
-
-
+.innerHTML="已加载";
 
 
 
 document
 .getElementById("dataCount")
-.innerHTML=
-
-dltData.length;
-
+.innerHTML=dltData.length;
 
 
 
@@ -102,7 +93,7 @@ document
 .getElementById("systemStatus")
 .innerHTML=
 
-"V50.6.1数据模块运行正常";
+"V50.7数据模块运行正常";
 
 
 
@@ -141,7 +132,6 @@ document
 function parseData(text){
 
 
-
 let arr=[];
 
 
@@ -152,12 +142,8 @@ text
 
 
 
-let p=
-
-line.trim()
+let p=line.trim()
 .split(/\s+/);
-
-
 
 
 
@@ -186,22 +172,15 @@ i++
 ){
 
 
-
 front.push(
 
-String(
-
-Number(p[i])
-
-)
-
+String(Number(p[i]))
 .padStart(2,"0")
 
 );
 
 
 }
-
 
 
 
@@ -214,23 +193,15 @@ i++
 ){
 
 
-
 back.push(
 
-String(
-
-Number(p[i])
-
-)
-
+String(Number(p[i]))
 .padStart(2,"0")
 
 );
 
 
 }
-
-
 
 
 
@@ -246,16 +217,11 @@ back
 
 
 
-
-
 });
 
 
 
-
-
 return arr;
-
 
 
 }
@@ -280,14 +246,11 @@ if(
 dltData.length===0
 ){
 
-
 alert(
 "数据未加载"
 );
 
-
 return;
-
 
 }
 
@@ -295,28 +258,92 @@ return;
 
 
 
-let box=
+
+
+let result=
 
 document
 .getElementById("result");
 
 
 
+let progress=
+
+document
+.getElementById("progressBox");
 
 
-box.innerHTML=
-
-"V50.6.1模型启动...<br>"+
-"评分计算中...<br>"+
-"100000组蒙特卡罗模拟...";
 
 
+
+result.innerHTML=
+
+"V50.7模型启动...<br>"+
+"历史数据分析...<br>"+
+"蒙特卡罗搜索中...";
+
+
+
+progress.innerHTML=
+
+"准备计算...";
 
 
 
 
 
 DLTEngine.init(dltData);
+
+
+
+
+
+
+
+// 进度回调
+
+DLTEngine.progress=function(count,total){
+
+
+
+let percent=
+
+Math.floor(
+
+count/total*100
+
+);
+
+
+
+
+
+progress.innerHTML=
+
+"模拟进度："+
+
+percent+
+
+"%<br>"+
+
+count+
+
+"/"+
+
+total+
+
+"<br><progress value='"+
+
+percent+
+
+"' max='100'></progress>";
+
+
+
+};
+
+
+
 
 
 
@@ -332,7 +359,7 @@ plans=>{
 
 let html=
 
-"<b>彩票智能分析系统 V50.6.1 Mobile</b><br><br>";
+"<b>彩票智能分析系统 V50.7 Mobile</b><br><br>";
 
 
 
@@ -358,7 +385,9 @@ html+=
 
 
 
+
 html+="<b>最终推荐</b><br><br>";
+
 
 
 
@@ -417,8 +446,6 @@ p.type+
 
 
 
-
-
 });
 
 
@@ -427,18 +454,27 @@ p.type+
 
 html+=
 
-"模型状态：V50.6.1综合模型完成";
+"模型状态：V50.7综合模型完成";
 
 
 
 
 
+result.innerHTML=html;
 
-box.innerHTML=html;
+
+
+
+
+progress.innerHTML=
+
+"计算完成 100%";
 
 
 
 }
+
+
 
 );
 
@@ -473,10 +509,7 @@ document
 
 box.innerHTML=
 
-"V50.6.1滚动回测中...<br>"+
-"手机优化计算启动，请等待...";
-
-
+"V50.7滚动回测中...";
 
 
 
@@ -496,8 +529,7 @@ result=>{
 
 let html=
 
-"<b>V50.6.1历史回测报告</b><br><br>";
-
+"<b>V50.7历史回测报告</b><br><br>";
 
 
 
@@ -518,8 +550,6 @@ r.period+
 
 
 
-
-
 html+=
 
 "测试数量："+
@@ -527,8 +557,6 @@ html+=
 r.test+
 
 "<br>";
-
-
 
 
 
@@ -542,8 +570,6 @@ r.hit3+
 
 
 
-
-
 html+=
 
 "前区4中："+
@@ -551,8 +577,6 @@ html+=
 r.hit4+
 
 "次<br>";
-
-
 
 
 
@@ -566,8 +590,6 @@ r.hit5+
 
 
 
-
-
 html+=
 
 "最佳表现："+
@@ -578,11 +600,7 @@ r.best+
 
 
 
-
-
 });
-
-
 
 
 
@@ -647,7 +665,6 @@ return;
 
 
 
-
 DLTEngine.feedback(value);
 
 
@@ -658,7 +675,7 @@ document
 .getElementById("learningStatus")
 .innerHTML=
 
-"V50.6.1反馈保存成功："+value;
+"V50.7反馈保存成功："+value;
 
 
 
