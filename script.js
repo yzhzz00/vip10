@@ -1,6 +1,6 @@
 /*
 ====================================
-彩票智能分析系统 V50.5 Mobile
+彩票智能分析系统 V50.6.1 Mobile
 
 页面控制
 ====================================
@@ -16,7 +16,6 @@ window.onload=function(){
 
 
 loadData();
-
 
 
 document
@@ -44,6 +43,9 @@ document
 
 
 
+
+
+
 // ======================
 // 加载数据
 // ======================
@@ -57,7 +59,7 @@ try{
 let res=
 
 await fetch(
-"data/dlt_raw.txt?v505"
+"data/dlt_raw.txt?v5061"
 );
 
 
@@ -65,6 +67,8 @@ await fetch(
 let text=
 
 await res.text();
+
+
 
 
 
@@ -76,13 +80,21 @@ dltData=parseData(text);
 
 document
 .getElementById("dltStatus")
-.innerHTML="已加载";
+.innerHTML=
+
+"已加载";
+
+
 
 
 
 document
 .getElementById("dataCount")
-.innerHTML=dltData.length;
+.innerHTML=
+
+dltData.length;
+
+
 
 
 
@@ -90,11 +102,13 @@ document
 .getElementById("systemStatus")
 .innerHTML=
 
-"V50.5数据模块运行正常";
+"V50.6.1数据模块运行正常";
 
 
 
-}catch(e){
+}
+
+catch(e){
 
 
 
@@ -109,7 +123,11 @@ document
 }
 
 
+
 }
+
+
+
 
 
 
@@ -123,6 +141,7 @@ document
 function parseData(text){
 
 
+
 let arr=[];
 
 
@@ -132,6 +151,7 @@ text
 .forEach(line=>{
 
 
+
 let p=
 
 line.trim()
@@ -139,9 +159,13 @@ line.trim()
 
 
 
+
+
 if(
 p.length<9
-)return;
+)
+
+return;
 
 
 
@@ -162,15 +186,22 @@ i++
 ){
 
 
+
 front.push(
 
-String(Number(p[i]))
+String(
+
+Number(p[i])
+
+)
+
 .padStart(2,"0")
 
 );
 
 
 }
+
 
 
 
@@ -183,15 +214,23 @@ i++
 ){
 
 
+
 back.push(
 
-String(Number(p[i]))
+String(
+
+Number(p[i])
+
+)
+
 .padStart(2,"0")
 
 );
 
 
 }
+
+
 
 
 
@@ -207,14 +246,20 @@ back
 
 
 
+
+
 });
+
+
 
 
 
 return arr;
 
 
+
 }
+
 
 
 
@@ -228,6 +273,7 @@ return arr;
 // ======================
 
 function startPredict(){
+
 
 
 if(
@@ -260,9 +306,10 @@ document
 
 box.innerHTML=
 
-"V50.5模型启动...<br>"+
+"V50.6.1模型启动...<br>"+
 "评分计算中...<br>"+
 "100000组蒙特卡罗模拟...";
+
 
 
 
@@ -285,7 +332,7 @@ plans=>{
 
 let html=
 
-"<b>彩票智能分析系统 V50.5 Mobile</b><br><br>";
+"<b>彩票智能分析系统 V50.6.1 Mobile</b><br><br>";
 
 
 
@@ -319,6 +366,7 @@ html+="<b>最终推荐</b><br><br>";
 
 
 plans.forEach((p,i)=>{
+
 
 
 html+=
@@ -369,8 +417,9 @@ p.type+
 
 
 
-});
 
+
+});
 
 
 
@@ -378,7 +427,8 @@ p.type+
 
 html+=
 
-"模型状态：V50.5综合模型完成";
+"模型状态：V50.6.1综合模型完成";
+
 
 
 
@@ -389,8 +439,6 @@ box.innerHTML=html;
 
 
 }
-
-
 
 );
 
@@ -405,8 +453,9 @@ box.innerHTML=html;
 
 
 
+
 // ======================
-// 滚动回测
+// 历史回测
 // ======================
 
 function startBackTest(){
@@ -424,7 +473,10 @@ document
 
 box.innerHTML=
 
-"V50.5滚动回测中...";
+"V50.6.1滚动回测中...<br>"+
+"手机优化计算启动，请等待...";
+
+
 
 
 
@@ -444,7 +496,9 @@ result=>{
 
 let html=
 
-"<b>V50.5历史回测报告</b><br><br>";
+"<b>V50.6.1历史回测报告</b><br><br>";
+
+
 
 
 
@@ -464,6 +518,8 @@ r.period+
 
 
 
+
+
 html+=
 
 "测试数量："+
@@ -471,6 +527,8 @@ html+=
 r.test+
 
 "<br>";
+
+
 
 
 
@@ -484,6 +542,8 @@ r.hit3+
 
 
 
+
+
 html+=
 
 "前区4中："+
@@ -491,6 +551,8 @@ html+=
 r.hit4+
 
 "次<br>";
+
+
 
 
 
@@ -504,6 +566,8 @@ r.hit5+
 
 
 
+
+
 html+=
 
 "最佳表现："+
@@ -514,7 +578,11 @@ r.best+
 
 
 
+
+
 });
+
+
 
 
 
@@ -533,6 +601,7 @@ box.innerHTML=html;
 
 
 }
+
 
 
 
@@ -560,6 +629,7 @@ document
 
 
 
+
 if(!value){
 
 
@@ -577,6 +647,7 @@ return;
 
 
 
+
 DLTEngine.feedback(value);
 
 
@@ -587,7 +658,7 @@ document
 .getElementById("learningStatus")
 .innerHTML=
 
-"V50.5反馈保存成功："+value;
+"V50.6.1反馈保存成功："+value;
 
 
 

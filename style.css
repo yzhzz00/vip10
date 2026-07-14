@@ -1,6 +1,6 @@
 /*
 ====================================
-彩票智能分析系统 V50.5 Mobile
+彩票智能分析系统 V50.6.1 Mobile
 
 界面样式
 ====================================
@@ -8,7 +8,9 @@
 
 
 *{
+
 box-sizing:border-box;
+
 }
 
 
@@ -19,7 +21,7 @@ margin:0;
 
 padding:10px;
 
-background:#eef3f8;
+background:#f3f6fa;
 
 font-family:
 
@@ -34,23 +36,25 @@ color:#222;
 
 
 
+
 .container{
 
 max-width:900px;
 
 margin:auto;
 
-background:#ffffff;
+background:#fff;
 
-padding:16px;
+padding:15px;
 
-border-radius:18px;
+border-radius:15px;
 
 box-shadow:
 
-0 8px 25px rgba(0,0,0,.1);
+0 5px 20px rgba(0,0,0,.08);
 
 }
+
 
 
 
@@ -59,32 +63,32 @@ h1{
 
 text-align:center;
 
-font-size:23px;
+font-size:22px;
 
-font-weight:bold;
+color:#1677ff;
 
-color:#0958d9;
-
-margin:12px 0 22px;
+margin:10px 0 20px;
 
 }
+
 
 
 
 
 .box{
 
-background:#f9fbff;
+background:#fafafa;
 
-border:1px solid #dce6f5;
+border:1px solid #e5e5e5;
 
-border-radius:14px;
+border-radius:12px;
 
-padding:16px;
+padding:15px;
 
 margin-bottom:15px;
 
 }
+
 
 
 
@@ -95,9 +99,9 @@ font-size:16px;
 
 font-weight:bold;
 
-color:#0958d9;
+color:#333;
 
-margin-bottom:12px;
+margin-bottom:10px;
 
 }
 
@@ -109,27 +113,19 @@ button{
 
 width:100%;
 
-height:46px;
+height:44px;
 
 margin:8px 0;
 
 border:none;
 
-border-radius:12px;
+border-radius:10px;
 
-background:
-
-linear-gradient(
-135deg,
-#1677ff,
-#4096ff
-);
+background:#1677ff;
 
 color:#fff;
 
 font-size:16px;
-
-font-weight:bold;
 
 }
 
@@ -139,7 +135,7 @@ font-weight:bold;
 
 button:active{
 
-transform:scale(.97);
+transform:scale(.98);
 
 }
 
@@ -151,19 +147,18 @@ input{
 
 width:100%;
 
-height:44px;
+height:42px;
 
 padding:10px;
 
 font-size:15px;
 
-border:1px solid #ccd6e5;
+border:1px solid #ccc;
 
-border-radius:10px;
-
-background:#fff;
+border-radius:8px;
 
 }
+
 
 
 
@@ -196,29 +191,15 @@ font-weight:bold;
 
 background:#fff;
 
-border-left:
+border-left:4px solid #1677ff;
 
-5px solid #1677ff;
+padding:12px;
 
-padding:15px;
-
-border-radius:10px;
+border-radius:8px;
 
 line-height:2;
 
-min-height:140px;
-
-font-size:15px;
-
-}
-
-
-
-
-
-#result b{
-
-color:#0958d9;
+min-height:120px;
 
 }
 
@@ -230,13 +211,11 @@ color:#0958d9;
 
 background:#fff;
 
-border-left:
+border-left:4px solid #19a15f;
 
-5px solid #19a15f;
+padding:12px;
 
-padding:15px;
-
-border-radius:10px;
+border-radius:8px;
 
 line-height:2;
 
@@ -250,7 +229,7 @@ line-height:2;
 
 line-height:1.8;
 
-color:#666;
+color:#555;
 
 }
 
@@ -263,12 +242,6 @@ color:#666;
 font-weight:bold;
 
 color:#198754;
-
-background:#f0fff5;
-
-padding:8px;
-
-border-radius:8px;
 
 }
 
@@ -290,7 +263,7 @@ margin:0;
 
 li{
 
-line-height:1.9;
+line-height:1.8;
 
 }
 
@@ -298,14 +271,13 @@ line-height:1.9;
 
 
 
-/* 手机适配 */
-
 @media(max-width:600px){
+
 
 
 body{
 
-padding:5px;
+padding:6px;
 
 }
 
@@ -314,8 +286,6 @@ padding:5px;
 .container{
 
 padding:12px;
-
-border-radius:14px;
 
 }
 
@@ -331,17 +301,9 @@ font-size:20px;
 
 button{
 
-height:43px;
+height:42px;
 
 font-size:15px;
-
-}
-
-
-
-.box{
-
-padding:12px;
 
 }
 
@@ -351,8 +313,6 @@ padding:12px;
 #backTestResult{
 
 font-size:14px;
-
-line-height:1.9;
 
 }
 
