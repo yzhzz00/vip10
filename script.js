@@ -1,6 +1,6 @@
 // ======================================
-// 彩票智能分析系统 V34.1
-// 稳定预测核心修正版
+// 彩票智能分析系统 V34.2
+// 稳定平衡优化版
 // Part 1
 // ======================================
 
@@ -18,7 +18,7 @@ const count=document.getElementById("dataCount");
 
 
 
-result.innerHTML="V34.1稳定模型启动...";
+result.innerHTML="V34.2平衡模型启动...";
 
 
 
@@ -26,7 +26,9 @@ try{
 
 
 const res=await fetch(
-"data/dlt_raw.txt?v=3410"
+
+"data/dlt_raw.txt?v=3420"
+
 );
 
 
@@ -55,6 +57,7 @@ let nums=line.match(/\d+/g);
 
 
 if(nums && nums.length>=7){
+
 
 
 let arr=nums.map(
@@ -92,7 +95,7 @@ count.innerHTML=data.length+"期";
 
 
 // ================================
-// 读取学习参数
+// 学习参数
 // ================================
 
 
@@ -105,15 +108,15 @@ runs:0,
 weights:{
 
 
-freq:0.20,
+freq:0.18,
 
-trend:0.25,
+trend:0.22,
 
 miss:0.15,
 
-markov:0.20,
+markov:0.18,
 
-structure:0.20
+structure:0.27
 
 
 },
@@ -123,6 +126,7 @@ predictions:[]
 
 
 };
+
 
 
 
@@ -141,15 +145,14 @@ let old=localStorage.getItem(
 
 if(old){
 
+
 memory=JSON.parse(old);
+
 
 }
 
 
-
 }catch(e){}
-
-
 
 
 
@@ -237,7 +240,6 @@ recent[n]++;
 for(let i=data.length-1;i>=0;i--){
 
 
-
 data[i].front.forEach(n=>{
 
 
@@ -261,8 +263,32 @@ miss[n]=data.length-i;
 
 
 
+
 // ================================
-// 位置转移统计
+// 冷热评分
+// ================================
+
+
+let hot={};
+
+
+
+for(let n in freq){
+
+
+hot[n]=recent[n]-freq[n]/data.length*300;
+
+
+}
+
+
+
+
+
+
+
+// ================================
+// 马尔可夫位置模型
 // ================================
 
 
@@ -274,6 +300,7 @@ for(let i=0;i<data.length-1;i++){
 
 
 for(let p=0;p<5;p++){
+
 
 
 let a=data[i].front[p];
@@ -349,9 +376,8 @@ markovScore[n]=total;
 
 
 
-
 // ================================
-// 综合评分
+// 综合号码评分
 // ================================
 
 
@@ -363,13 +389,36 @@ for(let n in freq){
 
 
 
+let x=parseInt(n);
+
+
+
 let structure=
 
-parseInt(n)%2===1?
+x%2===1?
 
-0.6:
+0.55:
 
-0.4;
+0.45;
+
+
+
+
+let hotAdjust=
+
+
+hot[n]>20?
+
+-0.05:
+
+
+hot[n]<-10?
+
+0.05:
+
+
+0;
+
 
 
 
@@ -410,7 +459,13 @@ score[n]=
 
 structure
 
-*memory.weights.structure;
+*memory.weights.structure
+
+
+
++
+
+hotAdjust;
 
 
 
@@ -419,8 +474,6 @@ structure
 
 
 
-
-// 固定排序
 
 let pool=
 
@@ -447,36 +500,25 @@ return score[b]-score[a];
 
 
 
+// ===== V34.2 PART 1 END =====
+// ======================================
+// V34.2 Part 2
+// 平衡组合生成 + 差异化筛选
+// ======================================
 
-// ===== V34.1 PART 1 END =====
-// ======================================
-// V34.1 Part 2
-// 确定性组合生成 + 固定输出
-// ======================================
 
 
 // ================================
-// 组合评分函数
+// 组合结构评分
 // ================================
 
 
-function combinationScore(arr){
+function getStructureScore(arr){
 
 
 let s=0;
 
 
-arr.forEach(n=>{
-
-
-s+=score[n];
-
-
-});
-
-
-
-// 奇偶结构
 
 let odd=arr.filter(
 
@@ -486,19 +528,24 @@ n=>parseInt(n)%2===1
 
 
 
+// 奇偶
+
 if(odd===2||odd===3){
 
-s+=0.15;
+s+=0.3;
 
 }else{
 
-s-=0.15;
+s-=0.3;
 
 }
 
 
 
-// 三区结构
+
+
+
+// 三区
 
 let low=0;
 
@@ -514,15 +561,20 @@ arr.forEach(n=>{
 let x=parseInt(n);
 
 
+
 if(x<=12){
 
 low++;
 
-}else if(x<=24){
+}
+
+else if(x<=24){
 
 mid++;
 
-}else{
+}
+
+else{
 
 high++;
 
@@ -533,15 +585,15 @@ high++;
 
 
 
-if(low>0&&mid>0&&high>0){
 
-s+=0.2;
 
-}else{
+if(low>=1&&mid>=1&&high>=1){
 
-s-=0.2;
+s+=0.4;
 
 }
+
+
 
 
 
@@ -559,7 +611,42 @@ let sum=arr.reduce(
 
 if(sum>=90&&sum<=150){
 
-s+=0.1;
+s+=0.3;
+
+}
+
+else{
+
+s-=0.2;
+
+}
+
+
+
+
+
+
+
+// 跨度
+
+
+let span=
+
+parseInt(arr[4])
+
+-
+
+parseInt(arr[0]);
+
+
+
+if(span>=18){
+
+s+=0.3;
+
+}else{
+
+s-=0.2;
 
 }
 
@@ -577,8 +664,7 @@ return s;
 
 
 // ================================
-// 确定性生成组合
-// 不使用随机
+// 生成所有确定组合
 // ================================
 
 
@@ -622,6 +708,7 @@ pool[n]
 
 
 
+
 arr.sort(
 
 (a,b)=>parseInt(a)-parseInt(b)
@@ -630,7 +717,21 @@ arr.sort(
 
 
 
-let s=combinationScore(arr);
+let total=0;
+
+
+
+arr.forEach(x=>{
+
+
+total+=score[x];
+
+
+});
+
+
+
+total+=getStructureScore(arr);
 
 
 
@@ -638,7 +739,7 @@ candidates.push({
 
 front:arr,
 
-score:s
+score:total
 
 
 });
@@ -660,7 +761,11 @@ score:s
 
 
 
+
+// ================================
 // 固定排序
+// ================================
+
 
 candidates.sort((a,b)=>{
 
@@ -691,9 +796,8 @@ return b.score-a.score;
 
 
 
-
 // ================================
-// 三方案差异化
+// 三方案差异控制
 // ================================
 
 
@@ -701,11 +805,11 @@ let plans=[];
 
 
 
-for(let item of candidates){
+for(let c of candidates){
 
 
 
-let same=false;
+let reject=false;
 
 
 
@@ -713,7 +817,7 @@ for(let p of plans){
 
 
 
-let overlap=item.front.filter(
+let same=c.front.filter(
 
 x=>p.front.includes(x)
 
@@ -721,21 +825,23 @@ x=>p.front.includes(x)
 
 
 
-if(overlap>=3){
+if(same>3){
 
-same=true;
-
-}
-
+reject=true;
 
 }
 
 
 
-if(!same){
+}
 
 
-plans.push(item);
+
+
+if(!reject){
+
+
+plans.push(c);
 
 
 }
@@ -757,26 +863,23 @@ break;
 
 
 
-
 // ================================
-// 后区固定评分
+// 后区评分
 // ================================
 
 
-let backScore={};
+let backFreq={};
 
 
 
 for(let i=1;i<=12;i++){
 
 
-let n=String(i).padStart(2,"0");
-
-
-backScore[n]=0;
+backFreq[String(i).padStart(2,"0")]=0;
 
 
 }
+
 
 
 
@@ -786,11 +889,10 @@ data.forEach(d=>{
 d.back.forEach(n=>{
 
 
-if(backScore[n]!==undefined){
+if(backFreq[n]!==undefined){
 
 
-backScore[n]++;
-
+backFreq[n]++;
 
 }
 
@@ -804,25 +906,26 @@ backScore[n]++;
 
 
 
-let backPool=Object.keys(backScore)
+
+let backPool=
+
+Object.keys(backFreq)
 
 .sort((a,b)=>{
 
 
-if(backScore[b]===backScore[a]){
+if(backFreq[b]===backFreq[a]){
 
 
 return parseInt(a)-parseInt(b);
 
-
 }
 
 
-return backScore[b]-backScore[a];
+return backFreq[b]-backFreq[a];
 
 
 });
-
 
 
 
@@ -836,7 +939,7 @@ return backScore[b]-backScore[a];
 // ================================
 
 
-let record={
+memory.predictions.push({
 
 
 time:new Date().toLocaleString(),
@@ -849,11 +952,9 @@ p=>p.front.join(" ")
 )
 
 
-};
+});
 
 
-
-memory.predictions.push(record);
 
 
 
@@ -862,6 +963,8 @@ if(memory.predictions.length>100){
 memory.predictions.shift();
 
 }
+
+
 
 
 
@@ -876,16 +979,16 @@ JSON.stringify(memory)
 
 
 
-// ===== V34.1 PART 2 END =====
+// ===== V34.2 PART 2 END =====
 // ======================================
-// V34.1 Part 3
-// 回测 + 稳定性 + 输出
+// V34.2 Part 3
+// 回测 + 输出 + 状态
 // ======================================
 
 
 
 // ================================
-// 滚动回测
+// 500期滚动回测
 // ================================
 
 
@@ -923,11 +1026,13 @@ hit3++;
 }
 
 
+
 if(hit>=4){
 
 hit4++;
 
 }
+
 
 
 if(hit===5){
@@ -946,11 +1051,69 @@ hit5++;
 
 
 // ================================
-// 模型稳定检测
+// 权重反馈
 // ================================
 
 
-let stable="100%";
+if(hit3>=5){
+
+
+memory.weights.structure+=0.01;
+
+memory.weights.trend+=0.01;
+
+
+}else{
+
+
+memory.weights.freq+=0.01;
+
+
+}
+
+
+
+
+
+
+let totalWeight=
+
+memory.weights.freq+
+
+memory.weights.trend+
+
+memory.weights.miss+
+
+memory.weights.markov+
+
+memory.weights.structure;
+
+
+
+for(let k in memory.weights){
+
+
+memory.weights[k]=
+
+memory.weights[k]/totalWeight;
+
+
+}
+
+
+
+
+
+
+localStorage.setItem(
+
+"V34_memory",
+
+JSON.stringify(memory)
+
+);
+
+
 
 
 
@@ -965,7 +1128,7 @@ let html="";
 
 
 
-html+="<h3>彩票智能分析系统 V34.1</h3>";
+html+="<h3>彩票智能分析系统 V34.2</h3>";
 
 
 
@@ -987,7 +1150,6 @@ plans.forEach((p,i)=>{
 
 
 html+="方案"+(i+1)+"：";
-
 
 html+=p.front.join(" ");
 
@@ -1033,13 +1195,21 @@ html+="<br><br>";
 
 
 
-html+="500期滚动回测<br>";
+html+="500期平衡回测<br>";
+
+
 
 html+="3+0："+hit3+"次<br>";
 
+
+
 html+="4+0："+hit4+"次<br>";
 
+
+
 html+="5+0："+hit5+"次<br><br>";
+
+
 
 
 
@@ -1067,7 +1237,11 @@ memory.runs
 
 
 
-html+="模型稳定性："+stable+"<br>";
+html+="冷热平衡：开启<br>";
+
+
+
+html+="结构优化：开启<br>";
 
 
 
@@ -1079,11 +1253,7 @@ html+="预测模式：确定性模式<br>";
 
 
 
-html+="权重反馈：开启<br>";
-
-
-
-html+="模型状态：V34.1运行完成";
+html+="模型状态：V34.2运行完成";
 
 
 
@@ -1091,6 +1261,7 @@ html+="模型状态：V34.1运行完成";
 
 
 result.innerHTML=html;
+
 
 
 
@@ -1108,7 +1279,7 @@ learning.innerHTML=
 
 "<br>"+
 
-"反馈学习：开启";
+"平衡学习：开启";
 
 
 
@@ -1117,7 +1288,7 @@ learning.innerHTML=
 
 status.innerHTML=
 
-"V34.1 FINAL运行成功";
+"V34.2 FINAL运行成功";
 
 
 
