@@ -1,6 +1,6 @@
 // ======================================
-// 彩票智能分析系统 V35.2
-// 结构优化预测模型
+// 彩票智能分析系统 V35.3
+// 组合优化预测模型
 // Part 1
 // ======================================
 
@@ -19,12 +19,11 @@ let modelReady = false;
 
 
 
-window.onload = function(){
+window.onload=function(){
 
     loadData();
 
 };
-
 
 
 
@@ -41,12 +40,13 @@ async function loadData(){
 try{
 
 
-let res = await fetch(
-"data/dlt_raw.txt?v=3520"
+let res=await fetch(
+"data/dlt_raw.txt?v=3530"
 );
 
 
-let text = await res.text();
+let text=await res.text();
+
 
 
 dltData=parseDLT(text);
@@ -59,15 +59,13 @@ document.getElementById("dltStatus").innerHTML="已加载";
 document.getElementById("dataCount").innerHTML=dltData.length;
 
 
-
 document.getElementById("pl5Status").innerHTML="已加载";
 
 
 
 document.getElementById("modelStatus").innerHTML=
 
-"V35.2 数据加载完成";
-
+"V35.3 数据加载完成";
 
 
 }
@@ -84,7 +82,6 @@ document.getElementById("modelStatus").innerHTML=
 
 
 }
-
 
 
 
@@ -123,7 +120,6 @@ nums.slice(0,5)
 back:
 nums.slice(5,7)
 .map(n=>n.padStart(2,"0"))
-
 
 });
 
@@ -173,6 +169,10 @@ if(!modelReady){
 
 buildModel();
 
+
+generatePlans();
+
+
 modelReady=true;
 
 
@@ -193,7 +193,7 @@ showResult();
 
 
 // ================================
-// 建立评分模型
+// 建立评分
 // ================================
 
 
@@ -213,6 +213,7 @@ String(i).padStart(2,"0")
 
 
 
+
 for(let i=1;i<=12;i++){
 
 
@@ -228,8 +229,8 @@ String(i).padStart(2,"0")
 
 
 
-
 // 历史频率
+
 
 dltData.forEach(item=>{
 
@@ -260,22 +261,17 @@ backScore[n]+=1;
 
 
 
+// 最近趋势
 
 
-// 最近趋势权重
-
-
-let recent=dltData.slice(-300);
-
-
-
-recent.forEach(item=>{
+dltData.slice(-300)
+.forEach(item=>{
 
 
 item.front.forEach(n=>{
 
 
-frontScore[n]+=1.5;
+frontScore[n]+=2;
 
 
 });
@@ -285,7 +281,7 @@ frontScore[n]+=1.5;
 item.back.forEach(n=>{
 
 
-backScore[n]+=1.5;
+backScore[n]+=2;
 
 
 });
@@ -295,16 +291,9 @@ backScore[n]+=1.5;
 
 
 
-
-
-
-
-
-// 归一化评分 0-100
 
 
 normalize(frontScore);
-
 
 normalize(backScore);
 
@@ -320,65 +309,95 @@ normalize(backScore);
 
 
 // ================================
-// 评分标准化
+// 标准化评分
 // ================================
 
 
 function normalize(obj){
 
 
-let values=Object.values(obj);
+let arr=Object.values(obj);
 
 
-let max=Math.max(...values);
+let max=Math.max(...arr);
 
 
-let min=Math.min(...values);
+let min=Math.min(...arr);
 
 
 
-for(let key in obj){
+for(let k in obj){
 
 
-obj[key]=
+obj[k]=
 
-((obj[key]-min)/(max-min))*100;
+((obj[k]-min)/(max-min))*100;
+
+
+}
 
 
 }
 
 
-}
-// ======================================
-// V35.2 Part 2
-// 组合生成 + 结构优化
-// ======================================
+
+
+
 
 
 
 // ================================
-// 生成候选号码池
+// 生成候选组合
 // ================================
 
 
-function getFrontPool(){
+function generatePlans(){
 
 
-return Object.keys(frontScore)
-
-.sort((a,b)=>{
+let candidates=[];
 
 
-if(frontScore[b]===frontScore[a]){
+let pool=Object.keys(frontScore);
 
 
-return parseInt(a)-parseInt(b);
 
-}
+for(let a=0;a<pool.length;a++){
 
 
-return frontScore[b]-frontScore[a];
+for(let b=a+1;b<pool.length;b++){
 
+
+for(let c=b+1;c<pool.length;c++){
+
+
+for(let d=c+1;d<pool.length;d++){
+
+
+for(let e=d+1;e<pool.length;e++){
+
+
+
+let arr=[
+
+pool[a],
+pool[b],
+pool[c],
+pool[d],
+pool[e]
+
+];
+
+
+
+if(filterCombination(arr)){
+
+
+candidates.push({
+
+nums:arr,
+
+score:
+calculateScore(arr)
 
 });
 
@@ -387,79 +406,121 @@ return frontScore[b]-frontScore[a];
 
 
 
+}
+
+
+}
+
+
+}
+
+
+}
+
+
+}
+
+
+
+}
+
+
+
+
+candidates.sort((a,b)=>{
+
+
+return b.score-a.score;
+
+
+});
+
+
+
+
+finalPlans=candidates.slice(0,3);
+
+
+
+}
+// ======================================
+// V35.3 Part 2
+// 过滤 + 评分 + 输出
+// ======================================
+
 
 
 
 
 // ================================
-// 结构评分
+// 组合过滤
 // ================================
 
 
-function structureScore(arr){
-
-
-let score=0;
+function filterCombination(arr){
 
 
 
-// 奇偶
+let nums=arr.map(
+n=>parseInt(n)
+);
 
-let odd=
 
-arr.filter(
 
-n=>parseInt(n)%2===1
+
+
+// 奇偶过滤
+
+let odd=nums.filter(
+
+n=>n%2===1
 
 ).length;
 
 
 
-if(odd===2 || odd===3){
+if(
+odd<2 ||
+odd>3
+){
 
-
-score+=20;
-
-
-}
-
-
-
-
-
-
-// 三区
-
-let zone1=0;
-
-let zone2=0;
-
-let zone3=0;
-
-
-
-arr.forEach(n=>{
-
-
-let x=parseInt(n);
-
-
-
-if(x<=12){
-
-zone1++;
+return false;
 
 }
 
-else if(x<=24){
 
-zone2++;
+
+
+
+
+// 三区过滤
+
+let z1=0;
+
+let z2=0;
+
+let z3=0;
+
+
+
+nums.forEach(n=>{
+
+
+if(n<=12){
+
+z1++;
+
+}
+
+else if(n<=24){
+
+z2++;
 
 }
 
 else{
 
-zone3++;
+z3++;
 
 }
 
@@ -469,15 +530,15 @@ zone3++;
 
 
 
+let zone=[z1,z2,z3];
+
+
+
 if(
-zone1>=1 &&
-zone2>=1 &&
-zone3>=1
+zone.includes(0)
 ){
 
-
-score+=25;
-
+return false;
 
 }
 
@@ -487,26 +548,25 @@ score+=25;
 
 
 
-// 和值
+
+// 和值过滤
 
 
 let sum=
 
-arr.reduce(
-
-(a,b)=>a+parseInt(b),
-
+nums.reduce(
+(a,b)=>a+b,
 0
-
 );
 
 
 
-if(sum>=90 && sum<=160){
+if(
+sum<80 ||
+sum>170
+){
 
-
-score+=25;
-
+return false;
 
 }
 
@@ -515,31 +575,29 @@ score+=25;
 
 
 
-
-// 连号控制
+// 连号过滤
 
 
 let link=0;
 
 
 
-for(let i=1;i<arr.length;i++){
+nums.sort(
+(a,b)=>a-b
+);
+
+
+
+for(let i=1;i<nums.length;i++){
 
 
 
 if(
-parseInt(arr[i])-
-
-parseInt(arr[i-1])
-
-===1
-
+nums[i]-nums[i-1]===1
 ){
-
 
 link++;
 
-
 }
 
 
@@ -547,14 +605,107 @@ link++;
 
 
 
-if(link<=2){
+if(link>2){
 
 
-score+=15;
+return false;
 
 
 }
 
+
+
+
+
+return true;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+// ================================
+// 组合评分
+// ================================
+
+
+function calculateScore(arr){
+
+
+
+let score=0;
+
+
+
+arr.forEach(n=>{
+
+
+score+=
+
+frontScore[n];
+
+
+});
+
+
+
+
+// 结构奖励
+
+
+let nums=arr.map(
+n=>parseInt(n)
+);
+
+
+
+
+let odd=
+
+nums.filter(
+n=>n%2===1
+).length;
+
+
+
+if(
+odd===2 ||
+odd===3
+){
+
+score+=10;
+
+}
+
+
+
+
+
+let sum=
+
+nums.reduce(
+(a,b)=>a+b,
+0
+);
+
+
+
+if(
+sum>=90 &&
+sum<=150
+){
+
+score+=10;
+
+}
 
 
 
@@ -562,69 +713,9 @@ score+=15;
 return score;
 
 
-}
-
-
-
-
-
-
-
-
-
-// ================================
-// 生成方案
-// ================================
-
-
-function makePlan(start){
-
-
-
-let pool=getFrontPool();
-
-
-let arr=[];
-
-
-
-for(
-let i=start;
-i<pool.length;
-i++
-){
-
-
-if(arr.length===5){
-
-
-break;
-
 
 }
 
-
-arr.push(pool[i]);
-
-
-}
-
-
-
-
-
-arr.sort(
-
-(a,b)=>parseInt(a)-parseInt(b)
-
-);
-
-
-
-return arr;
-
-
-}
 
 
 
@@ -638,7 +729,7 @@ return arr;
 // ================================
 
 
-function makeBack(start){
+function getBack(){
 
 
 
@@ -647,15 +738,6 @@ let pool=
 Object.keys(backScore)
 
 .sort((a,b)=>{
-
-
-if(backScore[b]===backScore[a]){
-
-
-return parseInt(a)-parseInt(b);
-
-
-}
 
 
 return backScore[b]-backScore[a];
@@ -667,9 +749,9 @@ return backScore[b]-backScore[a];
 
 return [
 
-pool[start],
+pool[0],
 
-pool[start+1]
+pool[1]
 
 ];
 
@@ -683,8 +765,9 @@ pool[start+1]
 
 
 
+
 // ================================
-// 输出
+// 输出结果
 // ================================
 
 
@@ -696,15 +779,19 @@ let html="";
 
 
 
-html+="<b>彩票智能分析系统 V35.2</b><br><br>";
+html+=
+
+"<b>彩票智能分析系统 V35.3</b><br><br>";
 
 
 
-html+="数据期数："
+html+=
 
-+dltData.length
+"数据期数："+
 
-+"期<br><br>";
+dltData.length+
+
+"期<br><br>";
 
 
 
@@ -715,74 +802,75 @@ html+="最终推荐<br><br>";
 
 
 
-for(let i=0;i<3;i++){
+finalPlans.forEach(
+
+(plan,index)=>{
 
 
 
-let front=
-
-makePlan(i*5);
-
-
-
-let back=
-
-makeBack(i*2);
-
-
-
-let score=
-
-structureScore(front);
+let back=getBack();
 
 
 
 html+=
 
-"方案"+(i+1)+"："
+"方案"+
 
-+
+(index+1)+
 
-front.join(" ")
-
-+
-
-" + "
-
-+
-
-back.join(" ")
-
-+
-
-"<br>";
-
+"：";
 
 
 
 html+=
 
-"综合评分："
+plan.nums.join(" ");
 
-+
 
-score.toFixed(2)
 
-+
+html+=" + ";
 
-"分<br><br>";
+
+
+html+=
+
+back.join(" ");
+
+
+
+
+
+html+="<br>";
+
+
+
+html+=
+
+"综合评分："+
+
+plan.score.toFixed(2)+
+
+"分";
+
+
+
+html+="<br><br>";
 
 
 
 }
 
+);
+
+
 
 
 
 
 html+=
 
-"模型状态：V35.2结构优化完成";
+"模型状态：V35.3组合优化完成";
+
 
 
 
@@ -797,13 +885,15 @@ document.getElementById(
 
 
 
+
 document.getElementById(
 
 "modelStatus"
 
 ).innerHTML=
 
-"V35.2运行成功<br>固定结构模式开启";
+"V35.3运行成功<br>组合筛选开启";
+
 
 
 
@@ -855,6 +945,7 @@ return;
 
 
 }
+
 
 
 
