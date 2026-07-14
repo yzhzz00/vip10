@@ -1,9 +1,9 @@
 /*
-=====================================
-彩票智能分析系统 V36.1 Mobile
+====================================
+彩票智能分析系统 V36.2 Mobile
 
-script.js
-=====================================
+页面控制
+====================================
 */
 
 
@@ -20,19 +20,19 @@ loadData();
 
 document
 .getElementById("predictBtn")
-.onclick=startPredict;
+.onclick=predict;
 
 
 
 document
 .getElementById("backTestBtn")
-.onclick=startBackTest;
+.onclick=backTest;
 
 
 
 document
 .getElementById("feedbackBtn")
-.onclick=saveFeedback;
+.onclick=feedback;
 
 
 
@@ -44,11 +44,9 @@ document
 
 
 
-
-
-// =========================
+// ======================
 // 加载数据
-// =========================
+// ======================
 
 
 async function loadData(){
@@ -62,7 +60,7 @@ try{
 let res=
 
 await fetch(
-"data/dlt_raw.txt?v361"
+"data/dlt_raw.txt?v362"
 );
 
 
@@ -73,12 +71,7 @@ await res.text();
 
 
 
-
-dltData=
-
-parseData(text);
-
-
+dltData=parseData(text);
 
 
 
@@ -96,17 +89,15 @@ dltData.length;
 
 
 
-
 document
 .getElementById("systemStatus")
 .innerHTML=
 
-"V36.1数据模块运行正常";
+"V36.2数据模块运行正常";
 
 
 
-}
-catch(e){
+}catch(e){
 
 
 
@@ -132,9 +123,9 @@ document
 
 
 
-// =========================
+// ======================
 // 数据解析
-// =========================
+// ======================
 
 
 function parseData(text){
@@ -162,8 +153,7 @@ line.trim()
 
 if(
 p.length<9
-)
-return;
+)return;
 
 
 
@@ -172,7 +162,6 @@ return;
 let front=[];
 
 let back=[];
-
 
 
 
@@ -198,7 +187,6 @@ Number(p[i])
 
 
 }
-
 
 
 
@@ -231,16 +219,11 @@ Number(p[i])
 
 arr.push({
 
-
 front,
-
 
 back
 
-
-
 });
-
 
 
 
@@ -265,29 +248,26 @@ return arr;
 
 
 
-// =========================
-// 智能分析
-// =========================
+// ======================
+// 预测
+// ======================
 
 
-function startPredict(){
+function predict(){
 
 
 
 if(
-dltData.length===0
+!dltData.length
 ){
 
 
-
 alert(
-"历史数据未加载"
+"数据未加载"
 );
 
 
-
 return;
-
 
 
 }
@@ -296,7 +276,8 @@ return;
 
 
 
-let box=
+
+let result=
 
 document
 .getElementById("result");
@@ -305,18 +286,13 @@ document
 
 
 
-box.innerHTML=
+result.innerHTML=
 
-"V36.1模型启动...<br>"+
-"动态权重计算...<br>"+
-"蒙特卡罗搜索5000×3...";
-
-
+"V36.2计算启动...<br>"+
+"动态权重分析...<br>"+
+"蒙特卡罗搜索中...";
 
 
-
-
-setTimeout(()=>{
 
 
 
@@ -326,52 +302,17 @@ DLTEngine.init(dltData);
 
 
 
-let result=
-
-DLTEngine.run();
 
 
-
-
-
-showResult(result);
+DLTEngine.run(function(data){
 
 
 
 
 
-},200);
+let html=
 
-
-
-}
-
-
-
-
-
-
-
-
-
-// =========================
-// 显示预测
-// =========================
-
-
-function showResult(result){
-
-
-
-let html="";
-
-
-
-
-
-html+=
-
-"<b>彩票智能分析系统 V36.1 Mobile</b><br><br>";
+"<b>彩票智能分析系统 V36.2 Mobile</b><br><br>";
 
 
 
@@ -397,61 +338,37 @@ html+=
 
 
 
-
-result.forEach((r,i)=>{
+data.forEach((x,i)=>{
 
 
 
 html+=
 
 "方案"+
-
-(i+1)
-
-+
-
+(i+1)+
 "："+
-
-r.front.join(" ")
-
+x.front.join(" ")
 +
-
 " + "
-
 +
-
-r.back.join(" ")
-
+x.back.join(" ")
 +
-
 "<br>";
 
 
 
 html+=
 
-"综合评分："
-
-+
-
-r.score
-
-+
-
+"综合评分："+
+x.score+
 "分<br>";
 
 
 
 html+=
 
-"类型："
-
-+
-
-r.type
-
-+
-
+"类型："+
+x.type+
 "<br><br>";
 
 
@@ -462,20 +379,21 @@ r.type
 
 
 
-
 html+=
 
-"模型状态：V36.1综合模型完成";
+"模型状态：V36.2综合模型完成";
 
 
 
 
 
-document
-.getElementById("result")
-.innerHTML=
+result.innerHTML=html;
 
-html;
+
+
+
+
+});
 
 
 
@@ -489,12 +407,12 @@ html;
 
 
 
-// =========================
+// ======================
 // 回测
-// =========================
+// ======================
 
 
-function startBackTest(){
+function backTest(){
 
 
 
@@ -505,15 +423,15 @@ document
 
 
 
+
+
 box.innerHTML=
 
-"V36.1历史回测运行中...";
+"V36.2历史回测运行中...<br>"+
+"正在测试100/300/500期";
 
 
 
-
-
-setTimeout(()=>{
 
 
 
@@ -521,9 +439,10 @@ DLTEngine.init(dltData);
 
 
 
-let reports=
 
-DLTEngine.backTest();
+
+
+DLTEngine.backTest(function(data){
 
 
 
@@ -531,22 +450,21 @@ DLTEngine.backTest();
 
 let html=
 
-"<b>V36.1历史回测报告</b><br><br>";
+"<b>V36.2历史回测报告</b><br><br>";
 
 
 
 
 
-reports.forEach(r=>{
+
+data.forEach(r=>{
 
 
 
 html+=
 
 "测试周期："+
-
 r.period+
-
 "期<br>";
 
 
@@ -554,9 +472,7 @@ r.period+
 html+=
 
 "测试数量："+
-
 r.test+
-
 "<br>";
 
 
@@ -597,13 +513,11 @@ r.hit5+
 
 
 
-box.innerHTML=
-
-html;
+box.innerHTML=html;
 
 
 
-},300);
+});
 
 
 
@@ -617,12 +531,12 @@ html;
 
 
 
-// =========================
+// ======================
 // 开奖反馈
-// =========================
+// ======================
 
 
-function saveFeedback(){
+function feedback(){
 
 
 
@@ -640,12 +554,15 @@ document
 if(!value){
 
 
+
 alert(
-"请输入开奖结果"
+"请输入开奖号码"
 );
 
 
+
 return;
+
 
 
 }
@@ -654,13 +571,9 @@ return;
 
 
 
-localStorage.setItem(
 
-"V361_FEEDBACK",
+DLTEngine.learn(value);
 
-value
-
-);
 
 
 
@@ -670,7 +583,7 @@ document
 .getElementById("learningStatus")
 .innerHTML=
 
-"V36.1开奖反馈已保存："+value;
+"V36.2反馈学习完成："+value;
 
 
 

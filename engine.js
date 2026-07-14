@@ -1,59 +1,37 @@
 /*
-=====================================
-彩票智能分析系统 V36.1 Mobile
+====================================
+彩票智能分析系统 V36.2 Mobile
 
-核心引擎
-修复：
-1. 回测数量错误
-2. 评分0分问题
-3. 方案重复问题
-4. 动态权重
-=====================================
+核心计算引擎
+
+优化：
+1. 分批计算
+2. 手机不卡死
+3. 预测/回测分离
+4. 方案差异化
+====================================
 */
 
 
 const DLTEngine={
 
 
-version:"V36.1",
+version:"V36.2",
 
 
 data:[],
 
 
-frontScore:{},
+front:{},
 
 
-backScore:{},
+back:{},
 
 
-transition:{},
+markov:{},
 
 
 pool:[],
-
-
-seed:3610,
-
-
-
-
-
-random(){
-
-
-this.seed=
-
-(
-this.seed*9301+
-49297
-)%233280;
-
-
-return this.seed/233280;
-
-
-},
 
 
 
@@ -63,22 +41,16 @@ return this.seed/233280;
 init(data){
 
 
-
 this.data=data||[];
 
 
-
-this.frontScore={};
-
-
-this.backScore={};
+this.front={};
 
 
-this.transition={};
+this.back={};
 
 
-this.pool=[];
-
+this.markov={};
 
 
 
@@ -95,12 +67,10 @@ String(i)
 .padStart(2,"0");
 
 
-this.frontScore[n]=0;
+this.front[n]=0;
 
 
 }
-
-
 
 
 
@@ -117,7 +87,7 @@ String(i)
 .padStart(2,"0");
 
 
-this.backScore[n]=0;
+this.back[n]=0;
 
 
 }
@@ -126,13 +96,10 @@ this.backScore[n]=0;
 
 
 
-this.frequencyModel();
+this.analyseFrequency();
 
 
-this.markovModel();
-
-
-this.normalize();
+this.analyseMarkov();
 
 
 this.createPool();
@@ -147,77 +114,36 @@ this.createPool();
 
 
 
+// ======================
+// 历史频率分析
+// ======================
 
 
-// =========================
-// 动态频率模型
-// =========================
-
-
-frequencyModel(){
+analyseFrequency(){
 
 
 
-let len=
+let total=
 
 this.data.length;
 
 
 
-
-
-this.data.forEach(
-(item,index)=>{
+this.data.forEach((item,index)=>{
 
 
 
-let weight=1;
-
-
-
-let gap=
-
-len-index;
-
-
-
-if(gap<=50){
-
-
-weight=5;
-
-
-}
-
-else if(gap<=100){
-
-
-weight=3;
-
-
-}
-
-else if(gap<=300){
-
-
-weight=2;
-
-
-}
-
-
-
+let weight=1+index/total;
 
 
 
 item.front.forEach(n=>{
 
 
-this.frontScore[n]+=weight;
+this.front[n]+=weight;
 
 
 });
-
 
 
 
@@ -225,7 +151,7 @@ this.frontScore[n]+=weight;
 item.back.forEach(n=>{
 
 
-this.backScore[n]+=weight;
+this.back[n]+=weight;
 
 
 });
@@ -233,7 +159,6 @@ this.backScore[n]+=weight;
 
 
 });
-
 
 
 
@@ -243,9 +168,8 @@ this.backScore[n]+=weight;
 // 遗漏补偿
 
 
-Object.keys(
-this.frontScore
-)
+
+Object.keys(this.front)
 .forEach(n=>{
 
 
@@ -255,7 +179,7 @@ let miss=0;
 
 
 for(
-let i=len-1;
+let i=this.data.length-1;
 i>=0;
 i--
 ){
@@ -277,39 +201,26 @@ break;
 miss++;
 
 
-}
-
-
-
-
-
-if(miss>=30){
-
-
-this.frontScore[n]+=10;
-
 
 }
 
-else if(miss>=20){
 
 
-this.frontScore[n]+=6;
 
 
-}
+this.front[n]+=
 
-else if(miss>=10){
-
-
-this.frontScore[n]+=3;
-
-
-}
+Math.min(
+miss,
+30
+)
+*
+0.3;
 
 
 
 });
+
 
 
 
@@ -322,14 +233,12 @@ this.frontScore[n]+=3;
 
 
 
+// ======================
+// 马尔可夫模型
+// ======================
 
 
-// =========================
-// 马尔可夫转移
-// =========================
-
-
-markovModel(){
+analyseMarkov(){
 
 
 
@@ -341,13 +250,12 @@ i++
 
 
 
-let prev=
+let a=
 
 this.data[i-1].front;
 
 
-
-let next=
+let b=
 
 this.data[i].front;
 
@@ -355,127 +263,51 @@ this.data[i].front;
 
 
 
-prev.forEach(a=>{
+a.forEach(x=>{
 
 
 
 if(
-!this.transition[a]
+!this.markov[x]
 ){
 
 
-this.transition[a]={};
+this.markov[x]={};
 
 
 }
 
 
 
-
-next.forEach(b=>{
+b.forEach(y=>{
 
 
 
 if(
-!this.transition[a][b]
+!this.markov[x][y]
 ){
 
 
-this.transition[a][b]=0;
+this.markov[x][y]=0;
 
 
 }
 
 
 
-
-this.transition[a][b]++;
-
-
-
-});
-
+this.markov[x][y]++;
 
 
 
 });
 
+
+
+});
 
 
 
 }
-
-
-
-},
-// =========================
-// 权重归一化
-// =========================
-
-
-normalize(){
-
-
-
-let max=
-
-Math.max(
-...Object.values(
-this.frontScore
-)
-);
-
-
-
-Object.keys(
-this.frontScore
-)
-.forEach(n=>{
-
-
-this.frontScore[n]=
-
-this.frontScore[n]
-/
-(max||1)
-*
-100;
-
-
-
-});
-
-
-
-
-
-let maxBack=
-
-Math.max(
-...Object.values(
-this.backScore
-)
-);
-
-
-
-Object.keys(
-this.backScore
-)
-.forEach(n=>{
-
-
-this.backScore[n]=
-
-this.backScore[n]
-/
-(maxBack||1)
-*
-100;
-
-
-
-});
 
 
 
@@ -487,69 +319,43 @@ this.backScore[n]
 
 
 
-// =========================
-// 候选池
-// =========================
+// ======================
+// 创建号码池
+// ======================
 
 
 createPool(){
 
 
 
-this.pool=
+let arr=
 
-Object.keys(
-this.frontScore
-)
+Object.keys(this.front)
 .sort(
 
 (a,b)=>
 
-this.frontScore[b]-
-this.frontScore[a]
+this.front[b]-
+this.front[a]
 
 );
 
 
 
+this.pool=arr;
+
+
+
 },
+// ======================
+// 号码评分
+// ======================
 
 
+scoreNumber(n){
 
 
-
-
-
-// =========================
-// 贝叶斯评分
-// =========================
-
-
-bayesScore(front){
-
-
-
-let score=0;
-
-
-
-front.forEach(n=>{
-
-
-score+=
-
-this.frontScore[n]
-*
-0.4;
-
-
-
-});
-
-
-
-return score;
-
+return this.front[n]||0;
 
 
 },
@@ -560,85 +366,26 @@ return score;
 
 
 
-// =========================
-// 马尔可夫评分
-// =========================
+// ======================
+// 组合评分
+// ======================
 
 
-markovScore(front){
-
-
-
-let score=0;
-
-
-
-front.forEach(a=>{
-
-
-
-if(
-this.transition[a]
-){
-
-
-
-front.forEach(b=>{
-
-
-if(
-a!==b &&
-this.transition[a][b]
-){
-
-
-
-score+=
-
-this.transition[a][b]
-*
-0.05;
-
-
-
-}
-
-
-
-});
-
-
-
-}
-
-
-
-});
-
-
-
-return score;
-
-
-
-},
-
-
-
-
-
-
-
-// =========================
-// 结构评分
-// =========================
-
-
-structureScore(front){
+scoreCombo(arr){
 
 
 
 let score=0;
+
+
+
+arr.forEach(n=>{
+
+
+score+=this.scoreNumber(n);
+
+
+});
 
 
 
@@ -649,31 +396,22 @@ let score=0;
 
 let odd=
 
-front.filter(
+arr.filter(n=>
 
-x=>
+Number(n)%2===1
 
-Number(x)%2
-
-===1
-
-)
-.length;
+).length;
 
 
 
 if(
-odd===2 ||
+odd===2||
 odd===3
 ){
 
-
-score+=10;
-
+score+=15;
 
 }
-
-
 
 
 
@@ -682,48 +420,25 @@ score+=10;
 // 三区
 
 
-
 let zone=[0,0,0];
 
 
 
-front.forEach(n=>{
+arr.forEach(n=>{
+
+
+let x=Number(n);
 
 
 
-let x=
-
-Number(n);
-
-
-
-if(
-x<=12
-){
-
-
+if(x<=12)
 zone[0]++;
 
-
-}
-
-else if(
-x<=24
-){
-
-
+else if(x<=24)
 zone[1]++;
 
-
-}
-
-else{
-
-
+else
 zone[2]++;
-
-
-}
 
 
 
@@ -734,17 +449,14 @@ zone[2]++;
 
 
 if(
-zone[0] &&
-zone[1] &&
-zone[2]
+zone[0]>0 &&
+zone[1]>0 &&
+zone[2]>0
 ){
 
-
-score+=10;
-
+score+=15;
 
 }
-
 
 
 
@@ -756,12 +468,11 @@ score+=10;
 
 let sum=
 
-front.reduce(
+arr.reduce(
 
 (a,b)=>
 
-a+
-Number(b),
+a+Number(b),
 
 0
 
@@ -769,52 +480,14 @@ Number(b),
 
 
 
-
-
 if(
-sum>=95 &&
-sum<=175
+sum>=90 &&
+sum<=180
 ){
 
-
-score+=10;
-
+score+=15;
 
 }
-
-
-
-
-
-
-
-
-// 跨度
-
-
-let span=
-
-Number(front[4])-
-
-Number(front[0]);
-
-
-
-
-
-if(
-span>=15 &&
-span<=32
-){
-
-
-score+=5;
-
-
-}
-
-
-
 
 
 
@@ -832,101 +505,65 @@ return score;
 
 
 
-// =========================
-// 综合评分
-// =========================
+// ======================
+// 随机组合
+// ======================
 
 
-totalScore(front){
-
-
-
-return (
-
-this.bayesScore(front)
-+
-this.markovScore(front)
-+
-this.structureScore(front)
-
-);
-
-
-
-},
-
-
-
-
-
-
-
-// =========================
-// 三种选号模式
-// =========================
-
-
-generate(mode){
+createCombo(type){
 
 
 
 let result=[];
 
 
-let limit=15;
+
+let start=0;
 
 
 
-if(
-mode==="balance"
-){
-
-
-limit=25;
-
-
-}
+let range=this.pool.length;
 
 
 
-if(
-mode==="cold"
-){
 
 
-limit=35;
+if(type==="stable"){
+
+
+range=15;
 
 
 }
 
 
 
+if(type==="cold"){
 
 
+start=15;
 
-let count=0;
+
+range=20;
+
+
+}
+
+
 
 
 
 while(
-result.length<5 &&
-count<500
+result.length<5
 ){
-
-
-count++;
-
 
 
 
 let index=
 
+start+
 Math.floor(
-
-this.random()
-*
-limit
-
+Math.random()*range
 );
 
 
@@ -934,7 +571,6 @@ limit
 let n=
 
 this.pool[index];
-
 
 
 
@@ -956,38 +592,44 @@ result.push(n);
 
 
 
+
+
 return result.sort(
 
 (a,b)=>
 
-Number(a)-
-Number(b)
+Number(a)-Number(b)
 
 );
 
 
 
 },
-// =========================
+
+
+
+
+
+
+
+// ======================
 // 后区生成
-// =========================
+// ======================
 
 
-generateBack(){
+createBack(){
 
 
 
-let pool=
+let arr=
 
-Object.keys(
-this.backScore
-)
+Object.keys(this.back)
 .sort(
 
 (a,b)=>
 
-this.backScore[b]-
-this.backScore[a]
+this.back[b]-
+this.back[a]
 
 );
 
@@ -1005,13 +647,10 @@ result.length<2
 
 let n=
 
-pool[
-
+arr[
 Math.floor(
-this.random()*
-pool.length
+Math.random()*arr.length
 )
-
 ];
 
 
@@ -1020,9 +659,7 @@ if(
 !result.includes(n)
 ){
 
-
 result.push(n);
-
 
 }
 
@@ -1036,8 +673,7 @@ return result.sort(
 
 (a,b)=>
 
-Number(a)-
-Number(b)
+Number(a)-Number(b)
 
 );
 
@@ -1051,12 +687,130 @@ Number(b)
 
 
 
-// =========================
-// 三方案生成
-// =========================
+// ======================
+// 单方案搜索
+// ======================
 
 
-run(){
+search(type,callback){
+
+
+
+let best=null;
+
+
+let bestScore=0;
+
+
+let count=0;
+
+
+
+
+let timer=setInterval(()=>{
+
+
+
+for(
+let i=0;
+i<200;
+i++
+){
+
+
+
+let combo=
+
+this.createCombo(type);
+
+
+
+let score=
+
+this.scoreCombo(combo);
+
+
+
+
+
+if(
+score>bestScore
+){
+
+bestScore=score;
+
+best=combo;
+
+
+}
+
+
+
+count++;
+
+
+
+
+
+}
+
+
+
+
+if(
+count>=5000
+){
+
+
+
+clearInterval(timer);
+
+
+
+callback({
+
+
+front:best,
+
+
+back:this.createBack(),
+
+
+raw:bestScore,
+
+
+type
+
+
+
+});
+
+
+
+}
+
+
+
+},20);
+
+
+
+
+
+},
+
+
+
+
+
+
+
+// ======================
+// 三方案异步生成
+// ======================
+
+
+run(callback){
 
 
 
@@ -1076,198 +830,38 @@ let result=[];
 
 
 
-modes.forEach(mode=>{
-
-
-
-let best=null;
-
-
-let bestScore=-999;
+let index=0;
 
 
 
 
 
-for(
-let i=0;
-i<5000;
-i++
-){
 
-
-
-let front=
-
-this.generate(mode);
-
-
-
-let score=
-
-this.totalScore(front);
-
-
+let next=()=>{
 
 
 
 if(
-score>bestScore
+index>=modes.length
 ){
 
 
 
-bestScore=score;
+result.sort(
 
+(a,b)=>
 
-best=front;
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-result.push({
-
-
-type:mode,
-
-
-front:best,
-
-
-back:this.generateBack(),
-
-
-raw:bestScore
-
-
-
-});
-
-
-
-});
-
-
-
-
-
-
-
-// 方案重复惩罚
-
-
-for(
-let i=0;
-i<result.length;
-i++
-){
-
-
-
-for(
-let j=i+1;
-j<result.length;
-j++
-){
-
-
-
-let same=0;
-
-
-
-result[i].front.forEach(n=>{
-
-
-if(
-result[j].front.includes(n)
-){
-
-
-same++;
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-if(
-same>=3
-){
-
-
-result[j].raw-=15;
-
-
-}
-
-
-
-
-
-if(
-same>=4
-){
-
-
-result[j].raw-=25;
-
-
-}
-
-
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-// 百分制
-
-
-let max=Math.max(
-
-...result.map(
-x=>x.raw
-)
+b.raw-a.raw
 
 );
 
 
 
-let min=Math.min(
 
-...result.map(
-x=>x.raw
-)
 
-);
+let max=
 
+result[0].raw;
 
 
 
@@ -1281,18 +875,14 @@ x.score=
 Number(
 
 (
-
-80+
-
+85+
 (
-(x.raw-min)/
-(max-min||1)
+x.raw/max
 *
-20
-
+15
 )
 
-.toFixed(2)
+).toFixed(2)
 
 );
 
@@ -1304,62 +894,97 @@ Number(
 
 
 
-return result.sort(
+callback(result);
 
-(a,b)=>
 
-b.score-a.score
 
-);
+return;
+
+
+}
+
+
+
+
+
+this.search(
+
+modes[index],
+
+data=>{
+
+
+result.push(data);
+
+
+index++;
+
+
+next();
+
+
+
+});
+
+
+
+};
+
+
+
+
+
+next();
 
 
 
 },
+// ======================
+// V36.2 历史回测
+// ======================
+
+
+backTest(callback){
 
 
 
-
-
-
-
-// =========================
-// V36.1 多周期回测
-// =========================
-
-
-backTest(){
-
-
-
-let periods=[
-
-100,
-
-300,
-
-500
-
-];
-
+let periods=[100,300,500];
 
 
 let reports=[];
 
 
-
-periods.forEach(period=>{
-
+let pIndex=0;
 
 
-let hit3=0;
-
-let hit4=0;
-
-let hit5=0;
-
-let total=0;
 
 
+
+let runPeriod=()=>{
+
+
+
+if(
+pIndex>=periods.length
+){
+
+
+
+callback(reports);
+
+
+return;
+
+
+}
+
+
+
+
+
+let period=
+
+periods[pIndex];
 
 
 
@@ -1377,10 +1002,40 @@ this.data.length-period
 
 
 
-for(
+let hit3=0;
+
+let hit4=0;
+
+let hit5=0;
+
+
+let total=0;
+
+
 let i=start;
-i<this.data.length;
-i++
+
+
+
+
+
+
+let timer=setInterval(()=>{
+
+
+
+let end=
+
+Math.min(
+i+5,
+this.data.length
+);
+
+
+
+
+
+while(
+i<end
 ){
 
 
@@ -1402,6 +1057,7 @@ this.data[i];
 
 
 
+
 this.init(train);
 
 
@@ -1410,7 +1066,7 @@ this.init(train);
 
 let predict=
 
-this.generate("stable");
+this.createCombo("stable");
 
 
 
@@ -1428,7 +1084,6 @@ if(
 real.front.includes(n)
 ){
 
-
 same++;
 
 
@@ -1437,6 +1092,7 @@ same++;
 
 
 });
+
 
 
 
@@ -1464,8 +1120,11 @@ hit5++;
 
 
 
+
 total++;
 
+
+i++;
 
 
 
@@ -1475,9 +1134,20 @@ total++;
 
 
 
+if(
+i>=this.data.length
+){
+
+
+
+clearInterval(timer);
+
+
+
 
 
 reports.push({
+
 
 
 period,
@@ -1501,9 +1171,8 @@ hit5
 
 
 
-});
 
-
+pIndex++;
 
 
 
@@ -1511,7 +1180,7 @@ this.init(this.data);
 
 
 
-return reports;
+runPeriod();
 
 
 
@@ -1519,7 +1188,86 @@ return reports;
 
 
 
+},30);
+
+
+
 };
+
+
+
+
+
+runPeriod();
+
+
+
+},
+
+
+
+
+
+
+
+// ======================
+// 反馈学习
+// ======================
+
+
+learn(result){
+
+
+
+let nums=
+
+result
+.split(/\s+/)
+.filter(x=>x);
+
+
+
+nums.forEach(n=>{
+
+
+
+if(
+this.front[n]
+!==undefined
+){
+
+
+this.front[n]+=5;
+
+
+}
+
+
+
+});
+
+
+
+
+
+localStorage.setItem(
+
+"V362_LEARN",
+
+JSON.stringify(nums)
+
+);
+
+
+
+},
+
+
+
+
+
+};
+
 
 
 
