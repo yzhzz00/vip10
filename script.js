@@ -1,9 +1,9 @@
 /*
-====================================
-彩票智能分析系统 V36.2 Mobile
+=================================
+彩票智能分析系统 V36.3 Mobile
 
 页面控制
-====================================
+=================================
 */
 
 
@@ -17,22 +17,19 @@ window.onload=function(){
 loadData();
 
 
-
 document
 .getElementById("predictBtn")
-.onclick=predict;
-
+.onclick=startPredict;
 
 
 document
 .getElementById("backTestBtn")
-.onclick=backTest;
-
+.onclick=startBackTest;
 
 
 document
 .getElementById("feedbackBtn")
-.onclick=feedback;
+.onclick=saveFeedback;
 
 
 
@@ -44,9 +41,10 @@ document
 
 
 
-// ======================
+
+// =================
 // 加载数据
-// ======================
+// =================
 
 
 async function loadData(){
@@ -56,11 +54,10 @@ async function loadData(){
 try{
 
 
-
 let res=
 
 await fetch(
-"data/dlt_raw.txt?v362"
+"data/dlt_raw.txt?v363"
 );
 
 
@@ -77,15 +74,13 @@ dltData=parseData(text);
 
 document
 .getElementById("dltStatus")
-.innerHTML=
-"已加载";
+.innerHTML="已加载";
 
 
 
 document
 .getElementById("dataCount")
-.innerHTML=
-dltData.length;
+.innerHTML=dltData.length;
 
 
 
@@ -93,12 +88,11 @@ document
 .getElementById("systemStatus")
 .innerHTML=
 
-"V36.2数据模块运行正常";
+"V36.3数据模块运行正常";
 
 
 
 }catch(e){
-
 
 
 document
@@ -108,7 +102,6 @@ document
 "数据加载失败";
 
 
-
 }
 
 
@@ -123,9 +116,9 @@ document
 
 
 
-// ======================
+// =================
 // 数据解析
-// ======================
+// =================
 
 
 function parseData(text){
@@ -149,12 +142,9 @@ line.trim()
 
 
 
-
-
 if(
 p.length<9
 )return;
-
 
 
 
@@ -187,6 +177,7 @@ Number(p[i])
 
 
 }
+
 
 
 
@@ -228,6 +219,7 @@ back
 
 
 
+
 });
 
 
@@ -248,22 +240,22 @@ return arr;
 
 
 
-// ======================
-// 预测
-// ======================
+// =================
+// 开始预测
+// =================
 
 
-function predict(){
+function startPredict(){
 
 
 
 if(
-!dltData.length
+dltData.length===0
 ){
 
 
 alert(
-"数据未加载"
+"历史数据未加载"
 );
 
 
@@ -277,22 +269,18 @@ return;
 
 
 
-let result=
+let box=
 
 document
 .getElementById("result");
 
 
 
+box.innerHTML=
 
-
-result.innerHTML=
-
-"V36.2计算启动...<br>"+
+"V36.3模型启动...<br>"+
 "动态权重分析...<br>"+
 "蒙特卡罗搜索中...";
-
-
 
 
 
@@ -304,7 +292,7 @@ DLTEngine.init(dltData);
 
 
 
-DLTEngine.run(function(data){
+DLTEngine.run(function(result){
 
 
 
@@ -312,7 +300,7 @@ DLTEngine.run(function(data){
 
 let html=
 
-"<b>彩票智能分析系统 V36.2 Mobile</b><br><br>";
+"<b>彩票智能分析系统 V36.3 Mobile</b><br><br>";
 
 
 
@@ -326,7 +314,7 @@ dltData.length+
 
 html+=
 
-"蒙特卡罗模拟：15000组<br><br>";
+"蒙特卡罗模拟：30000组<br><br>";
 
 
 
@@ -338,14 +326,15 @@ html+=
 
 
 
-data.forEach((x,i)=>{
+result.forEach((x,i)=>{
 
 
 
 html+=
 
 "方案"+
-(i+1)+
+(i+1)
++
 "："+
 x.front.join(" ")
 +
@@ -368,7 +357,9 @@ x.score+
 html+=
 
 "类型："+
+
 x.type+
+
 "<br><br>";
 
 
@@ -379,15 +370,16 @@ x.type+
 
 
 
+
 html+=
 
-"模型状态：V36.2综合模型完成";
+"模型状态：V36.3综合模型完成";
 
 
 
 
 
-result.innerHTML=html;
+box.innerHTML=html;
 
 
 
@@ -407,12 +399,12 @@ result.innerHTML=html;
 
 
 
-// ======================
-// 回测
-// ======================
+// =================
+// 历史回测
+// =================
 
 
-function backTest(){
+function startBackTest(){
 
 
 
@@ -427,9 +419,8 @@ document
 
 box.innerHTML=
 
-"V36.2历史回测运行中...<br>"+
+"V36.3历史回测运行中...<br>"+
 "正在测试100/300/500期";
-
 
 
 
@@ -441,8 +432,7 @@ DLTEngine.init(dltData);
 
 
 
-
-DLTEngine.backTest(function(data){
+DLTEngine.backTest(function(report){
 
 
 
@@ -450,21 +440,22 @@ DLTEngine.backTest(function(data){
 
 let html=
 
-"<b>V36.2历史回测报告</b><br><br>";
+"<b>V36.3历史回测报告</b><br><br>";
 
 
 
 
 
-
-data.forEach(r=>{
+report.forEach(r=>{
 
 
 
 html+=
 
 "测试周期："+
+
 r.period+
+
 "期<br>";
 
 
@@ -472,7 +463,9 @@ r.period+
 html+=
 
 "测试数量："+
+
 r.test+
+
 "<br>";
 
 
@@ -531,12 +524,12 @@ box.innerHTML=html;
 
 
 
-// ======================
+// =================
 // 开奖反馈
-// ======================
+// =================
 
 
-function feedback(){
+function saveFeedback(){
 
 
 
@@ -556,13 +549,12 @@ if(!value){
 
 
 alert(
-"请输入开奖号码"
+"请输入开奖结果"
 );
 
 
 
 return;
-
 
 
 }
@@ -578,12 +570,11 @@ DLTEngine.learn(value);
 
 
 
-
 document
 .getElementById("learningStatus")
 .innerHTML=
 
-"V36.2反馈学习完成："+value;
+"V36.3反馈学习完成："+value;
 
 
 

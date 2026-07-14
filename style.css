@@ -1,9 +1,9 @@
 /*
-====================================
-彩票智能分析系统 V36.2 Mobile
+=================================
+彩票智能分析系统 V36.3 Mobile
 
-style.css
-====================================
+界面样式
+=================================
 */
 
 
@@ -17,15 +17,11 @@ box-sizing:border-box;
 
 body{
 
-
 margin:0;
-
 
 padding:10px;
 
-
-background:#f2f5f9;
-
+background:#f3f6fa;
 
 font-family:
 
@@ -33,9 +29,7 @@ font-family:
 Arial,
 sans-serif;
 
-
 color:#222;
-
 
 }
 
@@ -45,33 +39,21 @@ color:#222;
 
 .container{
 
-
-width:100%;
-
-
 max-width:900px;
-
 
 margin:auto;
 
-
 background:#fff;
-
 
 padding:15px;
 
-
 border-radius:15px;
-
 
 box-shadow:
 
-0 4px 15px rgba(0,0,0,.08);
-
+0 5px 18px rgba(0,0,0,.08);
 
 }
-
-
 
 
 
@@ -79,22 +61,15 @@ box-shadow:
 
 h1{
 
-
 text-align:center;
-
 
 font-size:22px;
 
-
 color:#1677ff;
-
 
 margin:10px 0 20px;
 
-
 }
-
-
 
 
 
@@ -102,25 +77,17 @@ margin:10px 0 20px;
 
 .box{
 
-
 background:#fafafa;
 
-
-border:1px solid #e5e5e5;
-
+border:1px solid #e6e6e6;
 
 border-radius:12px;
 
-
 padding:15px;
-
 
 margin-bottom:15px;
 
-
 }
-
-
 
 
 
@@ -128,18 +95,13 @@ margin-bottom:15px;
 
 .title{
 
-
 font-size:16px;
-
 
 font-weight:bold;
 
-
-margin-bottom:12px;
-
+margin-bottom:10px;
 
 color:#333;
-
 
 }
 
@@ -147,34 +109,23 @@ color:#333;
 
 
 
-
-
 button{
-
 
 width:100%;
 
-
 height:44px;
-
-
-border:none;
-
-
-border-radius:10px;
-
-
-background:#1677ff;
-
-
-color:white;
-
-
-font-size:16px;
-
 
 margin:8px 0;
 
+border:0;
+
+border-radius:10px;
+
+background:#1677ff;
+
+color:white;
+
+font-size:16px;
 
 }
 
@@ -184,9 +135,7 @@ margin:8px 0;
 
 button:active{
 
-
 transform:scale(.98);
-
 
 }
 
@@ -194,28 +143,19 @@ transform:scale(.98);
 
 
 
-
-
 input{
-
 
 width:100%;
 
-
 height:42px;
-
-
-border:1px solid #ccc;
-
-
-border-radius:8px;
-
 
 padding:10px;
 
+border-radius:8px;
+
+border:1px solid #ccc;
 
 font-size:15px;
-
 
 }
 
@@ -225,16 +165,11 @@ font-size:15px;
 
 input:focus{
 
-
 outline:none;
-
 
 border-color:#1677ff;
 
-
 }
-
-
 
 
 
@@ -242,16 +177,11 @@ border-color:#1677ff;
 
 span{
 
-
 color:#1677ff;
-
 
 font-weight:bold;
 
-
 }
-
-
 
 
 
@@ -259,57 +189,19 @@ font-weight:bold;
 
 #result{
 
-
-background:white;
-
+background:#fff;
 
 border-left:4px solid #1677ff;
 
-
 padding:12px;
 
-
 border-radius:8px;
-
 
 line-height:2;
 
-
 min-height:120px;
 
-
 }
-
-
-
-
-
-
-
-#progress{
-
-
-background:white;
-
-
-border-left:4px solid #ff9900;
-
-
-padding:12px;
-
-
-border-radius:8px;
-
-
-color:#666;
-
-
-line-height:1.8;
-
-
-}
-
-
 
 
 
@@ -317,25 +209,17 @@ line-height:1.8;
 
 #backTestResult{
 
-
-background:white;
-
+background:#fff;
 
 border-left:4px solid #19a15f;
 
-
 padding:12px;
-
 
 border-radius:8px;
 
-
 line-height:2;
 
-
 }
-
-
 
 
 
@@ -343,16 +227,11 @@ line-height:2;
 
 #learningStatus{
 
-
 line-height:1.8;
-
 
 color:#555;
 
-
 }
-
-
 
 
 
@@ -360,12 +239,9 @@ color:#555;
 
 #systemStatus{
 
-
-color:#16803c;
-
+color:#198754;
 
 font-weight:bold;
-
 
 }
 
@@ -373,16 +249,11 @@ font-weight:bold;
 
 
 
-
-
 ul{
-
 
 padding-left:20px;
 
-
 margin:0;
-
 
 }
 
@@ -392,13 +263,9 @@ margin:0;
 
 li{
 
-
 line-height:1.8;
 
-
 }
-
-
 
 
 
@@ -407,12 +274,9 @@ line-height:1.8;
 @media(max-width:600px){
 
 
-
 body{
 
-
 padding:6px;
-
 
 }
 
@@ -420,9 +284,7 @@ padding:6px;
 
 .container{
 
-
 padding:12px;
-
 
 }
 
@@ -430,9 +292,7 @@ padding:12px;
 
 h1{
 
-
 font-size:20px;
-
 
 }
 
@@ -440,24 +300,18 @@ font-size:20px;
 
 button{
 
-
 height:42px;
-
 
 font-size:15px;
 
-
 }
-
 
 
 
 #result,
 #backTestResult{
 
-
 font-size:14px;
-
 
 }
 
