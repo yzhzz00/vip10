@@ -1,11 +1,11 @@
 /*
-================================================
+====================================
 
-彩票智能分析系统 V60 CORE
+大乐透智能分析系统 V60.1
 
-页面控制程序
+页面控制
 
-================================================
+====================================
 */
 
 
@@ -13,12 +13,14 @@ let systemReady=false;
 
 
 
-// ==============================
+
+
+// ======================
 // 页面启动
-// ==============================
+// ======================
 
 
-window.onload=async()=>{
+window.onload=async function(){
 
 
 await initSystem();
@@ -31,9 +33,10 @@ await initSystem();
 
 
 
-// ==============================
+
+// ======================
 // 初始化
-// ==============================
+// ======================
 
 
 async function initSystem(){
@@ -56,7 +59,7 @@ try{
 
 status.innerHTML=
 
-"正在加载大乐透数据...";
+"正在加载AI模型...";
 
 
 
@@ -82,7 +85,6 @@ status.innerHTML=
 
 
 
-
 document.getElementById(
 
 "dataCount"
@@ -95,8 +97,6 @@ AIEngine.dlt.length;
 
 }
 
-
-
 catch(e){
 
 
@@ -107,7 +107,10 @@ console.log(e);
 
 status.innerHTML=
 
-"数据加载失败";
+"加载失败";
+
+
+}
 
 
 
@@ -115,19 +118,14 @@ status.innerHTML=
 
 
 
-}
 
 
 
 
 
-
-
-
-
-// ==============================
-// 开始AI分析
-// ==============================
+// ======================
+// 开始预测
+// ======================
 
 
 async function startPredict(){
@@ -140,7 +138,7 @@ if(!systemReady){
 
 alert(
 
-"系统未加载完成"
+"系统未准备"
 
 );
 
@@ -157,16 +155,6 @@ return;
 
 
 
-let progress=
-
-document.getElementById(
-
-"progress"
-
-);
-
-
-
 let resultBox=
 
 document.getElementById(
@@ -178,70 +166,14 @@ document.getElementById(
 
 
 
+let progress=
 
+document.getElementById(
 
-resultBox.innerHTML=
+"progress"
 
-"正在启动AI模型...";
+);
 
-
-
-
-
-let timer=0;
-
-
-
-let interval=
-
-setInterval(()=>{
-
-
-
-timer+=2;
-
-
-
-if(timer>90)
-
-timer=90;
-
-
-
-if(progress)
-
-progress.innerHTML=
-
-`
-
-<div class="progress-bar">
-
-<div style="width:${timer}%">
-
-${timer}%
-
-</div>
-
-</div>
-
-`;
-
-
-
-},300);
-
-
-
-
-
-
-
-
-setTimeout(async()=>{
-
-
-
-clearInterval(interval);
 
 
 
@@ -249,7 +181,8 @@ clearInterval(interval);
 
 resultBox.innerHTML=
 
-"正在执行100万组蒙特卡罗模拟...";
+"正在初始化模型...";
+
 
 
 
@@ -258,30 +191,30 @@ resultBox.innerHTML=
 
 let result=
 
-AIEngine.monteCarlo(
+await AIEngine.predict(
 
-1000000,
+function(p){
 
-(p)=>{
 
 
 if(progress){
 
 
-progress.innerHTML=
 
-`
+progress.innerHTML=`
 
 <div class="progress-bar">
+
 
 <div style="width:${p}%">
 
 ${p}%
 
-</div>
 
 </div>
 
+
+</div>
 
 `;
 
@@ -300,7 +233,32 @@ ${p}%
 
 
 
-clearInterval(interval);
+
+if(progress){
+
+
+
+progress.innerHTML=`
+
+<div class="progress-bar">
+
+
+<div style="width:100%">
+
+
+100% 完成
+
+
+</div>
+
+
+</div>
+
+`;
+
+
+
+}
 
 
 
@@ -313,39 +271,6 @@ showResult(result);
 
 
 
-
-if(progress){
-
-
-
-progress.innerHTML=
-
-`
-
-<div class="progress-bar">
-
-<div style="width:100%">
-
-100% 完成
-
-</div>
-
-</div>
-
-`;
-
-
-
-}
-
-
-
-
-
-},1000);
-
-
-
 }
 
 
@@ -355,10 +280,9 @@ progress.innerHTML=
 
 
 
-
-// ==============================
-// 显示预测结果
-// ==============================
+// ======================
+// 显示结果
+// ======================
 
 
 function showResult(data){
@@ -375,61 +299,58 @@ document.getElementById(
 
 
 
-
-
 let html="";
 
 
 
 
 
-data.forEach((x,i)=>{
+data.forEach((item,index)=>{
 
 
 
 html+=`
+
 
 <div class="plan-card">
 
 
 <h3>
 
-方案${i+1}
+方案 ${index+1}
 
 </h3>
-
 
 
 <p>
 
 前区：
 
-${x.front.join(" ")}
+${item.front.join(" ")}
 
 </p>
-
 
 
 <p>
 
 后区：
 
-${x.back.join(" ")}
+${item.back.join(" ")}
 
 </p>
 
 
-
 <p>
 
-AI综合评分：
+AI评分：
 
-${x.score}
+${item.score}
 
 </p>
 
 
 </div>
+
 
 `;
 
@@ -441,9 +362,7 @@ ${x.score}
 
 
 
-box.innerHTML=
-
-html;
+box.innerHTML=html;
 
 
 
@@ -456,10 +375,9 @@ html;
 
 
 
-
-// ==============================
-// 历史回测
-// ==============================
+// ======================
+// 回测
+// ======================
 
 
 function startTrain(){
@@ -476,6 +394,8 @@ document.getElementById(
 
 
 
+
+
 let r=
 
 AIEngine.backtest(100);
@@ -484,33 +404,34 @@ AIEngine.backtest(100);
 
 
 
-box.innerHTML=
 
-`
+box.innerHTML=`
 
 回测周期：
 
 ${r.period}期
 
-<br>
+<br><br>
 
-前区3中：
+3个命中：
 
-${r.hit3}
-
-<br>
-
-前区4中：
-
-${r.hit4}
+${r.hit.three}
 
 <br>
 
-前区5中：
+4个命中：
 
-${r.hit5}
+${r.hit.four}
+
+<br>
+
+5个命中：
+
+${r.hit.five}
 
 `;
+
+
 
 
 
@@ -523,17 +444,16 @@ ${r.hit5}
 
 
 
-
-// ==============================
+// ======================
 // 开奖反馈
-// ==============================
+// ======================
 
 
 function saveFeedback(){
 
 
 
-let input=
+let value=
 
 document.getElementById(
 
@@ -544,17 +464,22 @@ document.getElementById(
 
 
 
-if(!input)
+
+
+if(!value)
 
 return;
 
 
 
 
-let arr=
 
-input.split(/\s+/);
 
+let nums=
+
+value.trim()
+
+.split(/\s+/);
 
 
 
@@ -562,13 +487,14 @@ input.split(/\s+/);
 
 let front=
 
-arr.slice(0,5);
+nums.slice(0,5);
 
 
 
 let back=
 
-arr.slice(5,7);
+nums.slice(5,7);
+
 
 
 
@@ -593,7 +519,9 @@ document.getElementById(
 
 ).innerHTML=
 
-"开奖反馈完成，模型参数已更新";
+"反馈完成，模型已调整";
+
+
 
 
 

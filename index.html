@@ -6,39 +6,33 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
 <title>
-彩票智能分析系统 V60 CORE
+彩票智能分析系统 V60.1 CORE
 </title>
 
 
 <link rel="stylesheet" href="style.css">
 
-
 </head>
-
 
 
 <body>
 
 
-
 <div class="container">
 
 
-
 <h1>
-彩票智能分析系统 V60 CORE
+彩票智能分析系统 V60.1 CORE
 </h1>
 
 
 
 
-
 <div class="box">
-
 
 <h2>
 数据状态
@@ -46,32 +40,26 @@
 
 
 <p>
-大乐透历史数据：
+大乐透数据：
 
 <span id="dataStatus">
-加载中
+加载中...
 </span>
-
 </p>
 
 
-
 <p>
-数据期数：
+历史期数：
 
 <span id="dataCount">
 0
 </span>
 
 期
-
 </p>
 
 
 </div>
-
-
-
 
 
 
@@ -85,36 +73,28 @@ AI智能分析
 </h2>
 
 
-
 <button onclick="startPredict()">
 
-开始 V60 AI智能分析
+开始 V60 AI分析
 
 </button>
-
 
 
 
 <div id="progress">
 
-
 </div>
-
 
 
 
 <div id="predictResult">
 
-
 等待分析...
 
-
 </div>
 
 
 </div>
-
-
 
 
 
@@ -126,23 +106,18 @@ AI智能分析
 
 
 <h2>
-AI多维分析报告
+AI分析报告
 </h2>
-
 
 
 <div id="aiReport">
 
-
 等待生成...
 
-
 </div>
 
 
 </div>
-
-
 
 
 
@@ -154,31 +129,26 @@ AI多维分析报告
 
 
 <h2>
-历史滚动回测
+历史回测
 </h2>
-
 
 
 <button onclick="startTrain()">
 
-开始历史回测
+开始滚动回测
 
 </button>
 
 
 
-
 <div id="trainResult">
 
-
-等待回测
-
-</div>
-
+等待回测...
 
 </div>
 
 
+</div>
 
 
 
@@ -191,30 +161,21 @@ AI多维分析报告
 
 <h2>
 开奖反馈学习
-
-
 </h2>
 
 
-
-
 <p>
-
-输入真实开奖号码
-
+输入真实开奖号码：
 </p>
-
-
 
 
 <input
 
 id="realResult"
 
-placeholder="例如 07 22 29 30 33 01 09"
+placeholder="例如：07 22 29 30 33 01 09"
 
 >
-
 
 
 
@@ -228,15 +189,13 @@ placeholder="例如 07 22 29 30 33 01 09"
 
 <p id="learningStatus">
 
-等待开奖学习
+等待反馈...
 
 </p>
 
 
 
 </div>
-
-
 
 
 
@@ -253,69 +212,55 @@ V60 CORE模型
 </h2>
 
 
-
 <ul>
-
 
 <li>
 动态频率模型
 </li>
 
-
 <li>
-号码趋势模型
+趋势走向模型
 </li>
-
 
 <li>
 遗漏周期模型
 </li>
 
-
 <li>
 和值概率模型
 </li>
-
 
 <li>
 奇偶结构模型
 </li>
 
-
 <li>
 三区结构模型
 </li>
-
 
 <li>
 连号概率模型
 </li>
 
-
 <li>
 重号概率模型
 </li>
-
 
 <li>
 马尔可夫转移模型
 </li>
 
-
 <li>
-后区独立评分模型
+后区独立模型
 </li>
 
-
 <li>
-100万组蒙特卡罗模拟
+蒙特卡罗模拟
 </li>
 
-
 <li>
-开奖反馈自学习
+开奖反馈学习
 </li>
-
 
 </ul>
 
@@ -328,34 +273,28 @@ V60 CORE模型
 
 
 
-
 <div class="box">
 
 
 <h2>
-系统版本
+系统状态
 </h2>
-
 
 
 <p>
 
-V60 CORE AI Engine Running
+V60.1 CORE ENGINE RUNNING
 
 </p>
 
 
-
 </div>
 
 
 
 
 
-
 </div>
-
-
 
 
 
@@ -363,11 +302,9 @@ V60 CORE AI Engine Running
 
 <script src="engine.js"></script>
 
-
 <script src="script.js"></script>
 
 
 </body>
-
 
 </html>

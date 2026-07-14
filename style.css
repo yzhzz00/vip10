@@ -1,456 +1,139 @@
-/*
-====================================
-
-彩票智能分析系统 V60 CORE
-
-Mobile UI
-
-====================================
-*/
-
-
 *{
-
-box-sizing:border-box;
-
+    box-sizing:border-box;
 }
-
-
 
 body{
-
-
-margin:0;
-
-
-padding:0;
-
-
-background:#f1f5f9;
-
-
-font-family:
-
-"Microsoft YaHei",
-Arial,
-sans-serif;
-
-
-color:#1f2937;
-
-
+    margin:0;
+    padding:0;
+    background:#f1f5f9;
+    font-family:"Microsoft YaHei",Arial,sans-serif;
+    color:#222;
 }
-
-
 
 
 .container{
-
-
-max-width:650px;
-
-
-margin:auto;
-
-
-padding:15px;
-
-
+    max-width:650px;
+    margin:auto;
+    padding:15px;
 }
-
-
-
 
 
 h1{
-
-
-text-align:center;
-
-
-font-size:25px;
-
-
-color:#2563eb;
-
-
-margin:20px 0;
-
-
+    text-align:center;
+    color:#2563eb;
+    font-size:25px;
 }
-
-
 
 
 h2{
-
-
-font-size:18px;
-
-
-color:#1d4ed8;
-
-
-border-bottom:
-
-1px solid #e5e7eb;
-
-
-padding-bottom:8px;
-
-
+    font-size:18px;
+    color:#1d4ed8;
+    border-bottom:1px solid #ddd;
+    padding-bottom:8px;
 }
-
-
-
 
 
 .box{
-
-
-background:#ffffff;
-
-
-border-radius:15px;
-
-
-padding:15px;
-
-
-margin-bottom:15px;
-
-
-box-shadow:
-
-0 3px 15px
-
-rgba(0,0,0,0.08);
-
-
+    background:#fff;
+    padding:15px;
+    margin-bottom:15px;
+    border-radius:15px;
+    box-shadow:0 3px 15px rgba(0,0,0,.08);
 }
-
-
-
 
 
 button{
-
-
-width:100%;
-
-
-height:45px;
-
-
-border:0;
-
-
-border-radius:10px;
-
-
-background:#2563eb;
-
-
-color:white;
-
-
-font-size:16px;
-
-
-margin-top:10px;
-
-
+    width:100%;
+    height:45px;
+    border:none;
+    border-radius:10px;
+    background:#2563eb;
+    color:white;
+    font-size:16px;
+    margin-top:10px;
 }
-
-
-
-button:active{
-
-
-transform:scale(.98);
-
-
-}
-
-
-
-
 
 
 input{
-
-
-width:100%;
-
-
-height:42px;
-
-
-padding:10px;
-
-
-border-radius:8px;
-
-
-border:
-
-1px solid #cbd5e1;
-
-
-font-size:15px;
-
-
+    width:100%;
+    height:42px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    padding:10px;
 }
-
-
-
 
 
 #dataStatus{
-
-
-color:#16a34a;
-
-
-font-weight:bold;
-
-
+    color:#16a34a;
+    font-weight:bold;
 }
-
 
 
 #dataCount{
-
-
-color:#dc2626;
-
-
-font-weight:bold;
-
-
+    color:#dc2626;
+    font-weight:bold;
 }
 
 
-
-
-
-/*
-========================
-
-进度条
-
-========================
-*/
-
+/* AI进度条 */
 
 .progress-bar{
-
-
-height:25px;
-
-
-background:#e5e7eb;
-
-
-border-radius:15px;
-
-
-overflow:hidden;
-
-
-margin:15px 0;
-
-
+    width:100%;
+    height:25px;
+    background:#e5e7eb;
+    border-radius:15px;
+    overflow:hidden;
+    margin:15px 0;
 }
-
 
 
 .progress-bar div{
-
-
-height:100%;
-
-
-background:#2563eb;
-
-
-color:white;
-
-
-text-align:center;
-
-
-line-height:25px;
-
-
-font-size:13px;
-
-
-transition:.3s;
-
-
+    height:100%;
+    background:#2563eb;
+    color:white;
+    text-align:center;
+    line-height:25px;
+    transition:.3s;
 }
 
 
-
-
-
-
-
-/*
-========================
-
-预测方案
-
-========================
-*/
-
+/* 预测方案 */
 
 .plan-card{
-
-
-background:#f8fafc;
-
-
-border-radius:12px;
-
-
-padding:12px;
-
-
-margin-top:12px;
-
-
-border-left:
-
-5px solid #2563eb;
-
-
+    background:#f8fafc;
+    padding:12px;
+    margin-top:12px;
+    border-radius:12px;
+    border-left:5px solid #2563eb;
 }
-
-
 
 
 .plan-card h3{
-
-
-margin:0;
-
-
-color:#2563eb;
-
-
+    color:#2563eb;
+    margin:0 0 8px;
 }
-
-
 
 
 .plan-card p{
-
-
-margin:8px 0;
-
-
-font-size:16px;
-
-
+    margin:6px 0;
+    font-size:16px;
 }
-
-
-
-
-
-/*
-========================
-
-文本区域
-
-========================
-*/
-
-
-#aiReport,
-
-
-#trainResult,
-
-
-#learningStatus,
-
-
-#predictResult{
-
-
-line-height:1.8;
-
-
-}
-
-
-
-
-
 
 
 ul{
-
-
-padding-left:20px;
-
-
-line-height:2;
-
-
+    padding-left:20px;
+    line-height:2;
 }
-
-
-
-
-
-li{
-
-
-color:#374151;
-
-
-}
-
-
-
 
 
 @media(max-width:400px){
 
-
-
 .container{
-
-
-padding:10px;
-
-
+    padding:10px;
 }
-
-
 
 h1{
-
-
-font-size:21px;
-
-
+    font-size:21px;
 }
-
-
-
-h2{
-
-
-font-size:16px;
-
-
-}
-
-
 
 }
