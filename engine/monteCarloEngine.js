@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V70.7
+V70.8
 
 Monte Carlo AI Engine
 
-蒙特卡罗模拟核心
+多维评分版
 
 ================================
 */
@@ -34,36 +34,16 @@ this.simulations=100000;
 
 
 
-randomNumber(min,max,set){
+random(min,max){
 
 
-
-let num;
-
-
-
-do{
-
-
-num=
-
-Math.floor(
+return Math.floor(
 
 Math.random()*(max-min+1)
 
 )+min;
 
 
-
-}
-
-while(set.includes(num));
-
-
-
-return num;
-
-
 }
 
 
@@ -73,29 +53,30 @@ return num;
 
 
 
-generateFront(){
+
+createUniqueNumbers(count,min,max){
 
 
 
-let result=[];
+let arr=[];
 
 
 
-while(result.length<5){
+while(arr.length<count){
 
 
 
 let n=
 
-this.randomNumber(
-1,
-35,
-result
-);
+this.random(min,max);
 
 
 
-result.push(n);
+if(!arr.includes(n)){
+
+
+
+arr.push(n);
 
 
 
@@ -103,7 +84,11 @@ result.push(n);
 
 
 
-return result.sort(
+}
+
+
+
+return arr.sort(
 (a,b)=>a-b
 );
 
@@ -119,29 +104,35 @@ return result.sort(
 
 
 
-generateBack(){
+generateTicket(){
 
 
 
-let result=[];
+return {
 
 
 
-while(result.length<2){
+front:
 
-
-
-let n=
-
-this.randomNumber(
+this.createUniqueNumbers(
+5,
 1,
-12,
-result
-);
+35
+),
 
 
 
-result.push(n);
+back:
+
+this.createUniqueNumbers(
+2,
+1,
+12
+)
+
+
+
+};
 
 
 
@@ -149,13 +140,6 @@ result.push(n);
 
 
 
-return result.sort(
-(a,b)=>a-b
-);
-
-
-
-}
 
 
 
@@ -164,13 +148,14 @@ return result.sort(
 
 
 
-
-
-
-// 大乐透基础评分
+// 综合评分模型
 
 
 score(ticket){
+
+
+
+let score=50;
 
 
 
@@ -180,13 +165,13 @@ ticket.front;
 
 
 
-let score=50;
 
 
 
 
-
+// ==================
 // 奇偶结构
+// ==================
 
 
 let odd=
@@ -199,16 +184,20 @@ n=>n%2!==0
 
 
 
-if(
-
-odd>=2 && odd<=3
-
-){
+if(odd===2 || odd===3){
 
 
 
-score+=10;
+score+=8;
 
+
+
+}
+
+else{
+
+
+score-=5;
 
 
 }
@@ -217,7 +206,13 @@ score+=10;
 
 
 
+
+
+
+
+// ==================
 // 大小结构
+// ==================
 
 
 let small=
@@ -231,15 +226,22 @@ n=>n<=17
 
 
 if(
-
-small>=2 && small<=3
-
+small===2 ||
+small===3
 ){
 
 
 
-score+=10;
+score+=8;
 
+
+
+}
+
+else{
+
+
+score-=4;
 
 
 }
@@ -249,7 +251,12 @@ score+=10;
 
 
 
-// 和值
+
+
+
+// ==================
+// 和值模型
+// ==================
 
 
 let sum=
@@ -265,59 +272,22 @@ front.reduce(
 
 
 if(
-
-sum>=80 && sum<=120
-
-){
-
-
-score+=15;
-
-
-}
-
-
-
-
-
-// 连号检测
-
-
-let consecutive=false;
-
-
-
-for(
-
-let i=1;
-
-i<front.length;
-
-i++
-
+sum>=85 &&
+sum<=115
 ){
 
 
 
-if(
-
-front[i]-front[i-1]===1
-
-){
-
-
-consecutive=true;
-
-
-}
+score+=12;
 
 
 
 }
 
-
-
-if(consecutive){
+else if(
+sum>=70 &&
+sum<=130
+){
 
 
 
@@ -327,12 +297,175 @@ score+=5;
 
 }
 
+else{
+
+
+score-=5;
+
+
+}
 
 
 
 
 
-return score;
+
+
+
+
+// ==================
+// 连号概率
+// ==================
+
+
+let link=0;
+
+
+
+for(
+let i=1;
+i<front.length;
+i++
+){
+
+
+
+if(
+front[i]-front[i-1]===1
+){
+
+
+link++;
+
+
+}
+
+
+
+}
+
+
+
+
+if(link===1){
+
+
+
+score+=5;
+
+
+
+}
+
+else if(link>=3){
+
+
+
+score-=5;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ==================
+// 分布平衡
+// ==================
+
+
+let zones=[0,0,0];
+
+
+
+front.forEach(n=>{
+
+
+
+if(n<=12)
+
+zones[0]++;
+
+
+else if(n<=24)
+
+zones[1]++;
+
+
+else
+
+zones[2]++;
+
+
+
+});
+
+
+
+
+
+
+let maxZone=
+
+Math.max(...zones);
+
+
+
+
+
+
+if(maxZone<=3){
+
+
+
+score+=8;
+
+
+
+}
+
+else{
+
+
+score-=3;
+
+
+}
+
+
+
+
+
+
+
+
+
+// ==================
+// 随机微调
+// 防止大量同分
+// ==================
+
+
+score +=
+
+Math.random()*6;
+
+
+
+
+
+
+return Number(
+
+score.toFixed(2)
+
+);
 
 
 
@@ -354,35 +487,20 @@ let result=[];
 
 
 
+
+
+
 for(
-
 let i=0;
-
 i<this.simulations;
-
 i++
-
 ){
 
 
 
-let ticket={
+let ticket=
 
-
-
-front:
-
-this.generateFront(),
-
-
-
-back:
-
-this.generateBack()
-
-
-
-};
+this.generateTicket();
 
 
 
@@ -408,6 +526,10 @@ result.push(ticket);
 
 
 
+
+// 排序
+
+
 result.sort(
 
 (a,b)=>
@@ -415,6 +537,73 @@ result.sort(
 b.score-a.score
 
 );
+
+
+
+
+
+
+
+
+
+// 去除重复组合
+
+
+let unique=[];
+
+
+
+let cache={};
+
+
+
+
+
+for(let item of result){
+
+
+
+let key=
+
+item.front.join(",")
+
++
+
+"|"
+
++
+
+item.back.join(",");
+
+
+
+
+
+if(!cache[key]){
+
+
+
+cache[key]=true;
+
+
+unique.push(item);
+
+
+
+}
+
+
+
+
+
+if(unique.length>=20)
+
+break;
+
+
+
+}
+
 
 
 
@@ -432,12 +621,7 @@ engine:this.name,
 count:this.simulations,
 
 
-top:
-
-result.slice(
-0,
-20
-)
+top:unique
 
 
 
@@ -450,7 +634,6 @@ result.slice(
 
 
 }
-
 
 
 

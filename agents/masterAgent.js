@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V70.2
+V70.8
 
 Master AI
 
-总控决策模型
+总控决策升级版
 
 ================================
 */
@@ -16,13 +16,11 @@ Master AI
 class MasterAgent {
 
 
+
 constructor(){
 
 
 this.name="Master AI";
-
-
-this.confidence=0.65;
 
 
 }
@@ -32,7 +30,28 @@ this.confidence=0.65;
 
 
 
-analyze(context){
+
+
+analyze(data){
+
+
+
+let models=
+
+data.models || {};
+
+
+
+let simulation=
+
+data.simulation || {};
+
+
+
+
+
+
+let confidence=0.65;
 
 
 
@@ -42,18 +61,46 @@ let reasons=[];
 
 
 
-let modelCount=0;
+
+// =====================
+// Monte Carlo
+// =====================
+
+
+let recommend=null;
 
 
 
-if(context && context.models){
 
 
-modelCount=
 
-Object.keys(
-context.models
-).length;
+if(
+simulation &&
+simulation.top &&
+simulation.top.length>0
+){
+
+
+
+recommend=
+
+simulation.top[0];
+
+
+
+
+
+confidence+=0.05;
+
+
+
+
+reasons.push(
+
+"采用Monte Carlo最高评分候选"
+
+);
+
 
 
 }
@@ -63,15 +110,128 @@ context.models
 
 
 
+
+
+
+// =====================
+// Theory AI
+// =====================
+
+
+if(models.theory){
+
+
+
+confidence+=0.03;
+
+
+
 reasons.push(
 
-"已接收 "+
-
-modelCount+
-
-" 个AI模型意见"
+"理论结构验证完成"
 
 );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================
+// Markov
+// =====================
+
+
+if(models.markov){
+
+
+
+confidence+=0.02;
+
+
+
+reasons.push(
+
+"Markov转移模型参与"
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================
+// Confidence
+// =====================
+
+
+if(models.confidence){
+
+
+
+confidence=
+
+(
+confidence+
+
+models.confidence.confidence/100
+
+)
+
+/
+
+2;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// 限制范围
+
+
+if(confidence>0.85){
+
+
+confidence=0.85;
+
+
+}
+
+
+
+if(confidence<0.5){
+
+
+confidence=0.5;
+
+
+}
+
+
+
 
 
 
@@ -86,7 +246,16 @@ agent:this.name,
 
 
 
-confidence:this.confidence,
+confidence:
+
+Number(
+
+confidence.toFixed(2)
+
+),
+
+
+
 
 
 
@@ -96,13 +265,39 @@ decision:{
 
 strategy:
 
-"综合历史趋势与结构分析",
+"Monte Carlo + Theory + Markov综合决策",
+
+
 
 
 
 recommend:
 
-"等待蒙特卡罗模块接入",
+recommend
+?
+
+{
+
+front:
+
+recommend.front,
+
+back:
+
+recommend.back,
+
+score:
+
+recommend.score
+
+}
+
+:
+
+"暂无候选",
+
+
+
 
 
 
@@ -129,8 +324,7 @@ reasons:reasons
 
 
 
-// 注意：这里必须实例化
 
-window.MasterAgent =
+window.MasterAgent=
 
 new MasterAgent();
