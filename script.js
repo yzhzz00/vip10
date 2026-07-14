@@ -3,9 +3,9 @@
 
 大乐透智能分析系统
 
-V70.7 CORE SCRIPT
+V70.9 CORE SCRIPT
 
-Monte Carlo显示版
+Review AI学习接入版
 
 ================================
 */
@@ -13,6 +13,7 @@ Monte Carlo显示版
 
 let systemReady=false;
 
+let currentPrediction=null;
 
 
 
@@ -24,31 +25,21 @@ try{
 
 document.getElementById(
 "dataStatus"
-).innerHTML=
-
-"AI系统启动中...";
+).innerHTML="AI系统启动中...";
 
 
 
-
-
-await window.AIEngine.init();
-
-
+await AIEngine.init();
 
 
 
 let status=
 
-window.AIEngine.status();
-
-
+AIEngine.status();
 
 
 
 systemReady=true;
-
-
 
 
 
@@ -57,9 +48,6 @@ document.getElementById(
 ).innerHTML=
 
 "系统加载成功";
-
-
-
 
 
 
@@ -89,29 +77,17 @@ ${status.agents.join(" / ")}
 
 
 
-
-
-
 document.getElementById(
 "agentList"
 ).innerHTML=
 
-status.agents.join(
-"<br>"
-);
+status.agents.join("<br>");
 
 
 
 }
 
-
-
 catch(e){
-
-
-
-console.error(e);
-
 
 
 document.getElementById(
@@ -141,241 +117,59 @@ async function startPredict(){
 
 if(!systemReady){
 
-
-alert(
-"系统未启动"
-);
-
+alert("系统未启动");
 
 return;
 
-
 }
-
-
-
-
 
 
 
 let result=
 
-await window.AIEngine.analyze();
+await AIEngine.analyze();
 
 
 
 
 
+// 保存Master预测
 
-let html=
 
-`
+if(
 
-<h3>
-AI多模型会议报告
-</h3>
+result.decision &&
 
-`;
+result.decision.decision.recommend.front
 
+){
 
 
 
+currentPrediction={
 
 
 
+front:
 
-// 基础AI模块
+result.decision.decision.recommend.front,
 
 
-for(let key of [
 
-"trend",
+back:
 
-"structure",
+result.decision.decision.recommend.back
 
-"markov",
 
-"risk",
 
-"review"
+};
 
-]){
 
 
 
-if(result.meeting[key]){
 
-
-
-html+=`
-
-<b>
-${key.toUpperCase()} AI
-</b>
-
-<br>
-
-${result.meeting[key].reason.join("<br>")}
-
-<br><br>
-
-`;
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// Theory AI
-
-
-if(result.meeting.theory){
-
-
-
-let t=
-
-result.meeting.theory.theory;
-
-
-
-html+=`
-
-<h3>
-Theory AI 大乐透理论库
-</h3>
-
-
-奇偶结构：
-
-${JSON.stringify(t.oddEven)}
-
-<br><br>
-
-
-大小结构：
-
-${JSON.stringify(t.size)}
-
-<br><br>
-
-
-三区分布：
-
-${JSON.stringify(t.zone)}
-
-<br><br>
-
-
-和值：
-
-${JSON.stringify(t.sum)}
-
-<br><br>
-
-
-`;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// Monte Carlo
-
-
-if(result.simulation){
-
-
-
-html+=`
-
-<h3>
-Monte Carlo AI 蒙特卡罗模拟
-</h3>
-
-
-模拟次数：
-
-${result.simulation.count}
-
-<br><br>
-
-
-TOP候选号码：
-
-<br><br>
-
-`;
-
-
-
-
-
-
-result.simulation.top.forEach(
-
-(item,index)=>{
-
-
-
-html+=`
-
-第 ${index+1} 名：
-
-<br>
-
-
-前区：
-
-${item.front.join(" ")}
-
-
-<br>
-
-
-后区：
-
-${item.back.join(" ")}
-
-
-<br>
-
-
-评分：
-
-${item.score}
-
-
-<br><br>
-
-
-`;
-
-
-
-}
-
-
-
+ReviewAgent.savePrediction(
+currentPrediction
 );
 
 
@@ -387,35 +181,42 @@ ${item.score}
 
 
 
+let html="";
 
 
-
-// Confidence
-
-
-if(result.meeting.confidence){
 
 
 
 html+=`
 
 <h3>
-Confidence AI 信心指数
+Monte Carlo AI预测
 </h3>
 
+`;
 
-综合信心：
 
-${result.meeting.confidence.confidence}%
 
+
+
+if(currentPrediction){
+
+
+html+=`
+
+预测号码：
 
 <br>
 
+前区：
 
-等级：
+${currentPrediction.front.join(" ")}
 
-${result.meeting.confidence.level}
+<br>
 
+后区：
+
+${currentPrediction.back.join(" ")}
 
 <br><br>
 
@@ -432,14 +233,10 @@ ${result.meeting.confidence.level}
 
 
 
-
-// Master
-
-
 html+=`
 
 <h3>
-Master AI 总控决策
+Master AI决策
 </h3>
 
 
@@ -457,6 +254,7 @@ null,
 
 </pre>
 
+
 `;
 
 
@@ -466,55 +264,50 @@ null,
 
 
 
-
-// Critic
-
-
-if(result.critic){
+if(result.simulation){
 
 
 
 html+=`
 
 <h3>
-Critic AI 自我审查
+Monte Carlo TOP20
 </h3>
 
+`;
 
-信心：
 
-${result.critic.confidence}%
+
+result.simulation.top.forEach(
+(item,index)=>{
+
+
+html+=`
+
+第${index+1}名：
+
+${item.front.join(" ")}
+
++
+
+${item.back.join(" ")}
 
 
 <br>
 
+评分：
 
-等级：
-
-${result.critic.level}
+${item.score}
 
 
 <br><br>
-
-
-挑战意见：
-
-<br>
-
-${result.critic.challenge.join("<br>")}
-
-
-<br><br>
-
-
-风险提醒：
-
-<br>
-
-${result.critic.reason.join("<br>")}
-
 
 `;
+
+
+}
+
+);
 
 
 
@@ -540,7 +333,6 @@ html;
 
 
 
-
 document.getElementById(
 "aiReport"
 ).innerHTML=
@@ -555,7 +347,6 @@ AI会议完成
 
 ${result.version}
 
-
 <br>
 
 参与模型：
@@ -563,8 +354,6 @@ ${result.version}
 ${result.agents.join(" / ")}
 
 `;
-
-
 
 
 
@@ -591,13 +380,111 @@ document.getElementById(
 
 
 
+if(!currentPrediction){
 
 
-localStorage.setItem(
 
-"dlt_feedback",
+document.getElementById(
+"learningStatus"
+).innerHTML=
 
-value
+"请先生成预测";
+
+
+return;
+
+
+}
+
+
+
+
+
+
+// 输入格式：
+
+// 前区5个 后区2个
+
+// 例如：
+
+// 03 08 17 26 33 05 11
+
+
+let arr=
+
+value.trim()
+.split(/\s+/)
+.map(Number);
+
+
+
+
+
+
+if(arr.length!==7){
+
+
+
+document.getElementById(
+"learningStatus"
+).innerHTML=
+
+"格式错误，需要7个号码";
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+let real={
+
+
+
+front:
+
+arr.slice(0,5),
+
+
+
+back:
+
+arr.slice(5,7)
+
+
+
+};
+
+
+
+
+
+
+let review=
+
+ReviewAgent.compare(
+
+currentPrediction,
+
+real
+
+);
+
+
+
+
+
+let learn=
+
+ReviewAgent.learn(
+
+review
 
 );
 
@@ -610,7 +497,62 @@ document.getElementById(
 "learningStatus"
 ).innerHTML=
 
-"开奖反馈已保存";
+`
+
+<h3>
+Review AI复盘结果
+</h3>
+
+
+前区命中：
+
+${review.frontHit}/5
+
+
+<br>
+
+
+后区命中：
+
+${review.backHit}/2
+
+
+<br>
+
+
+和值偏差：
+
+${review.sumDifference}
+
+
+<br>
+
+
+模型调整：
+
+${learn.message}
+
+
+<br>
+
+
+权重：
+
+${learn.adjustWeight}
+
+`;
+
+
+
+
+
+localStorage.setItem(
+
+"dlt_feedback",
+
+JSON.stringify(real)
+
+);
 
 
 

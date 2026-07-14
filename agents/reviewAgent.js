@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V70.2
+V70.9
 
 Review AI
 
-开奖复盘学习模型
+开奖反馈学习版
 
 ================================
 */
@@ -23,9 +23,6 @@ constructor(){
 this.name="Review AI";
 
 
-this.confidence=0.5;
-
-
 this.history=[];
 
 
@@ -36,23 +33,22 @@ this.history=[];
 
 
 
-analyze(data){
+
+
+savePrediction(prediction){
 
 
 
-let result={
+let record={
 
 
 
-agent:this.name,
+time:new Date()
+.toLocaleString(),
 
 
 
-confidence:this.confidence,
-
-
-
-reason:[]
+prediction:prediction
 
 
 
@@ -62,39 +58,23 @@ reason:[]
 
 
 
-
-result.reason.push(
-
-"等待开奖反馈"
-
-);
+this.history.push(record);
 
 
 
 
 
-result.reason.push(
+localStorage.setItem(
 
-"记录预测结果与实际结果差异"
+"dlt_prediction_history",
+
+JSON.stringify(this.history)
 
 );
 
 
 
-
-
-result.reason.push(
-
-"为自主学习提供样本"
-
-);
-
-
-
-
-
-
-return result;
+return record;
 
 
 
@@ -106,23 +86,68 @@ return result;
 
 
 
-feedback(real,predict){
+
+
+analyze(data){
 
 
 
-this.history.push({
+return {
 
 
 
-real:real,
+reason:[
+
+
+"等待开奖反馈",
+
+"记录预测结果与实际结果差异",
+
+"为自主学习提供样本"
 
 
 
-predict:predict,
+]
 
 
 
-time:new Date().toISOString()
+};
+
+
+
+}
+
+
+
+
+
+
+
+
+
+compare(prediction,real){
+
+
+
+let frontHit=0;
+
+
+let backHit=0;
+
+
+
+
+
+prediction.front.forEach(n=>{
+
+
+if(real.front.includes(n)){
+
+
+frontHit++;
+
+
+}
 
 
 
@@ -133,21 +158,120 @@ time:new Date().toISOString()
 
 
 
-localStorage.setItem(
+prediction.back.forEach(n=>{
 
-"review_history",
 
-JSON.stringify(
+if(real.back.includes(n)){
 
-this.history
 
-)
+backHit++;
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+
+let predictOdd=
+
+prediction.front.filter(
+
+n=>n%2!==0
+
+).length;
+
+
+
+
+
+let realOdd=
+
+real.front.filter(
+
+n=>n%2!==0
+
+).length;
+
+
+
+
+
+
+
+
+let predictSum=
+
+prediction.front.reduce(
+
+(a,b)=>a+b,
+
+0
 
 );
 
 
 
-}
+
+
+
+let realSum=
+
+real.front.reduce(
+
+(a,b)=>a+b,
+
+0
+
+);
+
+
+
+
+
+
+
+
+
+return {
+
+
+
+frontHit:frontHit,
+
+
+backHit:backHit,
+
+
+
+oddDifference:
+
+predictOdd-realOdd,
+
+
+
+sumDifference:
+
+predictSum-realSum,
+
+
+
+score:
+
+frontHit*10+
+
+backHit*15
+
+
+
+};
 
 
 
@@ -159,6 +283,65 @@ this.history
 
 
 
-window.ReviewAgent =
+
+learn(result){
+
+
+
+let weight=100;
+
+
+
+if(result.score<20){
+
+
+weight-=10;
+
+
+}
+
+
+
+if(Math.abs(result.sumDifference)>30){
+
+
+weight-=5;
+
+
+}
+
+
+
+
+
+return {
+
+
+
+adjustWeight:weight,
+
+
+message:
+
+"根据开奖反馈调整模型权重"
+
+
+
+};
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+window.ReviewAgent=
 
 new ReviewAgent();
