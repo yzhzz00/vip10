@@ -1,6 +1,6 @@
 /*
 ====================================
-彩票智能分析系统 V50.8 Mobile
+彩票智能分析系统 V51.0 Mobile
 
 界面样式
 ====================================
@@ -35,6 +35,7 @@ color:#222;
 
 
 
+
 .container{
 
 max-width:900px;
@@ -55,6 +56,8 @@ box-shadow:
 
 
 
+
+
 h1{
 
 text-align:center;
@@ -66,6 +69,8 @@ color:#1677ff;
 margin:10px 0 20px;
 
 }
+
+
 
 
 
@@ -85,17 +90,21 @@ margin-bottom:15px;
 
 
 
+
+
 .title{
 
 font-size:16px;
 
 font-weight:bold;
 
-color:#333;
-
 margin-bottom:10px;
 
+color:#333;
+
 }
+
+
 
 
 
@@ -121,11 +130,15 @@ font-size:16px;
 
 
 
+
+
 button:active{
 
 transform:scale(.98);
 
 }
+
+
 
 
 
@@ -147,6 +160,8 @@ border-radius:8px;
 
 
 
+
+
 input:focus{
 
 outline:none;
@@ -154,6 +169,8 @@ outline:none;
 border-color:#1677ff;
 
 }
+
+
 
 
 
@@ -167,14 +184,18 @@ font-weight:bold;
 
 
 
-/* ======================
-预测区域
-====================== */
+
+
+/*
+=====================
+预测结果
+=====================
+*/
 
 
 #result{
 
-background:#fff;
+background:white;
 
 border-left:4px solid #1677ff;
 
@@ -191,20 +212,64 @@ min-height:120px;
 
 
 
-/* ======================
-预测进度
-====================== */
+
+/*
+=====================
+AI分析区域
+=====================
+*/
 
 
-#progressBox{
+.ai-box{
+
+background:#fff;
+
+border-left:4px solid #722ed1;
+
+padding:12px;
+
+border-radius:8px;
+
+line-height:1.8;
+
+margin-top:10px;
+
+}
+
+
+
+
+
+.ai-score{
+
+font-size:18px;
+
+font-weight:bold;
+
+color:#722ed1;
+
+}
+
+
+
+
+
+/*
+=====================
+进度条
+=====================
+*/
+
+
+#progressBox,
+#backProgressBox{
+
 
 margin-top:12px;
 
 padding:12px;
 
 background:#fff;
-
-border-left:4px solid #1677ff;
 
 border-radius:8px;
 
@@ -216,16 +281,46 @@ font-size:14px;
 
 
 
+#progressBox{
+
+border-left:4px solid #1677ff;
+
+}
 
 
-/* ======================
-回测结果
-====================== */
+
+#backProgressBox{
+
+border-left:4px solid #19a15f;
+
+}
+
+
+
+
+
+progress{
+
+width:100%;
+
+height:18px;
+
+}
+
+
+
+
+
+/*
+=====================
+回测
+=====================
+*/
 
 
 #backTestResult{
 
-background:#fff;
+background:white;
 
 border-left:4px solid #19a15f;
 
@@ -241,45 +336,11 @@ line-height:2;
 
 
 
-/* ======================
-回测进度
-====================== */
-
-
-#backProgressBox{
-
-margin-top:12px;
-
-padding:12px;
-
-background:#fff;
-
-border-left:4px solid #19a15f;
-
-border-radius:8px;
-
-line-height:1.8;
-
-font-size:14px;
-
-}
-
-
-
-
-
-progress{
-
-width:100%;
-
-height:18px;
-
-margin-top:8px;
-
-}
-
-
-
+/*
+=====================
+学习反馈
+=====================
+*/
 
 
 #learningStatus{
@@ -316,6 +377,8 @@ margin:0;
 
 
 
+
+
 li{
 
 line-height:1.8;
@@ -326,8 +389,14 @@ line-height:1.8;
 
 
 
-@media(max-width:600px){
+/*
+=====================
+移动端
+=====================
+*/
 
+
+@media(max-width:600px){
 
 
 body{
@@ -346,11 +415,14 @@ padding:12px;
 
 
 
+
 h1{
 
 font-size:20px;
 
 }
+
+
 
 
 
@@ -364,6 +436,8 @@ font-size:15px;
 
 
 
+
+
 #result,
 #backTestResult,
 #progressBox,
@@ -372,6 +446,7 @@ font-size:15px;
 font-size:14px;
 
 }
+
 
 
 
