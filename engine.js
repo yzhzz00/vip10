@@ -3,9 +3,9 @@
 
 大乐透智能分析系统
 
-V70.2 CORE ENGINE
+V70.3 CORE ENGINE
 
-正式版
+AI会议版
 
 ================================
 */
@@ -14,11 +14,10 @@ V70.2 CORE ENGINE
 class AIEngine {
 
 
-
 constructor(){
 
 
-this.version="V70.2";
+this.version="V70.3";
 
 
 this.dlt=[];
@@ -36,35 +35,17 @@ this.ready=false;
 
 
 
-
-
-// 初始化
-
 async init(){
-
-
-console.log(
-"V70.2 初始化开始"
-);
 
 
 
 await this.loadData();
 
 
-
 this.loadAgents();
 
 
-
 this.ready=true;
-
-
-
-console.log(
-"V70.2 初始化完成"
-);
-
 
 
 return true;
@@ -77,43 +58,24 @@ return true;
 
 
 
-
-
-
-// 加载历史数据
-
 async loadData(){
-
-
-
-let url=
-
-"data/dlt.txt?v=70.2";
-
-
-
 
 
 let response=
 
-await fetch(url);
-
-
+await fetch(
+"data/dlt.txt?v=703"
+);
 
 
 
 if(!response.ok){
 
-
 throw new Error(
-"大乐透历史数据读取失败"
+"大乐透数据读取失败"
 );
 
-
 }
-
-
-
 
 
 
@@ -123,15 +85,9 @@ await response.text();
 
 
 
-
-
-
 let lines=
 
 text.trim().split(/\n+/);
-
-
-
 
 
 
@@ -139,11 +95,7 @@ this.dlt=[];
 
 
 
-
-
-
 for(let line of lines){
-
 
 
 let arr=
@@ -152,29 +104,12 @@ line.trim().split(/\s+/);
 
 
 
-
-
-
-// 格式:
-// 期号 日期 前5 后2
-
-
 if(arr.length>=9){
-
 
 
 this.dlt.push({
 
-
-
 issue:arr[0],
-
-
-
-date:arr[1],
-
-
-
 
 front:[
 
@@ -186,9 +121,6 @@ arr[6]
 
 ],
 
-
-
-
 back:[
 
 arr[7],
@@ -197,10 +129,11 @@ arr[8]
 ]
 
 
-
 });
 
 
+}
+
 
 }
 
@@ -214,126 +147,41 @@ arr[8]
 
 
 
-if(this.dlt.length===0){
-
-
-throw new Error(
-"大乐透数据为空"
-);
-
-
-}
-
-
-
-
-
-console.log(
-
-"历史数据:",
-
-this.dlt.length
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// 加载AI Agent
 
 loadAgents(){
-
 
 
 this.agents={};
 
 
+if(window.MasterAgent)
+
+this.agents.master=window.MasterAgent;
 
 
+if(window.TrendAgent)
 
-if(window.MasterAgent){
-
-this.agents.master=
-
-window.MasterAgent;
-
-}
+this.agents.trend=window.TrendAgent;
 
 
+if(window.StructureAgent)
+
+this.agents.structure=window.StructureAgent;
 
 
-if(window.TrendAgent){
+if(window.MarkovAgent)
 
-this.agents.trend=
-
-window.TrendAgent;
-
-}
+this.agents.markov=window.MarkovAgent;
 
 
+if(window.RiskAgent)
+
+this.agents.risk=window.RiskAgent;
 
 
-if(window.StructureAgent){
+if(window.ReviewAgent)
 
-this.agents.structure=
-
-window.StructureAgent;
-
-}
-
-
-
-
-if(window.MarkovAgent){
-
-this.agents.markov=
-
-window.MarkovAgent;
-
-}
-
-
-
-
-if(window.RiskAgent){
-
-this.agents.risk=
-
-window.RiskAgent;
-
-}
-
-
-
-
-if(window.ReviewAgent){
-
-this.agents.review=
-
-window.ReviewAgent;
-
-}
-
-
-
-
-console.log(
-
-"Agent:",
-
-Object.keys(this.agents)
-
-);
-
+this.agents.review=window.ReviewAgent;
 
 
 }
@@ -345,77 +193,70 @@ Object.keys(this.agents)
 
 
 
-
-// AI分析入口
 
 async analyze(){
 
 
 
-let models={};
-
-
-
+let meeting={};
 
 
 
 if(this.agents.trend){
 
-
-models.trend=
+meeting.trend=
 
 this.agents.trend.analyze(
 this.dlt
 );
 
-
 }
-
-
 
 
 
 if(this.agents.structure){
 
-
-models.structure=
+meeting.structure=
 
 this.agents.structure.analyze(
 this.dlt
 );
 
-
 }
-
-
 
 
 
 if(this.agents.markov){
 
-
-models.markov=
+meeting.markov=
 
 this.agents.markov.analyze(
 this.dlt
 );
 
-
 }
-
-
 
 
 
 if(this.agents.risk){
 
-
-models.risk=
+meeting.risk=
 
 this.agents.risk.analyze(
 this.dlt
 );
 
+}
+
+
+
+if(this.agents.review){
+
+meeting.review=
+
+this.agents.review.analyze(
+this.dlt
+);
 
 }
 
@@ -424,22 +265,22 @@ this.dlt
 
 
 
-let decision={};
-
-
+let finalDecision={};
 
 
 
 if(this.agents.master){
 
 
-decision=
+finalDecision=
 
 this.agents.master.analyze({
 
-models:models,
+models:meeting,
+
 
 history:this.dlt.length
+
 
 });
 
@@ -461,15 +302,16 @@ version:this.version,
 history:this.dlt.length,
 
 
-models:models,
-
-
-decision:decision,
-
-
 message:
 
-"AI分析完成",
+"AI多模型会议完成",
+
+
+
+meeting:meeting,
+
+
+decision:finalDecision,
 
 
 agents:Object.keys(
@@ -489,10 +331,6 @@ this.agents
 
 
 
-
-
-
-// 状态
 
 status(){
 
@@ -516,19 +354,14 @@ this.agents
 ready:this.ready
 
 
-
 };
 
 
-
 }
 
 
 
 }
-
-
-
 
 
 
@@ -537,3 +370,9 @@ ready:this.ready
 window.AIEngine=
 
 new AIEngine();
+
+
+
+console.log(
+"V70.3 AI会议引擎启动"
+);

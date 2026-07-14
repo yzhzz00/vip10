@@ -1,5 +1,13 @@
 /*
-V70.2 CORE SCRIPT
+================================
+
+大乐透智能分析系统
+
+V70.3 CORE SCRIPT
+
+AI会议显示版
+
+================================
 */
 
 
@@ -15,20 +23,12 @@ window.onload=async function(){
 try{
 
 
+
 document.getElementById(
 "dataStatus"
 ).innerHTML=
 
 "AI系统启动中...";
-
-
-
-
-
-console.log(
-"当前AIEngine",
-window.AIEngine
-);
 
 
 
@@ -68,6 +68,7 @@ document.getElementById(
 
 
 
+
 document.getElementById(
 "systemStatus"
 ).innerHTML=
@@ -78,49 +79,27 @@ document.getElementById(
 
 ${status.version}
 
-
 <br>
-
 
 历史数据：
 
 ${status.data}
 
-
 <br>
 
+AI模型：
 
-状态：
-
-${status.ready}
+${status.agents.join(" / ")}
 
 `;
 
 
 
-
-
-
-
-document.getElementById(
-"agentList"
-).innerHTML=
-
-status.agents.join(
-"<br>"
-);
-
-
-
-
-
 }
 
+
+
 catch(e){
-
-
-
-console.error(e);
 
 
 
@@ -168,9 +147,166 @@ return;
 
 
 
+
 let result=
 
 await window.AIEngine.analyze();
+
+
+
+
+
+
+let html=
+
+`
+
+<h3>
+AI多模型会议报告
+</h3>
+
+`;
+
+
+
+
+
+if(result.meeting.trend){
+
+
+html+=
+
+`
+
+<b>Trend AI 趋势分析</b>
+
+<br>
+
+${result.meeting.trend.reason.join("<br>")}
+
+<br><br>
+
+`;
+
+}
+
+
+
+
+if(result.meeting.structure){
+
+
+html+=
+
+`
+
+<b>Structure AI 结构分析</b>
+
+<br>
+
+${result.meeting.structure.reason.join("<br>")}
+
+<br><br>
+
+`;
+
+}
+
+
+
+
+if(result.meeting.markov){
+
+
+html+=
+
+`
+
+<b>Markov AI 转移分析</b>
+
+<br>
+
+${result.meeting.markov.reason.join("<br>")}
+
+<br><br>
+
+`;
+
+}
+
+
+
+
+if(result.meeting.risk){
+
+
+html+=
+
+`
+
+<b>Risk AI 风险分析</b>
+
+<br>
+
+${result.meeting.risk.reason.join("<br>")}
+
+<br><br>
+
+`;
+
+}
+
+
+
+
+if(result.meeting.review){
+
+
+html+=
+
+`
+
+<b>Review AI 复盘分析</b>
+
+<br>
+
+${result.meeting.review.reason.join("<br>")}
+
+<br><br>
+
+`;
+
+}
+
+
+
+
+
+
+html+=
+
+`
+
+<h3>
+Master AI 总控决策
+</h3>
+
+
+${
+
+JSON.stringify(
+
+result.decision,
+
+null,
+
+2
+
+)
+
+}
+
+`;
 
 
 
@@ -181,29 +317,8 @@ document.getElementById(
 "predictResult"
 ).innerHTML=
 
-`
+html;
 
-分析完成
-
-<br>
-
-版本：
-
-${result.version}
-
-
-<br>
-
-历史：
-
-${result.history}
-
-
-<br>
-
-${result.message}
-
-`;
 
 
 
@@ -212,7 +327,24 @@ document.getElementById(
 "aiReport"
 ).innerHTML=
 
-"AI多模型分析完成";
+`
+
+AI会议完成
+
+<br>
+
+版本：
+
+${result.version}
+
+<br>
+
+参与模型：
+
+${result.agents.join(" / ")}
+
+`;
+
 
 
 
@@ -256,7 +388,7 @@ document.getElementById(
 "learningStatus"
 ).innerHTML=
 
-"反馈保存成功";
+"开奖反馈已保存";
 
 
 
