@@ -7,42 +7,93 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>彩票智能分析系统 V30.2</title>
+<title>彩票智能分析系统 V30.3</title>
+
 
 <style>
 
 body{
-    font-family:"Microsoft YaHei",Arial;
-    background:#f5f5f5;
-    padding:20px;
+
+font-family:"Microsoft YaHei",Arial;
+
+background:#f4f4f4;
+
+padding:20px;
+
 }
+
+
 
 .container{
-    max-width:900px;
-    margin:auto;
-    background:white;
-    padding:20px;
-    border-radius:10px;
+
+max-width:900px;
+
+margin:auto;
+
+background:#fff;
+
+padding:20px;
+
+border-radius:12px;
+
 }
 
-button{
-    padding:12px 25px;
-    font-size:18px;
-    cursor:pointer;
-}
 
-.box{
-    margin-top:15px;
-    padding:15px;
-    border:1px solid #ddd;
-    border-radius:8px;
-}
 
 h1{
-    text-align:center;
+
+text-align:center;
+
 }
 
+
+
+button{
+
+width:100%;
+
+padding:15px;
+
+font-size:18px;
+
+border:none;
+
+border-radius:8px;
+
+cursor:pointer;
+
+}
+
+
+
+.box{
+
+margin-top:20px;
+
+padding:15px;
+
+border:1px solid #ddd;
+
+border-radius:10px;
+
+background:#fafafa;
+
+}
+
+
+
+.title{
+
+font-size:20px;
+
+font-weight:bold;
+
+}
+
+
+
 </style>
+
 
 </head>
 
@@ -53,15 +104,22 @@ h1{
 <div class="container">
 
 
+
 <h1>
-彩票智能分析系统 V30.2
+彩票智能分析系统 V30.3
 </h1>
 
 
 
 <div class="box">
 
-<h3>数据状态</h3>
+
+<div class="title">
+
+数据状态
+
+</div>
+
 
 大乐透历史数据：已加载
 
@@ -69,12 +127,15 @@ h1{
 
 排列五历史数据：已加载
 
+
 <br>
 
 数据期数：
 
 <span id="dataCount">
+
 等待读取
+
 </span>
 
 
@@ -86,7 +147,7 @@ h1{
 
 <button onclick="startAnalysis()">
 
-开始V30.2智能分析
+开始 V30.3 智能分析
 
 </button>
 
@@ -98,7 +159,11 @@ h1{
 <div class="box">
 
 
-<h3>分析结果</h3>
+<div class="title">
+
+分析结果
+
+</div>
 
 
 <div id="result">
@@ -115,38 +180,52 @@ h1{
 
 
 
-
 <div class="box">
 
 
-<h3>V30.2校准模型</h3>
+<div class="title">
+
+V30.3修正模型
+
+</div>
+
 
 
 <ul>
 
-<li>前区综合评分</li>
+<li>前区综合评分模型</li>
 
-<li>后区独立评分</li>
+<li>后区独立评分模型</li>
 
-<li>冷热分析</li>
+<li>冷热平衡模型</li>
 
-<li>遗漏分析</li>
+<li>遗漏周期分析</li>
 
-<li>趋势模型</li>
+<li>时间衰减趋势</li>
 
-<li>贝叶斯评分</li>
+<li>贝叶斯概率评分</li>
 
-<li>马尔可夫转移</li>
+<li>马尔可夫转移矩阵</li>
 
-<li>结构评分</li>
+<li>号码位置分析</li>
 
-<li>奇偶分析</li>
+<li>和值结构模型</li>
 
-<li>三区分析</li>
+<li>奇偶结构模型</li>
 
-<li>蒙特卡罗筛选</li>
+<li>三区结构模型</li>
+
+<li>连号过滤</li>
+
+<li>反极端结构过滤</li>
+
+<li>蒙特卡罗组合筛选</li>
+
+<li>三方案差异化</li>
 
 <li>500期滚动回测</li>
+
+<li>学习参数保存</li>
 
 
 </ul>
@@ -163,7 +242,12 @@ h1{
 <div class="box">
 
 
-<h3>模型状态</h3>
+<div class="title">
+
+模型状态
+
+</div>
+
 
 
 <div id="modelStatus">
@@ -173,9 +257,6 @@ h1{
 </div>
 
 
-</div>
-
-
 
 </div>
 
@@ -183,9 +264,14 @@ h1{
 
 
 
-<script src="script.js?v=3021"></script>
+</div>
+
+
+
+<script src="script.js?v=3030"></script>
 
 
 </body>
+
 
 </html>
