@@ -3,9 +3,9 @@
 
 大乐透智能分析系统
 
-V70.3 CORE ENGINE
+V70.4 CORE ENGINE
 
-AI会议版
+Confidence AI版
 
 ================================
 */
@@ -17,7 +17,7 @@ class AIEngine {
 constructor(){
 
 
-this.version="V70.3";
+this.version="V70.4";
 
 
 this.dlt=[];
@@ -36,7 +36,6 @@ this.ready=false;
 
 
 async init(){
-
 
 
 await this.loadData();
@@ -61,10 +60,11 @@ return true;
 async loadData(){
 
 
+
 let response=
 
 await fetch(
-"data/dlt.txt?v=703"
+"data/dlt.txt?v=704"
 );
 
 
@@ -76,6 +76,7 @@ throw new Error(
 );
 
 }
+
 
 
 
@@ -95,7 +96,10 @@ this.dlt=[];
 
 
 
+
+
 for(let line of lines){
+
 
 
 let arr=
@@ -107,9 +111,12 @@ line.trim().split(/\s+/);
 if(arr.length>=9){
 
 
+
 this.dlt.push({
 
+
 issue:arr[0],
+
 
 front:[
 
@@ -120,6 +127,7 @@ arr[5],
 arr[6]
 
 ],
+
 
 back:[
 
@@ -133,6 +141,7 @@ arr[8]
 
 
 }
+
 
 
 }
@@ -151,37 +160,67 @@ arr[8]
 loadAgents(){
 
 
+
 this.agents={};
+
 
 
 if(window.MasterAgent)
 
-this.agents.master=window.MasterAgent;
+this.agents.master=
+
+window.MasterAgent;
+
 
 
 if(window.TrendAgent)
 
-this.agents.trend=window.TrendAgent;
+this.agents.trend=
+
+window.TrendAgent;
+
 
 
 if(window.StructureAgent)
 
-this.agents.structure=window.StructureAgent;
+this.agents.structure=
+
+window.StructureAgent;
+
 
 
 if(window.MarkovAgent)
 
-this.agents.markov=window.MarkovAgent;
+this.agents.markov=
+
+window.MarkovAgent;
+
 
 
 if(window.RiskAgent)
 
-this.agents.risk=window.RiskAgent;
+this.agents.risk=
+
+window.RiskAgent;
+
 
 
 if(window.ReviewAgent)
 
-this.agents.review=window.ReviewAgent;
+this.agents.review=
+
+window.ReviewAgent;
+
+
+
+// 新增 Confidence AI
+
+if(window.ConfidenceAgent)
+
+this.agents.confidence=
+
+window.ConfidenceAgent;
+
 
 
 }
@@ -202,7 +241,9 @@ let meeting={};
 
 
 
-if(this.agents.trend){
+
+
+if(this.agents.trend)
 
 meeting.trend=
 
@@ -210,11 +251,11 @@ this.agents.trend.analyze(
 this.dlt
 );
 
-}
 
 
 
-if(this.agents.structure){
+
+if(this.agents.structure)
 
 meeting.structure=
 
@@ -222,11 +263,11 @@ this.agents.structure.analyze(
 this.dlt
 );
 
-}
 
 
 
-if(this.agents.markov){
+
+if(this.agents.markov)
 
 meeting.markov=
 
@@ -234,11 +275,11 @@ this.agents.markov.analyze(
 this.dlt
 );
 
-}
 
 
 
-if(this.agents.risk){
+
+if(this.agents.risk)
 
 meeting.risk=
 
@@ -246,11 +287,11 @@ this.agents.risk.analyze(
 this.dlt
 );
 
-}
 
 
 
-if(this.agents.review){
+
+if(this.agents.review)
 
 meeting.review=
 
@@ -258,7 +299,20 @@ this.agents.review.analyze(
 this.dlt
 );
 
-}
+
+
+
+
+
+// Confidence AI会议评分
+
+if(this.agents.confidence)
+
+meeting.confidence=
+
+this.agents.confidence.analyze(
+meeting
+);
 
 
 
@@ -269,12 +323,16 @@ let finalDecision={};
 
 
 
+
+
 if(this.agents.master){
+
 
 
 finalDecision=
 
 this.agents.master.analyze({
+
 
 models:meeting,
 
@@ -302,16 +360,15 @@ version:this.version,
 history:this.dlt.length,
 
 
-message:
-
-"AI多模型会议完成",
-
-
-
 meeting:meeting,
 
 
 decision:finalDecision,
+
+
+message:
+
+"AI会议+信心指数完成",
 
 
 agents:Object.keys(
@@ -325,6 +382,8 @@ this.agents
 
 
 }
+
+
 
 
 
@@ -354,14 +413,17 @@ this.agents
 ready:this.ready
 
 
+
 };
 
 
-}
-
-
 
 }
+
+
+
+}
+
 
 
 
@@ -370,9 +432,3 @@ ready:this.ready
 window.AIEngine=
 
 new AIEngine();
-
-
-
-console.log(
-"V70.3 AI会议引擎启动"
-);

@@ -3,9 +3,9 @@
 
 大乐透智能分析系统
 
-V70.3 CORE SCRIPT
+V70.4 CORE SCRIPT
 
-AI会议显示修正版
+Confidence AI显示版
 
 ================================
 */
@@ -19,7 +19,6 @@ window.onload=async function(){
 
 
 try{
-
 
 
 document.getElementById(
@@ -38,7 +37,6 @@ await window.AIEngine.init();
 
 
 
-
 let status=
 
 window.AIEngine.status();
@@ -47,9 +45,7 @@ window.AIEngine.status();
 
 
 
-
 systemReady=true;
-
 
 
 
@@ -65,6 +61,7 @@ document.getElementById(
 
 
 
+
 document.getElementById(
 "systemStatus"
 ).innerHTML=
@@ -75,17 +72,13 @@ document.getElementById(
 
 ${status.version}
 
-
 <br>
-
 
 历史数据：
 
 ${status.data}
 
-
 <br>
-
 
 AI模型：
 
@@ -97,8 +90,6 @@ ${status.agents.join(" / ")}
 
 
 
-// 修复 Agent 列表显示
-
 document.getElementById(
 "agentList"
 ).innerHTML=
@@ -106,7 +97,6 @@ document.getElementById(
 status.agents.join(
 "<br>"
 );
-
 
 
 
@@ -191,13 +181,12 @@ AI多模型会议报告
 
 
 
+
 if(result.meeting.trend){
 
 
 
-html+=
-
-`
+html+=`
 
 <b>Trend AI 趋势分析</b>
 
@@ -213,13 +202,12 @@ ${result.meeting.trend.reason.join("<br>")}
 
 
 
+
 if(result.meeting.structure){
 
 
 
-html+=
-
-`
+html+=`
 
 <b>Structure AI 结构分析</b>
 
@@ -235,13 +223,13 @@ ${result.meeting.structure.reason.join("<br>")}
 
 
 
+
+
 if(result.meeting.markov){
 
 
 
-html+=
-
-`
+html+=`
 
 <b>Markov AI 转移分析</b>
 
@@ -257,13 +245,13 @@ ${result.meeting.markov.reason.join("<br>")}
 
 
 
+
+
 if(result.meeting.risk){
 
 
 
-html+=
-
-`
+html+=`
 
 <b>Risk AI 风险分析</b>
 
@@ -279,13 +267,13 @@ ${result.meeting.risk.reason.join("<br>")}
 
 
 
+
+
 if(result.meeting.review){
 
 
 
-html+=
-
-`
+html+=`
 
 <b>Review AI 复盘分析</b>
 
@@ -303,13 +291,58 @@ ${result.meeting.review.reason.join("<br>")}
 
 
 
-html+=
 
-`
+// Confidence AI显示
+
+if(result.meeting.confidence){
+
+
+
+html+=`
+
+<h3>
+Confidence AI 信心指数
+</h3>
+
+
+综合信心：
+
+${result.meeting.confidence.confidence}%
+
+
+<br>
+
+
+等级：
+
+${result.meeting.confidence.level}
+
+
+<br>
+
+
+${result.meeting.confidence.reason.join("<br>")}
+
+
+<br><br>
+
+`;
+
+}
+
+
+
+
+
+
+
+
+html+=`
 
 <h3>
 Master AI 总控决策
 </h3>
+
 
 <pre>
 
@@ -358,6 +391,7 @@ AI会议完成
 
 ${result.version}
 
+
 <br>
 
 参与模型：
@@ -365,6 +399,7 @@ ${result.version}
 ${result.agents.join(" / ")}
 
 `;
+
 
 
 
@@ -401,7 +436,6 @@ localStorage.setItem(
 value
 
 );
-
 
 
 
