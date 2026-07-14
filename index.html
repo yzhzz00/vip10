@@ -1,59 +1,66 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+async function startAnalysis(){
 
-<head>
+    let result = document.getElementById("result");
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    result.innerHTML = "正在分析数据...";
 
-<title>彩票智能分析系统 V10.0</title>
+    try{
 
-<link rel="stylesheet" href="style.css">
+        let response = await fetch("data/dlt_raw.txt");
 
-</head>
+        let text = await response.text();
 
 
-<body>
-
-<h1>彩票智能分析系统 V10.0</h1>
-
-
-<h2>数据状态</h2>
-
-<p>大乐透历史数据：已加载</p>
-<p>排列五历史数据：已加载</p>
+        // 提取01-35号码
+        let nums = text.match(/\b\d{1,2}\b/g);
 
 
-<button onclick="startAnalysis()">开始分析</button>
+        let count = {};
 
 
-<h2>分析结果</h2>
-
-<div id="result">
-等待分析...
-</div>
+        for(let i=1;i<=35;i++){
+            count[i.toString().padStart(2,"0")] = 0;
+        }
 
 
-<h2>功能模块</h2>
+        nums.forEach(n=>{
 
-<ul>
+            let num = n.padStart(2,"0");
 
-<li>冷热号分析</li>
+            if(count[num] !== undefined){
 
-<li>遗漏分析</li>
+                count[num]++;
 
-<li>号码频率统计</li>
+            }
 
-<li>蒙特卡罗模拟</li>
-
-<li>智能评分模型</li>
-
-</ul>
+        });
 
 
-<script src="script.js"></script>
+
+        let sort = Object.entries(count)
+        .sort((a,b)=>b[1]-a[1])
+        .slice(0,10);
 
 
-</body>
 
-</html>
+        let html = "<h3>大乐透前区热号TOP10</h3>";
+
+        sort.forEach((item,index)=>{
+
+            html += 
+            `${index+1}. ${item[0]}  出现 ${item[1]} 次<br>`;
+
+        });
+
+
+        result.innerHTML = html;
+
+
+    }catch(e){
+
+        result.innerHTML =
+        "分析失败，请检查数据";
+
+    }
+
+}
