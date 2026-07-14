@@ -7,11 +7,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>彩票智能分析系统 V35.3</title>
-
+<title>彩票智能分析系统 V35.4</title>
 
 <link rel="stylesheet" href="style.css">
-
 
 </head>
 
@@ -23,7 +21,7 @@
 
 
 <h1>
-彩票智能分析系统 V35.3
+彩票智能分析系统 V35.4
 </h1>
 
 
@@ -39,7 +37,7 @@
 大乐透历史数据：
 
 <span id="dltStatus">
-等待读取
+等待检测
 </span>
 
 <br>
@@ -48,8 +46,9 @@
 排列五历史数据：
 
 <span id="pl5Status">
-等待读取
+等待检测
 </span>
+
 
 <br>
 
@@ -68,21 +67,24 @@
 
 
 
-<button onclick="startPrediction()">
 
-开始 V35.3 智能预测
+<button id="predictBtn">
+
+开始 V35.4 智能分析
+
+</button>
+
+
+
+
+
+
+<button id="feedbackBtn">
+
+开奖反馈
 
 </button>
 
-
-
-
-
-<button onclick="feedbackTraining()">
-
-开奖反馈训练
-
-</button>
 
 
 
@@ -91,6 +93,7 @@
 
 
 <div class="box">
+
 
 <div class="title">
 预测结果
@@ -99,12 +102,13 @@
 
 <div id="result">
 
-等待预测...
+等待分析...
 
 </div>
 
 
 </div>
+
 
 
 
@@ -113,6 +117,7 @@
 
 
 <div class="box">
+
 
 <div class="title">
 开奖反馈输入
@@ -138,6 +143,7 @@ placeholder="例如：03 08 17 26 33 + 07 10"
 
 <div class="box">
 
+
 <div class="title">
 学习状态
 </div>
@@ -145,7 +151,7 @@ placeholder="例如：03 08 17 26 33 + 07 10"
 
 <div id="learningStatus">
 
-等待学习...
+等待反馈...
 
 </div>
 
@@ -161,38 +167,31 @@ placeholder="例如：03 08 17 26 33 + 07 10"
 
 <div class="box">
 
+
 <div class="title">
-V35.3 核心模块
+V35.4 系统模块
 </div>
 
 
 <ul>
 
+<li>数据读取模块</li>
 
-<li>固定预测模式</li>
+<li>固定分析引擎</li>
 
-<li>历史频率评分</li>
+<li>号码评分模型</li>
 
-<li>近期趋势分析</li>
+<li>结构过滤模型</li>
 
-<li>组合候选生成</li>
+<li>前区分析</li>
 
-<li>奇偶结构过滤</li>
+<li>后区分析</li>
 
-<li>三区结构过滤</li>
-
-<li>和值范围过滤</li>
-
-<li>连号控制</li>
-
-<li>后区独立评分</li>
-
-<li>三方案优化</li>
-
-<li>开奖反馈接口</li>
+<li>方案生成</li>
 
 <li>历史回测接口</li>
 
+<li>反馈学习接口</li>
 
 </ul>
 
@@ -208,22 +207,17 @@ V35.3 核心模块
 
 <div class="box">
 
+
 <div class="title">
-模型状态
+系统状态
 </div>
 
 
-<div id="modelStatus">
+<div id="systemStatus">
 
-V35.3 等待启动
-
-</div>
-
+V35.4 等待启动
 
 </div>
-
-
-
 
 
 </div>
@@ -232,7 +226,14 @@ V35.3 等待启动
 
 
 
-<script src="script.js?v=3530"></script>
+
+
+</div>
+
+
+
+
+<script src="script.js?v=3540"></script>
 
 
 </body>
