@@ -5,7 +5,7 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>
 大乐透智能分析系统 V70.2 CORE
@@ -16,7 +16,6 @@
 
 
 </head>
-
 
 
 <body>
@@ -36,8 +35,6 @@ V70.2 CORE
 
 
 
-<!-- 数据状态 -->
-
 <div class="card">
 
 
@@ -47,30 +44,22 @@ V70.2 CORE
 
 
 <div id="dataStatus">
-
-正在初始化...
-
+等待加载...
 </div>
-
 
 
 <div id="systemStatus">
+等待系统启动...
+</div>
 
-等待系统加载...
 
 </div>
 
 
 
-</div>
 
 
 
-
-
-
-
-<!-- AI分析 -->
 
 <div class="card">
 
@@ -80,10 +69,9 @@ AI智能分析中心
 </h2>
 
 
-
 <button onclick="startPredict()">
 
-启动 V70 AI分析
+开始 V70 AI分析
 
 </button>
 
@@ -105,15 +93,12 @@ AI智能分析中心
 
 
 
-<!-- AI报告 -->
-
 <div class="card">
 
 
 <h2>
 AI多维分析报告
 </h2>
-
 
 
 <div id="aiReport">
@@ -123,7 +108,6 @@ AI多维分析报告
 </div>
 
 
-
 </div>
 
 
@@ -132,7 +116,27 @@ AI多维分析报告
 
 
 
-<!-- 开奖反馈 -->
+<div class="card">
+
+
+<h2>
+历史滚动回测
+</h2>
+
+
+<div id="backtestResult">
+
+等待回测...
+
+</div>
+
+
+</div>
+
+
+
+
+
 
 
 <div class="card">
@@ -143,13 +147,11 @@ AI多维分析报告
 </h2>
 
 
-
 <input
 
 id="realResult"
 
 placeholder="输入真实开奖号码"
-
 
 >
 
@@ -161,7 +163,6 @@ placeholder="输入真实开奖号码"
 </button>
 
 
-
 <div id="learningStatus">
 
 等待反馈...
@@ -169,7 +170,6 @@ placeholder="输入真实开奖号码"
 </div>
 
 
-
 </div>
 
 
@@ -178,18 +178,12 @@ placeholder="输入真实开奖号码"
 
 
 
-<!-- 模型列表 -->
-
-
 <div class="card">
 
 
 <h2>
-
 V70 AI Agent模型
-
 </h2>
-
 
 
 <div>
@@ -199,35 +193,35 @@ Master AI：
 总控决策
 
 
-<br>
+<br><br>
 
 
 Trend AI：
 趋势走势分析
 
 
-<br>
+<br><br>
 
 
 Structure AI：
 号码结构分析
 
 
-<br>
+<br><br>
 
 
 Markov AI：
 历史转移分析
 
 
-<br>
+<br><br>
 
 
 Risk AI：
 风险过滤
 
 
-<br>
+<br><br>
 
 
 Review AI：
@@ -237,7 +231,6 @@ Review AI：
 </div>
 
 
-
 </div>
 
 
@@ -254,32 +247,32 @@ Review AI：
 
 
 
+<!-- Agent -->
 
-<!-- Agent加载 -->
 
+<script src="agents/masterAgent.js?v=70"></script>
 
-<script src="agents/masterAgent.js"></script>
+<script src="agents/trendAgent.js?v=70"></script>
 
-<script src="agents/trendAgent.js"></script>
+<script src="agents/structureAgent.js?v=70"></script>
 
-<script src="agents/structureAgent.js"></script>
+<script src="agents/markovAgent.js?v=70"></script>
 
-<script src="agents/markovAgent.js"></script>
+<script src="agents/riskAgent.js?v=70"></script>
 
-<script src="agents/riskAgent.js"></script>
-
-<script src="agents/reviewAgent.js"></script>
-
+<script src="agents/reviewAgent.js?v=70"></script>
 
 
 
 
-<!-- 核心 -->
+
+<!-- Core -->
 
 
-<script src="engine.js"></script>
+<script src="engine.js?v=70"></script>
 
-<script src="script.js"></script>
+<script src="script.js?v=70"></script>
+
 
 
 

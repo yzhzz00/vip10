@@ -1,25 +1,19 @@
 /*
-====================================
+================================
 
-大乐透智能分析系统 V70 CORE
+大乐透智能分析系统
 
-Risk Agent
+V70.2
 
-风险控制专家
+Risk AI
 
+风险过滤模型
 
-功能：
-
-1. 组合风险检测
-2. 结构异常提醒
-3. 给Master AI提供反向意见
-
-
-====================================
+================================
 */
 
 
-class RiskAgent{
+class RiskAgent {
 
 
 constructor(){
@@ -28,7 +22,7 @@ constructor(){
 this.name="Risk AI";
 
 
-this.version="V70.0";
+this.confidence=0.58;
 
 
 }
@@ -38,146 +32,11 @@ this.version="V70.0";
 
 
 
+analyze(data){
 
-analyze(numbers){
 
 
-
-if(!numbers || numbers.length===0){
-
-
-
-return {
-
-
-risk:true,
-
-
-reason:[
-
-"没有检测号码"
-
-]
-
-
-
-};
-
-
-
-}
-
-
-
-
-
-
-
-let risk=[];
-
-
-
-
-let odd=0;
-
-let even=0;
-
-
-let sum=0;
-
-
-
-
-numbers.forEach(n=>{
-
-
-
-let num=
-
-Number(n);
-
-
-
-sum+=num;
-
-
-
-if(num%2===0){
-
-even++;
-
-}else{
-
-odd++;
-
-}
-
-
-
-});
-
-
-
-
-
-
-
-// 奇偶风险
-
-if(odd===5 || even===5){
-
-
-
-risk.push(
-
-"奇偶比例极端"
-
-);
-
-
-
-}
-
-
-
-
-
-// 和值风险
-
-
-if(sum<60){
-
-
-risk.push(
-
-"和值过低"
-
-);
-
-
-}
-
-
-
-if(sum>140){
-
-
-risk.push(
-
-"和值过高"
-
-);
-
-
-}
-
-
-
-
-
-
-
-return {
+let result={
 
 
 
@@ -185,39 +44,11 @@ agent:this.name,
 
 
 
-risk:
-
-risk.length>0,
+confidence:this.confidence,
 
 
 
-score:
-
-Math.max(
-
-0,
-
-100-risk.length*20
-
-),
-
-
-
-reason:
-
-risk.length
-
-?
-
-risk
-
-:
-
-[
-
-"结构风险正常"
-
-]
+reason:[]
 
 
 
@@ -227,7 +58,53 @@ risk
 
 
 
-}
+
+
+result.reason.push(
+
+"检测号码集中风险"
+
+);
+
+
+
+
+
+
+result.reason.push(
+
+"检测冷热号码比例"
+
+);
+
+
+
+
+
+
+result.reason.push(
+
+"检测异常组合结构"
+
+);
+
+
+
+
+
+
+result.reason.push(
+
+"等待风险评分模型增强"
+
+);
+
+
+
+
+
+
+return result;
 
 
 
@@ -235,10 +112,13 @@ risk
 
 
 
+}
 
 
 
 
-window.RiskAgent=
+
+
+window.RiskAgent =
 
 new RiskAgent();

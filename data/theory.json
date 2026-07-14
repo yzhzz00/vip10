@@ -1,0 +1,24 @@
+{
+ "version":"V70.2",
+ "theories":[
+
+ {
+  "name":"和值理论",
+  "weight":0.7,
+  "confidence":0.5
+ },
+
+ {
+  "name":"奇偶结构理论",
+  "weight":0.6,
+  "confidence":0.5
+ },
+
+ {
+  "name":"三区分布理论",
+  "weight":0.6,
+  "confidence":0.5
+ }
+
+ ]
+}

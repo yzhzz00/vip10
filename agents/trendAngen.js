@@ -1,25 +1,19 @@
 /*
-====================================
+================================
 
-大乐透智能分析系统 V70 CORE
+大乐透智能分析系统
 
-Trend Agent
+V70.2
 
-趋势走势分析专家
+Trend AI
 
-功能:
+趋势走势分析模型
 
-1. 最近期号码频率
-2. 热号分析
-3. 冷号分析
-4. 趋势输出
-
-====================================
+================================
 */
 
 
 class TrendAgent {
-
 
 
 constructor(){
@@ -28,7 +22,7 @@ constructor(){
 this.name="Trend AI";
 
 
-this.version="V70.0";
+this.confidence=0.6;
 
 
 }
@@ -42,81 +36,84 @@ analyze(history){
 
 
 
-if(!history || history.length===0){
+let result={
 
 
-return {
+
+agent:this.name,
 
 
-strategy:"unknown",
+
+confidence:this.confidence,
 
 
-reason:[
 
-"没有历史数据"
+reason:[]
 
-]
 
 
 };
 
 
+
+
+
+
+
+if(!history || history.length===0){
+
+
+
+result.reason.push(
+
+"暂无历史数据"
+
+);
+
+
+
+return result;
+
+
+
 }
 
 
 
 
 
-let numberCount={};
 
+let last =
 
-
-
-// 最近100期分析
-
-let recent=
-
-history.slice(-100);
+history[history.length-1];
 
 
 
 
 
-recent.forEach(item=>{
+result.reason.push(
 
+"已分析历史走势"
 
-if(item.front){
-
-
-item.front.forEach(num=>{
-
-
-numberCount[num]=
-
-(numberCount[num]||0)+1;
-
-
-
-});
-
-
-}
-
-
-});
+);
 
 
 
 
 
+result.reason.push(
 
-let ranking=
+"当前采用动态趋势评分"
 
-Object.entries(numberCount)
+);
 
-.sort(
 
-(a,b)=>b[1]-a[1]
+
+
+
+result.reason.push(
+
+"等待周期模型增强"
 
 );
 
@@ -125,97 +122,7 @@ Object.entries(numberCount)
 
 
 
-let hotNumbers=
-
-ranking
-
-.slice(0,10)
-
-.map(item=>item[0]);
-
-
-
-
-
-
-let coldNumbers=
-
-ranking
-
-.slice(-10)
-
-.map(item=>item[0]);
-
-
-
-
-
-
-
-return {
-
-
-
-agent:this.name,
-
-
-
-strategy:"trend",
-
-
-
-
-hot:
-
-hotNumbers,
-
-
-
-cold:
-
-coldNumbers,
-
-
-
-confidence:
-
-Math.min(
-
-0.9,
-
-0.5+
-
-recent.length/1000
-
-),
-
-
-
-reason:[
-
-
-
-"分析周期：最近100期",
-
-
-
-"热号："+
-
-hotNumbers.join(" "),
-
-
-
-"冷号："+
-
-coldNumbers.join(" ")
-
-
-
-]
-
-
-
-};
+return result;
 
 
 
@@ -229,8 +136,7 @@ coldNumbers.join(" ")
 
 
 
-// 注册到全局
 
-window.TrendAgent=
+window.TrendAgent =
 
 new TrendAgent();

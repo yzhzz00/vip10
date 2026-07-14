@@ -1,18 +1,19 @@
 /*
-====================================
+================================
 
-大乐透智能分析系统 V70
+大乐透智能分析系统
+
+V70.2
 
 Master AI
 
 总控决策模型
 
-====================================
+================================
 */
 
 
 class MasterAgent {
-
 
 
 constructor(){
@@ -21,7 +22,7 @@ constructor(){
 this.name="Master AI";
 
 
-this.version="V70.0";
+this.confidence=0.65;
 
 
 }
@@ -35,112 +36,43 @@ analyze(context){
 
 
 
-let decision={
-
-
-
-strategy:"balanced",
-
-
-
-confidence:0.65,
-
-
-
-reason:[]
-
-
-
-};
+let reasons=[];
 
 
 
 
 
-
-
-if(context.models){
+let modelCount=0;
 
 
 
-let count=
+if(context && context.models){
+
+
+modelCount=
 
 Object.keys(
-
 context.models
-
 ).length;
 
 
-
-
-decision.reason.push(
-
-"已接收 "
-
-+count+
-
-" 个专家模型意见"
-
-);
-
-
-
 }
 
 
 
 
 
-if(context.models && context.models.trend){
 
+reasons.push(
 
+"已接收 "+
 
-decision.reason.push(
+modelCount+
 
-"趋势模型已参与"
-
-);
-
-
-
-}
-
-
-
-
-
-if(context.models && context.models.structure){
-
-
-
-decision.reason.push(
-
-"结构模型已参与"
+" 个AI模型意见"
 
 );
 
-
-
-}
-
-
-
-
-
-if(context.models && context.models.markov){
-
-
-
-decision.reason.push(
-
-"转移模型已参与"
-
-);
-
-
-
-}
 
 
 
@@ -154,7 +86,31 @@ agent:this.name,
 
 
 
-decision:decision
+confidence:this.confidence,
+
+
+
+decision:{
+
+
+
+strategy:
+
+"综合历史趋势与结构分析",
+
+
+
+recommend:
+
+"等待蒙特卡罗模块接入",
+
+
+
+reasons:reasons
+
+
+
+}
 
 
 
@@ -166,7 +122,6 @@ decision:decision
 
 
 
-
 }
 
 
@@ -174,9 +129,8 @@ decision:decision
 
 
 
+// 注意：这里必须实例化
 
-// 注意这里必须实例化
-
-window.MasterAgent=
+window.MasterAgent =
 
 new MasterAgent();

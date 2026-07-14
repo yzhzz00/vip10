@@ -3,27 +3,38 @@
 
 大乐透智能分析系统
 
-V70 TEST SCRIPT
+V70.2 CORE SCRIPT
 
-初始化测试版
+页面控制中心
 
 ================================
 */
+
 
 
 let systemReady=false;
 
 
 
+
+
+// 页面加载
+
 window.onload=async function(){
+
 
 
 try{
 
 
-document.getElementById("dataStatus").innerHTML=
 
-"正在加载AI核心...";
+document.getElementById(
+"dataStatus"
+).innerHTML=
+
+"AI系统加载中...";
+
+
 
 
 
@@ -42,39 +53,43 @@ AIEngine.status();
 
 
 
+
 systemReady=true;
 
 
 
 
 
-document.getElementById("dataStatus").innerHTML=
 
-"加载成功";
+document.getElementById(
+"dataStatus"
+).innerHTML=
+
+"大乐透数据加载成功";
 
 
 
 
 
-document.getElementById("systemStatus").innerHTML=
+
+document.getElementById(
+"systemStatus"
+).innerHTML=
 
 `
 
 版本：
-
 ${status.version}
 
 <br>
 
-数据：
-
-${status.data}期
+历史数据：
+${status.data} 期
 
 <br>
 
-状态：
-
-正常
+AI模型：
+${status.agents.join(" / ")}
 
 `;
 
@@ -88,17 +103,22 @@ catch(e){
 
 
 
-document.getElementById("dataStatus").innerHTML=
+document.getElementById(
+"dataStatus"
+).innerHTML=
 
 "加载失败：" + e.message;
 
 
 
-console.log(e);
+console.log(
+e
+);
 
 
 
 }
+
 
 
 
@@ -110,14 +130,23 @@ console.log(e);
 
 
 
-function startPredict(){
+
+
+
+
+// 开始分析
+
+
+async function startPredict(){
 
 
 
 if(!systemReady){
 
 
-alert("系统未准备完成");
+alert(
+"系统还未准备完成"
+);
 
 
 return;
@@ -127,9 +156,105 @@ return;
 
 
 
-document.getElementById("predictResult").innerHTML=
 
-"测试成功，AI分析入口正常";
+
+
+try{
+
+
+
+let result=
+
+await AIEngine.analyze();
+
+
+
+
+
+document.getElementById(
+"predictResult"
+).innerHTML=
+
+`
+
+<h3>
+V70.2 AI分析完成
+</h3>
+
+
+历史数据：
+
+${result.history}期
+
+
+<br><br>
+
+
+状态：
+
+${result.message}
+
+
+<br><br>
+
+
+参与模型：
+
+${result.agents.join(" / ")}
+
+`;
+
+
+
+
+
+
+
+document.getElementById(
+"aiReport"
+).innerHTML=
+
+`
+
+AI多维分析报告
+
+<br><br>
+
+
+当前版本：
+
+${result.version}
+
+
+<br>
+
+系统状态：
+
+正常
+
+
+`;
+
+
+
+
+
+}
+
+catch(e){
+
+
+
+document.getElementById(
+"predictResult"
+).innerHTML=
+
+"分析失败：" + e.message;
+
+
+
+}
+
 
 
 
@@ -140,33 +265,63 @@ document.getElementById("predictResult").innerHTML=
 
 
 
+
+
+
+// 保存开奖反馈
+
+
 function saveFeedback(){
 
 
 
-let input=
+let value=
 
-document.getElementById("realResult");
+document.getElementById(
+"realResult"
+).value;
 
 
 
-if(!input)return;
+
+
+if(!value){
+
+
+alert(
+"请输入开奖号码"
+);
+
+
+return;
+
+
+}
+
+
+
 
 
 
 localStorage.setItem(
 
-"last_feedback",
+"dlt_feedback",
 
-input.value
+value
 
 );
 
 
 
-document.getElementById("learningStatus").innerHTML=
 
-"反馈保存成功";
+
+
+document.getElementById(
+"learningStatus"
+).innerHTML=
+
+"开奖反馈已保存";
+
 
 
 }
