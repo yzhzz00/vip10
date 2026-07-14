@@ -2,25 +2,21 @@ async function startAnalysis(){
 
 const result=document.getElementById("result");
 
-result.innerHTML="正在分析数据...";
+result.innerHTML="正在运行V10.3智能评分模型...";
 
 
 try{
 
 
-const response=await fetch("data/dlt_raw.txt?v=102");
-
+const response=await fetch("data/dlt_raw.txt?v=103");
 
 const text=await response.text();
 
 
 const lines=text.split("\n");
 
-
 let data=[];
 
-
-// 清洗数据
 
 lines.forEach(line=>{
 
@@ -29,7 +25,6 @@ let nums=line.match(/\b\d{2}\b/g);
 
 
 if(nums && nums.length>=7){
-
 
 let arr=nums.slice(-7);
 
@@ -42,15 +37,13 @@ back:arr.slice(5,7)
 
 });
 
-
 }
-
 
 });
 
 
 
-// 频率
+// 基础频率
 
 let count={};
 
@@ -62,7 +55,6 @@ let n=i.toString().padStart(2,"0");
 count[n]=0;
 
 }
-
 
 
 data.forEach(item=>{
@@ -78,29 +70,35 @@ count[n]++;
 
 
 
-// 热号
+// 最近100期
 
-let hot=Object.entries(count)
-
-.sort((a,b)=>b[1]-a[1])
-
-.slice(0,10);
+let recent={};
 
 
+for(let i=1;i<=35;i++){
 
+let n=i.toString().padStart(2,"0");
 
-// 冷号
+recent[n]=0;
 
-let cold=Object.entries(count)
-
-.sort((a,b)=>a[1]-b[1])
-
-.slice(0,10);
+}
 
 
 
+data.slice(0,100).forEach(item=>{
 
-// 遗漏
+item.front.forEach(n=>{
+
+recent[n]++;
+
+});
+
+});
+
+
+
+
+// 当前遗漏
 
 let miss={};
 
@@ -128,85 +126,55 @@ miss[n]++;
 
 
 
+// 评分
 
-// 和值
-
-let sumTotal=0;
-
-
-data.forEach(item=>{
-
-item.front.forEach(n=>{
-
-sumTotal+=Number(n);
-
-});
-
-});
+let score={};
 
 
-let avg=(sumTotal/data.length).toFixed(2);
+for(let n in count){
 
 
+let freqScore=count[n]/497*35;
 
 
-// 奇偶
-
-let odd=0;
-
-let even=0;
+let missScore=Math.min(miss[n]/25,1)*25;
 
 
-data.forEach(item=>{
+let recentScore=recent[n]/20*20;
 
-item.front.forEach(n=>{
 
-if(Number(n)%2){
+let balanceScore=20;
 
-odd++;
 
-}else{
+if(count[n]<380){
 
-even++;
+balanceScore+=5;
 
 }
 
-});
 
-});
+score[n]=
 
+freqScore+
 
+missScore+
 
+recentScore+
 
-// 三区
+balanceScore;
 
-let zone=[0,0,0];
-
-
-data.forEach(item=>{
-
-item.front.forEach(n=>{
-
-let x=Number(n);
-
-
-if(x<=12){
-
-zone[0]++;
-
-}else if(x<=24){
-
-zone[1]++;
-
-}else{
-
-zone[2]++;
 
 }
 
-});
 
-});
+
+// 排序
+
+let ranking=Object.entries(score)
+
+.sort((a,b)=>b[1]-a[1])
+
+.slice(0,15);
 
 
 
@@ -215,80 +183,53 @@ zone[2]++;
 let html="";
 
 
-html+=`<h3>数据检测</h3>`;
+html+="<h3>V10.3智能评分结果</h3>";
 
-html+=`有效开奖：${data.length}期<br>`;
+html+="数据期数："+data.length+"期<br><br>";
 
 
 
-html+=`<h3>热号TOP10</h3>`;
+html+="<h3>前区号码评分TOP15</h3>";
 
-hot.forEach((x,i)=>{
 
-html+=`${i+1}. ${x[0]} ${x[1]}次<br>`;
+
+ranking.forEach((x,i)=>{
+
+
+html+=
+
+`${i+1}. ${x[0]} 评分 ${x[1].toFixed(1)}分<br>`;
+
 
 });
 
 
 
-html+=`<h3>冷号TOP10</h3>`;
-
-cold.forEach((x,i)=>{
-
-html+=`${i+1}. ${x[0]} ${x[1]}次<br>`;
-
-});
 
 
+html+="<h3>推荐号码池</h3>";
 
-html+=`<h3>当前遗漏TOP10</h3>`;
 
-Object.entries(miss)
-
-.sort((a,b)=>b[1]-a[1])
+html+=ranking
 
 .slice(0,10)
 
-.forEach((x,i)=>{
+.map(x=>x[0])
 
-html+=`${i+1}. ${x[0]} 遗漏${x[1]}期<br>`;
-
-});
-
-
-
-html+=`<h3>和值分析</h3>`;
-
-html+=`平均和值：${avg}<br>`;
-
-
-
-html+=`<h3>奇偶分析</h3>`;
-
-html+=`奇数：${odd}<br>`;
-
-html+=`偶数：${even}<br>`;
-
-
-
-html+=`<h3>三区分布</h3>`;
-
-html+=`一区01-12：${zone[0]}<br>`;
-
-html+=`二区13-24：${zone[1]}<br>`;
-
-html+=`三区25-35：${zone[2]}<br>`;
+.join(" ");
 
 
 
 result.innerHTML=html;
 
 
+
 }
 
-catch(error){
 
-result.innerHTML="分析失败："+error;
+catch(e){
+
+result.innerHTML="模型运行失败："+e.message;
 
 }
 
