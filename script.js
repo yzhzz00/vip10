@@ -1,6 +1,6 @@
 /*
 ======================================
-彩票智能分析系统 V35.8.1 Mobile
+彩票智能分析系统 V35.8.2
 script.js
 ======================================
 */
@@ -11,10 +11,7 @@ let dltData=[];
 
 
 
-// ==============================
 // 页面启动
-// ==============================
-
 
 window.onload=function(){
 
@@ -50,9 +47,8 @@ window.onload=function(){
 
 
 
-
 // ==============================
-// 加载数据
+// 加载大乐透数据
 // ==============================
 
 
@@ -62,49 +58,50 @@ async function loadDLTData(){
 try{
 
 
-    let res =
-    await fetch(
-        "data/dlt_raw.txt?v=3581"
-    );
+let res =
+await fetch(
+"data/dlt_raw.txt?v=3582"
+);
 
 
 
-    let text =
-    await res.text();
-
-
-
-    dltData =
-    parseDLT(text);
+let text =
+await res.text();
 
 
 
 
-
-    document
-    .getElementById("dltStatus")
-    .innerHTML=
-    "已加载";
+dltData =
+parseDLT(text);
 
 
 
 
 
-    document
-    .getElementById("dataCount")
-    .innerHTML=
-    dltData.length;
+document
+.getElementById("dltStatus")
+.innerHTML=
+"已加载";
 
 
 
 
 
-    document
-    .getElementById("systemStatus")
-    .innerHTML=
+document
+.getElementById("dataCount")
+.innerHTML=
+dltData.length;
 
-    "V35.8.1数据模块运行正常";
 
+
+
+
+
+document
+.getElementById("systemStatus")
+.innerHTML=
+
+"V35.8.2数据模块运行正常";
 
 
 
@@ -112,15 +109,14 @@ try{
 catch(e){
 
 
+document
+.getElementById("systemStatus")
+.innerHTML=
 
-    document
-    .getElementById("systemStatus")
-    .innerHTML=
-
-    "数据加载失败";
+"数据加载失败";
 
 
-    console.log(e);
+console.log(e);
 
 
 
@@ -146,7 +142,7 @@ function parseDLT(text){
 
 
 
-let arr=[];
+let result=[];
 
 
 
@@ -160,86 +156,87 @@ text.split(/\r?\n/);
 lines.forEach(line=>{
 
 
-    let p =
-    line.trim()
-    .split(/\s+/);
+let p =
+line.trim()
+.split(/\s+/);
+
+
+
+if(p.length<9){
+
+return;
+
+}
 
 
 
 
-    if(p.length<9){
+let front=[];
 
-        return;
-
-    }
-
-
-
-
-    let front=[];
-
-    let back=[];
-
-
-
-
-
-
-    for(
-        let i=2;
-        i<=6;
-        i++
-    ){
-
-
-        front.push(
-
-            String(
-                Number(p[i])
-            )
-            .padStart(2,"0")
-
-        );
-
-
-    }
+let back=[];
 
 
 
 
 
 
-    for(
-        let i=7;
-        i<=8;
-        i++
-    ){
+for(
+let i=2;
+i<=6;
+i++
+){
 
 
-        back.push(
+front.push(
 
-            String(
-                Number(p[i])
-            )
-            .padStart(2,"0")
+String(
+Number(p[i])
+)
+.padStart(2,"0")
 
-        );
-
-
-    }
+);
 
 
+}
 
 
 
-    arr.push({
 
-        front:front,
 
-        back:back
 
-    });
+for(
+let i=7;
+i<=8;
+i++
+){
 
+
+back.push(
+
+String(
+Number(p[i])
+)
+.padStart(2,"0")
+
+);
+
+
+}
+
+
+
+
+
+result.push({
+
+
+front:front,
+
+
+back:back
+
+
+});
 
 
 
@@ -249,7 +246,8 @@ lines.forEach(line=>{
 
 
 
-return arr;
+return result;
+
 
 
 }
@@ -277,7 +275,7 @@ dltData.length===0
 
 
 alert(
-"数据未加载"
+"大乐透数据未加载"
 );
 
 
@@ -291,10 +289,10 @@ return;
 
 
 
+
 let box =
-document.getElementById(
-"result"
-);
+document.getElementById("result");
+
 
 
 
@@ -302,9 +300,8 @@ document.getElementById(
 
 box.innerHTML=
 
-"V35.8.1模型运行中...<br>"+
+"V35.8.2模型运行中...<br>"+
 "蒙特卡罗模拟20000组...";
-
 
 
 
@@ -316,41 +313,42 @@ setTimeout(()=>{
 
 
 
-    try{
+try{
 
 
 
-        DLTEngine.data =
-        dltData;
+DLTEngine.data=
+dltData;
 
 
 
-
-        let result =
-        DLTEngine.run();
-
+let result =
+DLTEngine.run();
 
 
 
 
-        showResult(result);
+showResult(result);
 
 
 
-    }
-    catch(e){
+
+
+}
+catch(e){
+
+
+box.innerHTML=
+"模型错误："+e;
 
 
 
-        box.innerHTML=
-        "模型错误："+e;
+console.log(e);
 
 
 
-        console.log(e);
+}
 
-
-    }
 
 
 
@@ -381,17 +379,18 @@ let html="";
 
 
 
-
 html+=
 
-"<b>彩票智能分析系统 V35.8.1</b><br><br>";
+"<b>彩票智能分析系统 V35.8.2</b><br><br>";
 
 
 
 html+=
 
 "数据期数："+
+
 dltData.length+
+
 "期<br><br>";
 
 
@@ -415,7 +414,6 @@ html+=
 data.forEach((item,index)=>{
 
 
-
 html+=
 
 "方案"+
@@ -430,15 +428,18 @@ item.front.join(" ");
 
 
 
+
 html+=
 
 " + ";
 
 
 
+
 html+=
 
 item.back.join(" ");
+
 
 
 
@@ -469,9 +470,11 @@ html+=
 
 
 
+
 html+=
 
-"模型状态：V35.8.1 Mobile完成";
+"模型状态：V35.8.2综合模型完成";
+
 
 
 
@@ -491,7 +494,7 @@ document
 .getElementById("systemStatus")
 .innerHTML=
 
-"V35.8.1模型运行成功<br>"+
+"V35.8.2模型运行成功<br>"+
 dltData.length+
 "期历史数据参与计算";
 
@@ -543,7 +546,6 @@ return;
 
 
 
-
 localStorage.setItem(
 
 "DLT_FEEDBACK",
@@ -551,6 +553,7 @@ localStorage.setItem(
 value
 
 );
+
 
 
 
