@@ -1,6 +1,6 @@
 /*
 ======================================
-彩票智能分析系统 V35.8.2
+彩票智能分析系统 V35.8.3
 script.js
 ======================================
 */
@@ -11,32 +11,37 @@ let dltData=[];
 
 
 
+// ==============================
 // 页面启动
+// ==============================
+
 
 window.onload=function(){
 
 
-    loadDLTData();
+loadDLTData();
 
 
 
-    document
-    .getElementById("predictBtn")
-    .onclick=function(){
+document
+.getElementById("predictBtn")
+.onclick=function(){
 
-        startAnalysis();
+startAnalysis();
 
-    };
+};
 
 
 
-    document
-    .getElementById("feedbackBtn")
-    .onclick=function(){
 
-        saveFeedback();
+document
+.getElementById("feedbackBtn")
+.onclick=function(){
 
-    };
+saveFeedback();
+
+};
+
 
 
 };
@@ -47,8 +52,10 @@ window.onload=function(){
 
 
 
+
+
 // ==============================
-// 加载大乐透数据
+// 加载数据
 // ==============================
 
 
@@ -58,15 +65,15 @@ async function loadDLTData(){
 try{
 
 
-let res =
+let response =
 await fetch(
-"data/dlt_raw.txt?v=3582"
+"data/dlt_raw.txt?v=3583"
 );
 
 
 
 let text =
-await res.text();
+await response.text();
 
 
 
@@ -96,17 +103,17 @@ dltData.length;
 
 
 
-
 document
 .getElementById("systemStatus")
 .innerHTML=
 
-"V35.8.2数据模块运行正常";
+"V35.8.3数据模块运行正常";
 
 
 
 }
-catch(e){
+catch(error){
+
 
 
 document
@@ -116,11 +123,13 @@ document
 "数据加载失败";
 
 
-console.log(e);
+
+console.log(error);
 
 
 
 }
+
 
 
 }
@@ -134,7 +143,7 @@ console.log(e);
 
 
 // ==============================
-// 数据解析
+// 大乐透数据解析
 // ==============================
 
 
@@ -142,7 +151,7 @@ function parseDLT(text){
 
 
 
-let result=[];
+let arr=[];
 
 
 
@@ -156,9 +165,12 @@ text.split(/\r?\n/);
 lines.forEach(line=>{
 
 
+
 let p =
 line.trim()
 .split(/\s+/);
+
+
 
 
 
@@ -171,10 +183,10 @@ return;
 
 
 
+
 let front=[];
 
 let back=[];
-
 
 
 
@@ -197,6 +209,7 @@ Number(p[i])
 );
 
 
+
 }
 
 
@@ -211,6 +224,7 @@ i++
 ){
 
 
+
 back.push(
 
 String(
@@ -221,13 +235,14 @@ Number(p[i])
 );
 
 
+
 }
 
 
 
 
 
-result.push({
+arr.push({
 
 
 front:front,
@@ -246,8 +261,8 @@ back:back
 
 
 
-return result;
 
+return arr;
 
 
 }
@@ -279,6 +294,7 @@ alert(
 );
 
 
+
 return;
 
 
@@ -290,7 +306,7 @@ return;
 
 
 
-let box =
+let resultBox =
 document.getElementById("result");
 
 
@@ -298,9 +314,9 @@ document.getElementById("result");
 
 
 
-box.innerHTML=
+resultBox.innerHTML=
 
-"V35.8.2模型运行中...<br>"+
+"V35.8.3模型运行中...<br>"+
 "蒙特卡罗模拟20000组...";
 
 
@@ -317,7 +333,7 @@ try{
 
 
 
-DLTEngine.data=
+DLTEngine.data =
 dltData;
 
 
@@ -328,9 +344,9 @@ DLTEngine.run();
 
 
 
+
+
 showResult(result);
-
-
 
 
 
@@ -338,8 +354,8 @@ showResult(result);
 catch(e){
 
 
-box.innerHTML=
-"模型错误："+e;
+resultBox.innerHTML=
+"运行错误："+e;
 
 
 
@@ -348,7 +364,6 @@ console.log(e);
 
 
 }
-
 
 
 
@@ -367,11 +382,11 @@ console.log(e);
 
 
 // ==============================
-// 显示结果
+// 输出结果
 // ==============================
 
 
-function showResult(data){
+function showResult(result){
 
 
 
@@ -379,25 +394,31 @@ let html="";
 
 
 
+
+
 html+=
 
-"<b>彩票智能分析系统 V35.8.2</b><br><br>";
+"<b>彩票智能分析系统 V35.8.3</b><br><br>";
+
+
 
 
 
 html+=
 
 "数据期数："+
-
 dltData.length+
-
 "期<br><br>";
+
+
 
 
 
 html+=
 
 "蒙特卡罗模拟：20000组<br><br>";
+
+
 
 
 
@@ -411,7 +432,9 @@ html+=
 
 
 
-data.forEach((item,index)=>{
+
+result.forEach((item,index)=>{
+
 
 
 html+=
@@ -419,6 +442,7 @@ html+=
 "方案"+
 (index+1)+
 "：";
+
 
 
 
@@ -449,11 +473,13 @@ html+=
 
 
 
+
 html+=
 
 "综合评分："+
 item.score+
 "分";
+
 
 
 
@@ -473,7 +499,7 @@ html+=
 
 html+=
 
-"模型状态：V35.8.2综合模型完成";
+"模型状态：V35.8.3综合模型完成";
 
 
 
@@ -490,11 +516,12 @@ html;
 
 
 
+
 document
 .getElementById("systemStatus")
 .innerHTML=
 
-"V35.8.2模型运行成功<br>"+
+"V35.8.3模型运行成功<br>"+
 dltData.length+
 "期历史数据参与计算";
 
@@ -537,6 +564,7 @@ alert(
 );
 
 
+
 return;
 
 
@@ -563,8 +591,7 @@ document
 .getElementById("learningStatus")
 .innerHTML=
 
-"已保存开奖反馈："+
-value;
+"已保存开奖反馈："+value;
 
 
 
