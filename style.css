@@ -1,8 +1,7 @@
-/*
+ /*
 ================================
-彩票智能分析系统 V35.9.2 Mobile
+彩票智能分析系统 V35.9.3 Mobile
 style.css
-手机优化版
 ================================
 */
 
@@ -12,14 +11,13 @@ style.css
 }
 
 
-
 body{
 
     margin:0;
 
     padding:10px;
 
-    background:#f2f5f9;
+    background:#f3f6fa;
 
     font-family:
     "Microsoft YaHei",
@@ -32,7 +30,6 @@ body{
 
 
 
-
 .container{
 
     width:100%;
@@ -41,7 +38,7 @@ body{
 
     margin:auto;
 
-    background:#fff;
+    background:white;
 
     padding:15px;
 
@@ -54,14 +51,13 @@ body{
 
 
 
-
 h1{
 
     text-align:center;
 
-    font-size:22px;
-
     color:#1677ff;
+
+    font-size:22px;
 
     margin:10px 0 20px;
 
@@ -69,23 +65,19 @@ h1{
 
 
 
-
-
 .box{
 
     background:#fafafa;
-
-    border-radius:12px;
 
     padding:15px;
 
     margin-bottom:15px;
 
+    border-radius:12px;
+
     border:1px solid #eee;
 
 }
-
-
 
 
 
@@ -97,11 +89,7 @@ h1{
 
     margin-bottom:10px;
 
-    color:#333;
-
 }
-
-
 
 
 
@@ -109,7 +97,7 @@ button{
 
     width:100%;
 
-    height:45px;
+    height:44px;
 
     margin:8px 0;
 
@@ -127,15 +115,11 @@ button{
 
 
 
-
-
 button:active{
 
     transform:scale(.98);
 
 }
-
-
 
 
 
@@ -157,8 +141,6 @@ input{
 
 
 
-
-
 input:focus{
 
     outline:none;
@@ -166,8 +148,6 @@ input:focus{
     border-color:#1677ff;
 
 }
-
-
 
 
 
@@ -181,15 +161,9 @@ span{
 
 
 
-
-
 #result{
 
-    line-height:2;
-
-    min-height:120px;
-
-    background:#fff;
+    background:white;
 
     padding:12px;
 
@@ -197,29 +171,17 @@ span{
 
     border-left:4px solid #1677ff;
 
-}
+    line-height:2;
 
-
-
-
-
-#result b{
-
-    color:#1677ff;
-
-    font-size:18px;
+    min-height:120px;
 
 }
-
-
 
 
 
 #backTestResult{
 
-    line-height:2;
-
-    background:#fff;
+    background:white;
 
     padding:12px;
 
@@ -227,31 +189,19 @@ span{
 
     border-left:4px solid #20a060;
 
-}
-
-
-
-
-
-#backTestResult b{
-
-    color:#20a060;
+    line-height:2;
 
 }
-
-
 
 
 
 #learningStatus{
 
-    line-height:1.8;
-
     color:#555;
 
+    line-height:1.8;
+
 }
-
-
 
 
 
@@ -265,28 +215,6 @@ span{
 
 
 
-
-
-ul{
-
-    padding-left:20px;
-
-}
-
-
-
-li{
-
-    line-height:1.8;
-
-}
-
-
-
-
-
-
-
 @media(max-width:600px){
 
 
@@ -297,13 +225,11 @@ body{
 }
 
 
-
 .container{
 
     padding:12px;
 
 }
-
 
 
 h1{
@@ -313,7 +239,6 @@ h1{
 }
 
 
-
 button{
 
     height:42px;
@@ -321,7 +246,6 @@ button{
     font-size:15px;
 
 }
-
 
 
 #result,
