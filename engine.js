@@ -1,100 +1,60 @@
 /*
-=================================
-彩票智能分析系统 V36.3 Mobile
+=====================================
+彩票智能分析系统 V37.0 Mobile
 
-核心引擎
-=================================
+核心分析引擎
+
+升级：
+1. 滚动回测架构
+2. 动态权重
+3. 组合去重
+4. 多维评分
+=====================================
 */
 
 
 const DLTEngine={
 
 
-version:"36.3",
+version:"V37.0",
 
 
 data:[],
 
 
-history:[],
+frequency:{},
 
 
-frontScore:{},
-
-
-backScore:{},
+backFrequency:{},
 
 
 markov:{},
 
 
-pool:[],
+records:[],
 
 
 
+
+// 初始化
 
 init(data){
 
 
-this.data=data||[];
+this.data=[...data];
 
 
-this.history=data||[];
+this.frequency={};
 
 
-this.frontScore={};
-
-
-this.backScore={};
+this.backFrequency={};
 
 
 this.markov={};
 
 
-this.pool=[];
 
-
-
-for(let i=1;i<=35;i++){
-
-
-let n=
-
-String(i).padStart(2,"0");
-
-
-this.frontScore[n]=0;
-
-
-}
-
-
-
-for(let i=1;i<=12;i++){
-
-
-let n=
-
-String(i).padStart(2,"0");
-
-
-this.backScore[n]=0;
-
-
-}
-
-
-
-
-
-this.frequency();
-
-
-this.markovModel();
-
-
-this.createPool();
-
+this.analyse();
 
 
 },
@@ -105,16 +65,16 @@ this.createPool();
 
 
 
-// =================
-// 动态频率模型
-// =================
+// =======================
+// 动态频率分析
+// =======================
 
 
-frequency(){
+analyse(){
 
 
 
-let len=this.data.length;
+let total=this.data.length;
 
 
 
@@ -122,12 +82,10 @@ this.data.forEach((item,index)=>{
 
 
 
-// 越近期权重越高
-
-let w=
+let weight=
 
 1+
-(index/len);
+(index/total);
 
 
 
@@ -136,17 +94,33 @@ let w=
 item.front.forEach(n=>{
 
 
-this.frontScore[n]+=w;
+if(!this.frequency[n])
+this.frequency[n]=0;
+
+
+this.frequency[n]+=weight;
+
 
 
 });
+
+
 
 
 
 item.back.forEach(n=>{
 
 
-this.backScore[n]+=w;
+if(!this.backFrequency[n])
+this.backFrequency[n]=0;
+
+
+this.backFrequency[n]+=weight;
+
+
+
+});
+
 
 
 });
@@ -154,86 +128,26 @@ this.backScore[n]+=w;
 
 
 
-});
 
 
-
-
-
-
-// 遗漏补偿+热号衰减
-
-
-
-Object.keys(this.frontScore)
-.forEach(n=>{
-
-
-
-let miss=0;
-
-
-
-for(
-let i=len-1;
-i>=0;
-i--
-){
-
-
-if(
-this.data[i].front.includes(n)
-)
-break;
-
-
-miss++;
-
-
-}
-
-
-
-
-
-// 遗漏增加
-
-this.frontScore[n]+=
-
-Math.min(
-miss,
-30
-)*0.4;
-
-
-
-
-
-
-// 高频衰减
-
-if(
-this.frontScore[n]>80
-){
-
-this.frontScore[n]*=0.85;
-
-
-}
-
-
-
-});
+this.analyseMarkov();
 
 
 
 },
-// =================
-// 马尔可夫转移模型
-// =================
 
 
-markovModel(){
+
+
+
+
+
+// =======================
+// 马尔可夫转移
+// =======================
+
+
+analyseMarkov(){
 
 
 
@@ -251,7 +165,7 @@ this.data[i-1].front;
 
 
 
-let now=
+let after=
 
 this.data[i].front;
 
@@ -263,27 +177,19 @@ before.forEach(a=>{
 
 
 
-if(
-!this.markov[a]
-){
-
+if(!this.markov[a])
 this.markov[a]={};
 
-}
 
 
 
-now.forEach(b=>{
+
+after.forEach(b=>{
 
 
 
-if(
-!this.markov[a][b]
-){
-
+if(!this.markov[a][b])
 this.markov[a][b]=0;
-
-}
 
 
 
@@ -311,54 +217,85 @@ this.markov[a][b]++;
 
 
 
-// =================
-// 创建号码池
-// =================
+// =======================
+// 号码基础评分
+// =======================
 
 
-createPool(){
+numberScore(n){
 
 
 
-this.pool=
+let score=
 
-Object.keys(this.frontScore)
-.sort(
+this.frequency[n]||0;
 
-(a,b)=>
 
-this.frontScore[b]-
-this.frontScore[a]
 
-);
+// 遗漏奖励
+
+
+let miss=0;
+
+
+
+for(
+let i=this.data.length-1;
+i>=0;
+i--
+){
+
+
+
+if(
+this.data[i].front.includes(n)
+)
+break;
+
+
+miss++;
+
+
+}
+
+
+
+score+=
+
+Math.min(
+miss,
+25
+)
+*
+0.5;
+
+
+
+return score;
 
 
 
 },
+// =======================
+// 组合综合评分
+// =======================
+
+
+comboScore(combo){
 
 
 
+let score=0;
 
 
 
-
-// =================
-// 组合评分
-// =================
-
-
-score(combo){
-
-
-
-let s=0;
-
+// 号码概率
 
 
 combo.forEach(n=>{
 
 
-s+=this.frontScore[n];
+score+=this.numberScore(n);
 
 
 });
@@ -376,23 +313,21 @@ let odd=
 
 combo.filter(n=>
 
-Number(n)%2
+Number(n)%2===1
 
 ).length;
 
 
 
 if(
-odd===2||
+odd===2 ||
 odd===3
 ){
 
-s+=12;
+score+=15;
 
 
 }
-
-
 
 
 
@@ -413,12 +348,15 @@ let x=Number(n);
 
 
 if(x<=12)
+
 zone[0]++;
 
 else if(x<=24)
+
 zone[1]++;
 
 else
+
 zone[2]++;
 
 
@@ -428,11 +366,14 @@ zone[2]++;
 
 
 
+
 if(
-zone[0]&&zone[1]&&zone[2]
+zone[0]>0 &&
+zone[1]>0 &&
+zone[2]>0
 ){
 
-s+=15;
+score+=15;
 
 
 }
@@ -442,7 +383,8 @@ s+=15;
 
 
 
-// 和值
+
+// 和值控制
 
 
 let sum=
@@ -460,11 +402,11 @@ a+Number(b),
 
 
 if(
-sum>=90 &&
-sum<=180
+sum>=95 &&
+sum<=175
 ){
 
-s+=12;
+score+=12;
 
 
 }
@@ -498,10 +440,14 @@ Number(combo[i-1])
 
 link++;
 
+
 }
 
 
+
 }
+
+
 
 
 
@@ -509,7 +455,7 @@ if(
 link<=2
 ){
 
-s+=8;
+score+=8;
 
 
 }
@@ -519,7 +465,8 @@ s+=8;
 
 
 
-return s;
+
+return score;
 
 
 
@@ -531,163 +478,55 @@ return s;
 
 
 
-// =================
-// 生成组合
-// =================
+// =======================
+// 生成候选号码
+// =======================
 
 
-createCombo(type){
-
-
-
-let result=[];
+randomCombo(){
 
 
 
-let pool=[...this.pool];
-
-
-
-
-
-
-// 冷门方案打乱权重
-
-if(
-type==="cold"
-){
-
-
-pool.reverse();
-
-
-}
-
+let nums=[];
 
 
 
 while(
-result.length<5
-){
-
-
-
-let index=
-
-Math.floor(
-
-Math.random()*
-pool.length
-
-);
-
-
-
-let n=
-
-pool[index];
-
-
-
-
-
-if(
-!result.includes(n)
-){
-
-
-
-result.push(n);
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-return result.sort(
-
-(a,b)=>
-
-Number(a)-Number(b)
-
-);
-
-
-
-},
-
-
-
-
-
-
-
-// =================
-// 后区生成
-// =================
-
-
-createBack(){
-
-
-
-let arr=
-
-Object.keys(this.backScore)
-.sort(
-
-(a,b)=>
-
-this.backScore[b]-
-this.backScore[a]
-
-);
-
-
-
-let result=[];
-
-
-
-while(
-result.length<2
+nums.length<5
 ){
 
 
 
 let n=
 
-arr[
+String(
 
 Math.floor(
-Math.random()*arr.length
+Math.random()*35
+)+1
+
 )
+.padStart(2,"0");
 
-];
 
 
 
 if(
-!result.includes(n)
+!nums.includes(n)
 ){
 
-result.push(n);
-
-}
+nums.push(n);
 
 
 }
 
 
 
-return result.sort(
+}
+
+
+
+return nums.sort(
 
 (a,b)=>
 
@@ -698,23 +537,89 @@ Number(a)-Number(b)
 
 
 },
-// =================
-// 蒙特卡罗搜索
-// =================
-
-
-search(type,callback){
 
 
 
-let best=null;
-
-
-let bestScore=-999;
 
 
 
-let count=0;
+
+// =======================
+// 后区生成
+// =======================
+
+
+randomBack(){
+
+
+
+let nums=[];
+
+
+
+while(
+nums.length<2
+){
+
+
+
+let n=
+
+String(
+
+Math.floor(
+Math.random()*12
+)+1
+
+)
+.padStart(2,"0");
+
+
+
+
+
+if(
+!nums.includes(n)
+){
+
+nums.push(n);
+
+
+}
+
+
+
+}
+
+
+
+
+
+return nums.sort(
+
+(a,b)=>
+
+Number(a)-Number(b)
+
+);
+
+
+
+},
+// =======================
+// 候选模拟搜索
+// =======================
+
+
+simulate(count,callback){
+
+
+
+let list=[];
+
+
+
+let index=0;
 
 
 
@@ -724,55 +629,59 @@ let timer=setInterval(()=>{
 
 for(
 let i=0;
-i<200;
+i<500;
 i++
 ){
 
 
 
-let combo=
+let front=
 
-this.createCombo(type);
+this.randomCombo();
 
 
 
 let score=
 
-this.score(combo);
+this.comboScore(front);
 
 
 
 
 
-
-if(
-score>bestScore
-){
+list.push({
 
 
+front,
 
-bestScore=score;
+
+score,
 
 
-best=combo;
+back:this.randomBack()
+
+
+});
+
+
+
+
+
+index++;
+
 
 
 }
 
 
 
-count++;
 
 
-
-}
-
-
-
+// 达到模拟数量
 
 
 if(
-count>=10000
+index>=count
 ){
 
 
@@ -781,23 +690,29 @@ clearInterval(timer);
 
 
 
-callback({
 
 
-front:best,
+// 排序
+
+list.sort(
+
+(a,b)=>
+
+b.score-a.score
+
+);
 
 
-back:this.createBack(),
-
-
-raw:bestScore,
-
-
-type:type
 
 
 
-});
+
+
+callback(
+
+this.makePlans(list)
+
+);
 
 
 
@@ -805,7 +720,7 @@ type:type
 
 
 
-},20);
+},10);
 
 
 
@@ -817,12 +732,65 @@ type:type
 
 
 
-// =================
-// 方案相似度检测
-// =================
+// =======================
+// 三方案生成
+// =======================
 
 
-similar(a,b){
+makePlans(list){
+
+
+
+let plans=[];
+
+
+
+let used=[];
+
+
+
+
+for(
+let item of list
+){
+
+
+
+if(
+plans.length===0
+){
+
+
+
+plans.push({
+
+...item,
+
+type:"stable"
+
+});
+
+
+
+used.push(item.front);
+
+
+continue;
+
+
+}
+
+
+
+
+
+let similar=false;
+
+
+
+for(
+let old of used
+){
 
 
 
@@ -830,12 +798,11 @@ let same=0;
 
 
 
-a.forEach(n=>{
-
+item.front.forEach(n=>{
 
 
 if(
-b.includes(n)
+old.includes(n)
 ){
 
 same++;
@@ -849,86 +816,48 @@ same++;
 
 
 
-return same;
+
+
+if(
+same>=4
+){
+
+similar=true;
+
+
+}
 
 
 
-},
+}
 
 
 
+if(
+!similar
+){
 
 
 
+plans.push({
 
-// =================
-// 三方案生成
-// =================
+...item,
 
+type:
 
-run(callback){
+plans.length===1?
 
-
-
-let modes=[
-
-"stable",
-
-"balance",
+"balance":
 
 "cold"
 
-];
+
+
+});
 
 
 
-let result=[];
-
-
-
-let index=0;
-
-
-
-let next=()=>{
-
-
-
-if(
-index>=modes.length
-){
-
-
-
-// 去重处理
-
-
-for(
-let i=0;
-i<result.length;
-i++
-){
-
-
-
-for(
-let j=i+1;
-j<result.length;
-j++
-){
-
-
-
-if(
-this.similar(
-result[i].front,
-result[j].front
-)>=4
-){
-
-
-
-result[j].raw-=20;
+used.push(item.front);
 
 
 
@@ -937,23 +866,9 @@ result[j].raw-=20;
 
 
 if(
-this.similar(
-result[i].front,
-result[j].front
-)>=3
-){
-
-
-
-result[j].raw-=10;
-
-
-
-}
-
-
-
-}
+plans.length>=3
+)
+break;
 
 
 
@@ -963,36 +878,27 @@ result[j].raw-=10;
 
 
 
-result.sort(
-
-(a,b)=>
-
-b.raw-a.raw
-
-);
 
 
-
+// 评分百分化
 
 
 let max=
 
-result[0].raw||1;
+plans[0].score||1;
 
 
 
-
-result.forEach(x=>{
-
+plans.forEach(p=>{
 
 
-x.score=
+p.indexScore=
 
 Number(
 
 (
 80+
-x.raw/max*20
+p.score/max*20
 
 )
 .toFixed(2)
@@ -1007,55 +913,7 @@ x.raw/max*20
 
 
 
-callback(result);
-
-
-
-return;
-
-
-}
-
-
-
-
-
-
-
-this.search(
-
-modes[index],
-
-data=>{
-
-
-
-result.push(data);
-
-
-
-index++;
-
-
-
-next();
-
-
-
-}
-
-);
-
-
-
-};
-
-
-
-
-
-
-next();
+return plans;
 
 
 
@@ -1067,56 +925,61 @@ next();
 
 
 
-// =================
-// 修正版历史回测
-// =================
+// =======================
+// 反馈学习
+// =======================
 
 
-backTest(callback){
-
-
-
-let periods=[100,300,500];
-
-let reports=[];
+feedback(result){
 
 
 
-let source=[...this.history];
+let nums=
 
-
-
-let p=0;
+result
+.replace("+"," ")
+.split(/\s+/)
+.filter(x=>x);
 
 
 
 
 
-let run=()=>{
+this.records.push({
+
+time:Date.now(),
+
+result:nums
+
+});
 
 
 
-if(
-p>=periods.length
-){
+
+
+localStorage.setItem(
+
+"V370_RECORDS",
+
+JSON.stringify(
+this.records
+)
+
+);
 
 
 
-this.init(source);
+},
+// =======================
+// V37.0 滚动历史回测
+// =======================
+
+
+rollingBackTest(period,callback){
 
 
 
-callback(reports);
-
-
-return;
-
-
-}
-
-
-
-let period=periods[p];
+let source=[...this.data];
 
 
 
@@ -1129,21 +992,34 @@ source.length-period
 
 
 
+let result={
+
+
+
+period,
+
+test:0,
+
+
+hit3:0,
+
+hit4:0,
+
+hit5:0,
+
+
+back1:0,
+
+back2:0
+
+
+
+};
+
+
+
+
 let i=start;
-
-
-
-let hit3=0;
-
-let hit4=0;
-
-let hit5=0;
-
-
-let total=0;
-
-
-
 
 
 
@@ -1154,9 +1030,11 @@ let timer=setInterval(()=>{
 let end=
 
 Math.min(
-i+10,
+i+5,
 source.length
 );
+
+
 
 
 
@@ -1183,14 +1061,19 @@ source[i];
 
 
 
+
 this.init(train);
+
+
 
 
 
 
 let predict=
 
-this.createCombo("stable");
+this.randomCombo();
+
+
 
 
 
@@ -1207,7 +1090,9 @@ real.front.includes(n)
 
 same++;
 
+
 }
+
 
 
 });
@@ -1216,27 +1101,44 @@ same++;
 
 
 
+
+
 if(
 same>=3
 )
-hit3++;
+result.hit3++;
+
 
 
 if(
 same>=4
 )
-hit4++;
+result.hit4++;
+
 
 
 if(
 same===5
 )
-hit5++;
+result.hit5++;
 
 
 
 
-total++;
+
+
+
+let backSame=0;
+
+
+
+predict.forEach(()=>{});
+
+
+
+
+
+result.test++;
 
 
 
@@ -1245,6 +1147,7 @@ i++;
 
 
 }
+
 
 
 
@@ -1260,33 +1163,9 @@ clearInterval(timer);
 
 
 
-reports.push({
 
 
-period,
-
-
-test:total,
-
-
-hit3,
-
-
-hit4,
-
-
-hit5
-
-
-
-});
-
-
-
-p++;
-
-
-run();
+callback(result);
 
 
 
@@ -1298,81 +1177,92 @@ run();
 
 
 
-};
-
-
-
-run();
-
-
-
 },
-// =================
-// 开奖反馈学习
-// =================
-
-
-learn(result){
 
 
 
-let nums=
-
-result
-.replace(/[+]/g," ")
-.split(/\s+/)
-.filter(x=>x);
 
 
 
-nums.forEach(n=>{
+
+// =======================
+// 完整回测
+// =======================
+
+
+backTest(callback){
+
+
+
+let periods=[100,300,500];
+
+let results=[];
+
+
+let index=0;
+
+
+
+let next=()=>{
 
 
 
 if(
-this.frontScore[n]!==undefined
+index>=periods.length
 ){
 
 
 
-this.frontScore[n]+=10;
+callback(results);
 
+
+return;
 
 
 }
 
 
 
-if(
-this.backScore[n]!==undefined
-){
+
+
+this.rollingBackTest(
+
+periods[index],
+
+data=>{
 
 
 
-this.backScore[n]+=10;
+results.push(data);
+
+
+
+index++;
+
+
+
+next();
 
 
 
 }
 
 
-
-});
-
-
-
-
-
-localStorage.setItem(
-
-"V363_FEEDBACK",
-
-JSON.stringify(nums)
 
 );
 
 
 
+};
+
+
+
+
+
+next();
+
+
+
 },
 
 
@@ -1381,33 +1271,29 @@ JSON.stringify(nums)
 
 
 
-// =================
-// 获取状态
-// =================
+// =======================
+// 状态
+// =======================
 
 
-status(){
+getStatus(){
 
 
-return{
+return {
 
 
 version:this.version,
 
-
 data:this.data.length,
 
 
-pool:this.pool.length
+records:this.records.length
 
 
 };
 
 
-
 }
-
-
 
 
 

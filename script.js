@@ -1,13 +1,14 @@
 /*
-=================================
-彩票智能分析系统 V36.3 Mobile
+==================================
+彩票智能分析系统 V37.0 Mobile
 
 页面控制
-=================================
+==================================
 */
 
 
 let dltData=[];
+
 
 
 
@@ -19,12 +20,14 @@ loadData();
 
 document
 .getElementById("predictBtn")
-.onclick=startPredict;
+.onclick=predict;
+
 
 
 document
 .getElementById("backTestBtn")
-.onclick=startBackTest;
+.onclick=runBackTest;
+
 
 
 document
@@ -41,10 +44,9 @@ document
 
 
 
-
-// =================
-// 加载数据
-// =================
+// =======================
+// 加载历史数据
+// =======================
 
 
 async function loadData(){
@@ -57,7 +59,7 @@ try{
 let res=
 
 await fetch(
-"data/dlt_raw.txt?v363"
+"data/dlt_raw.txt?v370"
 );
 
 
@@ -72,15 +74,21 @@ dltData=parseData(text);
 
 
 
+
+
 document
 .getElementById("dltStatus")
-.innerHTML="已加载";
+.innerHTML=
+
+"已加载";
 
 
 
 document
 .getElementById("dataCount")
-.innerHTML=dltData.length;
+.innerHTML=
+
+dltData.length;
 
 
 
@@ -88,11 +96,12 @@ document
 .getElementById("systemStatus")
 .innerHTML=
 
-"V36.3数据模块运行正常";
+"V37.0数据模块运行正常";
 
 
 
 }catch(e){
+
 
 
 document
@@ -102,23 +111,24 @@ document
 "数据加载失败";
 
 
-}
-
-
 
 }
 
 
 
+}
 
 
 
 
 
 
-// =================
+
+
+
+// =======================
 // 数据解析
-// =================
+// =======================
 
 
 function parseData(text){
@@ -142,6 +152,7 @@ line.trim()
 
 
 
+
 if(
 p.length<9
 )return;
@@ -152,6 +163,7 @@ p.length<9
 let front=[];
 
 let back=[];
+
 
 
 
@@ -177,7 +189,6 @@ Number(p[i])
 
 
 }
-
 
 
 
@@ -240,12 +251,12 @@ return arr;
 
 
 
-// =================
-// 开始预测
-// =================
+// =======================
+// 预测
+// =======================
 
 
-function startPredict(){
+function predict(){
 
 
 
@@ -253,19 +264,14 @@ if(
 dltData.length===0
 ){
 
-
 alert(
-"历史数据未加载"
+"数据未加载"
 );
 
 
 return;
 
-
 }
-
-
-
 
 
 
@@ -276,11 +282,15 @@ document
 
 
 
+
+
 box.innerHTML=
 
-"V36.3模型启动...<br>"+
-"动态权重分析...<br>"+
-"蒙特卡罗搜索中...";
+"V37.0启动...<br>"+
+"动态模型计算...<br>"+
+"100000组候选模拟...";
+
+
 
 
 
@@ -292,7 +302,13 @@ DLTEngine.init(dltData);
 
 
 
-DLTEngine.run(function(result){
+
+DLTEngine.simulate(
+
+100000,
+
+function(plans){
+
 
 
 
@@ -300,7 +316,8 @@ DLTEngine.run(function(result){
 
 let html=
 
-"<b>彩票智能分析系统 V36.3 Mobile</b><br><br>";
+"<b>彩票智能分析系统 V37.0 Mobile</b><br><br>";
+
 
 
 
@@ -314,7 +331,7 @@ dltData.length+
 
 html+=
 
-"蒙特卡罗模拟：30000组<br><br>";
+"蒙特卡罗模拟：100000组<br><br>";
 
 
 
@@ -326,21 +343,20 @@ html+=
 
 
 
-result.forEach((x,i)=>{
+plans.forEach((p,i)=>{
 
 
 
 html+=
 
 "方案"+
-(i+1)
-+
+(i+1)+
 "："+
-x.front.join(" ")
+p.front.join(" ")
 +
 " + "
 +
-x.back.join(" ")
+p.back.join(" ")
 +
 "<br>";
 
@@ -348,18 +364,16 @@ x.back.join(" ")
 
 html+=
 
-"综合评分："+
-x.score+
-"分<br>";
+"模型指数："+
+p.indexScore+
+"<br>";
 
 
 
 html+=
 
 "类型："+
-
-x.type+
-
+p.type+
 "<br><br>";
 
 
@@ -370,18 +384,14 @@ x.type+
 
 
 
-
 html+=
 
-"模型状态：V36.3综合模型完成";
-
+"模型状态：V37.0综合模型完成";
 
 
 
 
 box.innerHTML=html;
-
-
 
 
 
@@ -399,12 +409,12 @@ box.innerHTML=html;
 
 
 
-// =================
-// 历史回测
-// =================
+// =======================
+// 回测
+// =======================
 
 
-function startBackTest(){
+function runBackTest(){
 
 
 
@@ -416,11 +426,10 @@ document
 
 
 
-
 box.innerHTML=
 
-"V36.3历史回测运行中...<br>"+
-"正在测试100/300/500期";
+"V37.0滚动回测运行中...";
+
 
 
 
@@ -432,21 +441,21 @@ DLTEngine.init(dltData);
 
 
 
-DLTEngine.backTest(function(report){
+DLTEngine.backTest(
 
-
+function(result){
 
 
 
 let html=
 
-"<b>V36.3历史回测报告</b><br><br>";
+"<b>V37.0历史回测报告</b><br><br>";
 
 
 
 
 
-report.forEach(r=>{
+result.forEach(r=>{
 
 
 
@@ -510,7 +519,11 @@ box.innerHTML=html;
 
 
 
-});
+}
+
+
+
+);
 
 
 
@@ -524,9 +537,9 @@ box.innerHTML=html;
 
 
 
-// =================
+// =======================
 // 开奖反馈
-// =================
+// =======================
 
 
 function saveFeedback(){
@@ -546,12 +559,9 @@ document
 
 if(!value){
 
-
-
 alert(
 "请输入开奖结果"
 );
-
 
 
 return;
@@ -563,8 +573,7 @@ return;
 
 
 
-
-DLTEngine.learn(value);
+DLTEngine.feedback(value);
 
 
 
@@ -574,7 +583,7 @@ document
 .getElementById("learningStatus")
 .innerHTML=
 
-"V36.3反馈学习完成："+value;
+"V37.0反馈已保存："+value;
 
 
 
