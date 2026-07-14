@@ -2,13 +2,13 @@ async function startAnalysis(){
 
 const result=document.getElementById("result");
 
-result.innerHTML="正在运行 V22.0稳定评分模型...";
+result.innerHTML="正在运行 V23.0智能组合优化模型...";
 
 
 try{
 
 
-const res=await fetch("data/dlt_raw.txt?v=2200");
+const res=await fetch("data/dlt_raw.txt?v=2300");
 
 const text=await res.text();
 
@@ -19,13 +19,13 @@ let data=[];
 text.split("\n").forEach(line=>{
 
 
-let nums=line.match(/\b\d{2}\b/g);
+let n=line.match(/\b\d{2}\b/g);
 
 
-if(nums&&nums.length>=7){
+if(n&&n.length>=7){
 
 
-let a=nums.slice(-7);
+let a=n.slice(-7);
 
 
 data.push({
@@ -45,47 +45,43 @@ back:a.slice(5,7)
 
 if(data.length===0){
 
-throw new Error("历史数据读取失败");
+throw new Error("数据读取失败");
 
 }
 
 
 
-
-// ====================
-// 基础统计
-// ====================
 
 
 function countFront(arr){
 
 
-let obj={};
+let c={};
 
 
 for(let i=1;i<=35;i++){
 
-obj[String(i).padStart(2,"0")]=0;
+c[String(i).padStart(2,"0")]=0;
 
 }
+
 
 
 arr.forEach(d=>{
 
-
 d.front.forEach(n=>{
 
-obj[n]++;
+c[n]++;
+
+});
 
 });
 
 
-});
-
-
-return obj;
+return c;
 
 }
+
 
 
 
@@ -93,152 +89,39 @@ return obj;
 function countBack(arr){
 
 
-let obj={};
+let c={};
 
 
 for(let i=1;i<=12;i++){
 
-obj[String(i).padStart(2,"0")]=0;
+c[String(i).padStart(2,"0")]=0;
 
 }
+
 
 
 arr.forEach(d=>{
 
-
 d.back.forEach(n=>{
 
-obj[n]++;
+c[n]++;
+
+});
 
 });
 
 
-});
-
-
-return obj;
+return c;
 
 }
 
 
 
-
-// ====================
-// 遗漏评分
-// ====================
-
-
-function missScore(arr){
-
-
-let last={};
-
-
-for(let i=1;i<=35;i++){
-
-last[String(i).padStart(2,"0")]=999;
-
-}
-
-
-
-for(let i=0;i<arr.length;i++){
-
-
-arr[i].front.forEach(n=>{
-
-
-if(last[n]===999){
-
-last[n]=i;
-
-}
-
-
-});
-
-
-}
-
-
-
-return last;
-
-}
-
-
-
-
-// ====================
-// 马尔可夫趋势
-// ====================
-
-
-function markovScore(arr){
-
-
-let score={};
-
-
-for(let i=1;i<=35;i++){
-
-score[String(i).padStart(2,"0")]=0;
-
-}
-
-
-
-for(let i=0;i<arr.length-1;i++){
-
-
-let current=arr[i].front;
-
-let next=arr[i+1].front;
-
-
-
-current.forEach(a=>{
-
-
-next.forEach(b=>{
-
-
-if(a===b){
-
-score[b]+=1;
-
-}
-
-
-});
-
-
-});
-
-
-}
-
-
-
-return score;
-
-}
-
-
-
-
-// ====================
-// 综合评分
-// ====================
 
 
 let freq=countFront(data);
 
 let recent=countFront(data.slice(0,100));
-
-let miss=missScore(data);
-
-let markov=markovScore(data);
 
 
 
@@ -251,209 +134,264 @@ for(let n in freq){
 
 score[n]=
 
-freq[n]*0.35
+freq[n]*0.4
 
 +
 
-recent[n]*0.25
-
-+
-
-markov[n]*0.25
-
-+
-
-(1/(miss[n]+1))*100*0.15;
+recent[n]*0.3;
 
 
 
-}
-// ====================
-// 组合评分
-// ====================
+if(parseInt(n)%2){
 
-
-function combinationScore(nums){
-
-
-let s=0;
-
-
-// 号码总评分
-
-nums.forEach(n=>{
-
-s+=score[n];
-
-});
-
-
-
-// 奇偶结构
-
-let odd=nums.filter(n=>parseInt(n)%2===1).length;
-
-
-if(odd>=2&&odd<=3){
-
-s+=20;
+score[n]+=5;
 
 }
 
 
 
-// 三区结构
+}
 
-let a=0,b=0,c=0;
+
+
+function getScoreDetail(nums){
+
+
+let frequency=0;
 
 
 nums.forEach(n=>{
 
-
-let x=parseInt(n);
-
-
-if(x<=12)a++;
-
-else if(x<=24)b++;
-
-else c++;
-
+frequency+=score[n];
 
 });
 
 
-if(a>0&&b>0&&c>0){
-
-s+=20;
+return frequency;
 
 }
+// =====================
+// 组合生成
+// =====================
 
 
-
-// 和值范围
-
-let sum=nums.reduce(
-
-(x,y)=>x+parseInt(y),0
-
-);
-
-
-if(sum>=80&&sum<=140){
-
-s+=15;
-
-}
-
-
-
-return s;
-
-}
-
-
-
-
-
-// ====================
-// 固定排序选号
-// ====================
-
-
-let frontPool=
+let pool=
 
 Object.keys(score)
 
 .sort((a,b)=>score[b]-score[a])
 
-.slice(0,18);
+.slice(0,25);
 
 
 
 
-
-let candidates=[];
-
+function combination(arr){
 
 
-for(let i=0;i<frontPool.length;i++){
-
-for(let j=i+1;j<frontPool.length;j++){
-
-for(let k=j+1;k<frontPool.length;k++){
+let list=[];
 
 
 
-let arr=[
+for(let i=0;i<arr.length;i++){
 
-frontPool[i],
+for(let j=i+1;j<arr.length;j++){
 
-frontPool[j],
+for(let k=j+1;k<arr.length;k++){
 
-frontPool[k]
+for(let m=k+1;m<arr.length;m++){
+
+for(let n=m+1;n<arr.length;n++){
+
+
+let nums=[
+
+arr[i],
+
+arr[j],
+
+arr[k],
+
+arr[m],
+
+arr[n]
 
 ];
 
 
-
-let temp=frontPool.filter(
-
-x=>!arr.includes(x)
-
-).slice(0,2);
+let value=getScoreDetail(nums);
 
 
 
-if(temp.length===2){
-
-
-let nums=arr.concat(temp).sort();
-
-
-candidates.push({
+list.push({
 
 nums:nums,
 
-value:combinationScore(nums)
+score:value
 
 });
 
 
 }
 
-
-
 }
 
 }
 
 }
 
+}
 
 
 
-// 排序取前三
+return list;
 
-candidates.sort(
+}
 
-(a,b)=>b.value-a.value
+
+
+
+
+let combinations=combination(pool);
+
+
+
+// 结构过滤
+
+combinations=combinations.filter(x=>{
+
+
+let nums=x.nums;
+
+
+let odd=nums.filter(
+
+n=>parseInt(n)%2
+
+).length;
+
+
+
+let sum=nums.reduce(
+
+(a,b)=>a+parseInt(b),0
 
 );
 
 
 
-let backCountData=countBack(data);
+return (
+
+odd>=2
+
+&&
+
+odd<=3
+
+&&
+
+sum>=70
+
+&&
+
+sum<=150
+
+);
+
+
+});
+
+
+
+
+
+// 排序
+
+combinations.sort(
+
+(a,b)=>b.score-a.score
+
+);
+
+
+
+
+
+// 选择不同方案
+
+let plans=[];
+
+
+for(let i=0;i<combinations.length;i++){
+
+
+let item=combinations[i];
+
+
+let same=false;
+
+
+plans.forEach(p=>{
+
+
+let common=item.nums.filter(
+
+n=>p.front.includes(n)
+
+).length;
+
+
+
+if(common>=4){
+
+same=true;
+
+}
+
+
+});
+
+
+
+if(!same){
+
+plans.push({
+
+front:item.nums,
+
+score:item.score
+
+});
+
+}
+
+
+if(plans.length>=3){
+
+break;
+
+}
+
+
+}
+
+
+
+
+
+// 后区
+
+let backs=countBack(data);
 
 
 
 let backPool=
 
-Object.keys(backCountData)
+Object.keys(backs)
 
 .sort(
 
-(a,b)=>backCountData[b]-backCountData[a]
+(a,b)=>backs[b]-backs[a]
 
 )
 
@@ -463,47 +401,41 @@ Object.keys(backCountData)
 
 
 
-let plans=[];
+plans.forEach((p,i)=>{
 
 
+p.back=
 
-for(let i=0;i<3;i++){
-
-
-plans.push({
+backPool.slice(i,i+2);
 
 
-front:candidates[i].nums,
+p.score=
 
+Math.min(
 
-back:
+99,
 
-backPool.slice(i,i+2),
+p.score/10
 
-
-score:
-
-candidates[i].value
+);
 
 
 });
 
 
-}
 
 
 
 
-
-// ====================
+// =====================
 // 输出
-// ====================
+// =====================
 
 
 let html="";
 
 
-html+="<h3>V22.0稳定评分模型</h3>";
+html+="<h3>V23.0智能组合优化模型</h3>";
 
 html+="数据期数："+data.length+"期<br><br>";
 
@@ -526,22 +458,25 @@ html+=
 
 +p.back.join(" ")
 
-+"<br>"
++"<br>";
 
-+"综合评分："
 
-+p.score.toFixed(2)
 
-+"<br><br>";
+html+="综合评分："
+
++p.score.toFixed(1)
+
++"分<br><br>";
+
 
 
 });
 
 
 
-html+="模型状态：固定评分排序完成<br>";
+html+="模型状态：优化完成<br>";
 
-html+="重复点击结果保持一致";
+html+="三方案差异化：开启";
 
 
 
