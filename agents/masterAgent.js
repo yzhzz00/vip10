@@ -3,165 +3,52 @@
 
 大乐透智能分析系统 V70
 
-Master AI Agent
+Master AI
 
 总控决策模型
-
-职责:
-1. 接收所有子模型分析
-2. 判断当前周期
-3. 生成预测策略
-4. 输出决策日志
 
 ====================================
 */
 
 
-const MasterAgent = {
-
-
-version:"V70.0",
+class MasterAgent {
 
 
 
-// 当前状态分析
+constructor(){
+
+
+this.name="Master AI";
+
+
+this.version="V70.0";
+
+
+}
+
+
+
+
+
 
 analyze(context){
 
 
-let strategy="balanced";
 
-
-let reason=[];
-
-
-
-// 热号判断
-
-if(context.hot && context.hot.length>5){
-
-
-strategy="hot";
-
-
-reason.push(
-
-"近期热号明显"
-
-);
-
-
-}
-
-
-
-
-
-// 冷号判断
-
-if(context.cold && context.cold.length>5){
-
-
-strategy="cold";
-
-
-reason.push(
-
-"遗漏号码释放概率增加"
-
-);
-
-
-}
-
-
-
-
-
-// 和值判断
-
-if(context.sum){
-
-
-
-if(context.sum.average>105){
-
-
-
-reason.push(
-
-"历史和值偏高，控制高位号码"
-
-);
-
-
-}
-
-
-
-if(context.sum.average<85){
-
-
-reason.push(
-
-"和值偏低，关注回升"
-
-);
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-return {
-
-
-strategy,
-
-
-reason
-
-
-
-};
-
-
-
-},
-
-
-
-
-
-
-
-
-
-// 综合子模型意见
-
-
-decision(models){
-
-
-
-let result={
+let decision={
 
 
 
 strategy:"balanced",
 
 
-confidence:0,
+
+confidence:0.65,
 
 
-suggestions:[]
+
+reason:[]
+
 
 
 };
@@ -171,45 +58,29 @@ suggestions:[]
 
 
 
-let score={
+
+if(context.models){
 
 
 
-hot:0,
+let count=
 
-cold:0,
+Object.keys(
 
-balanced:0
+context.models
 
-
-};
-
-
+).length;
 
 
 
 
-models.forEach(model=>{
+decision.reason.push(
 
+"已接收 "
 
++count+
 
-if(model.strategy){
-
-
-score[model.strategy]++;
-
-
-}
-
-
-
-if(model.reason){
-
-
-
-result.suggestions.push(
-
-...model.reason
+" 个专家模型意见"
 
 );
 
@@ -219,31 +90,18 @@ result.suggestions.push(
 
 
 
-});
+
+
+if(context.models && context.models.trend){
 
 
 
+decision.reason.push(
 
+"趋势模型已参与"
 
+);
 
-if(score.hot>score.cold
-
-&&score.hot>score.balanced){
-
-
-
-result.strategy="hot";
-
-
-}
-
-
-
-else if(score.cold>score.hot){
-
-
-
-result.strategy="cold";
 
 
 }
@@ -252,40 +110,39 @@ result.strategy="cold";
 
 
 
-
-result.confidence=
-
-Math.max(
-
-score.hot,
-
-score.cold,
-
-score.balanced
-
-)/models.length;
+if(context.models && context.models.structure){
 
 
 
+decision.reason.push(
+
+"结构模型已参与"
+
+);
 
 
 
-return result;
-
-
-
-},
+}
 
 
 
 
 
+if(context.models && context.models.markov){
 
 
-// 输出AI思考日志
+
+decision.reason.push(
+
+"转移模型已参与"
+
+);
 
 
-log(decision){
+
+}
+
+
 
 
 
@@ -293,21 +150,11 @@ return {
 
 
 
-time:
-
-new Date()
-
-.toISOString(),
+agent:this.name,
 
 
 
-agent:
-
-"Master AI",
-
-
-
-decision
+decision:decision
 
 
 
@@ -319,12 +166,17 @@ decision
 
 
 
-};
+
+}
 
 
 
 
+
+
+
+// 注意这里必须实例化
 
 window.MasterAgent=
 
-MasterAgent;
+new MasterAgent();
