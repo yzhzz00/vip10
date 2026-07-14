@@ -5,29 +5,25 @@
 
 V70.2 CORE ENGINE
 
-AI多专家调度核心
-
+稳定版
 
 ====================================
 */
 
 
-class AIEngine{
+class AIEngine {
 
 
 constructor(){
 
 
-this.version="V70.2";
+this.version = "V70.2";
 
+this.dlt = [];
 
-this.dlt=[];
+this.agents = {};
 
-
-this.agents={};
-
-
-this.memory=[];
+this.memory = [];
 
 
 }
@@ -38,16 +34,45 @@ this.memory=[];
 
 
 
+// ======================
+// 初始化
+// ======================
+
 async init(){
 
+
+try{
 
 
 await this.loadData();
 
 
-
 this.loadAgents();
 
+
+console.log(
+"V70.2初始化完成"
+);
+
+
+return true;
+
+
+}
+
+catch(e){
+
+
+console.log(
+"初始化错误:",
+e
+);
+
+
+throw e;
+
+
+}
 
 
 }
@@ -56,30 +81,43 @@ this.loadAgents();
 
 
 
+
+
+
+
+// ======================
+// 加载数据
+// ======================
 
 
 async loadData(){
 
 
 
-try{
+let url =
+"data/dlt.txt?t=" + Date.now();
 
 
 
-let res=
+let res =
+await fetch(url);
 
-await fetch(
 
-"data/dlt.txt?v=702"
 
+if(!res.ok){
+
+
+throw new Error(
+"大乐透数据文件加载失败"
 );
 
 
+}
 
-let text=
 
+
+let text =
 await res.text();
-
 
 
 
@@ -89,22 +127,19 @@ this.dlt=[];
 
 
 
-
-text.trim()
-
-.split(/\n+/)
-
-.forEach(line=>{
+let lines =
+text.trim().split(/\n+/);
 
 
 
-let arr=
-
-line.trim()
-
-.split(/\s+/);
 
 
+lines.forEach(line=>{
+
+
+
+let arr =
+line.trim().split(/\s+/);
 
 
 
@@ -118,7 +153,6 @@ this.dlt.push({
 
 
 issue:arr[0],
-
 
 
 date:arr[1],
@@ -160,28 +194,22 @@ arr[8]
 
 
 
+
+if(this.dlt.length===0){
+
+
+throw new Error(
+"大乐透数据为空"
+);
+
+
+}
+
+
+
 console.log(
-
-"数据期数:",
-
+"加载大乐透:",
 this.dlt.length
-
-);
-
-
-
-}
-
-catch(e){
-
-
-
-console.log(
-
-"数据加载失败",
-
-e
-
 );
 
 
@@ -190,14 +218,15 @@ e
 
 
 
-}
 
 
 
 
 
 
-
+// ======================
+// 加载Agent
+// ======================
 
 
 loadAgents(){
@@ -209,51 +238,89 @@ this.agents={};
 
 
 
-if(window.MasterAgent)
 
-this.agents.master=
+if(window.MasterAgent){
 
+
+this.agents.master =
 window.MasterAgent;
 
 
+}
 
-if(window.TrendAgent)
 
-this.agents.trend=
 
+
+
+if(window.TrendAgent){
+
+
+this.agents.trend =
 window.TrendAgent;
 
 
+}
 
-if(window.StructureAgent)
 
-this.agents.structure=
 
+
+
+if(window.StructureAgent){
+
+
+this.agents.structure =
 window.StructureAgent;
 
 
+}
 
-if(window.MarkovAgent)
 
-this.agents.markov=
 
+
+
+if(window.MarkovAgent){
+
+
+this.agents.markov =
 window.MarkovAgent;
 
 
+}
 
-if(window.RiskAgent)
 
-this.agents.risk=
 
+
+
+if(window.RiskAgent){
+
+
+this.agents.risk =
 window.RiskAgent;
 
 
+}
 
-if(window.ReviewAgent)
 
-this.agents.review=
 
+
+
+if(window.ReviewAgent){
+
+
+this.agents.review =
 window.ReviewAgent;
+
+
+}
+
+
+
+
+
+console.log(
+"加载模型:",
+Object.keys(this.agents)
+);
 
 
 
@@ -265,34 +332,50 @@ window.ReviewAgent;
 
 
 
+
+
+// ======================
+// AI分析
+// ======================
 
 
 async analyze(){
 
 
 
-let trend=null;
-
-let structure=null;
-
-let markov=null;
+let result = {
 
 
+version:this.version,
+
+
+history:this.dlt.length,
+
+
+models:{},
+
+
+decision:{}
+
+
+};
 
 
 
+
+
+
+// Trend
 
 
 if(this.agents.trend){
 
 
 
-trend=
+result.models.trend =
 
 this.agents.trend.analyze(
-
 this.dlt
-
 );
 
 
@@ -301,18 +384,21 @@ this.dlt
 
 
 
+
+
+
+
+// Structure
 
 
 if(this.agents.structure){
 
 
 
-structure=
+result.models.structure =
 
 this.agents.structure.analyze(
-
 this.dlt
-
 );
 
 
@@ -321,18 +407,21 @@ this.dlt
 
 
 
+
+
+
+
+// Markov
 
 
 if(this.agents.markov){
 
 
 
-markov=
+result.models.markov =
 
 this.agents.markov.analyze(
-
 this.dlt
-
 );
 
 
@@ -344,55 +433,42 @@ this.dlt
 
 
 
-let context={
 
 
-
-history:
-
-this.dlt.length,
-
-
-
-trend:trend,
-
-
-
-structure:structure,
-
-
-
-markov:markov
-
-
-
-};
-
-
-
-
-
-
-
-
-let master={};
-
-
-
+// Master
 
 
 if(this.agents.master){
 
 
 
-master=
+result.decision =
 
-this.agents.master.analyze(
+this.agents.master.analyze({
 
-context
 
-);
+history:this.dlt.length,
 
+
+models:result.models
+
+
+});
+
+
+
+}
+
+else{
+
+
+result.decision={
+
+
+strategy:"Master AI未加载"
+
+
+};
 
 
 }
@@ -402,49 +478,8 @@ context
 
 
 
-
-
-let result={
-
-
-
-version:this.version,
-
-
-
-history:this.dlt.length,
-
-
-
-models:{
-
-
-
-trend,
-
-structure,
-
-markov
-
-
-
-},
-
-
-
-decision:master,
-
-
-
-time:
-
-new Date()
-
-.toLocaleString()
-
-
-
-};
+result.time =
+new Date().toLocaleString();
 
 
 
@@ -452,8 +487,6 @@ new Date()
 
 
 this.saveMemory(result);
-
-
 
 
 
@@ -471,6 +504,11 @@ return result;
 
 
 
+// ======================
+// 保存记忆
+// ======================
+
+
 saveMemory(data){
 
 
@@ -484,9 +522,7 @@ localStorage.setItem(
 "v70_memory",
 
 JSON.stringify(
-
 this.memory
-
 )
 
 );
@@ -503,6 +539,11 @@ this.memory
 
 
 
+// ======================
+// 状态
+// ======================
+
+
 status(){
 
 
@@ -514,15 +555,11 @@ return {
 version:this.version,
 
 
-
 data:this.dlt.length,
 
 
-
 agents:Object.keys(
-
 this.agents
-
 )
 
 
@@ -541,7 +578,5 @@ this.agents
 
 
 
-
-window.AIEngine=
-
+window.AIEngine =
 new AIEngine();
