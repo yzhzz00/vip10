@@ -7,8 +7,7 @@ result.innerHTML="正在运行 V20.0综合智能模型...";
 
 try{
 
-
-const res=await fetch("data/dlt_raw.txt?v=2000");
+const res=await fetch("data/dlt_raw.txt?v=2001");
 
 const text=await res.text();
 
@@ -20,17 +19,13 @@ text.split("\n").forEach(line=>{
 
 let nums=line.match(/\b\d{2}\b/g);
 
-
-if(nums&&nums.length>=7){
+if(nums && nums.length>=7){
 
 let a=nums.slice(-7);
 
 data.push({
-
 front:a.slice(0,5),
-
 back:a.slice(5,7)
-
 });
 
 }
@@ -39,33 +34,23 @@ back:a.slice(5,7)
 
 
 
-// =====================
-// 学习权重
-// =====================
-
-
 let weight=JSON.parse(
 
 localStorage.getItem("v20_weight")
 
 ||
 
-'{"freq":0.2,"trend":0.25,"struct":0.2,"markov":0.2,"anti":0.15}'
+'{"freq":0.25,"trend":0.25,"struct":0.25,"anti":0.25}'
 
 );
 
 
 
-// =====================
-// 统计函数
-// =====================
 
 
-function countFront(arr){
-
+function frontCount(arr){
 
 let c={};
-
 
 for(let i=1;i<=35;i++){
 
@@ -91,12 +76,9 @@ return c;
 
 
 
-
-function countBack(arr){
-
+function backCount(arr){
 
 let c={};
-
 
 for(let i=1;i<=12;i++){
 
@@ -122,25 +104,18 @@ return c;
 
 
 
-// =====================
-// 智能评分
-// =====================
 
+function getFrontScore(arr){
 
-function scoring(history){
+let all=frontCount(arr);
 
-
-let all=countFront(history);
-
-let recent=countFront(history.slice(0,100));
+let recent=frontCount(arr.slice(0,100));
 
 
 let score={};
 
 
-
 for(let n in all){
-
 
 score[n]=
 
@@ -151,72 +126,39 @@ all[n]*weight.freq
 recent[n]*weight.trend;
 
 
+if(parseInt(n)%2==1){
 
-// 结构平衡
-
-if(parseInt(n)>=13&&parseInt(n)<=24){
-
-score[n]+=weight.struct*10;
+score[n]+=weight.struct;
 
 }
 
 
+if(all[n]<350){
 
-// 反人类过滤
-
-if(all[n]<380){
-
-score[n]+=weight.anti*20;
+score[n]+=weight.anti*10;
 
 }
 
-
-}
-
-
-
-return score;
-
-
-}
-
-
-
-// =====================
-// 后区评分
-// =====================
-
-
-function backScore(history){
-
-
-let c=countBack(history);
-
-
-let score={};
-
-
-
-for(let n in c){
-
-score[n]=c[n];
 
 }
 
 
 return score;
 
-
 }
 
 
-// =====================
-// 生成号码
-// =====================
 
+function getBackScore(arr){
 
-function choose(arr,num){
+let c=backCount(arr);
 
+return c;
+
+}
+// 选号函数
+
+function pick(arr,num){
 
 let a=[...arr];
 
@@ -225,12 +167,9 @@ let r=[];
 
 while(r.length<num){
 
-
 let i=Math.floor(Math.random()*a.length);
 
-
 r.push(a[i]);
-
 
 a.splice(i,1);
 
@@ -239,52 +178,53 @@ a.splice(i,1);
 
 return r.sort();
 
-
 }
-// =====================
-// 蒙特卡罗选号优化
-// =====================
 
 
-function monteCarlo(frontPool,backPool){
+
+
+// 蒙特卡罗
+
+function simulation(frontPool,backPool){
 
 
 let best=null;
 
-let bestScore=-1;
+
+for(let i=0;i<3000;i++){
 
 
+let f=pick(frontPool,5);
 
-for(let i=0;i<10000;i++){
-
-
-let f=choose(frontPool,5);
-
-let b=choose(backPool,2);
+let b=pick(backPool,2);
 
 
-let score=0;
-
+let value=0;
 
 
 f.forEach(n=>{
 
-score+=Math.random();
+value+=Math.random();
 
 });
 
 
-if(score>bestScore){
+if(!best || value>best.value){
 
-bestScore=score;
+best={
 
-best={front:f,back:b};
+front:f,
+
+back:b,
+
+value:value
+
+};
 
 }
 
 
 }
-
 
 
 return best;
@@ -293,15 +233,11 @@ return best;
 
 
 
-// =====================
-// 当前预测
-// =====================
+
+let frontScore=getFrontScore(data);
 
 
-let frontScore=scoring(data);
-
-
-let backScore=backScore(data);
+let backResult=getBackScore(data);
 
 
 
@@ -319,7 +255,7 @@ Object.entries(frontScore)
 
 let backPool=
 
-Object.entries(backScore)
+Object.entries(backResult)
 
 .sort((a,b)=>b[1]-a[1])
 
@@ -329,14 +265,15 @@ Object.entries(backScore)
 
 
 
-let resultList=[];
+
+let plans=[];
 
 
 for(let i=0;i<3;i++){
 
-resultList.push(
+plans.push(
 
-monteCarlo(frontPool,backPool)
+simulation(frontPool,backPool)
 
 );
 
@@ -345,10 +282,8 @@ monteCarlo(frontPool,backPool)
 
 
 
-// =====================
-// 滚动回测
-// =====================
 
+// 回测
 
 let hit={
 
@@ -364,14 +299,10 @@ let hit={
 
 
 
-let test=data.slice(-500);
+data.slice(-500).forEach(real=>{
 
 
-
-test.forEach(real=>{
-
-
-resultList.forEach(p=>{
+plans.forEach(p=>{
 
 
 let f=p.front.filter(
@@ -388,10 +319,11 @@ x=>real.back.includes(x)
 ).length;
 
 
+
 let key=f+"+"+b;
 
 
-if(hit[key]!=undefined){
+if(hit[key]!==undefined){
 
 hit[key]++;
 
@@ -406,21 +338,9 @@ hit[key]++;
 
 
 
-// =====================
-// 自动学习
-// =====================
+// 保存学习
 
-
-if(hit["4+1"]>0){
-
-weight.markov+=0.01;
-
-}else{
-
-weight.freq+=0.01;
-
-}
-
+weight.trend+=0.005;
 
 
 localStorage.setItem(
@@ -433,10 +353,6 @@ JSON.stringify(weight)
 
 
 
-
-// =====================
-// 输出
-// =====================
 
 
 let html="";
@@ -452,7 +368,7 @@ html+="<h3>最终推荐</h3>";
 
 
 
-resultList.forEach((p,i)=>{
+plans.forEach((p,i)=>{
 
 
 html+=
@@ -471,7 +387,8 @@ p.front.join(" ")
 
 
 
-html+="<h3>500期回测</h3>";
+html+="<br><h3>500期回测</h3>";
+
 
 
 for(let k in hit){
@@ -482,30 +399,7 @@ html+=k+"："+hit[k]+"次<br>";
 
 
 
-html+="<h3>学习权重</h3>";
-
-html+="频率："+
-
-(weight.freq*100).toFixed(1)
-
-+"%<br>";
-
-html+="趋势："+
-
-(weight.trend*100).toFixed(1)
-
-+"%<br>";
-
-html+="结构："+
-
-(weight.struct*100).toFixed(1)
-
-+"%<br>";
-
-
-
-html+="模型学习：已保存";
-
+html+="<br>模型学习：已保存";
 
 
 result.innerHTML=html;
@@ -517,7 +411,7 @@ result.innerHTML=html;
 
 result.innerHTML=
 
-"模型运行失败："+e.message;
+"运行失败："+e.message;
 
 
 }
