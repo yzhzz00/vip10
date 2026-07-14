@@ -1,231 +1,424 @@
 async function startAnalysis(){
 
 const result=document.getElementById("result");
-result.innerHTML="正在运行 V14.0智能回测模型...";
+
+result.innerHTML="正在运行 V14.5真实滚动回测模型...";
+
 
 try{
 
-let res=await fetch("data/dlt_raw.txt?v=1400");
-let text=await res.text();
+
+const res=await fetch("data/dlt_raw.txt?v=1450");
+
+const text=await res.text();
+
 
 let data=[];
 
+
 text.split("\n").forEach(line=>{
+
 
 let n=line.match(/\b\d{2}\b/g);
 
+
 if(n&&n.length>=7){
+
 
 let a=n.slice(-7);
 
+
 data.push({
+
 front:a.slice(0,5),
+
 back:a.slice(5,7)
+
 });
+
 
 }
 
 });
 
 
-// 学习参数
+
+// =================
+// 学习权重
+// =================
+
 
 let weight=JSON.parse(
-localStorage.getItem("v14_weight")
+
+localStorage.getItem("v145_weight")
+
 ||
-'{"f":0.25,"t":0.25}'
+
+'{"freq":0.3,"trend":0.3,"structure":0.2,"random":0.2}'
+
 );
 
 
-// 前区统计
-
-let fc={};
-
-for(let i=1;i<=35;i++)
-fc[String(i).padStart(2,"0")]=0;
 
 
-data.forEach(d=>{
+// =================
+// 统计函数
+// =================
 
-d.front.forEach(n=>fc[n]++);
+
+function getScore(history){
+
+
+let count={};
+
+
+for(let i=1;i<=35;i++){
+
+count[String(i).padStart(2,"0")]=0;
+
+}
+
+
+
+history.forEach(d=>{
+
+
+d.front.forEach(n=>{
+
+count[n]++;
+
+});
+
 
 });
 
 
 
-// 后区统计
-
-let bc={};
-
-for(let i=1;i<=12;i++)
-bc[String(i).padStart(2,"0")]=0;
+return count;
 
 
-data.forEach(d=>{
-
-d.back.forEach(n=>bc[n]++);
-
-});
+}
 
 
 
-// 最近趋势
 
-let rc={};
-
-for(let i=1;i<=35;i++)
-rc[String(i).padStart(2,"0")]=0;
+// =================
+// 预测函数
+// =================
 
 
-data.slice(0,100).forEach(d=>{
-
-d.front.forEach(n=>rc[n]++);
-
-});
+function predict(history){
 
 
+let count=getScore(history);
 
-// 综合评分
+
+let recent=getScore(history.slice(0,100));
+
 
 let score={};
 
 
-for(let n in fc){
+
+for(let n in count){
+
 
 score[n]=
-fc[n]*weight.f+
-rc[n]*weight.t;
+
+count[n]*weight.freq
+
++
+
+recent[n]*weight.trend;
+
 
 }
 
 
 
-let fp=Object.entries(score)
+let front=
+
+Object.entries(score)
+
 .sort((a,b)=>b[1]-a[1])
-.slice(0,20)
+
+.slice(0,15)
+
 .map(x=>x[0]);
 
 
-let bp=Object.entries(bc)
+
+
+let backCount={};
+
+
+for(let i=1;i<=12;i++){
+
+backCount[String(i).padStart(2,"0")]=0;
+
+}
+
+
+
+history.forEach(d=>{
+
+
+d.back.forEach(n=>{
+
+backCount[n]++;
+
+});
+
+
+});
+
+
+
+let back=
+
+Object.entries(backCount)
+
 .sort((a,b)=>b[1]-a[1])
-.slice(0,8)
+
+.slice(0,6)
+
 .map(x=>x[0]);
 
 
 
-// 选号
 
-function pick(a,n){
+function pick(arr,num){
 
-let t=[...a],r=[];
 
-while(r.length<n){
+let t=[...arr];
+
+let r=[];
+
+
+while(r.length<num){
+
 
 let i=Math.floor(Math.random()*t.length);
 
+
 r.push(t[i]);
+
 
 t.splice(i,1);
 
+
 }
+
 
 return r.sort();
 
-}
-
-
-
-let plans=[];
-
-while(plans.length<3){
-
-plans.push({
-
-f:pick(fp,5),
-
-b:pick(bp,2)
-
-});
 
 }
 
 
 
-// 简单回测
+return {
 
-let hit3=0;
-let hit4=0;
-let hit5=0;
+front:pick(front,5),
 
+back:pick(back,2)
 
-data.slice(0,500).forEach(d=>{
-
-plans.forEach(p=>{
-
-let h=p.f.filter(x=>d.front.includes(x)).length;
-
-if(h>=3)hit3++;
-
-if(h>=4)hit4++;
-
-if(h==5)hit5++;
-
-});
-
-});
+};
 
 
+}
+// =================
+// 滚动回测
+// =================
 
-// 学习调整
 
-weight.t+=0.01;
-weight.f-=0.01;
+let test=500;
+
+let start=data.length-test;
+
+
+let hit={
+
+"3+0":0,
+"3+1":0,
+"4+0":0,
+"4+1":0,
+"5+0":0,
+"5+1":0,
+"5+2":0
+
+};
+
+
+
+let modelScore=0;
+
+
+
+for(let i=start;i<data.length;i++){
+
+
+let history=data.slice(0,i);
+
+
+let p=predict(history);
+
+
+
+let f=p.front.filter(
+
+x=>data[i].front.includes(x)
+
+).length;
+
+
+
+let b=p.back.filter(
+
+x=>data[i].back.includes(x)
+
+).length;
+
+
+
+let key=f+"+"+b;
+
+
+
+if(hit[key]!=undefined){
+
+hit[key]++;
+
+}
+
+
+
+if(f>=3){
+
+modelScore+=f;
+
+}
+
+
+
+}
+
+
+
+
+// =================
+// 权重学习
+// =================
+
+
+if(modelScore>1000){
+
+weight.trend+=0.01;
+
+weight.freq-=0.01;
+
+}else{
+
+weight.freq+=0.01;
+
+weight.trend-=0.01;
+
+}
+
+
 
 localStorage.setItem(
-"v14_weight",
+
+"v145_weight",
+
 JSON.stringify(weight)
+
 );
 
 
 
-// 输出
+
+// =================
+// 当前推荐
+// =================
+
+
+let now=predict(data);
+
+
 
 let html="";
 
-html+="<h3>V14.0智能回测模型</h3>";
 
-html+="有效数据："+data.length+"期<br><br>";
+html+="<h3>V14.5真实滚动回测</h3>";
 
-html+="<h3>推荐方案</h3>";
+html+="数据期数："+data.length+"期<br><br>";
 
 
-plans.forEach((p,i)=>{
+
+html+="<h3>最新推荐</h3>";
 
 html+=
-"方案"+(i+1)+"："+p.f.join(" ")+" + "+p.b.join(" ")+"<br>";
 
-});
+now.front.join(" ")
+
++" + "
+
++now.back.join(" ")
+
++"<br><br>";
+
+
 
 
 html+="<h3>500期回测</h3>";
 
-html+="3个以上前区："+hit3+"次<br>";
-
-html+="4个以上前区："+hit4+"次<br>";
-
-html+="5个前区："+hit5+"次<br>";
 
 
-html+="<br>模型学习：已保存";
+for(let k in hit){
+
+html+=k+"："+hit[k]+"次<br>";
+
+}
+
+
+
+
+html+="<h3>模型状态</h3>";
+
+html+="频率权重："+
+
+(weight.freq*100).toFixed(1)
+
++"%<br>";
+
+
+
+html+="趋势权重："+
+
+(weight.trend*100).toFixed(1)
+
++"%<br>";
+
+
+
+html+="模型评分："+modelScore;
+
 
 
 result.innerHTML=html;
 
 
+
 }catch(e){
 
-result.innerHTML="错误："+e.message;
+
+result.innerHTML=
+
+"运行失败："+e.message;
+
 
 }
+
 
 }
