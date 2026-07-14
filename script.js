@@ -1,9 +1,9 @@
 /*
-======================================
-彩票智能分析系统 V35.9.2
+====================================
+彩票智能分析系统 V35.9.2 Mobile
 script.js
-差异化方案 + 回测版
-======================================
+手机优化版
+====================================
 */
 
 
@@ -11,53 +11,34 @@ let dltData=[];
 
 
 
-// ==============================
-// 初始化
-// ==============================
-
-
 window.onload=function(){
 
 
-loadDLTData();
-
+loadData();
 
 
 
 document
 .getElementById("predictBtn")
-.onclick=function(){
-
-startAnalysis();
-
-};
-
-
+.onclick=startPredict;
 
 
 
 document
 .getElementById("backTestBtn")
-.onclick=function(){
-
-startBackTest();
-
-};
-
-
+.onclick=startBackTest;
 
 
 
 document
 .getElementById("feedbackBtn")
-.onclick=function(){
+.onclick=saveFeedback;
 
-saveFeedback();
+
 
 };
 
 
-};
 
 
 
@@ -65,34 +46,26 @@ saveFeedback();
 
 
 
-
-
-// ==============================
-// 加载数据
-// ==============================
-
-
-async function loadDLTData(){
-
+async function loadData(){
 
 
 try{
 
 
-let res =
+let res=
 await fetch(
-"data/dlt_raw.txt?v=3592"
+"data/dlt_raw.txt"
 );
 
 
 
-let text =
+let text=
 await res.text();
 
 
 
-dltData =
-parseDLT(text);
+dltData=
+parseData(text);
 
 
 
@@ -105,7 +78,6 @@ document
 
 
 
-
 document
 .getElementById("dataCount")
 .innerHTML=
@@ -113,18 +85,15 @@ dltData.length;
 
 
 
-
-
 document
 .getElementById("systemStatus")
 .innerHTML=
-
-"V35.9.2数据模块运行正常";
-
+"V35.9.2 Mobile数据模块正常";
 
 
-}
-catch(e){
+
+}catch(e){
+
 
 
 document
@@ -133,9 +102,6 @@ document
 "数据加载失败";
 
 
-console.log(e);
-
-
 
 }
 
@@ -151,12 +117,7 @@ console.log(e);
 
 
 
-// ==============================
-// 解析大乐透数据
-// ==============================
-
-
-function parseDLT(text){
+function parseData(text){
 
 
 
@@ -164,30 +125,22 @@ let arr=[];
 
 
 
-let lines =
-text.split(/\r?\n/);
+text
+.split(/\r?\n/)
+.forEach(line=>{
 
 
 
-
-
-lines.forEach(line=>{
-
-
-
-let p =
+let p=
 line.trim()
 .split(/\s+/);
 
 
 
 
-
-if(p.length<9){
-
+if(p.length<9)
 return;
 
-}
 
 
 
@@ -195,7 +148,6 @@ return;
 let front=[];
 
 let back=[];
-
 
 
 
@@ -208,17 +160,15 @@ i++
 
 
 front.push(
-
 String(
 Number(p[i])
 )
 .padStart(2,"0")
-
 );
 
 
-
 }
+
 
 
 
@@ -232,14 +182,11 @@ i++
 
 
 back.push(
-
 String(
 Number(p[i])
 )
 .padStart(2,"0")
-
 );
-
 
 
 }
@@ -263,7 +210,6 @@ back
 
 
 
-
 return arr;
 
 
@@ -278,40 +224,20 @@ return arr;
 
 
 
-// ==============================
-// 开始分析
-// ==============================
-
-
-function startAnalysis(){
+function startPredict(){
 
 
 
-if(
-dltData.length===0
-){
-
-alert(
-"数据未加载"
-);
-
-
-return;
-
-}
-
-
-
-let box =
-document.getElementById("result");
+let box=
+document
+.getElementById("result");
 
 
 
 box.innerHTML=
 
-"V35.9.2模型运行中...<br>"+
+"V35.9.2 Mobile模型运行中...<br>"+
 "蒙特卡罗模拟20000组...";
-
 
 
 
@@ -321,16 +247,13 @@ setTimeout(()=>{
 
 
 
-DLTEngine.data =
+DLTEngine.data=
 dltData;
 
 
 
-
-let result =
+let result=
 DLTEngine.run();
-
-
 
 
 
@@ -352,11 +275,6 @@ showResult(result);
 
 
 
-// ==============================
-// 显示结果
-// ==============================
-
-
 function showResult(result){
 
 
@@ -366,89 +284,65 @@ let html="";
 
 
 html+=
-
-"<b>彩票智能分析系统 V35.9.2</b><br><br>";
+"<b>彩票智能分析系统 V35.9.2 Mobile</b><br><br>";
 
 
 
 html+=
-
 "数据期数："+
-
 dltData.length+
-
 "期<br><br>";
 
 
 
 html+=
-
 "蒙特卡罗模拟：20000组<br><br>";
 
 
 
-html+=
-
-"<b>最终推荐</b><br><br>";
+html+="<b>最终推荐</b><br><br>";
 
 
 
 
 
-
-result.forEach((item,index)=>{
-
+result.forEach((r,i)=>{
 
 
 html+=
 
 "方案"+
-
-(index+1)+
-
+(i+1)+
 "：";
 
 
 
-
-
 html+=
 
-item.front.join(" ");
+r.front.join(" ");
 
 
 
 
-
-html+=
-
-" + ";
-
-
+html+=" + ";
 
 
 
 html+=
 
-item.back.join(" ");
+r.back.join(" ");
 
 
 
 
-
-html+=
-
-"<br>";
-
+html+="<br>";
 
 
 
 html+=
 
 "综合评分："+
-
-item.score+
-
+r.score+
 "分<br><br>";
 
 
@@ -459,10 +353,9 @@ item.score+
 
 
 
-
 html+=
 
-"模型状态：V35.9.2综合模型完成";
+"模型状态：V35.9.2 Mobile完成";
 
 
 
@@ -485,41 +378,20 @@ html;
 
 
 
-// ==============================
-// 历史回测
-// ==============================
-
-
 function startBackTest(){
 
 
 
-if(
-dltData.length===0
-){
-
-alert(
-"数据未加载"
-);
-
-
-return;
-
-}
-
-
-
-
-
-let box =
-document.getElementById("backTestResult");
+let box=
+document
+.getElementById("backTestResult");
 
 
 
 box.innerHTML=
 
-"正在执行历史回测...<br>"+
-"测试500期...";
+"正在回测...<br>"+
+"测试100期，请稍候";
 
 
 
@@ -530,104 +402,42 @@ setTimeout(()=>{
 
 
 
-DLTEngine.data =
+DLTEngine.data=
 dltData;
 
 
 
+let r=
+DLTEngine.backTest(100);
 
-let report =
-DLTEngine.backTest(500);
-
-
-
-
-
-
-let html="";
-
-
-
-html+=
-
-"<b>V35.9.2历史回测报告</b><br><br>";
-
-
-
-html+=
-
-"测试期数："+
-
-report.testCount+
-
-"<br>";
-
-
-
-html+=
-
-"前区3中："+
-
-report.front3+
-
-"次<br>";
-
-
-
-html+=
-
-"前区4中："+
-
-report.front4+
-
-"次<br>";
-
-
-
-html+=
-
-"前区5中："+
-
-report.front5+
-
-"次<br><br>";
-
-
-
-html+=
-
-"后区中1："+
-
-report.back1+
-
-"次<br>";
-
-
-
-html+=
-
-"后区中2："+
-
-report.back2+
-
-"次<br><br>";
-
-
-
-html+=
-
-"模型表现率："+
-
-report.rate+
-
-"%";
 
 
 
 
 
 box.innerHTML=
-html;
+
+"<b>V35.9.2 Mobile历史回测报告</b><br><br>"+
+
+"测试期数："+r.testCount+
+"<br>"+
+
+"前区3中："+r.front3+
+"次<br>"+
+
+"前区4中："+r.front4+
+"次<br>"+
+
+"前区5中："+r.front5+
+"次<br><br>"+
+
+"后区中1："+r.back1+
+"次<br>"+
+
+"后区中2："+r.back2+
+"次<br><br>"+
+
+"模型表现率："+r.rate+"%";
 
 
 
@@ -645,16 +455,11 @@ html;
 
 
 
-// ==============================
-// 开奖反馈
-// ==============================
-
-
 function saveFeedback(){
 
 
 
-let value =
+let value=
 document
 .getElementById("realResult")
 .value
@@ -663,14 +468,11 @@ document
 
 
 
-
 if(!value){
-
 
 alert(
 "请输入开奖结果"
 );
-
 
 return;
 
@@ -680,14 +482,9 @@ return;
 
 
 localStorage.setItem(
-
 "DLT_FEEDBACK",
-
 value
-
 );
-
-
 
 
 
@@ -695,7 +492,7 @@ document
 .getElementById("learningStatus")
 .innerHTML=
 
-"已保存开奖反馈："+value;
+"已保存："+value;
 
 
 
