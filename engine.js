@@ -1,58 +1,22 @@
-/*
-====================================
-
-大乐透智能分析系统
-
-V70.2 CORE ENGINE
-
-稳定版
-
-====================================
-*/
-
-
 class AIEngine {
 
 
 constructor(){
 
+this.version="V70.TEST";
 
-this.version = "V70.2";
+this.dlt=[];
 
-this.dlt = [];
-
-this.agents = {};
-
-this.memory = [];
-
+this.agents={};
 
 }
 
 
 
-
-
-
-
-// ======================
-// 初始化
-// ======================
-
 async init(){
 
 
-try{
-
-
 await this.loadData();
-
-
-this.loadAgents();
-
-
-console.log(
-"V70.2初始化完成"
-);
 
 
 return true;
@@ -60,65 +24,36 @@ return true;
 
 }
 
-catch(e){
 
-
-console.log(
-"初始化错误:",
-e
-);
-
-
-throw e;
-
-
-}
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================
-// 加载数据
-// ======================
 
 
 async loadData(){
 
 
-
-let url =
-"data/dlt.txt?t=" + Date.now();
+try{
 
 
-
-let res =
-await fetch(url);
+let res=await fetch(
+"data/dlt.txt?t="+Date.now()
+);
 
 
 
 if(!res.ok){
 
-
 throw new Error(
-"大乐透数据文件加载失败"
+"dlt.txt读取失败"
 );
-
 
 }
 
 
 
-let text =
-await res.text();
+let text=await res.text();
 
+
+
+let lines=text.trim().split(/\n+/);
 
 
 
@@ -126,37 +61,17 @@ this.dlt=[];
 
 
 
-
-let lines =
-text.trim().split(/\n+/);
-
-
-
-
-
 lines.forEach(line=>{
 
 
-
-let arr =
-line.trim().split(/\s+/);
+let arr=line.trim().split(/\s+/);
 
 
 
-
-if(arr.length>=9){
-
+if(arr.length>=8){
 
 
 this.dlt.push({
-
-
-
-issue:arr[0],
-
-
-date:arr[1],
-
 
 
 front:[
@@ -170,7 +85,6 @@ arr[6]
 ],
 
 
-
 back:[
 
 arr[7],
@@ -179,9 +93,7 @@ arr[8]
 ]
 
 
-
 });
-
 
 
 }
@@ -189,367 +101,56 @@ arr[8]
 
 
 });
-
-
-
-
-
-
-if(this.dlt.length===0){
-
-
-throw new Error(
-"大乐透数据为空"
-);
-
-
-}
 
 
 
 console.log(
-"加载大乐透:",
+"数据数量:",
 this.dlt.length
 );
 
 
 
+}catch(e){
+
+
+console.log(
+"数据错误:",
+e
+);
+
+
+
+throw e;
+
+
 }
 
 
 
+}
 
 
 
-
-
-
-// ======================
-// 加载Agent
-// ======================
 
 
 loadAgents(){
 
 
 
-this.agents={};
-
-
-
-
-
-if(window.MasterAgent){
-
-
-this.agents.master =
-window.MasterAgent;
+return true;
 
 
 }
 
 
 
-
-
-if(window.TrendAgent){
-
-
-this.agents.trend =
-window.TrendAgent;
-
-
-}
-
-
-
-
-
-if(window.StructureAgent){
-
-
-this.agents.structure =
-window.StructureAgent;
-
-
-}
-
-
-
-
-
-if(window.MarkovAgent){
-
-
-this.agents.markov =
-window.MarkovAgent;
-
-
-}
-
-
-
-
-
-if(window.RiskAgent){
-
-
-this.agents.risk =
-window.RiskAgent;
-
-
-}
-
-
-
-
-
-if(window.ReviewAgent){
-
-
-this.agents.review =
-window.ReviewAgent;
-
-
-}
-
-
-
-
-
-console.log(
-"加载模型:",
-Object.keys(this.agents)
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================
-// AI分析
-// ======================
-
-
-async analyze(){
-
-
-
-let result = {
-
-
-version:this.version,
-
-
-history:this.dlt.length,
-
-
-models:{},
-
-
-decision:{}
-
-
-};
-
-
-
-
-
-
-// Trend
-
-
-if(this.agents.trend){
-
-
-
-result.models.trend =
-
-this.agents.trend.analyze(
-this.dlt
-);
-
-
-
-}
-
-
-
-
-
-
-
-// Structure
-
-
-if(this.agents.structure){
-
-
-
-result.models.structure =
-
-this.agents.structure.analyze(
-this.dlt
-);
-
-
-
-}
-
-
-
-
-
-
-
-// Markov
-
-
-if(this.agents.markov){
-
-
-
-result.models.markov =
-
-this.agents.markov.analyze(
-this.dlt
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-// Master
-
-
-if(this.agents.master){
-
-
-
-result.decision =
-
-this.agents.master.analyze({
-
-
-history:this.dlt.length,
-
-
-models:result.models
-
-
-});
-
-
-
-}
-
-else{
-
-
-result.decision={
-
-
-strategy:"Master AI未加载"
-
-
-};
-
-
-}
-
-
-
-
-
-
-result.time =
-new Date().toLocaleString();
-
-
-
-
-
-
-this.saveMemory(result);
-
-
-
-return result;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================
-// 保存记忆
-// ======================
-
-
-saveMemory(data){
-
-
-
-this.memory.push(data);
-
-
-
-localStorage.setItem(
-
-"v70_memory",
-
-JSON.stringify(
-this.memory
-)
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================
-// 状态
-// ======================
 
 
 status(){
 
 
-
 return {
-
 
 
 version:this.version,
@@ -558,16 +159,11 @@ version:this.version,
 data:this.dlt.length,
 
 
-agents:Object.keys(
-this.agents
-)
-
-
+agents:[]
 
 };
 
 
-
 }
 
 
@@ -578,5 +174,4 @@ this.agents
 
 
 
-window.AIEngine =
-new AIEngine();
+window.AIEngine=new AIEngine();
