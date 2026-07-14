@@ -1,6 +1,6 @@
 // ======================================
-// 彩票智能分析系统 V33.0
-// 智能学习引擎
+// 彩票智能分析系统 V34.0
+// 真实反馈学习系统
 // Part 1
 // ======================================
 
@@ -9,26 +9,31 @@ async function startAnalysis(){
 
 
 const result=document.getElementById("result");
+
 const status=document.getElementById("modelStatus");
+
 const learning=document.getElementById("learningStatus");
+
 const count=document.getElementById("dataCount");
 
 
 
-result.innerHTML="V33.0智能学习启动...";
+result.innerHTML="V34.0反馈学习启动...";
 
 
 
 try{
 
 
-const res=await fetch("data/dlt_raw.txt?v=3300");
+const res=await fetch(
+"data/dlt_raw.txt?v=3400"
+);
 
 
 
 if(!res.ok){
 
-throw new Error("数据读取失败");
+throw new Error("大乐透数据读取失败");
 
 }
 
@@ -53,7 +58,11 @@ if(nums && nums.length>=7){
 
 
 
-let arr=nums.map(n=>n.padStart(2,"0"));
+let arr=nums.map(
+
+n=>n.padStart(2,"0")
+
+);
 
 
 
@@ -82,20 +91,54 @@ count.innerHTML=data.length+"期";
 
 
 
+
 // ================================
-// 学习记录读取
+// 读取学习数据库
 // ================================
 
 
-let learningData={
+let memory={
+
 
 runs:0,
 
-bestModel:"",
+predictions:[],
 
-weights:{}
+models:{
+
+
+freq:0,
+
+trend:0,
+
+structure:0,
+
+fusion:0
+
+
+},
+
+weights:{
+
+
+freq:0.20,
+
+trend:0.25,
+
+miss:0.15,
+
+markov:0.20,
+
+structure:0.20
+
+
+}
+
 
 };
+
+
+
 
 
 
@@ -103,14 +146,18 @@ try{
 
 
 let old=localStorage.getItem(
-"V33_learning"
+
+"V34_memory"
+
 );
 
 
 
 if(old){
 
-learningData=JSON.parse(old);
+
+memory=JSON.parse(old);
+
 
 }
 
@@ -121,7 +168,9 @@ learningData=JSON.parse(old);
 
 
 
-learningData.runs++;
+
+memory.runs++;
+
 
 
 
@@ -146,6 +195,7 @@ for(let i=1;i<=35;i++){
 
 
 let n=String(i).padStart(2,"0");
+
 
 
 freq[n]=0;
@@ -182,7 +232,6 @@ freq[n]++;
 
 
 
-
 data.slice(-300).forEach(d=>{
 
 
@@ -203,8 +252,8 @@ trend[n]++;
 
 
 
-
 for(let i=data.length-1;i>=0;i--){
+
 
 
 data[i].front.forEach(n=>{
@@ -228,12 +277,13 @@ miss[n]=data.length-i;
 
 
 
+
 // ================================
 // 位置马尔可夫
 // ================================
 
 
-let positionMarkov={};
+let markov={};
 
 
 
@@ -245,29 +295,29 @@ for(let p=0;p<5;p++){
 
 
 
-let now=data[i].front[p];
+let a=data[i].front[p];
 
-let next=data[i+1].front[p];
-
-
-
-if(!positionMarkov[now]){
-
-positionMarkov[now]={};
-
-}
+let b=data[i+1].front[p];
 
 
 
-if(!positionMarkov[now][next]){
+if(!markov[a]){
 
-positionMarkov[now][next]=0;
+markov[a]={};
 
 }
 
 
 
-positionMarkov[now][next]++;
+if(!markov[a][b]){
+
+markov[a][b]=0;
+
+}
+
+
+
+markov[a][b]++;
 
 
 }
@@ -281,25 +331,28 @@ positionMarkov[now][next]++;
 
 
 
-let markov={};
+let markovScore={};
 
 
 
 for(let n in freq){
 
 
+
 let total=0;
 
 
 
-if(positionMarkov[n]){
+if(markov[n]){
 
 
-Object.values(positionMarkov[n])
+Object.values(markov[n])
 
 .forEach(v=>{
 
+
 total+=v;
+
 
 });
 
@@ -308,7 +361,7 @@ total+=v;
 
 
 
-markov[n]=total;
+markovScore[n]=total;
 
 
 }
@@ -319,44 +372,10 @@ markov[n]=total;
 
 
 
+
 // ================================
-// 动态权重
+// 综合评分
 // ================================
-
-
-let weights={
-
-
-
-freq:0.20,
-
-trend:0.25,
-
-miss:0.15,
-
-markov:0.20,
-
-structure:0.20
-
-
-};
-
-
-
-
-
-
-if(learningData.weights.freq){
-
-
-weights=learningData.weights;
-
-
-}
-
-
-
-
 
 
 let score={};
@@ -369,31 +388,50 @@ for(let n in freq){
 
 let structure=
 
-(
-parseInt(n)%2===1
-)?0.6:0.4;
+parseInt(n)%2===1?
+
+0.6:0.4;
 
 
 
 score[n]=
 
-(freq[n]/data.length)*weights.freq
+
+(freq[n]/data.length)
+
+*memory.weights.freq
+
+
 
 +
 
-(trend[n]/300)*weights.trend
+(trend[n]/300)
+
+*memory.weights.trend
+
+
 
 +
 
-(Math.min(miss[n],50)/50)*weights.miss
+(Math.min(miss[n],50)/50)
+
+*memory.weights.miss
+
+
 
 +
 
-(Math.min(markov[n],300)/300)*weights.markov
+(Math.min(markovScore[n],300)/300)
+
+*memory.weights.markov
+
+
 
 +
 
-structure*weights.structure;
+structure
+
+*memory.weights.structure;
 
 
 
@@ -407,18 +445,21 @@ let pool=
 
 Object.keys(score)
 
-.sort((a,b)=>score[b]-score[a])
+.sort(
+
+(a,b)=>score[b]-score[a]
+
+)
 
 .slice(0,40);
 
 
 
-// ===== V33 PART 1 END =====
+// ===== V34 PART 1 END =====
 // ======================================
-// V33.0 Part 2
-// 复盘 + 权重保存 + 组合生成 + 输出
+// V34.0 Part 2
+// 组合生成 + 预测保存 + 反馈学习 + 输出
 // ======================================
-
 
 
 // ================================
@@ -426,7 +467,7 @@ Object.keys(score)
 // ================================
 
 
-function check(nums){
+function valid(nums){
 
 
 let odd=nums.filter(
@@ -445,11 +486,11 @@ return false;
 
 
 
-let z1=0;
+let low=0;
 
-let z2=0;
+let mid=0;
 
-let z3=0;
+let high=0;
 
 
 
@@ -462,15 +503,15 @@ let x=parseInt(n);
 
 if(x<=12){
 
-z1++;
+low++;
 
 }else if(x<=24){
 
-z2++;
+mid++;
 
 }else{
 
-z3++;
+high++;
 
 }
 
@@ -479,7 +520,7 @@ z3++;
 
 
 
-if(z1===0||z2===0||z3===0){
+if(low===0||mid===0||high===0){
 
 return false;
 
@@ -515,9 +556,8 @@ return true;
 
 
 
-
 // ================================
-// 组合生成
+// 蒙特卡罗组合
 // ================================
 
 
@@ -564,18 +604,18 @@ arr.sort(
 
 
 
-if(check(arr)){
+if(valid(arr)){
 
 
 
-let s=0;
+let total=0;
 
 
 
 arr.forEach(n=>{
 
 
-s+=score[n];
+total+=score[n];
 
 
 });
@@ -586,7 +626,8 @@ combinations.push({
 
 front:arr,
 
-score:s
+score:total
+
 
 });
 
@@ -595,6 +636,7 @@ score:s
 
 
 }
+
 
 
 
@@ -611,7 +653,7 @@ combinations.sort(
 
 
 // ================================
-// 三方案
+// 三方案差异化
 // ================================
 
 
@@ -619,46 +661,47 @@ let plans=[];
 
 
 
-for(let c of combinations){
+for(let item of combinations){
 
 
 
-let same=false;
+let duplicate=false;
 
 
 
-for(let p of plans){
+for(let old of plans){
 
 
-let count=c.front.filter(
 
-x=>p.front.includes(x)
+let same=item.front.filter(
+
+x=>old.front.includes(x)
 
 ).length;
 
 
 
-if(count>=3){
+if(same>=3){
 
-same=true;
-
-}
-
-
+duplicate=true;
 
 }
 
 
 
-if(!same){
+}
 
-plans.push(c);
+
+
+if(!duplicate){
+
+plans.push(item);
 
 }
 
 
 
-if(plans.length>=3){
+if(plans.length===3){
 
 break;
 
@@ -672,9 +715,8 @@ break;
 
 
 
-
 // ================================
-// 后区学习模型
+// 后区模型
 // ================================
 
 
@@ -713,6 +755,7 @@ backFreq[n]++;
 
 
 
+
 let backPool=
 
 Object.keys(backFreq)
@@ -728,9 +771,61 @@ Object.keys(backFreq)
 
 
 
+// ================================
+// 保存预测记录
+// ================================
+
+
+let record={
+
+
+time:new Date().toLocaleString(),
+
+
+plans:plans.map(
+
+p=>p.front.join(" ")
+
+),
+
+
+back:
+
+
+backPool.slice(0,6)
+
+
+
+};
+
+
+
+
+
+memory.predictions.push(record);
+
+
+
+
+
+
+// 只保存最近100次
+
+if(memory.predictions.length>100){
+
+memory.predictions.shift();
+
+}
+
+
+
+
+
+
+
 
 // ================================
-// 滚动回测
+// 简单反馈学习
 // ================================
 
 
@@ -749,11 +844,11 @@ let test=data.slice(-500);
 test.forEach(d=>{
 
 
-let p=pool.slice(0,5);
+let predict=pool.slice(0,5);
 
 
 
-let hit=p.filter(
+let hit=predict.filter(
 
 x=>d.front.includes(x)
 
@@ -789,32 +884,32 @@ hit5++;
 
 
 
-
-// ================================
-// 学习反馈
-// ================================
+// 根据表现调整权重
 
 
 if(hit3>5){
 
 
-weights.trend+=0.02;
+memory.weights.trend+=0.02;
 
-weights.markov+=0.02;
+memory.weights.markov+=0.01;
+
+
+memory.models.fusion++;
+
+
+}else{
+
+
+memory.weights.freq+=0.01;
+
+
+memory.models.freq++;
 
 
 }
 
 
-if(hit3<3){
-
-
-weights.freq+=0.02;
-
-weights.structure-=0.02;
-
-
-}
 
 
 
@@ -823,26 +918,26 @@ weights.structure-=0.02;
 // 权重归一化
 
 
-let totalWeight=
+let total=
 
-weights.freq+
+memory.weights.freq+
 
-weights.trend+
+memory.weights.trend+
 
-weights.miss+
+memory.weights.miss+
 
-weights.markov+
+memory.weights.markov+
 
-weights.structure;
-
-
-
-for(let k in weights){
+memory.weights.structure;
 
 
-weights[k]=
 
-weights[k]/totalWeight;
+for(let k in memory.weights){
+
+
+memory.weights[k]=
+
+memory.weights[k]/total;
 
 
 }
@@ -851,28 +946,15 @@ weights[k]/totalWeight;
 
 
 
-learningData.weights=weights;
-
-
-
-learningData.bestModel=
-
-hit3>5?
-
-"融合趋势模型":
-
-"融合模型";
-
 
 
 localStorage.setItem(
 
-"V33_learning",
+"V34_memory",
 
-JSON.stringify(learningData)
+JSON.stringify(memory)
 
 );
-
 
 
 
@@ -888,7 +970,7 @@ let html="";
 
 
 
-html+="<h3>彩票智能分析系统 V33.0</h3>";
+html+="<h3>彩票智能分析系统 V34.0</h3>";
 
 html+="数据期数："+data.length+"期<br><br>";
 
@@ -914,9 +996,9 @@ html+=backPool[i*2]+" "+backPool[i*2+1];
 
 html+="<br>";
 
-html+="综合评分："+
+html+="评分：";
 
-(p.score*100).toFixed(2);
+html+=(p.score*100).toFixed(2);
 
 
 html+="<br><br>";
@@ -927,7 +1009,7 @@ html+="<br><br>";
 
 
 
-html+="500期滚动回测<br>";
+html+="500期学习回测<br>";
 
 html+="3+0："+hit3+"次<br>";
 
@@ -937,13 +1019,15 @@ html+="5+0："+hit5+"次<br><br>";
 
 
 
-html+="学习次数："+learningData.runs+"次<br>";
+html+="预测记录："+memory.predictions.length+"次<br>";
 
-html+="最佳模型："+learningData.bestModel+"<br>";
+html+="学习次数："+memory.runs+"次<br>";
 
-html+="权重已保存<br>";
+html+="融合模型次数："+memory.models.fusion+"<br>";
 
-html+="模型状态：V33.0运行完成";
+html+="权重反馈：开启<br>";
+
+html+="模型状态：V34.0运行完成";
 
 
 
@@ -953,14 +1037,17 @@ result.innerHTML=html;
 
 learning.innerHTML=
 
-"训练次数："+learningData.runs+
+"学习次数："+memory.runs+
 "<br>"+
-"最佳模型："+learningData.bestModel+
-"<br>权重学习：开启";
+"预测记录："+memory.predictions.length+
+"<br>"+
+"反馈学习：开启";
 
 
 
-status.innerHTML="V33.0 FINAL运行成功";
+status.innerHTML=
+
+"V34.0 FINAL运行成功";
 
 
 
@@ -971,14 +1058,17 @@ status.innerHTML="V33.0 FINAL运行成功";
 catch(e){
 
 
-result.innerHTML="错误："+e.message;
+result.innerHTML=
+
+"错误："+e.message;
 
 
-status.innerHTML="运行失败";
+status.innerHTML=
+
+"运行失败";
 
 
 }
-
 
 
 }
