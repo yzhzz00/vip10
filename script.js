@@ -5,23 +5,24 @@ const status=document.getElementById("modelStatus");
 const count=document.getElementById("dataCount");
 
 
-result.innerHTML="V30.3模型启动中...";
+result.innerHTML="V30.4模型计算中...";
 
 
 try{
 
 
-const response=await fetch("data/dlt_raw.txt?v=3031");
+const res=await fetch("data/dlt_raw.txt?v=3040");
 
 
-if(!response.ok){
+if(!res.ok){
 
-throw new Error("无法读取dlt_raw.txt");
+throw new Error("数据读取失败");
 
 }
 
 
-const text=await response.text();
+const text=await res.text();
+
 
 
 let data=[];
@@ -35,7 +36,7 @@ let nums=line.match(/\d+/g);
 
 
 
-if(nums && nums.length>=7){
+if(nums&&nums.length>=7){
 
 
 let arr=nums.map(n=>n.padStart(2,"0"));
@@ -58,36 +59,34 @@ back:arr.slice(5,7)
 
 
 
-if(data.length===0){
-
-throw new Error("数据为空");
-
-}
-
-
-
 count.innerHTML=data.length+"期";
 
 
 
-
-// =====================
-// 前区频率
-// =====================
+//=========================
+// 基础统计
+//=========================
 
 
 let freq={};
 
+let recent={};
+
 
 for(let i=1;i<=35;i++){
 
-freq[String(i).padStart(2,"0")]=0;
+let n=String(i).padStart(2,"0");
+
+freq[n]=0;
+
+recent[n]=0;
 
 }
 
 
 
-data.forEach(d=>{
+
+data.forEach((d,index)=>{
 
 
 d.front.forEach(n=>{
@@ -96,42 +95,130 @@ d.front.forEach(n=>{
 freq[n]++;
 
 
-});
+if(index>data.length-200){
+
+recent[n]++;
+
+}
 
 
 });
 
 
-
-
-
-// =====================
-// 候选号码
-// =====================
-
-
-let pool=Object.keys(freq).sort(
-
-(a,b)=>freq[b]-freq[a]
-
-);
+});
 
 
 
 
 
+//=========================
+// 遗漏
+//=========================
 
-// =====================
-// 结构检测
-// =====================
+
+let miss={};
 
 
-function valid(nums){
+for(let n in freq){
+
+miss[n]=data.length;
+
+}
+
+
+
+for(let i=data.length-1;i>=0;i--){
+
+
+data[i].front.forEach(n=>{
+
+
+if(miss[n]===data.length){
+
+miss[n]=data.length-i;
+
+
+}
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+//=========================
+// 综合评分
+//=========================
+
+
+let score={};
+
+
+
+for(let n in freq){
+
+
+
+let f=freq[n]/data.length*100;
+
+
+let t=recent[n]/200*100;
+
+
+let m=Math.min(miss[n],50)/50*100;
+
+
+
+let s=f*0.2
+
++t*0.2
+
++m*0.15;
+
+
+
+score[n]=s;
+
+
+}
+
+
+
+
+
+
+
+let pool=
+
+Object.keys(score)
+
+.sort((a,b)=>score[b]-score[a])
+
+.slice(0,40);
+
+
+
+
+
+
+//=========================
+// 结构过滤
+//=========================
+
+
+function check(nums){
+
 
 
 let odd=nums.filter(
 
-n=>parseInt(n)%2===1
+x=>parseInt(x)%2===1
 
 ).length;
 
@@ -146,8 +233,7 @@ return false;
 
 
 
-
-let a=0,b=0,c=0;
+let z1=0,z2=0,z3=0;
 
 
 
@@ -160,15 +246,15 @@ let x=parseInt(n);
 
 if(x<=12){
 
-a++;
+z1++;
 
 }else if(x<=24){
 
-b++;
+z2++;
 
 }else{
 
-c++;
+z3++;
 
 }
 
@@ -177,7 +263,7 @@ c++;
 
 
 
-if(a===0||b===0||c===0){
+if(z1===0||z2===0||z3===0){
 
 return false;
 
@@ -185,10 +271,9 @@ return false;
 
 
 
-
 let sum=nums.reduce(
 
-(s,n)=>s+parseInt(n),
+(a,b)=>a+parseInt(b),
 
 0
 
@@ -205,11 +290,13 @@ return false;
 
 
 
+
 let serial=0;
 
 
 
-for(let i=0;i<nums.length-1;i++){
+for(let i=0;i<4;i++){
+
 
 
 if(parseInt(nums[i+1])-parseInt(nums[i])===1){
@@ -242,25 +329,28 @@ return true;
 
 
 
-// =====================
-// 随机组合
-// =====================
+
+//=========================
+// 蒙特卡罗组合
+//=========================
 
 
-let resultPool=[];
-
-
-
-for(let i=0;i<100000;i++){
-
-
-let temp=[...pool.slice(0,30)];
-
-let nums=[];
+let combinations=[];
 
 
 
-while(nums.length<5){
+for(let i=0;i<80000;i++){
+
+
+
+let temp=[...pool];
+
+let arr=[];
+
+
+
+while(arr.length<5){
+
 
 
 let index=Math.floor(
@@ -271,7 +361,7 @@ Math.random()*temp.length
 
 
 
-nums.push(temp[index]);
+arr.push(temp[index]);
 
 temp.splice(index,1);
 
@@ -280,7 +370,7 @@ temp.splice(index,1);
 
 
 
-nums.sort(
+arr.sort(
 
 (a,b)=>parseInt(a)-parseInt(b)
 
@@ -288,29 +378,28 @@ nums.sort(
 
 
 
-if(valid(nums)){
+if(check(arr)){
+
+
+let sc=0;
 
 
 
-let score=0;
+arr.forEach(n=>{
 
 
-
-nums.forEach(n=>{
-
-
-score+=freq[n];
+sc+=score[n];
 
 
 });
 
 
 
-resultPool.push({
+combinations.push({
 
-front:nums,
+front:arr,
 
-score:score
+score:sc
 
 });
 
@@ -318,14 +407,12 @@ score:score
 }
 
 
-
 }
 
 
 
 
-
-resultPool.sort(
+combinations.sort(
 
 (a,b)=>b.score-a.score
 
@@ -336,27 +423,28 @@ resultPool.sort(
 
 
 
-// =====================
-// 三方案
-// =====================
+//=========================
+// 差异化方案
+//=========================
 
 
 let plans=[];
 
 
 
-for(let r of resultPool){
+for(let c of combinations){
 
 
-
-let repeat=false;
+let same=false;
 
 
 
 for(let p of plans){
 
 
-let same=r.front.filter(
+let count=
+
+c.front.filter(
 
 x=>p.front.includes(x)
 
@@ -364,20 +452,20 @@ x=>p.front.includes(x)
 
 
 
-if(same>=3){
+if(count>2){
 
-repeat=true;
-
-}
-
+same=true;
 
 }
 
 
+}
 
-if(!repeat){
 
-plans.push(r);
+
+if(!same){
+
+plans.push(c);
 
 }
 
@@ -397,9 +485,10 @@ break;
 
 
 
-// =====================
-// 后区
-// =====================
+
+//=========================
+// 后区评分
+//=========================
 
 
 let back={};
@@ -420,7 +509,7 @@ data.forEach(d=>{
 d.back.forEach(n=>{
 
 
-if(back[n]!==undefined){
+if(back[n]!=undefined){
 
 back[n]++;
 
@@ -434,7 +523,9 @@ back[n]++;
 
 
 
-let backPool=Object.keys(back).sort(
+let backPool=
+
+Object.keys(back).sort(
 
 (a,b)=>back[b]-back[a]
 
@@ -445,20 +536,16 @@ let backPool=Object.keys(back).sort(
 
 
 
-// =====================
+//=========================
 // 回测
-// =====================
+//=========================
 
 
-let hit={
+let hit3=0;
 
-three:0,
+let hit4=0;
 
-four:0,
-
-five:0
-
-};
+let hit5=0;
 
 
 
@@ -469,37 +556,22 @@ let test=data.slice(-500);
 test.forEach(d=>{
 
 
-let predict=pool.slice(0,5);
+let p=pool.slice(0,5);
 
 
+let h=p.filter(
 
-let h=predict.filter(
-
-x=>d.front.includes(x)
+n=>d.front.includes(n)
 
 ).length;
 
 
 
-if(h>=3){
+if(h>=3)hit3++;
 
-hit.three++;
+if(h>=4)hit4++;
 
-}
-
-
-if(h>=4){
-
-hit.four++;
-
-}
-
-
-if(h===5){
-
-hit.five++;
-
-}
+if(h===5)hit5++;
 
 
 });
@@ -510,15 +582,16 @@ hit.five++;
 
 
 
-// =====================
+//=========================
 // 输出
-// =====================
+//=========================
 
 
 let html="";
 
 
-html+="<h3>彩票智能分析系统 V30.3</h3>";
+
+html+="<h3>彩票智能分析系统 V30.4</h3>";
 
 html+="数据期数："+data.length+"期<br><br>";
 
@@ -535,19 +608,18 @@ html+="方案"+(i+1)+"：";
 
 html+=p.front.join(" ");
 
-
 html+=" + ";
-
 
 html+=backPool[i*2]+" "+backPool[i*2+1];
 
-
 html+="<br>";
 
-html+="评分："+(p.score/10).toFixed(1);
+html+="综合评分：";
 
+html+=(p.score).toFixed(1);
 
-html+="分<br><br>";
+html+="<br><br>";
+
 
 
 });
@@ -556,42 +628,37 @@ html+="分<br><br>";
 
 html+="500期滚动回测<br>";
 
-html+="3+0："+hit.three+"次<br>";
+html+="3+0："+hit3+"次<br>";
 
-html+="4+0："+hit.four+"次<br>";
+html+="4+0："+hit4+"次<br>";
 
-html+="5+0："+hit.five+"次<br><br>";
+html+="5+0："+hit5+"次<br><br>";
 
 
 
-html+="后区范围过滤：开启<br>";
-
-html+="结构过滤：开启<br>";
-
-html+="模型状态：V30.3运行完成";
+html+="模型状态：V30.4运行完成";
 
 
 
 result.innerHTML=html;
 
 
-status.innerHTML="V30.3 FINAL运行成功";
+status.innerHTML="V30.4 FINAL运行成功";
 
 
 }
 
 
+catch(e){
 
-catch(error){
 
-
-result.innerHTML="错误："+error.message;
-
+result.innerHTML="错误："+e.message;
 
 status.innerHTML="运行失败";
 
 
 }
+
 
 
 }
