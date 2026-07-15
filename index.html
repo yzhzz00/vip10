@@ -8,25 +8,21 @@
 <meta charset="UTF-8">
 
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
 <title>
-大乐透智能分析系统 V71.1
+大乐透智能分析系统 V71.2
 </title>
 
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=712">
 
 
 </head>
 
 
-
-
-
 <body>
-
 
 
 <div class="container">
@@ -39,7 +35,7 @@
 
 
 <h2>
-V71.1 AI CORE
+V71.2 AI CORE
 </h2>
 
 
@@ -69,7 +65,6 @@ V71.1 AI CORE
 
 
 
-
 <div class="card">
 
 
@@ -78,13 +73,11 @@ AI智能分析中心
 </h3>
 
 
-
 <button onclick="startAI()">
 
-开始 V71 AI分析
+开始 V71.2 AI分析
 
 </button>
-
 
 
 </div>
@@ -99,7 +92,7 @@ AI智能分析中心
 
 
 <h3>
-AI多模型会议报告
+AI多维分析报告
 </h3>
 
 
@@ -152,9 +145,8 @@ AI多模型会议报告
 
 
 <h3>
-V71 AI Agent模型
+V71.2 AI Agent模型
 </h3>
-
 
 
 <div id="agents">
@@ -164,14 +156,6 @@ V71 AI Agent模型
 </div>
 
 
-
-</div>
-
-
-
-
-
-
 </div>
 
 
@@ -180,81 +164,91 @@ V71 AI Agent模型
 
 
 
-
-
-<!-- Engine -->
-
-<script src="engine/frequencyEngine.js"></script>
-
-<script src="engine/monteCarloEngine.js"></script>
-
-
-
-
-
-<!-- Agents -->
-
-<script src="agents/trendAgent.js"></script>
-
-<script src="agents/structureAgent.js"></script>
-
-<script src="agents/markovAgent.js"></script>
-
-<script src="agents/riskAgent.js"></script>
-
-<script src="agents/reviewAgent.js"></script>
-
-<script src="agents/theoryAgent.js"></script>
-
-<script src="agents/confidenceAgent.js"></script>
-
-<script src="agents/criticAgent.js"></script>
-
-<script src="agents/masterAgent.js"></script>
+</div>
 
 
 
 
 
 
-<!-- Core -->
-
-
-<script src="engine.js"></script>
 
 
 
-<!-- UI -->
+<!-- =====================
+     Engine
+===================== -->
 
 
-<script src="script.js"></script>
+<script src="engine/frequencyEngine.js?v=712"></script>
 
 
-
-
-
-<script>
-
-
-function saveFeedback(){
-
-
-document.getElementById(
-"feedback"
-).innerHTML=
-
-"开奖反馈已保存";
-
-
-}
+<script src="engine/monteCarloEngine.js?v=712"></script>
 
 
 
-</script>
+
+
+
+
+<!-- =====================
+     Agents
+===================== -->
+
+
+<script src="agents/trendAgent.js?v=712"></script>
+
+
+<script src="agents/structureAgent.js?v=712"></script>
+
+
+<script src="agents/markovAgent.js?v=712"></script>
+
+
+<script src="agents/riskAgent.js?v=712"></script>
+
+
+<script src="agents/reviewAgent.js?v=712"></script>
+
+
+<script src="agents/theoryAgent.js?v=712"></script>
+
+
+<script src="agents/confidenceAgent.js?v=712"></script>
+
+
+<script src="agents/criticAgent.js?v=712"></script>
+
+
+<script src="agents/masterAgent.js?v=712"></script>
+
+
+
+
+
+
+
+<!-- =====================
+     Core
+===================== -->
+
+
+<script src="engine.js?v=712"></script>
+
+
+
+
+
+
+
+<!-- =====================
+     UI
+===================== -->
+
+
+<script src="script.js?v=712"></script>
 
 
 
 </body>
-
 
 </html>

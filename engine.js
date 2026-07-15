@@ -1,5 +1,5 @@
 /*
-====================================
+================================
 
 大乐透智能分析系统
 
@@ -9,12 +9,11 @@ engine.js
 
 核心控制引擎
 
-====================================
+================================
 */
 
 
 class AIEngine {
-
 
 
 constructor(){
@@ -27,7 +26,6 @@ constructor(){
 
 
     this.ready=false;
-
 
 
     this.agents={};
@@ -56,29 +54,13 @@ async init(){
 
 
 
-    console.log(
-
-        "AIEngine init"
-
-    );
-
-
-
-
-
     this.loadAgents();
-
 
 
     this.loadEngines();
 
 
-
-
-
     await this.loadData();
-
-
 
 
 
@@ -112,15 +94,12 @@ loadEngines(){
     if(window.FrequencyEngine){
 
 
-
         this.engines.frequency=
 
-        FrequencyEngine;
-
+        window.FrequencyEngine;
 
 
     }
-
 
 
 
@@ -129,11 +108,9 @@ loadEngines(){
     if(window.MonteCarloEngine){
 
 
-
         this.engines.montecarlo=
 
-        MonteCarloEngine;
-
+        window.MonteCarloEngine;
 
 
     }
@@ -151,7 +128,7 @@ loadEngines(){
 
 
 // ============================
-// 加载AI Agent
+// 加载Agent
 // ============================
 
 
@@ -159,91 +136,66 @@ loadAgents(){
 
 
 
-    if(window.MasterAgent)
-
-    this.agents.master=
-
-    MasterAgent;
+    let list={
 
 
 
+        master:"MasterAgent",
 
 
-    if(window.TrendAgent)
-
-    this.agents.trend=
-
-    TrendAgent;
+        trend:"TrendAgent",
 
 
+        structure:"StructureAgent",
+
+
+        markov:"MarkovAgent",
+
+
+        risk:"RiskAgent",
+
+
+        review:"ReviewAgent",
+
+
+        theory:"TheoryAgent",
+
+
+        confidence:"ConfidenceAgent",
+
+
+        critic:"CriticAgent"
 
 
 
-    if(window.StructureAgent)
-
-    this.agents.structure=
-
-    StructureAgent;
-
-
-
-
-
-    if(window.MarkovAgent)
-
-    this.agents.markov=
-
-    MarkovAgent;
+    };
 
 
 
 
 
-    if(window.RiskAgent)
-
-    this.agents.risk=
-
-    RiskAgent;
 
 
+    Object.keys(list)
+
+    .forEach(key=>{
 
 
 
-    if(window.ReviewAgent)
-
-    this.agents.review=
-
-    ReviewAgent;
+        if(window[list[key]]){
 
 
+            this.agents[key]=
 
-
-
-    if(window.TheoryAgent)
-
-    this.agents.theory=
-
-    TheoryAgent;
+            window[list[key]];
 
 
 
-
-
-    if(window.ConfidenceAgent)
-
-    this.agents.confidence=
-
-    ConfidenceAgent;
+        }
 
 
 
-
-
-    if(window.CriticAgent)
-
-    this.agents.critic=
-
-    CriticAgent;
+    });
 
 
 
@@ -258,7 +210,7 @@ loadAgents(){
 
 
 // ============================
-// 加载历史数据
+// 读取数据
 // ============================
 
 
@@ -270,11 +222,11 @@ async loadData(){
 
 
 
-        let res=
+        let response=
 
         await fetch(
 
-        "data/dlt.txt"
+            "data/dlt.txt"
 
         );
 
@@ -284,7 +236,7 @@ async loadData(){
 
         let text=
 
-        await res.text();
+        await response.text();
 
 
 
@@ -304,9 +256,9 @@ async loadData(){
 
         console.log(
 
-        "数据读取失败",
+            "数据读取失败",
 
-        e
+            e
 
         );
 
@@ -327,7 +279,9 @@ async loadData(){
 
 
 // ============================
-// 大乐透数据解析
+// 数据解析
+// 格式:
+// 07001 日期 22 24 29 31 35 04 11
 // ============================
 
 
@@ -335,13 +289,13 @@ parseData(text){
 
 
 
+    this.dlt=[];
+
+
+
     let lines=
 
     text.split("\n");
-
-
-
-    this.dlt=[];
 
 
 
@@ -362,11 +316,13 @@ parseData(text){
 
 
 
-        if(arr.length>=8){
+        if(arr.length>=9){
 
 
 
-            let front=arr.slice(
+            let front=
+
+            arr.slice(
 
                 2,
 
@@ -380,7 +336,10 @@ parseData(text){
 
 
 
-            let back=arr.slice(
+
+            let back=
+
+            arr.slice(
 
                 7,
 
@@ -394,12 +353,12 @@ parseData(text){
 
 
 
+
             this.dlt.push({
 
 
 
                 front:front,
-
 
 
                 back:back
@@ -417,16 +376,6 @@ parseData(text){
     });
 
 
-
-
-
-    console.log(
-
-        "历史数据",
-
-        this.dlt.length
-
-    );
 
 
 
@@ -466,7 +415,6 @@ async analyze(){
         critic:null
 
 
-
     };
 
 
@@ -476,15 +424,11 @@ async analyze(){
 
 
 
-    // ========================
-    // Trend AI
-    // ========================
-
 
     if(this.agents.trend){
 
 
-        result.models.trend =
+        result.models.trend=
 
         this.agents.trend.analyze(
 
@@ -503,15 +447,10 @@ async analyze(){
 
 
 
-    // ========================
-    // Structure AI
-    // ========================
-
-
     if(this.agents.structure){
 
 
-        result.models.structure =
+        result.models.structure=
 
         this.agents.structure.analyze(
 
@@ -530,15 +469,10 @@ async analyze(){
 
 
 
-    // ========================
-    // Markov AI
-    // ========================
-
-
     if(this.agents.markov){
 
 
-        result.models.markov =
+        result.models.markov=
 
         this.agents.markov.analyze(
 
@@ -557,15 +491,10 @@ async analyze(){
 
 
 
-    // ========================
-    // Risk AI
-    // ========================
-
-
     if(this.agents.risk){
 
 
-        result.models.risk =
+        result.models.risk=
 
         this.agents.risk.analyze(
 
@@ -584,15 +513,10 @@ async analyze(){
 
 
 
-    // ========================
-    // Theory AI
-    // ========================
-
-
     if(this.agents.theory){
 
 
-        result.models.theory =
+        result.models.theory=
 
         this.agents.theory.analyze(
 
@@ -611,15 +535,10 @@ async analyze(){
 
 
 
-    // ========================
-    // Confidence AI
-    // ========================
-
-
     if(this.agents.confidence){
 
 
-        result.models.confidence =
+        result.models.confidence=
 
         this.agents.confidence.analyze(
 
@@ -638,11 +557,6 @@ async analyze(){
 
 
 
-    // ========================
-    // Frequency Engine
-    // ========================
-
-
     if(this.engines.frequency){
 
 
@@ -653,10 +567,10 @@ async analyze(){
         );
 
 
-
-        result.frequency =
+        result.frequency=
 
         this.engines.frequency.status();
+
 
 
     }
@@ -669,15 +583,10 @@ async analyze(){
 
 
 
-    // ========================
-    // Monte Carlo Engine
-    // ========================
-
-
     if(this.engines.montecarlo){
 
 
-        result.simulation =
+        result.simulation=
 
         this.engines.montecarlo.simulate(
 
@@ -696,15 +605,10 @@ async analyze(){
 
 
 
-    // ========================
-    // Master AI
-    // ========================
-
-
     if(this.agents.master){
 
 
-        result.decision =
+        result.decision=
 
         this.agents.master.decide(
 
@@ -723,11 +627,6 @@ async analyze(){
 
 
 
-    // ========================
-    // Critic AI
-    // ========================
-
-
     if(
 
         this.agents.critic
@@ -739,7 +638,7 @@ async analyze(){
     ){
 
 
-        result.critic =
+        result.critic=
 
         this.agents.critic.analyze(
 
@@ -750,38 +649,6 @@ async analyze(){
 
     }
 
-
-
-
-
-
-
-
-
-    // ========================
-    // Review AI记录预测
-    // ========================
-
-
-    if(
-
-        this.agents.review
-
-        &&
-
-        result.decision
-
-    ){
-
-
-        this.agents.review.savePrediction(
-
-            result.decision.decision.recommend
-
-        );
-
-
-    }
 
 
 
@@ -811,11 +678,9 @@ async analyze(){
 saveFeedback(data){
 
 
-    if(
 
-        this.agents.review
+    if(this.agents.review){
 
-    ){
 
 
         return this.agents.review.feedback(
@@ -823,6 +688,7 @@ saveFeedback(data){
             data
 
         );
+
 
 
     }
@@ -844,11 +710,12 @@ saveFeedback(data){
 
 
 // ============================
-// 系统状态
+// 状态
 // ============================
 
 
 status(){
+
 
 
     return {
@@ -881,16 +748,26 @@ status(){
     };
 
 
-}
-// ============================
-// 导出AI核心
-// ============================
-
 
 }
 
 
 
-window.AIEngine =
+}
+
+
+
+
+
+
+
+
+
+// ============================
+// 创建核心实例
+// ============================
+
+
+window.AIEngine=
 
 new AIEngine();

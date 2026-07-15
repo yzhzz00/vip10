@@ -3,9 +3,11 @@
 
 大乐透智能分析系统
 
-V71.1 AI CORE
+V71.2 AI CORE
 
 style.css
+
+手机端控制台界面
 
 ================================
 */
@@ -19,8 +21,6 @@ box-sizing:border-box;
 
 
 
-
-
 body{
 
 
@@ -30,7 +30,7 @@ margin:0;
 padding:0;
 
 
-background:#0b1220;
+background:#050b18;
 
 
 color:#e5e7eb;
@@ -46,10 +46,6 @@ sans-serif;
 
 
 }
-
-
-
-
 
 
 
@@ -74,8 +70,6 @@ padding:15px;
 
 
 
-
-
 h1{
 
 
@@ -88,14 +82,10 @@ font-size:26px;
 color:#38bdf8;
 
 
-margin-bottom:5px;
+margin:10px 0 5px;
 
 
 }
-
-
-
-
 
 
 
@@ -108,15 +98,16 @@ text-align:center;
 font-size:18px;
 
 
+font-weight:normal;
+
+
 color:#94a3b8;
 
 
-margin-top:0;
+margin-bottom:20px;
 
 
 }
-
-
 
 
 
@@ -128,7 +119,7 @@ margin-top:0;
 background:#111827;
 
 
-border-radius:12px;
+border-radius:14px;
 
 
 padding:15px;
@@ -142,14 +133,12 @@ border:1px solid #1e293b;
 
 box-shadow:
 
-0 5px 15px
+0 8px 20px
 
-rgba(0,0,0,0.3);
+rgba(0,0,0,.35);
 
 
 }
-
-
 
 
 
@@ -158,18 +147,16 @@ rgba(0,0,0,0.3);
 .card h3{
 
 
-color:#22c55e;
-
-
 margin-top:0;
 
 
 font-size:18px;
 
 
+color:#22c55e;
+
+
 }
-
-
 
 
 
@@ -181,13 +168,13 @@ button{
 width:100%;
 
 
-padding:14px;
+height:48px;
 
 
-border:none;
+border:0;
 
 
-border-radius:10px;
+border-radius:12px;
 
 
 background:#2563eb;
@@ -202,14 +189,7 @@ font-size:16px;
 font-weight:bold;
 
 
-margin-top:10px;
-
-
 }
-
-
-
-
 
 
 
@@ -225,8 +205,6 @@ background:#1d4ed8;
 
 
 
-
-
 #status{
 
 
@@ -236,131 +214,10 @@ line-height:1.8;
 color:#facc15;
 
 
-}
-
-
-
-
-
-
-
-#report{
-
-
-line-height:1.6;
+font-size:15px;
 
 
 }
-
-
-
-
-
-
-
-.ai-card{
-
-
-background:#0f172a;
-
-
-border-radius:10px;
-
-
-padding:12px;
-
-
-margin-top:12px;
-
-
-border-left:
-
-4px solid #38bdf8;
-
-
-overflow:hidden;
-
-
-}
-
-
-
-
-
-
-
-.ai-card h4{
-
-
-color:#38bdf8;
-
-
-margin:0 0 8px;
-
-
-}
-
-
-
-
-
-
-
-.ai-card h3{
-
-
-color:#f97316;
-
-
-}
-
-
-
-
-
-
-
-pre{
-
-
-white-space:pre-wrap;
-
-
-word-break:break-word;
-
-
-font-size:13px;
-
-
-color:#cbd5e1;
-
-
-}
-
-
-
-
-
-
-
-p{
-
-
-background:#020617;
-
-
-padding:10px;
-
-
-border-radius:8px;
-
-
-line-height:1.8;
-
-
-}
-
-
 
 
 
@@ -384,12 +241,13 @@ gap:8px;
 
 
 
-
-
 .agent{
 
 
-background:#1e293b;
+background:#172554;
+
+
+color:#93c5fd;
 
 
 padding:8px 12px;
@@ -401,13 +259,121 @@ border-radius:20px;
 font-size:13px;
 
 
-color:#93c5fd;
+}
+
+
+
+
+
+.ai-card{
+
+
+background:#0f172a;
+
+
+margin-top:12px;
+
+
+padding:12px;
+
+
+border-radius:10px;
+
+
+border-left:4px solid #38bdf8;
+
+
+overflow:hidden;
 
 
 }
 
 
 
+
+
+.ai-card h4{
+
+
+margin:0 0 10px;
+
+
+color:#38bdf8;
+
+
+}
+
+
+
+
+
+.ai-card h3{
+
+
+color:#fb923c;
+
+
+}
+
+
+
+
+
+pre{
+
+
+white-space:pre-wrap;
+
+
+word-break:break-word;
+
+
+font-size:13px;
+
+
+line-height:1.6;
+
+
+color:#cbd5e1;
+
+
+}
+
+
+
+
+
+p{
+
+
+background:#020617;
+
+
+padding:10px;
+
+
+border-radius:8px;
+
+
+line-height:1.7;
+
+
+}
+
+
+
+
+
+#report{
+
+
+font-size:14px;
+
+
+line-height:1.6;
+
+
+}
 
 
 
@@ -427,6 +393,7 @@ padding:10px;
 
 
 
+
 h1{
 
 
@@ -437,10 +404,21 @@ font-size:22px;
 
 
 
+
 .card{
 
 
 padding:12px;
+
+
+}
+
+
+
+.ai-card{
+
+
+padding:10px;
 
 
 }
