@@ -4,6 +4,9 @@
 
 
 window.DataEngine = {
+alert("DataEngine 已加载");
+
+window.DataEngine = {
 
 
     history: [],
