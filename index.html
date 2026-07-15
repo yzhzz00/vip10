@@ -1,29 +1,25 @@
 <!DOCTYPE html>
-
 <html lang="zh-CN">
-
 
 <head>
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
 <title>
-大乐透智能分析系统 V80.2
+大乐透智能分析系统 V90 AI CORE
 </title>
 
 
 <link rel="stylesheet" href="style.css">
-
 
 </head>
 
 
 
 <body>
-
 
 
 <div class="container">
@@ -35,24 +31,55 @@
 
 
 <h2>
-V80.2 AI CORE
+V90 AI CORE
 </h2>
 
 
 
-
+<!-- 系统状态 -->
 
 <div class="card">
-
 
 <h3>
 系统状态
 </h3>
 
-
 <div id="status">
 
-加载中...
+等待加载...
+
+</div>
+
+</div>
+
+
+
+
+
+<!-- AI进度 -->
+
+<div class="card">
+
+
+<h3>
+AI分析进度
+</h3>
+
+
+<div class="progress-box">
+
+
+<div id="progress-bar">
+
+</div>
+
+
+</div>
+
+
+<div id="progress-text">
+
+等待任务...
 
 </div>
 
@@ -63,6 +90,9 @@ V80.2 AI CORE
 
 
 
+
+
+<!-- 分析中心 -->
 
 
 <div class="card">
@@ -73,31 +103,15 @@ AI智能分析中心
 </h3>
 
 
+<button id="start-btn"
+onclick="startAnalysis()">
 
-<button onclick="startAI()">
-
-开始 V80 AI分析
+开始 V90 AI分析
 
 </button>
 
 
-</div>
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-AI预测结果
-</h3>
-
-
-<div id="report">
+<div id="task-status">
 
 等待分析...
 
@@ -112,34 +126,132 @@ AI预测结果
 
 
 
+
+<!-- 预测报告 -->
+
+
 <div class="card">
 
 
 <h3>
-训练状态
+AI多模型预测报告
 </h3>
 
 
-<div id="training">
+<div id="report">
 
-等待...
-
-</div>
-
+等待生成...
 
 </div>
 
 
+</div>
 
 
 
+
+
+
+
+
+
+<!-- 回测 -->
 
 
 <div class="card">
 
 
 <h3>
-Agent模型
+历史回测系统
+</h3>
+
+
+<button onclick="startBacktest()">
+
+开始回测
+
+</button>
+
+
+<div id="backtest">
+
+等待测试...
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- 开奖反馈学习 -->
+
+
+<div class="card">
+
+
+<h3>
+开奖反馈学习
+</h3>
+
+
+
+<input id="front-input"
+
+placeholder="前区 例如: 03 08 17 26 33">
+
+
+<br><br>
+
+
+<input id="back-input"
+
+placeholder="后区 例如: 05 11">
+
+
+<br><br>
+
+
+<button onclick="saveFeedback()">
+
+保存开奖反馈
+
+</button>
+
+
+
+<div id="feedback">
+
+等待反馈...
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- Agent状态 -->
+
+
+<div class="card">
+
+
+<h3>
+V90 AI Agent模型
 </h3>
 
 
@@ -155,60 +267,102 @@ Agent模型
 
 
 
+
+
+
 </div>
 
 
 
 
 
+<!-- ================= -->
+<!-- CORE -->
+<!-- ================= -->
+
+
+<script src="core/dataengine.js"></script>
+
+<script src="core/featureengine.js"></script>
+
+<script src="core/theoryengine.js"></script>
+
+<script src="core/markovengine.js"></script>
+
+<script src="core/matrixengine.js"></script>
+
+<script src="core/bayesengine.js"></script>
+
+<script src="core/montecarloengine.js"></script>
+
+<script src="core/trainingengine.js"></script>
+
+<script src="core/predictionengine.js"></script>
+
+<script src="core/scoringengine.js"></script>
+
+<script src="core/evaluationengine.js"></script>
+
+<script src="core/learningengine.js"></script>
+
+<script src="core/riskengine.js"></script>
+
+<script src="core/loadingengine.js"></script>
+
+<script src="core/taskengine.js"></script>
 
 
 
 
 
-<!-- 核心 -->
+<!-- ================= -->
+<!-- AGENTS -->
+<!-- ================= -->
 
 
-<script src="core/DataEngine.js"></script>
+<script src="agents/trendagent.js"></script>
 
-<script src="core/FeatureEngine.js"></script>
+<script src="agents/structureagent.js"></script>
 
-<script src="core/TrainingEngine.js"></script>
+<script src="agents/markovagent.js"></script>
 
-<script src="core/PredictionEngine.js"></script>
+<script src="agents/theoryagent.js"></script>
 
-<script src="core/ScoringEngine.js"></script>
+<script src="agents/riskagent.js"></script>
 
+<script src="agents/criticagent.js"></script>
 
+<script src="agents/learningagent.js"></script>
 
+<script src="agents/antihumanagent.js"></script>
 
-
-<!-- Agent -->
-
-
-<script src="agents/trendAgent.js"></script>
-
-<script src="agents/structureAgent.js"></script>
-
-<script src="agents/markovAgent.js"></script>
-
-<script src="agents/riskAgent.js"></script>
-
-<script src="agents/theoryAgent.js"></script>
-
-<script src="agents/criticAgent.js"></script>
-
-<script src="agents/masterAgent.js"></script>
+<script src="agents/masteragent.js"></script>
 
 
 
 
 
-<!-- AI -->
+<!-- ================= -->
+<!-- WORKER -->
+<!-- ================= -->
+
+
+<script src="worker/analysisworker.js"></script>
+
+
+
+
+
+<!-- ================= -->
+<!-- ENGINE -->
+<!-- ================= -->
 
 
 <script src="engine.js"></script>
 
+
+
+<!-- 页面控制 -->
 
 
 <script src="script.js"></script>
@@ -216,6 +370,5 @@ Agent模型
 
 
 </body>
-
 
 </html>
