@@ -1,579 +1,263 @@
-window.V110_PREDICTOR = {
+window.V110_PREDICTOR={
 
 
 
-    // =========================
-    // 主预测入口
-    // =========================
+predict(history){
 
-    predict(history){
 
 
+V110_SEED.set(123456);
 
-        // 固定模式Seed
 
-        if(
-            V110_CONFIG.mode==="stable"
-        ){
 
-            V110_SEED.set(
-                123456
-            );
+let meeting=
 
+V110_CONFERENCE.vote(history);
 
-        }
 
 
+let pool=[];
 
 
 
+for(let i=0;i<500;i++){
 
-        // AI会议
 
-        let meeting =
+let front=[...meeting.final];
 
-        V110_CONFERENCE.vote(
 
-            history
 
-        );
+while(front.length<5){
 
 
+let n=
 
+Math.floor(
 
+V110_SEED.random()*35
 
+)+1;
 
 
-        // 生成候选池
 
+if(!front.includes(n))
 
-        let pool =
+front.push(n);
 
-        this.createPool(
 
-            history,
+}
 
-            meeting.final
 
-        );
 
+front.sort(
+(a,b)=>a-b
+);
 
 
 
 
+pool.push({
 
+front,
 
-        // Monte Carlo
+back:this.back()
 
+});
 
-        let results =
 
-        this.monteCarlo(
 
-            pool
+}
 
-        );
 
 
 
+let result=
 
+this.simulate(pool);
 
 
 
+return {
 
-        return {
 
+best:result[0],
 
 
-            confidence:
+top10:result.slice(0,10),
 
-            this.confidence(
 
-                history,
+conference:meeting,
 
-                meeting
 
-            ),
+confidence:this.confidence(
+meeting
+)
 
 
+};
 
-            conference:
 
-            meeting,
 
+},
 
 
-            top10:
 
-            results.slice(0,10),
 
 
 
-            best:
 
-            results[0]
+back(){
 
 
+let b=[];
 
-        };
 
+while(b.length<2){
 
 
-    },
+let n=
 
+Math.floor(
 
+V110_SEED.random()*12
 
+)+1;
 
 
 
+if(!b.includes(n))
 
+b.push(n);
 
 
-    // =========================
-    // 创建候选池
-    // =========================
 
-    createPool(history,meetingNumbers){
+}
 
 
+return b.sort(
+(a,b)=>a-b
+);
 
-        let result=[];
 
+},
 
 
 
-        for(
-            let i=0;
-            i<300;
-            i++
-        ){
 
 
 
-            let front=[];
 
+simulate(pool){
 
 
 
-            // 优先会议号码
+let map={};
 
-            let copy=
 
-            [...meetingNumbers];
 
+for(let i=0;i<100000;i++){
 
 
 
+let x=
 
-            while(
-                front.length<5
-            ){
+pool[
 
+Math.floor(
 
+V110_SEED.random()
 
-                let n;
+*
 
+pool.length
 
+)
 
-                if(
-                    Math.random()<0.7
-                    &&
-                    copy.length>0
-                ){
+];
 
 
-                    let index=
 
-                    Math.floor(
+let key=
 
-                    Math.random()
-                    *
-                    copy.length
+x.front.join("-")
++
+"+"
++
+x.back.join("-");
 
-                    );
 
 
-                    n=
 
-                    copy[index];
+if(!map[key]){
 
 
-                    copy.splice(
-                        index,
-                        1
-                    );
+map[key]={
 
+front:x.front,
 
-                }
+back:x.back,
 
-                else{
+count:0
 
+};
 
-                    n=
 
-                    Math.floor(
+}
 
-                    V110_SEED.random()
 
-                    *
 
-                    35
+map[key].count++;
 
-                    )
 
-                    +1;
 
+}
 
 
-                }
 
+return Object.values(map)
 
+.sort(
 
+(a,b)=>b.count-a.count
 
+);
 
 
-                if(
-                    !front.includes(n)
-                ){
 
-                    front.push(n);
+},
 
-                }
 
 
-            }
 
 
 
 
 
-            front.sort(
+confidence(meeting){
 
-                (a,b)=>
 
-                a-b
 
-            );
+let c=60;
 
 
 
+if(meeting.final.length===5)
 
+c+=20;
 
 
-            result.push({
 
+if(meeting.members.length>=4)
 
+c+=10;
 
-                front,
 
 
+return c>95?95:c;
 
-                back:
 
-                this.randomBack()
 
-
-
-            });
-
-
-
-        }
-
-
-
-
-        return result;
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    randomBack(){
-
-
-
-        let back=[];
-
-
-
-        while(
-            back.length<2
-        ){
-
-
-
-            let n=
-
-            Math.floor(
-
-            V110_SEED.random()
-
-            *
-
-            12
-
-            )
-
-            +1;
-
-
-
-
-
-            if(
-                !back.includes(n)
-            ){
-
-                back.push(n);
-
-            }
-
-
-
-        }
-
-
-
-        return back.sort(
-
-            (a,b)=>
-
-            a-b
-
-        );
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // =========================
-    // Monte Carlo
-    // =========================
-
-    monteCarlo(pool){
-
-
-
-        let map={};
-
-
-
-
-
-        let times=
-
-        V110_CONFIG.monteCarloTotal;
-
-
-
-
-
-
-        for(
-            let i=0;
-            i<times;
-            i++
-        ){
-
-
-
-            let index=
-
-            Math.floor(
-
-            V110_SEED.random()
-
-            *
-
-            pool.length
-
-            );
-
-
-
-
-
-
-            let item=
-
-            pool[index];
-
-
-
-
-
-            let key=
-
-            item.front.join("-")
-
-            +
-
-            "+"
-
-            +
-
-            item.back.join("-");
-
-
-
-
-
-
-            if(
-                !map[key]
-            ){
-
-
-
-                map[key]={
-
-
-                    front:item.front,
-
-
-                    back:item.back,
-
-
-                    count:0
-
-
-
-                };
-
-
-            }
-
-
-
-
-            map[key].count++;
-
-
-
-
-        }
-
-
-
-
-
-
-
-        return Object.values(map)
-
-        .sort(
-
-            (a,b)=>
-
-            b.count-a.count
-
-        );
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // =========================
-    // 可信度
-    // =========================
-
-    confidence(history,meeting){
-
-
-
-        let score=50;
-
-
-
-        if(
-            meeting.final.length===5
-        ){
-
-            score+=15;
-
-        }
-
-
-
-
-        let rhythm=
-
-        V110_RHYTHM.report(
-
-            history
-
-        );
-
-
-
-
-        if(
-            rhythm.sum.average
-        ){
-
-            score+=10;
-
-        }
-
-
-
-
-        if(
-            meeting.members.length>=5
-        ){
-
-            score+=10;
-
-        }
-
-
-
-
-        if(
-            score>95
-        ){
-
-            score=95;
-
-        }
-
-
-
-
-        return score;
-
-
-
-    }
-
-
-
-
+}
 
 
 

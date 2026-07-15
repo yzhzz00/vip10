@@ -1,121 +1,75 @@
-window.V110_PARSER = {
+window.V110_PARSER={
 
 
+parse(text){
 
-    parse(text){
 
+let list=[];
 
 
-        let history=[];
+text.split(/\r?\n/)
 
+.forEach(line=>{
 
 
-        let lines=
+line=line.trim();
 
-        text.split(/\r?\n/);
 
+if(!line)return;
 
 
 
+let a=line.split(/\s+/);
 
 
-        lines.forEach(line=>{
 
+if(a.length<9)return;
 
 
-            line=line.trim();
 
+list.push({
 
 
-            if(!line){
+period:a[0],
 
-                return;
 
-            }
+date:a[1],
 
 
 
+front:[
 
+Number(a[2]),
+Number(a[3]),
+Number(a[4]),
+Number(a[5]),
+Number(a[6])
 
+],
 
-            let arr=
 
-            line.split(/\s+/);
 
+back:[
 
+Number(a[7]),
+Number(a[8])
 
+]
 
 
-            if(arr.length<9){
 
-                return;
+});
 
-            }
 
 
+});
 
 
 
+return list;
 
-            history.push({
 
-
-
-                period:arr[0],
-
-
-
-                date:arr[1],
-
-
-
-                front:[
-
-                    Number(arr[2]),
-
-                    Number(arr[3]),
-
-                    Number(arr[4]),
-
-                    Number(arr[5]),
-
-                    Number(arr[6])
-
-                ],
-
-
-
-
-                back:[
-
-                    Number(arr[7]),
-
-                    Number(arr[8])
-
-                ]
-
-
-
-            });
-
-
-
-
-        });
-
-
-
-
-
-
-        return history;
-
-
-
-    }
-
-
-
+}
 
 
 

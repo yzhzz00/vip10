@@ -1,107 +1,30 @@
-window.V110_SEED = {
+window.V110_SEED={
 
+value:123456,
 
 
-    value:123456,
+set(seed){
 
+this.value=seed;
 
+},
 
 
-    // 设置种子
 
-    set(seed){
+random(){
 
+this.value=(
 
-        this.value=seed;
+this.value*9301+
 
+49297
 
-    },
+)%233280;
 
 
+return this.value/233280;
 
-
-
-
-    // 生成随机数
-
-    random(){
-
-
-
-        this.value =
-
-        (
-
-            this.value * 9301
-
-            +
-
-            49297
-
-        )
-
-        %
-
-        233280;
-
-
-
-
-
-        return this.value / 233280;
-
-
-
-    },
-
-
-
-
-
-
-
-    // 稳定随机
-
-    stableRandom(key){
-
-
-
-        let hash=0;
-
-
-
-        for(
-            let i=0;
-            i<key.length;
-            i++
-        ){
-
-
-            hash +=
-
-            key.charCodeAt(i);
-
-
-
-        }
-
-
-
-
-
-        this.set(hash);
-
-
-
-
-        return this.random();
-
-
-
-    }
-
-
-
+}
 
 
 

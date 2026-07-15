@@ -12,10 +12,10 @@ body{
 margin:0;
 
 
-background:#08111f;
+background:#07111f;
 
 
-color:#ffffff;
+color:#fff;
 
 
 font-family:
@@ -23,12 +23,11 @@ font-family:
 -apple-system,
 BlinkMacSystemFont,
 "Microsoft YaHei",
-Arial;
-
+Arial,
+sans-serif;
 
 
 }
-
 
 
 
@@ -38,7 +37,7 @@ Arial;
 width:100%;
 
 
-max-width:650px;
+max-width:680px;
 
 
 margin:auto;
@@ -53,27 +52,22 @@ padding:15px;
 
 
 
-
 .header{
 
 
 background:
 
 linear-gradient(
-
 135deg,
-
 #2563eb,
-
-#7c3aed
-
+#9333ea
 );
 
 
-padding:25px;
+border-radius:24px;
 
 
-border-radius:22px;
+padding:28px 20px;
 
 
 text-align:center;
@@ -81,8 +75,7 @@ text-align:center;
 
 box-shadow:
 
-0 10px 30px rgba(0,0,0,.3);
-
+0 10px 35px rgba(0,0,0,.35);
 
 
 }
@@ -95,7 +88,10 @@ box-shadow:
 margin:0;
 
 
-font-size:28px;
+font-size:30px;
+
+
+letter-spacing:1px;
 
 
 }
@@ -105,10 +101,17 @@ font-size:28px;
 .header p{
 
 
+margin-top:8px;
+
+
 opacity:.8;
 
 
+font-size:16px;
+
+
 }
+
 
 
 
@@ -117,16 +120,16 @@ opacity:.8;
 .card{
 
 
+background:#142033;
+
+
 margin-top:15px;
 
 
-background:#162235;
-
-
-border-radius:20px;
-
-
 padding:20px;
+
+
+border-radius:22px;
 
 
 box-shadow:
@@ -134,10 +137,7 @@ box-shadow:
 0 8px 25px rgba(0,0,0,.25);
 
 
-
 }
-
-
 
 
 
@@ -147,7 +147,7 @@ box-shadow:
 margin-top:0;
 
 
-font-size:19px;
+font-size:20px;
 
 
 color:#60a5fa;
@@ -158,19 +158,25 @@ color:#60a5fa;
 
 
 
+
 .health{
 
 
-font-size:32px;
+font-size:36px;
 
 
-letter-spacing:5px;
+letter-spacing:8px;
 
 
 color:#facc15;
 
 
+margin:15px 0;
+
+
 }
+
+
 
 
 
@@ -178,13 +184,14 @@ color:#facc15;
 span{
 
 
-color:#22c55e;
-
-
 font-weight:bold;
 
 
+color:#22c55e;
+
+
 }
+
 
 
 
@@ -196,33 +203,16 @@ button{
 width:100%;
 
 
-height:50px;
+height:52px;
 
 
 margin-top:12px;
 
 
-border:none;
+border:0;
 
 
-border-radius:15px;
-
-
-background:
-
-linear-gradient(
-
-135deg,
-
-#2563eb,
-
-#4f46e5
-
-);
-
-
-
-color:white;
+border-radius:16px;
 
 
 font-size:16px;
@@ -230,6 +220,17 @@ font-size:16px;
 
 font-weight:bold;
 
+
+color:white;
+
+
+background:
+
+linear-gradient(
+135deg,
+#2563eb,
+#4f46e5
+);
 
 
 }
@@ -256,28 +257,41 @@ input{
 width:100%;
 
 
-height:45px;
+height:46px;
 
 
 margin-top:10px;
 
 
-background:#243247;
+border:0;
 
 
-border:none;
+outline:none;
 
 
-border-radius:12px;
+border-radius:14px;
 
 
-padding:12px;
+background:#223047;
 
 
 color:white;
 
 
+padding:12px;
+
+
 font-size:15px;
+
+
+}
+
+
+
+input::placeholder{
+
+
+color:#94a3b8;
 
 
 }
@@ -315,7 +329,10 @@ ul{
 padding-left:20px;
 
 
-line-height:32px;
+line-height:30px;
+
+
+color:#e2e8f0;
 
 
 }
@@ -327,30 +344,35 @@ line-height:32px;
 #conferenceBox{
 
 
-line-height:30px;
-
-
-background:#0f172a;
+background:#0b1628;
 
 
 padding:15px;
 
 
-border-radius:12px;
+border-radius:15px;
+
+
+line-height:30px;
 
 
 }
-
 
 
 
 #resultBox{
 
 
+background:#0b1628;
+
+
+padding:15px;
+
+
+border-radius:15px;
+
+
 line-height:32px;
-
-
-font-size:15px;
 
 
 }
@@ -358,7 +380,17 @@ font-size:15px;
 
 
 
+
 #trainingBox{
+
+
+background:#0b1628;
+
+
+padding:15px;
+
+
+border-radius:15px;
 
 
 line-height:30px;
@@ -373,6 +405,15 @@ font-size:14px;
 
 
 #reportBox{
+
+
+background:#0b1628;
+
+
+padding:15px;
+
+
+border-radius:15px;
 
 
 line-height:30px;
@@ -391,6 +432,50 @@ font-size:16px;
 
 
 color:#93c5fd;
+
+
+margin-bottom:5px;
+
+
+}
+
+
+
+
+
+
+
+@media(max-width:400px){
+
+
+.app{
+
+
+padding:10px;
+
+
+}
+
+
+
+.header h1{
+
+
+font-size:24px;
+
+
+}
+
+
+
+.card{
+
+
+padding:15px;
+
+
+}
+
 
 
 }

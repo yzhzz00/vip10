@@ -3,362 +3,96 @@ window.V110_TRAINING={
 
 
 
-
-records:[],
-
-
-
-
-
-
-// =====================
-// 滚动考试
-// =====================
-
-
 run(history){
 
 
 
-    let result=[];
+let records=[];
 
 
 
-    let windowSize=
+for(
+let i=500;
+i<history.length;
+i++
+){
 
-    V110_CONFIG.trainWindow;
 
 
+let train=
 
+history.slice(
+i-500,
+i
+);
 
 
-    for(
-        let i=windowSize;
-        i<history.length;
-        i++
-    ){
 
+let real=
 
+history[i];
 
 
 
-        let trainData=
+let p=
 
-        history.slice(
+V110_PREDICTOR.predict(
+train
+);
 
-            i-windowSize,
 
-            i
 
-        );
 
+let hitFront=
 
+p.best.front.filter(
 
+n=>real.front.includes(n)
 
+).length;
 
 
-        let real=
 
-        history[i];
+let hitBack=
 
+p.best.back.filter(
 
+n=>real.back.includes(n)
 
+).length;
 
 
 
 
-        let predict=
 
-        V110_PREDICTOR.predict(
+records.push({
 
-            trainData
 
-        );
+period:real.period,
 
 
+predict:p.best,
 
 
+real,
 
 
-        let hitFront=
+hit:{
 
-        predict.best.front.filter(
 
-            n=>
+front:hitFront,
 
-            real.front.includes(n)
 
-        ).length;
-
-
-
-
-
-
-
-        let hitBack=
-
-        predict.best.back.filter(
-
-            n=>
-
-            real.back.includes(n)
-
-        ).length;
-
-
-
-
-
-
-
-
-
-        result.push({
-
-
-
-            period:
-
-            real.period,
-
-
-
-            predict:
-
-            predict.best,
-
-
-
-            real,
-
-
-
-            hit:{
-
-
-                front:hitFront,
-
-
-                back:hitBack
-
-
-            },
-
-
-
-            confidence:
-
-            predict.confidence,
-
-
-
-            conference:
-
-            predict.conference
-
-
-
-        });
-
-
-
-
-
-    }
-
-
-
-
-
-
-    this.records=result;
-
-
-
-
-
-
-    V110_DB.saveTraining(
-
-        result
-
-    );
-
-
-
-
-
-
-    return result;
-
+back:hitBack
 
 
 },
 
 
+confidence:p.confidence
 
 
-
-
-
-
-
-// =====================
-// 成绩统计
-// =====================
-
-
-statistics(range){
-
-
-
-    let data=
-
-    V110_DB.getTraining();
-
-
-
-
-
-    let list=
-
-    data.slice(
-
-        -range
-
-    );
-
-
-
-
-
-
-    if(
-        list.length===0
-    ){
-
-        return null;
-
-    }
-
-
-
-
-
-
-    let front=0;
-
-    let back=0;
-
-
-
-
-
-
-    list.forEach(item=>{
-
-
-
-        front+=
-
-        item.hit.front;
-
-
-
-        back+=
-
-        item.hit.back;
-
-
-
-    });
-
-
-
-
-
-
-
-    return {
-
-
-
-        total:
-
-        list.length,
-
-
-
-        avgFront:
-
-        (
-
-        front/list.length
-
-        ).toFixed(2),
-
-
-
-
-        avgBack:
-
-        (
-
-        back/list.length
-
-        ).toFixed(2)
-
-
-
-    };
-
-
-
-},
-
-
-
-
-
-
-
-
-
-// =====================
-// 成长报告
-// =====================
-
-
-report(){
-
-
-
-    return {
-
-
-
-        last100:
-
-        this.statistics(100),
-
-
-
-
-        last500:
-
-        this.statistics(500),
-
-
-
-
-        last1000:
-
-        this.statistics(1000)
-
-
-
-    };
+});
 
 
 
@@ -367,6 +101,125 @@ report(){
 
 
 
+V110_DB.saveTraining(
+records
+);
+
+
+
+return records;
+
+
+
+},
+
+
+
+
+
+
+
+statistics(range){
+
+
+
+let data=
+
+V110_DB.getTraining();
+
+
+
+let arr=
+
+data.slice(-range);
+
+
+
+if(!arr.length)
+
+return null;
+
+
+
+
+let f=0;
+
+let b=0;
+
+
+
+arr.forEach(x=>{
+
+
+f+=x.hit.front;
+
+
+b+=x.hit.back;
+
+
+});
+
+
+
+return {
+
+
+periods:arr.length,
+
+
+frontAverage:
+
+(f/arr.length).toFixed(2),
+
+
+
+backAverage:
+
+(b/arr.length).toFixed(2)
+
+
+
+};
+
+
+
+},
+
+
+
+
+
+
+
+
+report(){
+
+
+
+return {
+
+
+
+last100:
+this.statistics(100),
+
+
+
+last500:
+this.statistics(500),
+
+
+
+last1000:
+this.statistics(1000)
+
+
+
+};
+
+
+
+}
 
 
 

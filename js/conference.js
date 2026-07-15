@@ -1,120 +1,128 @@
-window.V110_CONFERENCE = {
+window.V110_CONFERENCE={
 
 
 
-    // =========================
-    // 单模型提案
-    // =========================
 
-    speak(history){
+vote(history){
 
 
 
-        let members=[];
+let models=[
 
+"trend",
 
+"bayes",
 
-        // Trend
+"markov",
 
-        members.push({
+"matrix"
 
+];
 
-            name:"Trend",
 
 
-            numbers:
+let votes={};
 
-            this.topNumbers(
 
-                history,
 
-                "trend"
+let members=[];
 
-            )
 
 
-        });
 
+models.forEach(type=>{
 
 
+let arr=[];
 
 
+for(
+let i=1;i<=35;i++
+){
 
 
-        // Bayes
+arr.push({
 
-        members.push({
+n:i,
 
+s:
+V110_MODELS[type](i,history)
 
-            name:"Bayes",
+});
 
 
-            numbers:
+}
 
-            this.topNumbers(
 
-                history,
 
-                "bayes"
+arr.sort(
+(a,b)=>b.s-a.s
+);
 
-            )
 
 
-        });
+let nums=
 
+arr.slice(0,5)
+.map(x=>x.n);
 
 
 
+members.push({
 
+name:type,
 
+numbers:nums
 
-        // Markov
+});
 
-        members.push({
 
 
-            name:"Markov",
 
+nums.forEach(n=>{
 
-            numbers:
 
-            this.topNumbers(
+votes[n]=
+(votes[n]||0)+1;
 
-                history,
 
-                "markov"
+});
 
-            )
 
 
-        });
 
+});
 
 
 
 
 
 
-        // Matrix
+let final=
 
-        members.push({
+Object.keys(votes)
 
+.map(n=>({
 
-            name:"Matrix",
+n:Number(n),
 
+v:votes[n]
 
-            numbers:
+}))
 
-            this.topNumbers(
+.sort(
 
-                history,
+(a,b)=>b.v-a.v
 
-                "matrix"
+)
 
-            )
+.slice(0,5)
 
+.map(x=>x.n)
 
-        });
+.sort(
+(a,b)=>a-b
+);
 
 
 
@@ -122,400 +130,34 @@ window.V110_CONFERENCE = {
 
 
 
+let result={
 
 
-        // Theory
+members,
 
-        members.push({
 
+final,
 
-            name:"Theory",
 
+time:Date.now()
 
-            numbers:
 
-            this.topNumbers(
+};
 
-                history,
 
-                "theory"
 
-            )
 
 
-        });
+V110_DB.saveConference(
+result
+);
 
 
 
+return result;
 
 
-
-
-        // Rhythm
-
-        let rhythm =
-
-        V110_RHYTHM.report(
-            history
-        );
-
-
-
-        members.push({
-
-
-            name:"Rhythm",
-
-
-            numbers:
-
-            rhythm.hotCold.hot
-
-
-        });
-
-
-
-
-
-
-
-        return members;
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // =========================
-    // 获取模型推荐号码
-    // =========================
-
-    topNumbers(history,type){
-
-
-
-        let arr=[];
-
-
-
-
-        for(
-            let i=1;
-            i<=35;
-            i++
-        ){
-
-
-            let score=0;
-
-
-
-            switch(type){
-
-
-
-                case "trend":
-
-                    score=
-
-                    V110_MODELS.trend(
-
-                        i,
-
-                        history
-
-                    );
-
-                    break;
-
-
-
-
-                case "bayes":
-
-                    score=
-
-                    V110_MODELS.bayes(
-
-                        i,
-
-                        history
-
-                    );
-
-                    break;
-
-
-
-
-                case "markov":
-
-                    score=
-
-                    V110_MODELS.markov(
-
-                        i,
-
-                        history
-
-                    );
-
-                    break;
-
-
-
-
-                case "matrix":
-
-                    score=
-
-                    V110_MODELS.matrix(
-
-                        i,
-
-                        history
-
-                    );
-
-                    break;
-
-
-
-                case "theory":
-
-                    score=
-
-                    V110_MODELS.frequency(
-
-                        i,
-
-                        history
-
-                    );
-
-                    break;
-
-
-
-            }
-
-
-
-
-
-            arr.push({
-
-
-                number:i,
-
-
-                score
-
-
-            });
-
-
-
-        }
-
-
-
-
-
-
-        arr.sort(
-
-            (a,b)=>
-
-            b.score-a.score
-
-        );
-
-
-
-
-
-        return arr
-
-        .slice(0,5)
-
-        .map(
-
-            x=>x.number
-
-        );
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // =========================
-    // AI会议融合
-    // =========================
-
-    vote(history){
-
-
-
-        let meeting=
-
-        this.speak(history);
-
-
-
-
-        let votes={};
-
-
-
-
-        meeting.forEach(member=>{
-
-
-
-            member.numbers.forEach(n=>{
-
-
-
-                if(
-                    !votes[n]
-                ){
-
-                    votes[n]=0;
-
-                }
-
-
-
-                votes[n]++;
-
-
-
-            });
-
-
-
-        });
-
-
-
-
-
-
-        let result=Object.keys(votes)
-
-        .map(n=>({
-
-
-            number:Number(n),
-
-
-            votes:votes[n]
-
-
-        }))
-
-
-
-        .sort(
-
-            (a,b)=>
-
-            b.votes-a.votes
-
-        );
-
-
-
-
-
-
-        let final=
-
-        result
-
-        .slice(0,5)
-
-        .map(
-
-            x=>x.number
-
-        )
-
-        .sort(
-
-            (a,b)=>
-
-            a-b
-
-        );
-
-
-
-
-
-
-
-
-        let report={
-
-
-
-            time:
-
-            Date.now(),
-
-
-
-            members:meeting,
-
-
-
-            final
-
-
-
-        };
-
-
-
-
-
-
-        V110_DB.saveConference(
-
-            report
-
-        );
-
-
-
-
-
-
-        return report;
-
-
-
-    }
-
-
+}
 
 
 

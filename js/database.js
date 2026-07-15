@@ -1,272 +1,103 @@
 window.V110_DB={
 
 
+save(key,data){
 
-    save(key,data){
+localStorage.setItem(
 
+key,
 
-        localStorage.setItem(
+JSON.stringify(data)
 
-            key,
+);
 
-            JSON.stringify(data)
+},
 
-        );
 
 
-    },
+get(key){
 
+let d=
 
+localStorage.getItem(key);
 
 
+return d?
 
+JSON.parse(d):[];
 
+},
 
-    get(key){
 
 
+saveTraining(data){
 
-        let data=
+this.save(
+"V110_TRAINING",
+data
+);
 
-        localStorage.getItem(key);
+},
 
 
 
-        return data
+getTraining(){
 
-        ?
+return this.get(
+"V110_TRAINING"
+);
 
-        JSON.parse(data)
+},
 
-        :
 
-        [];
 
+saveFeedback(data){
 
+let old=this.get(
+"V110_FEEDBACK"
+);
 
-    },
 
+old.push(data);
 
 
+this.save(
+"V110_FEEDBACK",
+old
+);
 
+},
 
 
 
-    // 历史数据
+getFeedback(){
 
-    saveHistory(data){
+return this.get(
+"V110_FEEDBACK"
+);
 
+},
 
-        this.save(
 
-            "V110_HISTORY",
 
-            data
+saveConference(data){
 
-        );
+this.save(
+"V110_CONFERENCE",
+data
+);
 
+},
 
-    },
 
 
+getConference(){
 
+return this.get(
+"V110_CONFERENCE"
+);
 
-
-    getHistory(){
-
-
-        return this.get(
-
-            "V110_HISTORY"
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // AI会议记录
-
-    saveConference(data){
-
-
-        this.save(
-
-            "V110_CONFERENCE",
-
-            data
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-    getConference(){
-
-
-        return this.get(
-
-            "V110_CONFERENCE"
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // 训练考试记录
-
-    saveTraining(data){
-
-
-        this.save(
-
-            "V110_TRAINING",
-
-            data
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-    getTraining(){
-
-
-        return this.get(
-
-            "V110_TRAINING"
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // 开奖反馈
-
-    saveFeedback(data){
-
-
-        let old=
-
-        this.get(
-
-            "V110_FEEDBACK"
-
-        );
-
-
-
-        old.push(data);
-
-
-
-        this.save(
-
-            "V110_FEEDBACK",
-
-            old
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-    getFeedback(){
-
-
-        return this.get(
-
-            "V110_FEEDBACK"
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // 模型权重
-
-    saveWeights(data){
-
-
-        this.save(
-
-            "V110_WEIGHTS",
-
-            data
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-    getWeights(){
-
-
-        return this.get(
-
-            "V110_WEIGHTS"
-
-        );
-
-
-    }
-
-
+}
 
 
 

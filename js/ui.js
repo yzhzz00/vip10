@@ -3,30 +3,32 @@ window.V110_UI={
 
 
 
-refresh(){
+
+refreshData(){
 
 
 
-    let count=
+let box=
 
-    document.getElementById(
+document.getElementById(
 
-        "dataCount"
+"dataCount"
 
-    );
-
-
-
-    if(count){
+);
 
 
-        count.innerHTML=
 
-        V110_ENGINE.history.length;
+if(box){
 
 
-    }
 
+box.innerHTML=
+
+V110_ENGINE.history.length;
+
+
+
+}
 
 
 
@@ -38,184 +40,196 @@ refresh(){
 
 
 
-showPrediction(result){
+bind(){
 
 
 
-    let box=
+let a=
 
-    document.getElementById(
+document.getElementById(
 
-        "resultBox"
+"analyzeBtn"
 
-    );
+);
 
 
 
+if(a){
 
 
-    if(!box)
 
-        return;
+a.onclick=()=>{
 
 
+V110_ENGINE.analyze();
 
 
+};
 
 
+}
 
-    let html=
 
 
 
-    `
 
-    <h3>
-    AI最终预测
-    </h3>
 
 
-    前区：
+let t=
 
-    ${
+document.getElementById(
 
-    result.best.front.join(" ")
+"trainBtn"
 
-    }
+);
 
 
-    <br>
 
+if(t){
 
-    后区：
 
-    ${
 
-    result.best.back.join(" ")
+t.onclick=()=>{
 
-    }
 
+V110_ENGINE.train();
 
-    <br><br>
 
+};
 
-    AI可信度：
 
-    ${
-
-    result.confidence
-
-    }%
-
-
-    <br><br>
-
-
-    AI会议：
-
-    <br>
-
-    `;
-
-
-
-
-
-
-
-    result.conference.members.forEach(
-
-        m=>{
-
-
-            html+=
-
-
-            m.name
-
-            +
-
-            " : "
-
-            +
-
-            m.numbers.join(" ")
-
-            +
-
-            "<br>";
-
-
-
-        }
-
-    );
-
-
-
-
-
-    html+=
-
-    "<hr>TOP10<br>";
-
-
-
-
-
-
-
-    result.top10.forEach(
-
-        (x,i)=>{
-
-
-            html+=
-
-
-            (
-
-            i+1
-
-            )
-
-            +
-
-            " "
-
-            +
-
-            x.front.join(" ")
-
-            +
-
-            " + "
-
-            +
-
-            x.back.join(" ")
-
-            +
-
-            "<br>";
-
-
-
-        }
-
-    );
-
-
-
-
-
-
-
-    box.innerHTML=html;
+}
 
 
 
 },
+
+
+
+
+
+
+
+showPrediction(r){
+
+
+
+document.getElementById(
+
+"confidence"
+
+).innerHTML=
+
+r.confidence+"%";
+
+
+
+
+
+let meeting="";
+
+
+
+r.conference.members.forEach(m=>{
+
+
+meeting+=
+
+m.name
+
++
+
+": "
+
++
+
+m.numbers.join(" ")
+
++
+
+"<br>";
+
+
+
+});
+
+
+
+
+document.getElementById(
+
+"conferenceBox"
+
+).innerHTML=
+
+meeting+
+
+"<hr>最终融合："
+
++
+
+r.conference.final.join(" ");
+
+
+
+
+
+
+
+
+
+let html="";
+
+
+
+r.top10.forEach((x,i)=>{
+
+
+html+=
+
+
+(i+1)
+
++
+
+". "
+
++
+
+x.front.join(" ")
+
++
+
+" + "
+
++
+
+x.back.join(" ")
+
++
+
+"<br>";
+
+
+
+});
+
+
+
+
+
+document.getElementById(
+
+"resultBox"
+
+).innerHTML=
+
+html;
+
+
+
+},
+
 
 
 
@@ -227,86 +241,63 @@ showTraining(data){
 
 
 
-    let box=
+let box=
 
-    document.getElementById(
+document.getElementById(
 
-        "trainingBox"
+"trainingBox"
 
-    );
-
-
-
-
-    if(!box)
-
-        return;
+);
 
 
 
+box.innerHTML=
 
 
-    let report=
+"训练完成<br>"+
 
-    V110_TRAINING.report();
+"考试次数："+
 
+data.length
 
++
 
+"<br><br>"+
 
+JSON.stringify(
 
+V110_TRAINING.statistics(100)
 
-    box.innerHTML=
-
-    `
-
-
-    最近100期：
-
-    ${
-
-    JSON.stringify(
-
-    report.last100
-
-    )
-
-    }
-
-
-    <br>
-
-
-    最近500期：
-
-    ${
-
-    JSON.stringify(
-
-    report.last500
-
-    )
-
-    }
-
-
-    <br>
-
-
-    最近1000期：
-
-    ${
-
-    JSON.stringify(
-
-    report.last1000
-
-    )
-
-    }
+);
 
 
 
-    `;
+},
+
+
+
+
+
+
+
+
+showReport(r){
+
+
+
+let box=
+
+document.getElementById(
+
+"reportBox"
+
+);
+
+
+
+box.innerHTML=
+
+JSON.stringify(r);
 
 
 
@@ -317,4 +308,23 @@ showTraining(data){
 
 
 
+
 };
+
+
+
+
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+V110_UI.bind();
+
+
+
+});

@@ -5,7 +5,6 @@ window.V110_ENGINE={
 history:[],
 
 
-
 result:null,
 
 
@@ -13,55 +12,47 @@ result:null,
 
 
 
-// =====================
-// 启动系统
-// =====================
-
 async init(){
 
 
 
-    let response=
+let res=
 
-    await fetch(
+await fetch(
 
-        V110_CONFIG.dataFile
+V110_CONFIG.dataFile
 
-    );
-
-
-
-    let text=
-
-    await response.text();
+);
 
 
 
+let text=
 
-
-    this.history=
-
-    V110_PARSER.parse(
-
-        text
-
-    );
+await res.text();
 
 
 
 
+this.history=
 
-    V110_DB.saveHistory(
+V110_PARSER.parse(text);
 
-        this.history
 
-    );
+
+
+V110_DB.save(
+
+"V110_HISTORY",
+
+this.history
+
+);
 
 
 
 
 
-    V110_UI.refresh();
+V110_UI.refreshData();
 
 
 
@@ -71,35 +62,27 @@ async init(){
 
 
 
-
-
-
-
-// =====================
-// AI分析
-// =====================
 
 
 analyze(){
 
 
 
-    this.result=
+this.result=
 
-    V110_PREDICTOR.predict(
+V110_PREDICTOR.predict(
 
-        this.history
+this.history
 
-    );
-
-
+);
 
 
-    V110_UI.showPrediction(
 
-        this.result
+V110_UI.showPrediction(
 
-    );
+this.result
+
+);
 
 
 
@@ -110,35 +93,27 @@ analyze(){
 
 
 
-
-
-
-// =====================
-// 开始训练
-// =====================
 
 
 train(){
 
 
 
-    let result=
+let data=
 
-    V110_TRAINING.run(
+V110_TRAINING.run(
 
-        this.history
+this.history
 
-    );
-
-
+);
 
 
 
-    V110_UI.showTraining(
+V110_UI.showTraining(
 
-        result
+data
 
-    );
+);
 
 
 
@@ -151,17 +126,21 @@ train(){
 
 
 
-
-// =====================
-// 成长报告
-// =====================
-
-
 report(){
 
 
 
-    return V110_TRAINING.report();
+let r=
+
+V110_TRAINING.report();
+
+
+
+V110_UI.showReport(
+
+r
+
+);
 
 
 
@@ -169,12 +148,7 @@ report(){
 
 
 
-
-
-
-
 };
-
 
 
 
@@ -189,8 +163,10 @@ document.addEventListener(
 ()=>{
 
 
-    V110_ENGINE.init();
+V110_ENGINE.init();
 
 
 
-});
+}
+
+);

@@ -8,7 +8,6 @@
 
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-
 <title>
 大乐透 AI CORE V110 FINAL
 </title>
@@ -24,21 +23,23 @@
 <body>
 
 
+
 <div class="app">
 
 
 
-<!-- 顶部 -->
-
 <div class="header">
+
 
 <h1>
 大乐透 AI CORE
 </h1>
 
+
 <p>
 V110 FINAL
 </p>
+
 
 </div>
 
@@ -47,9 +48,9 @@ V110 FINAL
 
 
 
-<!-- AI健康度 -->
 
 <div class="card">
+
 
 <h2>
 AI健康度
@@ -84,7 +85,7 @@ AI健康度
 
 
 
-<!-- 数据中心 -->
+
 
 <div class="card">
 
@@ -99,7 +100,9 @@ AI健康度
 历史数据：
 
 <span id="dataCount">
+
 0
+
 </span>
 
 期
@@ -108,6 +111,7 @@ AI健康度
 
 
 <p>
+
 数据文件：
 
 data/dlt.txt
@@ -123,7 +127,6 @@ data/dlt.txt
 
 
 
-<!-- AI模型 -->
 
 <div class="card">
 
@@ -167,7 +170,17 @@ Markov
 
 
 <li>
-开奖节奏
+大乐透理论
+</li>
+
+
+<li>
+反人类选号
+</li>
+
+
+<li>
+开奖节奏模型
 </li>
 
 
@@ -183,7 +196,6 @@ Markov
 
 
 
-<!-- 操作 -->
 
 <div class="card">
 
@@ -193,14 +205,11 @@ AI控制中心
 </h2>
 
 
-
 <button id="analyzeBtn">
 
 开始 AI 分析
 
 </button>
-
-
 
 
 <button id="trainBtn">
@@ -210,7 +219,6 @@ AI控制中心
 </button>
 
 
-
 </div>
 
 
@@ -219,15 +227,14 @@ AI控制中心
 
 
 
-<!-- AI会议 -->
+
 
 <div class="card">
 
 
 <h2>
-AI会议
+AI会议系统
 </h2>
-
 
 
 <div id="conferenceBox">
@@ -237,7 +244,6 @@ AI会议
 </div>
 
 
-
 </div>
 
 
@@ -246,7 +252,7 @@ AI会议
 
 
 
-<!-- TOP10 -->
+
 
 <div class="card">
 
@@ -257,7 +263,6 @@ TOP10预测
 </h2>
 
 
-
 <div id="resultBox">
 
 等待分析
@@ -265,7 +270,6 @@ TOP10预测
 </div>
 
 
-
 </div>
 
 
@@ -275,7 +279,6 @@ TOP10预测
 
 
 
-<!-- 训练中心 -->
 
 <div class="card">
 
@@ -286,7 +289,6 @@ TOP10预测
 </h2>
 
 
-
 <div id="trainingBox">
 
 等待训练
@@ -294,7 +296,6 @@ TOP10预测
 </div>
 
 
-
 </div>
 
 
@@ -304,7 +305,6 @@ TOP10预测
 
 
 
-<!-- 开奖反馈 -->
 
 <div class="card">
 
@@ -316,9 +316,9 @@ TOP10预测
 
 
 
-
-<input id="period"
-placeholder="期号">
+<input 
+id="period"
+placeholder="输入开奖期号">
 
 
 
@@ -333,27 +333,19 @@ placeholder="期号">
 <div class="numberInput">
 
 
-<input id="front1"
-placeholder="第1位">
+<input id="front1" placeholder="前区1">
 
+<input id="front2" placeholder="前区2">
 
-<input id="front2"
-placeholder="第2位">
+<input id="front3" placeholder="前区3">
 
+<input id="front4" placeholder="前区4">
 
-<input id="front3"
-placeholder="第3位">
-
-
-<input id="front4"
-placeholder="第4位">
-
-
-<input id="front5"
-placeholder="第5位">
+<input id="front5" placeholder="前区5">
 
 
 </div>
+
 
 
 
@@ -368,15 +360,13 @@ placeholder="第5位">
 <div class="numberInput">
 
 
-<input id="back1"
-placeholder="第1位">
+<input id="back1" placeholder="后区1">
 
-
-<input id="back2"
-placeholder="第2位">
+<input id="back2" placeholder="后区2">
 
 
 </div>
+
 
 
 
@@ -398,14 +388,14 @@ placeholder="第2位">
 
 
 
-<!-- 成长报告 -->
 
 
 <div class="card">
 
 
 <h2>
-成长报告
+AI成长报告
+
 </h2>
 
 
@@ -432,9 +422,6 @@ placeholder="第2位">
 
 
 
-
-<!-- JS顺序 -->
-
 <script src="js/config.js"></script>
 
 <script src="js/seed.js"></script>
@@ -458,7 +445,6 @@ placeholder="第2位">
 <script src="js/engine.js"></script>
 
 <script src="js/ui.js"></script>
-
 
 
 

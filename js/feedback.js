@@ -2,138 +2,64 @@ window.V110_FEEDBACK={
 
 
 
-
 save(){
 
 
 
-    let period =
+let data={
 
-    document.getElementById(
-        "period"
-    ).value;
 
 
+period:
+document.getElementById("period").value,
 
 
 
-    let front=[];
+front:[
 
+Number(front1.value),
+Number(front2.value),
+Number(front3.value),
+Number(front4.value),
+Number(front5.value)
 
+],
 
-    for(
-        let i=1;
-        i<=5;
-        i++
-    ){
 
 
-        let value=
+back:[
 
-        Number(
+Number(back1.value),
+Number(back2.value)
 
-        document.getElementById(
+],
 
-            "front"+i
 
-        ).value
 
-        );
+time:new Date().toLocaleString()
 
 
 
-        front.push(value);
+};
 
 
-    }
 
 
+V110_DB.saveFeedback(data);
 
 
 
+alert(
+"开奖已保存，等待AI学习"
+);
 
-    let back=[];
 
 
-
-    for(
-        let i=1;
-        i<=2;
-        i++
-    ){
-
-
-
-        let value=
-
-        Number(
-
-        document.getElementById(
-
-            "back"+i
-
-        ).value
-
-        );
-
-
-
-        back.push(value);
-
-
-
-    }
-
-
-
-
-
-
-    let data={
-
-
-
-        period,
-
-
-        front,
-
-
-        back,
-
-
-        time:
-
-        Date.now()
-
-
-
-    };
-
-
-
-
-
-
-    V110_DB.saveFeedback(
-
-        data
-
-    );
-
-
-
-
-
-    return data;
+return data;
 
 
 
 }
-
-
-
-
 
 
 
