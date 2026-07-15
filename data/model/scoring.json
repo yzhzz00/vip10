@@ -1,0 +1,260 @@
+{
+  "version": "V90",
+
+  "name": "最终综合评分模型",
+
+
+  "enabled": true,
+
+
+  "score": {
+
+
+    "base": {
+
+
+      "min": 0,
+
+
+      "max": 100
+
+
+    },
+
+
+
+    "components": {
+
+
+      "frequency": {
+
+
+        "weight": 20
+
+
+      },
+
+
+      "cold_hot": {
+
+
+        "weight": 15
+
+
+      },
+
+
+      "omission": {
+
+
+        "weight": 15
+
+
+      },
+
+
+      "markov": {
+
+
+        "weight": 20
+
+
+      },
+
+
+      "bayes": {
+
+
+        "weight": 15
+
+
+      },
+
+
+      "montecarlo": {
+
+
+        "weight": 10
+
+
+      },
+
+
+      "structure": {
+
+
+        "weight": 5
+
+
+      }
+
+
+    }
+
+
+  },
+
+
+
+  "penalty": {
+
+
+    "duplicate":
+
+    {
+
+
+      "enabled": true,
+
+
+      "minus": 10
+
+
+    },
+
+
+    "extreme_sum":
+
+    {
+
+
+      "enabled": true,
+
+
+      "minus": 8
+
+
+    },
+
+
+    "bad_structure":
+
+    {
+
+
+      "enabled": true,
+
+
+      "minus": 6
+
+
+    }
+
+
+  },
+
+
+
+  "bonus": {
+
+
+    "balanced_structure":
+
+    {
+
+
+      "enabled": true,
+
+
+      "plus": 10
+
+
+    },
+
+
+    "markov_support":
+
+    {
+
+
+      "enabled": true,
+
+
+      "plus": 8
+
+
+    },
+
+
+    "bayes_support":
+
+    {
+
+
+      "enabled": true,
+
+
+      "plus": 8
+
+
+    }
+
+
+  },
+
+
+
+  "ranking": {
+
+
+    "sort":
+
+    "desc",
+
+
+    "top":
+
+    10
+
+
+  },
+
+
+
+  "risk": {
+
+
+    "low":
+
+    {
+
+
+      "score":
+
+      "80-100"
+
+    },
+
+
+    "medium":
+
+    {
+
+
+      "score":
+
+      "60-80"
+
+    },
+
+
+    "high":
+
+    {
+
+
+      "score":
+
+      "0-60"
+
+    }
+
+
+  },
+
+
+  "description":
+
+  "V90最终号码评分与排序规则"
+
+}

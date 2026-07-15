@@ -1,19 +1,126 @@
 {
-  "frontCount":5,
-  "backCount":2,
+  "version": "V90",
 
-  "frontRange":[1,35],
-  "backRange":[1,12],
+  "front_rules": {
 
-  "rules":{
 
-    "allowRepeat":true,
+    "number_range": {
+      "min": 1,
+      "max": 35
+    },
 
-    "maxSameNumber":3,
 
-    "maxConsecutive":3,
+    "choose": 5,
 
-    "sumRange":[50,170]
 
-  }
+    "repeat": false,
+
+
+    "sort": true
+
+  },
+
+
+  "back_rules": {
+
+
+    "number_range": {
+      "min": 1,
+      "max": 12
+    },
+
+
+    "choose": 2,
+
+
+    "repeat": false,
+
+
+    "sort": true
+
+  },
+
+
+  "sum_rules": {
+
+
+    "front_sum": {
+
+
+      "low": 50,
+
+      "high": 140,
+
+
+      "weight": 0.15
+
+    }
+
+  },
+
+
+  "odd_even_rules": {
+
+
+    "front": {
+
+
+      "2_3": 0.35,
+
+      "3_2": 0.35,
+
+      "1_4": 0.15,
+
+      "4_1": 0.15
+
+    }
+
+  },
+
+
+  "zone_rules": {
+
+
+    "low_zone": "01-12",
+
+    "middle_zone": "13-24",
+
+    "high_zone": "25-35"
+
+
+  },
+
+
+  "consecutive_rules": {
+
+
+    "allow": true,
+
+
+    "max": 2,
+
+
+    "weight": 0.1
+
+  },
+
+
+  "repeat_history_rules": {
+
+
+    "enabled": true,
+
+
+    "max_repeat": 2,
+
+
+    "weight": 0.1
+
+  },
+
+
+  "description":
+
+  "V90大乐透基础规则库"
+
 }

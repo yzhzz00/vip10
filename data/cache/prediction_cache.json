@@ -1,4 +1,78 @@
 {
-  "updated":"",
-  "prediction":[]
+  "version": "V90",
+
+  "name": "预测结果缓存",
+
+
+  "enabled": true,
+
+
+  "current": {
+
+
+    "period": null,
+
+
+    "prediction": {
+
+
+      "front": [],
+
+
+      "back": []
+
+
+    },
+
+
+    "score": 0,
+
+
+    "confidence": 0
+
+
+  },
+
+
+
+  "history": [],
+
+
+
+  "cache_rules": {
+
+
+    "save_latest": true,
+
+
+    "max_records": 100,
+
+
+    "overwrite": true
+
+
+  },
+
+
+
+  "display": {
+
+
+    "fast_load": true,
+
+
+    "show_previous": true,
+
+
+    "show_score": true
+
+
+  },
+
+
+
+  "description":
+
+  "V90预测结果快速缓存"
+
 }

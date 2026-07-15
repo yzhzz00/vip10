@@ -1,0 +1,132 @@
+{
+  "version": "V90",
+
+  "name": "AI训练缓存",
+
+
+  "enabled": true,
+
+
+  "training": {
+
+
+    "status": "idle",
+
+
+    "progress": 0,
+
+
+    "samples": 0,
+
+
+    "last_train": null
+
+
+  },
+
+
+
+  "models": {
+
+
+    "frequency": {
+
+
+      "trained": false,
+
+
+      "samples": 0
+
+
+    },
+
+
+    "bayes": {
+
+
+      "trained": false,
+
+
+      "samples": 0
+
+
+    },
+
+
+    "markov": {
+
+
+      "trained": false,
+
+
+      "samples": 0
+
+
+    },
+
+
+    "montecarlo": {
+
+
+      "trained": false,
+
+
+      "samples": 0
+
+
+    },
+
+
+    "structure": {
+
+
+      "trained": false,
+
+
+      "samples": 0
+
+
+    }
+
+
+  },
+
+
+
+  "optimization": {
+
+
+    "reuse_feature": true,
+
+
+    "incremental_learning": true,
+
+
+    "save_checkpoint": true
+
+
+  },
+
+
+
+  "checkpoint": {
+
+
+    "version": "initial",
+
+
+    "data_hash": "",
+
+
+    "model_hash": ""
+
+
+  },
+
+
+
+  "description":
+
+  "V90 AI模型训练状态缓存"
+
+}

@@ -1,0 +1,147 @@
+{
+  "version": "V90",
+
+  "name": "贝叶斯概率模型配置",
+
+
+  "enabled": true,
+
+
+  "prior": {
+
+
+    "front_number": {
+
+
+      "range": "01-35",
+
+
+      "default_probability": 0.142857
+
+
+    },
+
+
+    "back_number": {
+
+
+      "range": "01-12",
+
+
+      "default_probability": 0.166667
+
+
+    }
+
+
+  },
+
+
+
+  "factors": {
+
+
+    "frequency": {
+
+
+      "enabled": true,
+
+
+      "weight": 0.30
+
+
+    },
+
+
+    "recent_trend": {
+
+
+      "enabled": true,
+
+
+      "weight": 0.20
+
+
+    },
+
+
+    "omission": {
+
+
+      "enabled": true,
+
+
+      "weight": 0.20
+
+
+    },
+
+
+    "markov": {
+
+
+      "enabled": true,
+
+
+      "weight": 0.20
+
+
+    },
+
+
+    "structure": {
+
+
+      "enabled": true,
+
+
+      "weight": 0.10
+
+
+    }
+
+
+  },
+
+
+
+  "posterior": {
+
+
+    "normalize": true,
+
+
+    "score_range": {
+
+
+      "min": 0,
+
+
+      "max": 100
+
+
+    }
+
+
+  },
+
+
+
+  "update": {
+
+
+    "feedback_enabled": true,
+
+
+    "learning_rate": 0.05
+
+
+  },
+
+
+
+  "description":
+
+  "V90贝叶斯后验概率评分参数"
+
+}

@@ -1,7 +1,0 @@
-{
-  "feature":0.20,
-  "theory":0.20,
-  "markov":0.20,
-  "bayes":0.15,
-  "montecarlo":0.25
-}

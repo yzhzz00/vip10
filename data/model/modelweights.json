@@ -1,0 +1,115 @@
+{
+  "version": "V90",
+
+  "name": "V90多模型融合权重",
+
+
+  "models": {
+
+
+    "frequency": {
+
+      "name": "历史频率模型",
+
+      "weight": 0.20
+
+    },
+
+
+    "cold_hot": {
+
+      "name": "冷热趋势模型",
+
+      "weight": 0.15
+
+    },
+
+
+    "omission": {
+
+      "name": "遗漏周期模型",
+
+      "weight": 0.15
+
+    },
+
+
+    "markov": {
+
+      "name": "马尔可夫转移模型",
+
+      "weight": 0.20
+
+    },
+
+
+    "bayes": {
+
+      "name": "贝叶斯概率模型",
+
+      "weight": 0.15
+
+    },
+
+
+    "montecarlo": {
+
+      "name": "蒙特卡罗模拟模型",
+
+      "weight": 0.10
+
+    },
+
+
+    "structure": {
+
+      "name": "号码结构模型",
+
+      "weight": 0.05
+
+    }
+
+
+  },
+
+
+  "fusion": {
+
+
+    "method":
+
+    "weighted_average",
+
+
+    "normalize": true,
+
+
+    "min_score": 0,
+
+
+    "max_score": 100
+
+
+  },
+
+
+  "learning": {
+
+
+    "enabled": true,
+
+
+    "feedback_adjust": 0.05,
+
+
+    "max_adjust": 0.20
+
+
+  },
+
+
+  "description":
+
+  "V90 AI多模型综合评分权重配置"
+
+}

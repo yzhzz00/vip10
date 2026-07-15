@@ -1,10 +1,6 @@
-/* 大乐透AI_V90 */
-/* Mobile UI Style */
-
-
 *{
 
-    box-sizing:border-box;
+box-sizing:border-box;
 
 }
 
@@ -12,66 +8,51 @@
 
 body{
 
+margin:0;
 
-    margin:0;
+padding:0;
 
+background:#07111f;
 
-    padding:0;
+color:#ffffff;
 
+font-family:
 
-    background:#111;
+-apple-system,
 
+BlinkMacSystemFont,
 
-    color:#eee;
+"Segoe UI",
 
-
-    font-family:
-
-    Arial,
-    "Microsoft YaHei",
-    sans-serif;
-
+sans-serif;
 
 }
-
-
 
 
 
 
 .container{
 
+width:100%;
 
-    width:100%;
+max-width:700px;
 
+margin:auto;
 
-    max-width:600px;
-
-
-    margin:auto;
-
-
-    padding:15px;
-
+padding:15px;
 
 }
 
 
 
 
-
-
 h1{
 
+text-align:center;
 
-    text-align:center;
+font-size:26px;
 
-
-    color:#00eaff;
-
-
-    font-size:26px;
-
+margin:10px 0;
 
 }
 
@@ -79,19 +60,15 @@ h1{
 
 h2{
 
+text-align:center;
 
-    text-align:center;
+font-size:18px;
 
+color:#38bdf8;
 
-    color:#aaa;
-
-
-    font-size:18px;
-
+margin-bottom:20px;
 
 }
-
-
 
 
 
@@ -99,33 +76,19 @@ h2{
 
 .panel{
 
+background:#172033;
 
-    background:#1c1c1c;
+border-radius:16px;
 
+padding:16px;
 
-    border-radius:12px;
+margin-bottom:16px;
 
+box-shadow:
 
-    padding:15px;
-
-
-    margin-bottom:15px;
-
-
-    box-shadow:
-
-    0 0 10px
-
-    rgba(
-        0,
-        255,
-        255,
-        0.15
-    );
-
+0 5px 20px rgba(0,0,0,.3);
 
 }
-
 
 
 
@@ -133,67 +96,46 @@ h2{
 
 .panel h3{
 
+color:#facc15;
 
-    margin-top:0;
+margin-top:0;
 
-
-    color:#00eaff;
-
-
-}
-
-
-
-
-
-
-
-
-
-button{
-
-
-    width:100%;
-
-
-    padding:14px;
-
-
-    border:none;
-
-
-    border-radius:10px;
-
-
-    background:#007cff;
-
-
-    color:white;
-
-
-    font-size:18px;
-
-
-    margin-top:10px;
-
+font-size:18px;
 
 }
 
 
 
 
+#status,
 
-button:active{
+#dataStatus,
+
+#learningStatus,
+
+#result,
+
+#report,
+
+#backtestResult,
+
+#agents{
 
 
-    transform:scale(0.98);
+background:#020617;
+
+border-radius:10px;
+
+padding:12px;
+
+min-height:45px;
+
+white-space:pre-wrap;
+
+word-break:break-word;
 
 
 }
-
-
-
-
 
 
 
@@ -202,23 +144,18 @@ button:active{
 .progress{
 
 
-    width:100%;
+height:20px;
 
+width:100%;
 
-    height:20px;
+background:#020617;
 
+border-radius:12px;
 
-    background:#333;
-
-
-    border-radius:20px;
-
-
-    overflow:hidden;
+overflow:hidden;
 
 
 }
-
 
 
 
@@ -227,37 +164,25 @@ button:active{
 #progressBar{
 
 
-    width:0%;
+height:100%;
+
+width:0%;
 
 
-    height:100%;
+background:
+
+linear-gradient(
+
+90deg,
+
+#22c55e,
+
+#38bdf8
+
+);
 
 
-    background:#00ff88;
-
-
-    transition:
-
-    width 0.3s;
-
-
-}
-
-
-
-
-
-
-
-
-
-#progressText{
-
-
-    text-align:center;
-
-
-    margin-top:8px;
+transition:.3s;
 
 
 }
@@ -266,29 +191,36 @@ button:active{
 
 
 
+button{
+
+
+width:100%;
+
+height:48px;
+
+margin-top:12px;
+
+border:0;
+
+border-radius:12px;
+
+background:#2563eb;
+
+color:white;
+
+font-size:16px;
+
+font-weight:bold;
+
+
+}
 
 
 
-
-#result{
-
-
-    min-height:120px;
+button:active{
 
 
-    background:#000;
-
-
-    padding:10px;
-
-
-    border-radius:8px;
-
-
-    overflow:auto;
-
-
-    font-size:14px;
+transform:scale(.97);
 
 
 }
@@ -296,7 +228,23 @@ button:active{
 
 
 
+input[type=file]{
 
+
+width:100%;
+
+padding:12px;
+
+background:#020617;
+
+color:white;
+
+border-radius:10px;
+
+margin-top:10px;
+
+
+}
 
 
 
@@ -304,28 +252,23 @@ button:active{
 textarea{
 
 
-    width:100%;
+width:100%;
 
+height:120px;
 
-    height:100px;
+background:#020617;
 
+color:white;
 
-    background:#222;
+border:0;
 
+border-radius:10px;
 
-    color:white;
+padding:12px;
 
+margin-top:10px;
 
-    border-radius:8px;
-
-
-    border:1px solid #555;
-
-
-    padding:10px;
-
-
-    resize:none;
+font-size:15px;
 
 
 }
@@ -333,6 +276,19 @@ textarea{
 
 
 
+pre{
+
+
+font-family:
+
+monospace;
+
+font-size:14px;
+
+line-height:1.5;
+
+
+}
 
 
 
@@ -341,36 +297,18 @@ textarea{
 @media(max-width:480px){
 
 
+.container{
 
-    h1{
+padding:10px;
 
-
-        font-size:22px;
-
-
-    }
+}
 
 
+h1{
 
+font-size:22px;
 
-    button{
-
-
-        font-size:16px;
-
-
-    }
-
-
-
-    .panel{
-
-
-        padding:12px;
-
-
-    }
-
+}
 
 
 }

@@ -1,4 +1,70 @@
 {
-  "updated":"",
-  "features":{}
+  "version": "V90",
+
+  "name": "特征计算缓存",
+
+
+  "enabled": true,
+
+
+  "cache": {
+
+
+    "frequency": {},
+
+
+    "cold_hot": {},
+
+
+    "omission": {},
+
+
+    "cycle": {},
+
+
+    "markov": {},
+
+
+    "structure": {}
+
+
+
+  },
+
+
+
+  "meta": {
+
+
+    "last_update": null,
+
+
+    "periods": 0,
+
+
+    "hash": ""
+
+  },
+
+
+
+  "settings": {
+
+
+    "auto_update": true,
+
+
+    "clear_on_new_data": true,
+
+
+    "max_size": 50
+
+
+  },
+
+
+  "description":
+
+  "V90特征工程缓存数据"
+
 }

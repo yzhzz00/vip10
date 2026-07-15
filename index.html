@@ -6,25 +6,18 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-content="width=device-width,
-initial-scale=1.0">
-
+content="width=device-width,initial-scale=1.0">
 
 <title>
-大乐透AI_V90
+大乐透AI V90 CORE
 </title>
 
-
-<link rel="stylesheet"
-href="style.css">
-
+<link rel="stylesheet" href="style.css">
 
 </head>
 
 
-
 <body>
-
 
 
 <div class="container">
@@ -40,32 +33,42 @@ V90 AI CORE
 </h2>
 
 
+<div class="panel">
+
+<h3>系统状态</h3>
+
+<div id="status">
+等待加载...
+</div>
+
+</div>
+
 
 
 <div class="panel">
-
 
 <h3>
-系统状态
+历史数据
 </h3>
 
+<input
+type="file"
+id="dataFile"
+accept=".txt">
 
-<div id="systemStatus">
 
-等待加载...
-
+<div id="dataStatus">
+等待加载大乐透历史数据
 </div>
 
 
 </div>
-
 
 
 
 
 
 <div class="panel">
-
 
 <h3>
 AI分析进度
@@ -74,27 +77,19 @@ AI分析进度
 
 <div class="progress">
 
-
 <div id="progressBar">
 
 </div>
 
-
 </div>
 
 
-<p id="progressText">
-
+<div id="progressText">
 等待任务...
-
-</p>
-
-
-
 </div>
 
 
-
+</div>
 
 
 
@@ -108,13 +103,14 @@ AI智能分析中心
 </h3>
 
 
-
-<button onclick="startV90()">
-
+<button id="startBtn">
 开始 V90 AI分析
-
 </button>
 
+
+<pre id="result">
+等待分析...
+</pre>
 
 
 </div>
@@ -124,27 +120,19 @@ AI智能分析中心
 
 
 
-
 <div class="panel">
-
 
 <h3>
 AI多模型预测报告
 </h3>
 
 
-
-<div id="result">
-
-等待分析...
-
-</div>
-
+<pre id="report">
+等待生成...
+</pre>
 
 
 </div>
-
-
 
 
 
@@ -152,30 +140,23 @@ AI多模型预测报告
 
 
 <div class="panel">
-
 
 <h3>
 历史回测系统
 </h3>
 
 
-<button>
-
+<button id="backtestBtn">
 开始回测
-
 </button>
 
 
-<div>
-
+<pre id="backtestResult">
 等待测试...
-
-</div>
-
+</pre>
 
 
 </div>
-
 
 
 
@@ -183,7 +164,6 @@ AI多模型预测报告
 
 
 <div class="panel">
-
 
 <h3>
 开奖反馈学习
@@ -191,23 +171,24 @@ AI多模型预测报告
 
 
 <textarea
-id="feedback"
-placeholder="输入实际开奖">
-
+id="feedbackInput"
+placeholder="输入开奖反馈">
 </textarea>
 
 
-
-<button>
-
+<button id="saveFeedback">
 保存开奖反馈
-
 </button>
 
+
+<div id="learningStatus">
+
+等待反馈...
 
 </div>
 
 
+</div>
 
 
 
@@ -215,107 +196,25 @@ placeholder="输入实际开奖">
 
 <div class="panel">
 
-
 <h3>
-V90 AI Agent模型
+V90 AI Agent
 </h3>
 
 
-<div>
-
+<pre id="agents">
 加载中...
-
-</div>
-
-
-</div>
-
+</pre>
 
 
 </div>
 
 
 
+</div>
 
 
 
-
-
-
-<!-- 核心 -->
-
-<script src="engine.js"></script>
-
-
-
-<!-- core -->
-
-<script src="core/loadingengine.js"></script>
-
-<script src="core/taskengine.js"></script>
-
-<script src="core/masterengine.js"></script>
-
-<script src="core/dataengine.js"></script>
-
-<script src="core/featureengine.js"></script>
-
-<script src="core/theoryengine.js"></script>
-
-<script src="core/markovengine.js"></script>
-
-<script src="core/matrixengine.js"></script>
-
-<script src="core/bayesengine.js"></script>
-
-<script src="core/montecarloengine.js"></script>
-
-<script src="core/trainingengine.js"></script>
-
-<script src="core/predictionengine.js"></script>
-
-<script src="core/scoringengine.js"></script>
-
-<script src="core/riskengine.js"></script>
-
-<script src="core/evaluationengine.js"></script>
-
-<script src="core/learningengine.js"></script>
-
-
-
-
-
-<!-- agents -->
-
-
-<script src="agents/trendagent.js"></script>
-
-<script src="agents/structureagent.js"></script>
-
-<script src="agents/markovagent.js"></script>
-
-<script src="agents/riskagent.js"></script>
-
-<script src="agents/reviewagent.js"></script>
-
-<script src="agents/theoryagent.js"></script>
-
-<script src="agents/criticagent.js"></script>
-
-<script src="agents/learningagent.js"></script>
-
-<script src="agents/antihumanagent.js"></script>
-
-<script src="agents/masteragent.js"></script>
-
-
-
-
-<!-- 控制 -->
-
-<script src="script.js"></script>
-
+<script src="V90.bundle.js"></script>
 
 
 </body>
