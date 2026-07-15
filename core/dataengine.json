@@ -1,6 +1,6 @@
 // 大乐透AI_V90
-// Data Engine
-// 历史开奖数据管理
+// Data Engine V90
+// 大乐透历史数据读取与标准化
 
 
 window.DataEngine = {
@@ -9,83 +9,22 @@ window.DataEngine = {
     history: [],
 
 
-    loaded:false,
+    initialized:false,
 
 
 
-    // 初始化
-
-    async init(){
+    init(){
 
 
-        await this.loadData();
+        this.history=[];
 
 
-    },
+        this.initialized=true;
 
 
-
-
-
-    // 加载历史数据
-
-
-    async loadData(){
-
-
-        try{
-
-
-            let response =
-
-            await fetch(
-                "data/dlt.txt"
-            );
-
-
-
-            let text =
-
-            await response.text();
-
-
-
-            this.history =
-
-            this.parseData(
-                text
-            );
-
-
-
-            this.loaded=true;
-
-
-
-            console.log(
-                "历史数据加载完成:",
-                this.history.length
-            );
-
-
-
-        }catch(error){
-
-
-
-            console.error(
-                "数据加载失败",
-                error
-            );
-
-
-
-            this.history=[];
-
-
-
-        }
-
+        console.log(
+            "DataEngine初始化完成"
+        );
 
 
     },
@@ -96,164 +35,191 @@ window.DataEngine = {
 
 
 
+    // 加载txt文本
 
-
-    // 数据解析
-
-
-    parseData(text){
+    loadText(text){
 
 
 
         let lines =
 
-        text
-        .split("\n")
-        .filter(
-            line =>
-            line.trim()!==""
-        );
+        text.split(/\r?\n/);
 
 
 
-        let result=[];
+        let data=[];
 
 
 
-        for(
-            let line of lines
-        ){
 
-
-            let item =
-
-            this.parseLine(
-                line
-            );
+        lines.forEach(
+            line=>{
 
 
 
-            if(item){
+                line=line.trim();
 
-                result.push(item);
+
+
+                if(!line){
+
+                    return;
+
+                }
+
+
+
+
+                let parts =
+
+                line.split(/\s+/);
+
+
+
+
+
+                /*
+                
+                格式:
+
+                期号
+                日期
+                前5
+                后2
+
+                共9个字段
+
+                */
+
+
+
+
+                if(
+                    parts.length < 9
+                ){
+
+                    return;
+
+                }
+
+
+
+
+
+
+                let period =
+
+                parts[0];
+
+
+
+                let date =
+
+                parts[1];
+
+
+
+
+
+
+                let front =
+
+                parts
+                .slice(
+                    2,
+                    7
+                )
+                .map(
+                    Number
+                );
+
+
+
+
+
+                let back =
+
+                parts
+                .slice(
+                    7,
+                    9
+                )
+                .map(
+                    Number
+                );
+
+
+
+
+
+
+
+
+                // 数据检查
+
+
+                if(
+                    front.length!==5 ||
+                    back.length!==2
+                ){
+
+                    return;
+
+                }
+
+
+
+
+
+                data.push({
+
+
+                    period,
+
+
+                    date,
+
+
+                    front,
+
+
+                    back
+
+
+
+                });
+
+
+
+
 
             }
-
-
-        }
-
-
-
-        return result;
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // 单行解析
-
-
-    parseLine(line){
-
-
-
-        /*
-        
-        支持格式：
-
-        2026001 01 05 12 23 35 03 08
-
-        或
-
-        01 05 12 23 35 + 03 08
-
-        */
-
-
-
-        let clean =
-
-        line.replace(
-            /\+/g,
-            " "
         );
 
 
 
-        let nums =
 
-        clean
-        .split(
-            /\s+/
-        )
-        .map(
-            Number
-        )
-        .filter(
-            n =>
-            !isNaN(n)
+
+
+
+        this.history=data;
+
+
+
+        console.log(
+
+            "大乐透数据加载:",
+
+            data.length,
+
+            "期"
+
         );
 
 
 
-        if(
-            nums.length < 7
-        ){
 
-            return null;
-
-        }
-
-
-
-        let start = 0;
-
-
-
-        // 如果第一位是期号
-
-        if(
-            nums.length >=8
-        ){
-
-            start=1;
-
-        }
-
-
-
-
-        return {
-
-
-            front:
-
-
-            nums.slice(
-                start,
-                start+5
-            ),
-
-
-
-            back:
-
-
-            nums.slice(
-                start+5,
-                start+7
-            )
-
-
-
-        };
+        return data;
 
 
 
@@ -284,17 +250,30 @@ window.DataEngine = {
 
 
 
-    // 获取最近多少期
 
 
-    getRecent(
-        count=100
-    ){
+    // 获取最新一期
 
 
-        return this.history.slice(
-            -count
-        );
+    getLatest(){
+
+
+
+        if(
+            this.history.length===0
+        ){
+
+            return null;
+
+        }
+
+
+
+
+        return this.history[
+            this.history.length-1
+        ];
+
 
 
     },
@@ -305,15 +284,15 @@ window.DataEngine = {
 
 
 
-    // 获取最新一期
 
 
-    getLatest(){
+    // 数据统计
 
 
-        return this.history[
-            this.history.length-1
-        ];
+    count(){
+
+
+        return this.history.length;
 
 
     }

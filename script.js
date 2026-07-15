@@ -1,49 +1,56 @@
 // 大乐透AI_V90
-// Front Controller
-// 网页总控制
+// script.js V90 FINAL
+// 网页总控制中心
 
 
-window.UI = {
+window.V90 = {
+
+    history: [],
+
+    report: null,
 
 
-    updateProgress(
-        percent,
-        text
-    ){
+    updateProgress(percent, text){
 
+        const bar =
+        document.getElementById("progressBar");
 
-        let bar =
-        document.getElementById(
-            "progressBar"
-        );
-
-
-        let status =
-        document.getElementById(
-            "progressText"
-        );
-
+        const txt =
+        document.getElementById("progressText");
 
 
         if(bar){
 
             bar.style.width =
-            percent+"%";
+            percent + "%";
 
         }
 
 
+        if(txt){
 
-        if(status){
-
-            status.innerHTML =
-            text+
-            " "+
-            percent+
-            "%";
+            txt.innerHTML =
+            text + " " + percent + "%";
 
         }
 
+    },
+
+
+
+
+
+    showStatus(text){
+
+        const box =
+        document.getElementById("systemStatus");
+
+
+        if(box){
+
+            box.innerHTML=text;
+
+        }
 
     },
 
@@ -52,24 +59,16 @@ window.UI = {
 
 
 
-    showResult(
-        data
-    ){
+    showResult(data){
 
-
-        let box =
-        document.getElementById(
-            "result"
-        );
-
+        const box =
+        document.getElementById("result");
 
 
         if(box){
 
-
             box.innerHTML =
-
-            "<pre>"+
+            "<pre>" +
             JSON.stringify(
                 data,
                 null,
@@ -78,15 +77,9 @@ window.UI = {
             +
             "</pre>";
 
-
         }
 
-
     }
-
-
-
-
 
 };
 
@@ -98,100 +91,83 @@ window.UI = {
 
 
 
-// 系统启动
+// ==========================
+// 加载大乐透历史数据
+// ==========================
 
 
-async function boot(){
+async function loadDLT(){
 
 
-
-    console.log(
-        "大乐透AI V90启动"
-    );
+    try{
 
 
+        V90.showStatus(
+            "正在加载大乐透历史数据..."
+        );
 
 
-    LoadingEngine.init();
-
-
-
-    DataEngine.init();
-
-
-
-    FeatureEngine.init(
-        DataEngine.getHistory()
-    );
+        const res =
+        await fetch(
+            "data/dlt.txt"
+        );
 
 
 
-    TheoryEngine.init();
-
-
-
-    MarkovEngine.init(
-        DataEngine.getHistory()
-    );
-
-
-
-    BayesEngine.init(
-        DataEngine.getHistory()
-    );
-
-
-
-    MatrixEngine.init();
-
-
-
-    MonteCarloEngine.init();
-
-
-
-    TrainingEngine.init();
-
-
-
-    PredictionEngine.init();
-
-
-
-    ScoringEngine.init();
-
-
-
-    RiskEngine.init();
-
-
-
-    EvaluationEngine.init(
-        DataEngine.getHistory()
-    );
-
-
-
-    LearningEngine.init();
+        const text =
+        await res.text();
 
 
 
 
+        const history =
 
-    MasterEngine.init();
-
-
-
-
-
-    MasterAgent.init();
+        DataEngine.loadText(
+            text
+        );
 
 
 
 
-    console.log(
-        "V90全部模块加载完成"
-    );
+        V90.history =
+        history;
+
+
+
+
+        V90.showStatus(
+
+            "大乐透历史数据：已加载<br>" +
+
+            "数据期数：" +
+
+            history.length
+
+        );
+
+
+
+        return history;
+
+
+
+    }catch(e){
+
+
+        console.error(e);
+
+
+
+        V90.showStatus(
+
+            "数据加载失败，请检查dlt.txt路径"
+
+        );
+
+
+        return [];
+
+    }
 
 
 
@@ -205,10 +181,108 @@ async function boot(){
 
 
 
-// 开始分析
+// ==========================
+// 系统启动
+// ==========================
+
+
+async function boot(){
+
+
+
+    console.log(
+        "V90启动"
+    );
+
+
+
+    // 初始化核心
+
+
+    DataEngine.init();
+
+
+    FeatureEngine.init();
+
+
+    TheoryEngine.init();
+
+
+    MarkovEngine.init();
+
+
+    BayesEngine.init();
+
+
+
+    MatrixEngine.init();
+
+
+    MonteCarloEngine.init();
+
+
+
+    TrainingEngine.init();
+
+
+    PredictionEngine.init();
+
+
+    ScoringEngine.init();
+
+
+    RiskEngine.init();
+
+
+    EvaluationEngine.init();
+
+
+    LearningEngine.init();
+
+
+
+    MasterEngine.init();
+
+
+
+    MasterAgent.init();
+
+
+
+
+    await loadDLT();
+
+
+
+
+    console.log(
+        "V90初始化完成"
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// ==========================
+// 开始AI分析
+// ==========================
 
 
 async function startV90(){
+
+
+
+    V90.updateProgress(
+        0,
+        "开始分析"
+    );
 
 
 
@@ -216,13 +290,40 @@ async function startV90(){
 
 
 
-        LoadingEngine.start(
-            "V90 AI分析启动"
+        V90.updateProgress(
+            10,
+            "读取历史数据"
         );
 
 
 
+        let history =
+        DataEngine.getHistory();
 
+
+
+
+
+        if(
+            history.length===0
+        ){
+
+
+            throw new Error(
+                "没有历史数据"
+            );
+
+
+        }
+
+
+
+
+
+        V90.updateProgress(
+            25,
+            "特征分析"
+        );
 
 
 
@@ -235,52 +336,90 @@ async function startV90(){
 
 
 
+
+        V90.updateProgress(
+            40,
+            "理论分析"
+        );
+
+
+
         let theory =
 
-        TheoryEngine.analyze({
-
-            front:[]
-            
-        });
+        TheoryEngine.analyze();
 
 
 
+
+
+
+
+
+        V90.updateProgress(
+            55,
+            "马尔可夫分析"
+        );
 
 
 
         let markov =
 
-        MarkovEngine.predictNext(
+        MarkovEngine.predictNext();
 
-            DataEngine.getLatest()
 
+
+
+
+
+
+        V90.updateProgress(
+            70,
+            "蒙特卡罗模拟"
         );
-
-
-
-
-
-
-        let bayes =
-
-        BayesEngine.predict();
-
-
-
 
 
 
         let monte =
 
-        await MonteCarloEngine.run({
+        await MonteCarloEngine.run();
 
-            count:1000000
+
+
+
+
+
+
+        V90.updateProgress(
+            85,
+            "AI会议裁决"
+        );
+
+
+
+        let meeting =
+
+        await MasterAgent.analyze({
+
+            features,
+
+            theory,
+
+            markov,
+
+            montecarlo:monte
 
         });
 
 
 
 
+
+
+
+        V90.updateProgress(
+            95,
+            "生成预测"
+        );
 
 
 
@@ -290,15 +429,9 @@ async function startV90(){
 
             theory,
 
-
             markov,
 
-
-            bayes,
-
-
             montecarlo:monte
-
 
         });
 
@@ -321,8 +454,10 @@ async function startV90(){
 
 
 
-
         let report={
+
+
+            meeting,
 
 
             prediction,
@@ -331,10 +466,9 @@ async function startV90(){
             risk,
 
 
+            period:
 
-            time:
-
-            new Date()
+            history.length
 
 
 
@@ -345,38 +479,48 @@ async function startV90(){
 
 
 
-        UI.showResult(
+
+        V90.report =
+        report;
+
+
+
+
+
+        V90.showResult(
             report
         );
 
 
 
 
-
-
-        LoadingEngine.finish(
+        V90.updateProgress(
+            100,
             "分析完成"
         );
 
 
 
 
-        return report;
-
-
 
     }catch(e){
-
 
 
         console.error(e);
 
 
 
-        LoadingEngine.finish(
+        V90.updateProgress(
+            0,
             "分析失败"
         );
 
+
+        V90.showResult(
+            {
+                error:e.message
+            }
+        );
 
 
     }
@@ -391,12 +535,4 @@ async function startV90(){
 
 
 
-
-
-
-// 页面加载
-
-
-window.onload =
-
-boot;
+window.onload = boot;
