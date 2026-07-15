@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V71.1
+V71.1 AI CORE
 
-Review AI
+Review Agent
 
-开奖复盘学习模块
+开奖反馈复盘模型
 
 ================================
 */
@@ -20,49 +20,10 @@ class ReviewAgent {
 constructor(){
 
 
-this.name="Review AI";
+    this.name="Review AI";
 
 
-this.history=[];
-
-
-}
-
-
-
-
-
-
-
-
-
-savePrediction(data){
-
-
-
-this.history.push({
-
-
-
-type:"prediction",
-
-
-
-data:data,
-
-
-
-time:new Date()
-
-.toLocaleString()
-
-
-
-});
-
-
-
-return true;
+    this.records=[];
 
 
 
@@ -76,33 +37,91 @@ return true;
 
 
 
-saveResult(result){
+analyze(history=[]){
 
 
 
-this.history.push({
+    return {
 
 
 
-type:"result",
+        agent:this.name,
 
 
 
-data:result,
+        records:
+
+        this.records.length,
 
 
 
-time:new Date()
-
-.toLocaleString()
+        description:[
 
 
 
-});
+            "等待开奖反馈",
 
 
 
-return true;
+            "记录预测结果与实际结果差异",
+
+
+
+            "为自主学习提供样本"
+
+
+
+        ]
+
+
+
+    };
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+// =====================
+// 保存预测
+// =====================
+
+
+
+savePrediction(prediction){
+
+
+
+    this.records.push({
+
+
+
+        type:"prediction",
+
+
+
+        data:prediction,
+
+
+
+        time:
+
+        new Date()
+
+        .toISOString()
+
+
+
+    });
 
 
 
@@ -116,29 +135,233 @@ return true;
 
 
 
-compare(prediction,actual){
+
+
+// =====================
+// 开奖反馈
+// =====================
 
 
 
-if(
-
-!prediction ||
-
-!actual
-
-){
+feedback(result){
 
 
 
-return {
+    if(
+
+        !result ||
+
+        !result.front ||
+
+        !result.back
+
+    ){
 
 
 
-error:"数据不足"
+        return {
 
 
 
-};
+            error:"开奖数据格式错误"
+
+
+
+        };
+
+
+
+    }
+
+
+
+
+
+
+
+
+    let last =
+
+    this.records[
+
+        this.records.length-1
+
+    ];
+
+
+
+
+
+
+
+
+    if(!last){
+
+
+
+        return {
+
+
+
+            error:"没有预测记录"
+
+
+
+        };
+
+
+
+    }
+
+
+
+
+
+
+
+
+    let prediction =
+
+    last.data;
+
+
+
+
+
+
+
+    let frontHit=0;
+
+
+
+    let backHit=0;
+
+
+
+
+
+
+
+    prediction.front
+
+    .forEach(n=>{
+
+
+
+        if(
+
+            result.front.includes(n)
+
+        ){
+
+
+
+            frontHit++;
+
+
+
+        }
+
+
+
+    });
+
+
+
+
+
+
+
+
+
+    prediction.back
+
+    .forEach(n=>{
+
+
+
+        if(
+
+            result.back.includes(n)
+
+        ){
+
+
+
+            backHit++;
+
+
+
+        }
+
+
+
+    });
+
+
+
+
+
+
+
+
+
+    let review={
+
+
+
+        type:"feedback",
+
+
+
+        prediction:prediction,
+
+
+
+        result:result,
+
+
+
+        hit:{
+
+
+
+            front:frontHit,
+
+
+
+            back:backHit
+
+
+
+        },
+
+
+
+        time:
+
+        new Date()
+
+        .toISOString()
+
+
+
+    };
+
+
+
+
+
+
+
+    this.records.push(review);
+
+
+
+
+
+
+    return review;
 
 
 
@@ -151,117 +374,38 @@ error:"数据不足"
 
 
 
-let frontHit=0;
-
-
-let backHit=0;
 
 
 
+// =====================
+// 状态
+// =====================
 
 
 
-
-prediction.front.forEach(num=>{
-
-
-
-if(
-
-actual.front.includes(num)
-
-){
+status(){
 
 
 
-frontHit++;
+    return {
 
 
 
-}
+        agent:this.name,
 
 
 
-});
+        records:
+
+        this.records.length
 
 
 
-
-
-
-
-prediction.back.forEach(num=>{
-
-
-
-if(
-
-actual.back.includes(num)
-
-){
-
-
-
-backHit++;
+    };
 
 
 
 }
-
-
-
-});
-
-
-
-
-
-
-
-
-
-return {
-
-
-
-agent:this.name,
-
-
-
-frontHit:frontHit,
-
-
-
-backHit:backHit,
-
-
-
-totalHit:
-
-
-
-frontHit+backHit,
-
-
-
-level:
-
-
-
-this.getLevel(
-
-frontHit,
-
-backHit
-
-)
-
-
-
-};
-
-
-
 
 
 
@@ -274,143 +418,6 @@ backHit
 
 
 
-
-getLevel(front,back){
-
-
-
-if(
-
-front===5 && back===2
-
-){
-
-
-
-return "一等奖命中";
-
-
-
-}
-
-
-
-if(
-
-front===5 && back>=1
-
-){
-
-
-
-return "二等奖级别";
-
-
-
-}
-
-
-
-if(
-
-front>=4
-
-){
-
-
-
-return "高等奖级别";
-
-
-
-}
-
-
-
-if(
-
-front>=3
-
-){
-
-
-
-return "小奖级别";
-
-
-
-}
-
-
-
-
-
-return "未命中";
-
-
-
-}
-
-
-
-
-
-
-
-
-
-analyze(history){
-
-
-
-return {
-
-
-
-agent:this.name,
-
-
-
-sampleCount:
-
-this.history.length,
-
-
-
-last:
-
-
-
-this.history.slice(-10),
-
-
-
-strategy:
-
-
-
-"预测结果与开奖反馈对比学习"
-
-
-
-};
-
-
-
-}
-
-
-
-
-
-
-}
-
-
-
-
-
-
-window.ReviewAgent=
+window.ReviewAgent =
 
 new ReviewAgent();

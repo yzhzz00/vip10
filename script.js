@@ -3,15 +3,26 @@
 
 大乐透智能分析系统
 
-V71.1
+V71.1 AI CORE
 
-前端控制脚本
+script.js
+
+页面控制
 
 ================================
 */
 
 
-let systemReady=false;
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+
+initSystem();
+
+
+
+});
 
 
 
@@ -21,89 +32,46 @@ let systemReady=false;
 
 
 
-window.onload=async function(){
+async function initSystem(){
 
 
 
-try{
+    try{
 
 
 
-if(
-!window.AIEngine
-){
-
-
-
-throw new Error(
-"AIEngine不存在"
-);
-
-
-
-}
+        await AIEngine.init();
 
 
 
 
-
-
-await AIEngine.init();
-
+        showStatus();
 
 
 
+    }
+
+    catch(e){
 
 
 
-systemReady=true;
+        console.error(e);
 
 
 
+        document.getElementById(
+            "status"
+        ).innerHTML =
+
+        "加载失败："+e.message;
 
 
 
-showStatus();
-
-
-
-
-
-
-showAgents();
-
-
-
+    }
 
 
 
 }
-
-catch(e){
-
-
-
-console.error(e);
-
-
-
-document.getElementById(
-
-"dataStatus"
-
-).innerHTML=
-
-
-
-"加载失败："+e.message;
-
-
-
-}
-
-
-
-};
 
 
 
@@ -117,77 +85,48 @@ function showStatus(){
 
 
 
-let status=
+    let status=
 
-AIEngine.status();
-
-
+    AIEngine.status();
 
 
 
 
-document.getElementById(
 
-"dataStatus"
+    let box=
 
-).innerHTML=
-
-
-
-`
-
-<p>系统加载成功</p>
-
-<p>版本：${status.version}</p>
-
-<p>历史数据：${status.data}</p>
-
-<p>状态：${status.ready}</p>
-
-`;
-
-
-
-}
+    document.getElementById(
+        "status"
+    );
 
 
 
 
 
 
+    if(box){
 
 
 
-function showAgents(){
+        box.innerHTML=
+
+        `
+
+        系统加载成功<br>
+
+        版本：${status.version}<br>
+
+        历史数据：${status.data}<br>
+
+        AI模型：
+
+        ${status.agents.join("/")}
+
+        `;
 
 
 
-let box=
-
-document.getElementById(
-
-"agentStatus"
-
-);
-
-
-
-
-
-
-box.innerHTML=
-
-
-
-AIEngine.status()
-
-.agents
-
-.join(
-
-"<br>"
-
-);
+    }
 
 
 
@@ -205,88 +144,60 @@ async function startAI(){
 
 
 
-if(!systemReady){
+    let reportBox=
+
+    document.getElementById(
+        "report"
+    );
 
 
 
-alert(
-
-"系统未准备完成"
-
-);
+    if(reportBox){
 
 
 
-return;
+        reportBox.innerHTML=
+
+        "AI多模型会议分析中...";
 
 
 
-}
-
-
-
-
-
-
-
-let box=
-
-document.getElementById(
-
-"analysisResult"
-
-);
+    }
 
 
 
 
 
 
-box.innerHTML=
-
-"AI分析中...";
+    try{
 
 
 
+        let result=
 
-
-
-
-
-try{
-
-
-
-let result=
-
-await AIEngine.analyze();
+        await AIEngine.analyze();
 
 
 
 
 
-
-
-renderResult(result);
-
+        renderReport(result);
 
 
 
+    }
 
-
-}
-
-catch(e){
-
-
-
-box.innerHTML=
-
-"分析失败："+e.message;
+    catch(e){
 
 
 
-}
+        reportBox.innerHTML=
+
+        "分析失败："+e.message;
+
+
+
+    }
 
 
 
@@ -300,25 +211,22 @@ box.innerHTML=
 
 
 
-function renderResult(result){
+function renderReport(result){
 
 
 
-let html="";
+    let html="";
 
 
 
 
 
 
-// Agent报告
 
 
-html+=`
+    html+=`
 
-<h3>
-AI多模型会议报告
-</h3>
+<h3>AI多模型会议报告</h3>
 
 `;
 
@@ -328,34 +236,37 @@ AI多模型会议报告
 
 
 
-for(let key in result.models){
+
+
+// Agent报告
 
 
 
-let model=
+for(
 
-result.models[key];
+let key in result.models
 
-
-
-
-
-
-html+=`
+){
 
 
 
-<div class="ai-box">
+    html+=`
+
+<div class="ai-card">
 
 
-<h4>${key.toUpperCase()} AI</h4>
+<h4>
+
+${key.toUpperCase()} AI
+
+</h4>
 
 
 <pre>
 
 ${JSON.stringify(
 
-model,
+result.models[key],
 
 null,
 
@@ -382,18 +293,19 @@ null,
 
 
 
+
 // Monte Carlo
 
 
-if(
 
-result.simulation
-
-){
+if(result.simulation){
 
 
 
 html+=`
+
+<div class="ai-card">
+
 
 <h3>
 
@@ -410,9 +322,8 @@ ${result.simulation.simulation}
 
 </p>
 
+
 `;
-
-
 
 
 
@@ -420,26 +331,22 @@ ${result.simulation.simulation}
 
 result.simulation.top
 
-.forEach((item,index)=>{
+.forEach(
 
+(item,index)=>{
 
 
 html+=`
 
-
-<div class="ticket">
-
-
-第 ${index+1} 名
+<p>
 
 
-<br>
+第 ${index+1} 名<br>
 
 
 前区：
 
 ${item.front.join(" ")}
-
 
 <br>
 
@@ -448,7 +355,6 @@ ${item.front.join(" ")}
 
 ${item.back.join(" ")}
 
-
 <br>
 
 
@@ -456,15 +362,26 @@ ${item.back.join(" ")}
 
 ${item.score}
 
-
-</div>
+</p>
 
 
 `;
 
 
 
-});
+}
+
+);
+
+
+
+
+
+html+=`
+
+</div>
+
+`;
 
 
 
@@ -481,11 +398,14 @@ ${item.score}
 // Master
 
 
+
 if(result.decision){
 
 
 
 html+=`
+
+<div class="ai-card">
 
 
 <h3>
@@ -510,6 +430,9 @@ null,
 </pre>
 
 
+</div>
+
+
 `;
 
 
@@ -527,11 +450,14 @@ null,
 // Critic
 
 
+
 if(result.critic){
 
 
 
 html+=`
+
+<div class="ai-card">
 
 
 <h3>
@@ -556,60 +482,8 @@ null,
 </pre>
 
 
-`;
+</div>
 
-
-
-}
-
-
-
-
-
-
-
-document.getElementById(
-
-"analysisResult"
-
-).innerHTML=
-
-html;
-
-
-
-
-
-
-
-
-document.getElementById(
-
-"aiReport"
-
-).innerHTML=
-
-`
-
-AI会议完成
-
-
-<br>
-
-版本：
-
-${result.version}
-
-
-<br>
-
-参与模型：
-
-${result.agents.join(
-
-" / "
-
-)}
 
 `;
 
@@ -625,20 +499,26 @@ ${result.agents.join(
 
 
 
-function saveFeedback(){
-
-
-
 document.getElementById(
 
-"learningStatus"
+"report"
 
-).innerHTML=
-
-
-
-"开奖反馈已保存";
+).innerHTML=html;
 
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+// 页面按钮调用
+
+window.startAI=startAI;

@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V71.1
+V71.1 AI CORE
 
-Theory AI
+Theory Agent
 
-大乐透理论库模块
+大乐透理论库模型
 
 ================================
 */
@@ -20,7 +20,7 @@ class TheoryAgent {
 constructor(){
 
 
-this.name="Theory AI";
+    this.name="Theory AI";
 
 
 }
@@ -33,29 +33,127 @@ this.name="Theory AI";
 
 
 
-analyze(history){
+analyze(history=[]){
 
 
 
-if(
+    if(
 
-!history ||
+        !history ||
 
-history.length===0
+        history.length===0
 
-){
-
-
-
-return {
+    ){
 
 
 
-error:"暂无历史数据"
+        return {
+
+
+            error:"无历史数据"
+
+
+        };
+
+
+    }
 
 
 
-};
+
+
+
+
+    let latest =
+
+    history[
+
+        history.length-1
+
+    ];
+
+
+
+
+
+
+    return {
+
+
+
+        agent:this.name,
+
+
+
+        oddEven:
+
+        this.analyzeOddEven(
+
+            history
+
+        ),
+
+
+
+
+        bigSmall:
+
+        this.analyzeBigSmall(
+
+            history
+
+        ),
+
+
+
+
+        zone:
+
+        this.analyzeZone(
+
+            history
+
+        ),
+
+
+
+
+        sum:
+
+        this.analyzeSum(
+
+            history
+
+        ),
+
+
+
+
+        description:[
+
+
+
+            "奇偶结构理论分析完成",
+
+
+
+            "大小比例理论分析完成",
+
+
+
+            "三区分布理论分析完成",
+
+
+
+            "和值模型分析完成"
+
+
+
+        ]
+
+
+
+    };
 
 
 
@@ -68,189 +166,279 @@ error:"暂无历史数据"
 
 
 
-let recent=
 
-history.slice(-100);
 
+// =====================
+// 奇偶结构
+// =====================
 
 
 
+analyzeOddEven(history){
 
 
-let odd={};
 
+    let item=
 
-let size={};
+    history[
 
+        history.length-1
 
-let zones={};
+    ];
 
 
 
-let sums=[];
+    let odd=0;
 
 
 
+    item.front.forEach(n=>{
 
 
 
+        if(n%2!==0){
 
 
 
-recent.forEach(item=>{
+            odd++;
 
 
+        }
 
-let front=item.front;
 
 
+    });
 
 
 
 
 
 
-// 奇偶
+    return {
 
 
-let oddCount=
 
-front.filter(
+        odd:odd,
 
-n=>n%2!==0
 
-).length;
 
+        even:5-odd,
 
 
 
+        pattern:
 
+        odd+":"+(5-odd)
 
-let evenCount=
 
-5-oddCount;
 
+    };
 
 
 
+}
 
 
-let oddPattern=
 
-oddCount+":"+evenCount;
 
 
 
 
 
 
-odd[oddPattern]=
+// =====================
+// 大小结构
+// 大乐透前区
+// 1-17小 18-35大
+// =====================
 
-(odd[oddPattern]||0)+1;
 
 
+analyzeBigSmall(history){
 
 
 
+    let item=
 
+    history[
 
+        history.length-1
 
+    ];
 
 
-// 大小
 
+    let small=0;
 
-let small=
 
-front.filter(
+    let big=0;
 
-n=>n<=17
 
-).length;
 
 
 
+    item.front.forEach(n=>{
 
 
 
-let big=
+        if(n<=17){
 
-5-small;
 
 
+            small++;
 
 
 
+        }
 
-let sizePattern=
+        else{
 
-small+":"+big;
 
 
+            big++;
 
 
 
+        }
 
-size[sizePattern]=
 
-(size[sizePattern]||0)+1;
 
+    });
 
 
 
 
 
 
+    return {
 
 
 
+        small:small,
 
+
+
+        big:big,
+
+
+
+        pattern:
+
+        small+":"+big
+
+
+
+    };
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================
 // 三区
-
-
-front.forEach(num=>{
-
-
-
-if(num<=12){
+// 1-12
+// 13-24
+// 25-35
+// =====================
 
 
 
-zones.zone1=
+analyzeZone(history){
 
-(zones.zone1||0)+1;
+
+
+    let item=
+
+    history[
+
+        history.length-1
+
+    ];
+
+
+
+    let zone1=0;
+
+
+    let zone2=0;
+
+
+    let zone3=0;
+
+
+
+
+
+
+    item.front.forEach(n=>{
+
+
+
+        if(n<=12){
+
+
+
+            zone1++;
+
+
+        }
+
+        else if(n<=24){
+
+
+
+            zone2++;
+
+
+        }
+
+        else{
+
+
+
+            zone3++;
+
+
+        }
+
+
+
+    });
+
+
+
+
+
+
+
+    return {
+
+
+
+        zone1:zone1,
+
+
+        zone2:zone2,
+
+
+        zone3:zone3
+
+
+
+    };
 
 
 
 }
 
-else if(num<=24){
-
-
-
-zones.zone2=
-
-(zones.zone2||0)+1;
-
-
-
-}
-
-else{
-
-
-
-zones.zone3=
-
-(zones.zone3||0)+1;
-
-
-
-}
-
-
-
-});
 
 
 
@@ -259,33 +447,35 @@ zones.zone3=
 
 
 
-
-
-
+// =====================
 // 和值
+// =====================
 
 
-let sum=
 
-front.reduce(
+analyzeSum(history){
 
-(a,b)=>a+b,
 
-0
 
-);
+    let item=
 
+    history[
 
+        history.length-1
 
+    ];
 
 
 
-sums.push(sum);
+    let value=
 
+    item.front.reduce(
 
+        (a,b)=>a+b,
 
-});
+        0
 
+    );
 
 
 
@@ -293,173 +483,50 @@ sums.push(sum);
 
 
 
+    let range="正常和值";
 
-let avgSum=
 
-Math.round(
 
-sums.reduce(
 
-(a,b)=>a+b,
 
-0
+    if(value<70){
 
-)
 
-/
 
-sums.length
+        range="偏低和值";
 
-);
 
+    }
 
 
 
+    if(value>140){
 
 
 
+        range="偏高和值";
 
-return {
 
+    }
 
 
-agent:this.name,
 
 
 
-period:100,
 
+    return {
 
 
 
+        value:value,
 
 
-oddEven:{
 
+        range:range
 
 
-pattern:
 
-this.maxKey(odd),
-
-
-
-detail:odd
-
-
-
-},
-
-
-
-
-
-
-
-size:{
-
-
-
-pattern:
-
-this.maxKey(size),
-
-
-
-detail:size
-
-
-
-},
-
-
-
-
-
-
-
-zone:zones,
-
-
-
-
-
-
-
-sum:{
-
-
-
-value:avgSum,
-
-
-
-range:
-
-avgSum>=80 && avgSum<=120
-
-?
-
-"正常和值"
-
-:
-
-"偏离和值"
-
-
-
-},
-
-
-
-
-
-
-
-
-theoryCheck:[
-
-
-
-"奇偶结构理论分析完成",
-
-
-
-"大小比例理论分析完成",
-
-
-
-"三区分布理论分析完成",
-
-
-
-"和值模型分析完成"
-
-
-
-],
-
-
-
-
-
-
-
-
-strategy:
-
-
-
-"理论结构验证"
-
-
-
-
-
-};
-
-
-
+    };
 
 
 
@@ -473,21 +540,26 @@ strategy:
 
 
 
-maxKey(obj){
+status(){
 
 
 
-return Object.keys(obj)
+    return {
 
-.sort(
 
-(a,b)=>
 
-obj[b]-obj[a]
+        agent:this.name,
 
-)[0]
 
-|| "";
+        ready:true
+
+
+
+    };
+
+
+
+}
 
 
 
@@ -499,13 +571,7 @@ obj[b]-obj[a]
 
 
 
-}
 
-
-
-
-
-
-window.TheoryAgent=
+window.TheoryAgent =
 
 new TheoryAgent();

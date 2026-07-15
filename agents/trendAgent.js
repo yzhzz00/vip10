@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V71.1
+V71.1 AI CORE
 
-Trend AI
+Trend Agent
 
-趋势分析模块
+趋势分析模型
 
 ================================
 */
@@ -20,7 +20,7 @@ class TrendAgent {
 constructor(){
 
 
-this.name="Trend AI";
+    this.name="Trend AI";
 
 
 }
@@ -33,27 +33,203 @@ this.name="Trend AI";
 
 
 
-analyze(history){
+analyze(history=[]){
 
 
 
-if(
-!history ||
-history.length===0
+    if(
 
-){
+        !history ||
 
+        history.length===0
 
-
-return {
+    ){
 
 
 
-error:"暂无历史数据"
+        return {
+
+
+            error:"无历史数据"
+
+
+        };
+
+
+    }
 
 
 
-};
+
+
+
+
+    let recent =
+
+    history.slice(-50);
+
+
+
+
+
+    let frequency={};
+
+
+
+
+
+    recent.forEach(item=>{
+
+
+
+        item.front.forEach(num=>{
+
+
+
+            if(!frequency[num]){
+
+
+
+                frequency[num]=0;
+
+
+
+            }
+
+
+
+            frequency[num]++;
+
+
+
+        });
+
+
+
+    });
+
+
+
+
+
+
+
+
+
+    let rank=[];
+
+
+
+
+
+    for(let i=1;i<=35;i++){
+
+
+
+        rank.push({
+
+
+
+            number:i,
+
+
+
+            count:
+
+            frequency[i] || 0
+
+
+
+        });
+
+
+
+    }
+
+
+
+
+
+
+
+    rank.sort(
+
+        (a,b)=>
+
+        b.count-a.count
+
+    );
+
+
+
+
+
+
+
+    let hot =
+
+    rank.slice(0,10);
+
+
+
+
+
+
+    let cold =
+
+    rank.slice(-10);
+
+
+
+
+
+
+
+
+
+    return {
+
+
+
+        agent:this.name,
+
+
+
+        period:
+
+        recent.length,
+
+
+
+        hotNumbers:hot,
+
+
+
+        coldNumbers:cold,
+
+
+
+        description:[
+
+
+
+            "已分析历史走势",
+
+
+
+            "当前采用动态趋势评分",
+
+
+
+            "等待周期模型增强"
+
+
+
+        ]
+
+
+
+    };
 
 
 
@@ -66,123 +242,88 @@ error:"暂无历史数据"
 
 
 
-let recent=
 
-history.slice(
+score(number,history=[]){
 
--100
 
-);
 
+    let score=0;
 
 
 
+    let count=0;
 
 
 
-let front={};
 
 
+    history.slice(-50)
 
+    .forEach(item=>{
 
 
 
-recent.forEach(item=>{
+        if(
 
+            item.front.includes(number)
 
+        ){
 
-item.front.forEach(num=>{
 
 
+            count++;
 
-if(!front[num]){
 
 
+        }
 
-front[num]=0;
 
 
+    });
 
-}
 
 
 
-front[num]++;
 
 
 
-});
+    if(count>=8){
 
 
 
-});
+        score+=5;
 
 
 
+    }
 
+    else if(count>=4){
 
 
 
+        score+=3;
 
 
-let hot=[];
 
+    }
 
-let cold=[];
+    else if(count<=1){
 
 
 
+        score-=2;
 
 
 
+    }
 
 
-for(let i=1;i<=35;i++){
 
 
 
-let count=
 
-front[i] || 0;
 
-
-
-
-
-
-if(count>=15){
-
-
-
-hot.push({
-
-num:i,
-
-count:count
-
-});
-
-
-
-}
-
-
-
-if(count<=5){
-
-
-
-cold.push({
-
-num:i,
-
-count:count
-
-});
-
-
-
-}
+    return score;
 
 
 
@@ -196,86 +337,26 @@ count:count
 
 
 
-let latest=
-
-history[history.length-1];
+status(){
 
 
 
+    return {
 
 
 
+        agent:this.name,
+
+
+        ready:true
 
 
 
-return {
-
-
-
-agent:this.name,
-
-
-
-historyCount:history.length,
-
-
-
-recentPeriod:100,
-
-
-
-hotNumbers:
-
-hot.sort(
-
-(a,b)=>
-
-b.count-a.count
-
-).slice(0,10),
-
-
-
-coldNumbers:
-
-cold.slice(0,10),
-
-
-
-latest:
-
-
-
-{
-
-
-front:latest.front,
-
-
-back:latest.back
-
-
-
-},
-
-
-
-
-strategy:
-
-
-
-"动态趋势评分"
-
-
-
-};
+    };
 
 
 
 }
-
-
 
 
 
@@ -286,6 +367,8 @@ strategy:
 
 
 
-window.TrendAgent=
+
+
+window.TrendAgent =
 
 new TrendAgent();

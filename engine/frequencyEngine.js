@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V71.1
+V71.1 AI CORE
 
 Frequency Engine
 
-历史频率分析模块
+历史频率引擎
 
 ================================
 */
@@ -16,14 +16,22 @@ Frequency Engine
 class FrequencyEngine {
 
 
+
 constructor(){
 
-    this.name = "Frequency Engine";
 
-    this.frontFrequency = {};
-    this.backFrequency = {};
+    this.name="Frequency Engine";
 
-    this.loaded = false;
+
+    this.front={};
+
+
+    this.back={};
+
+
+    this.loaded=false;
+
+
 
 }
 
@@ -32,81 +40,86 @@ constructor(){
 
 
 
-load(history){
 
 
-    this.frontFrequency = {};
-    this.backFrequency = {};
+
+load(history=[]){
 
 
-    if(!history || history.length === 0){
 
-        return false;
+    this.front={};
 
-    }
+
+    this.back={};
+
+
+
 
 
 
     history.forEach(item=>{
 
 
-        // 前区
 
-        if(item.front){
-
-            item.front.forEach(num=>{
-
-
-                if(!this.frontFrequency[num]){
-
-                    this.frontFrequency[num]=0;
-
-                }
-
-
-                this.frontFrequency[num]++;
-
-
-            });
-
-        }
+        item.front.forEach(n=>{
 
 
 
+            if(!this.front[n]){
 
 
-        // 后区
-
-        if(item.back){
-
-            item.back.forEach(num=>{
+                this.front[n]=0;
 
 
-                if(!this.backFrequency[num]){
-
-                    this.backFrequency[num]=0;
-
-                }
+            }
 
 
-                this.backFrequency[num]++;
+
+            this.front[n]++;
 
 
-            });
 
-        }
+        });
+
+
+
+
+
+
+
+        item.back.forEach(n=>{
+
+
+
+            if(!this.back[n]){
+
+
+                this.back[n]=0;
+
+
+            }
+
+
+
+            this.back[n]++;
+
+
+
+        });
 
 
 
     });
+
+
+
+
 
 
 
     this.loaded=true;
 
 
-    return true;
-
 
 }
 
@@ -117,154 +130,69 @@ load(history){
 
 
 
-getFrontFrequency(num){
 
 
-    return this.frontFrequency[num] || 0;
 
-
-}
-
-
-
-
-
-
-
-
-getBackFrequency(num){
-
-
-    return this.backFrequency[num] || 0;
-
-
-}
-
-
-
-
-
-
-
-
-getFrontRank(){
-
-
-    let result=[];
-
-
-    for(let i=1;i<=35;i++){
-
-
-        result.push({
-
-            number:i,
-
-            count:this.getFrontFrequency(i)
-
-        });
-
-
-    }
-
-
-
-    return result.sort(
-
-        (a,b)=>b.count-a.count
-
-    );
-
-
-}
-
-
-
-
-
-
-
-
-getBackRank(){
-
-
-    let result=[];
-
-
-    for(let i=1;i<=12;i++){
-
-
-        result.push({
-
-            number:i,
-
-            count:this.getBackFrequency(i)
-
-        });
-
-
-    }
-
-
-
-    return result.sort(
-
-        (a,b)=>b.count-a.count
-
-    );
-
-
-}
-
-
-
-
-
+// =====================
+// 号码评分
+// =====================
 
 
 
 score(ticket){
 
 
+
     let score=0;
 
 
 
-    if(!this.loaded){
-
-        return score;
-
-    }
 
 
 
+    ticket.front.forEach(n=>{
 
-    ticket.front.forEach(num=>{
 
 
         let count=
 
-        this.getFrontFrequency(num);
+        this.front[n] || 0;
 
 
 
-        if(count>=80){
+
+
+
+        if(count>400){
+
+
 
             score+=3;
 
+
+
         }
 
-        else if(count>=50){
+        else if(count>250){
+
+
 
             score+=2;
 
+
+
         }
 
-        else if(count<=20){
+        else if(count<100){
+
+
 
             score-=1;
 
+
+
         }
+
 
 
     });
@@ -275,29 +203,46 @@ score(ticket){
 
 
 
-    ticket.back.forEach(num=>{
+
+
+    ticket.back.forEach(n=>{
+
 
 
         let count=
 
-        this.getBackFrequency(num);
+        this.back[n] || 0;
 
 
 
-        if(count>=40){
+
+
+
+        if(count>150){
+
+
 
             score+=2;
 
+
+
         }
 
-        else if(count<=10){
+        else if(count<40){
+
+
 
             score-=1;
 
+
+
         }
 
 
+
     });
+
+
 
 
 
@@ -306,7 +251,139 @@ score(ticket){
     return score;
 
 
+
 }
+
+
+
+
+
+
+
+
+
+
+
+// =====================
+// 前区排序
+// =====================
+
+
+
+frontRank(){
+
+
+
+    let arr=[];
+
+
+
+    for(let i=1;i<=35;i++){
+
+
+
+        arr.push({
+
+
+
+            number:i,
+
+
+
+            count:
+
+            this.front[i] || 0
+
+
+
+        });
+
+
+
+    }
+
+
+
+
+
+
+    return arr.sort(
+
+        (a,b)=>
+
+        b.count-a.count
+
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+// =====================
+// 后区排序
+// =====================
+
+
+
+backRank(){
+
+
+
+    let arr=[];
+
+
+
+    for(let i=1;i<=12;i++){
+
+
+
+        arr.push({
+
+
+
+            number:i,
+
+
+
+            count:
+
+            this.back[i] || 0
+
+
+
+        });
+
+
+
+    }
+
+
+
+
+
+
+    return arr.sort(
+
+        (a,b)=>
+
+        b.count-a.count
+
+    );
+
+
+
+}
+
 
 
 
@@ -318,28 +395,31 @@ score(ticket){
 status(){
 
 
+
     return {
+
+
 
         engine:this.name,
 
-        loaded:this.loaded,
 
-        frontNumbers:Object.keys(
-            this.frontFrequency
-        ).length,
 
-        backNumbers:Object.keys(
-            this.backFrequency
-        ).length
+        loaded:this.loaded
+
+
 
     };
 
 
+
+}
+
+
+
 }
 
 
 
-}
 
 
 

@@ -3,9 +3,9 @@
 
 大乐透智能分析系统
 
-V71.1
+V71.1 AI CORE
 
-UI Style
+style.css
 
 ================================
 */
@@ -19,6 +19,8 @@ box-sizing:border-box;
 
 
 
+
+
 body{
 
 
@@ -28,17 +30,19 @@ margin:0;
 padding:0;
 
 
+background:#0b1220;
+
+
+color:#e5e7eb;
+
+
 font-family:
 
 "Microsoft YaHei",
+
 Arial,
+
 sans-serif;
-
-
-background:#f3f6fb;
-
-
-color:#222;
 
 
 }
@@ -52,13 +56,16 @@ color:#222;
 .container{
 
 
-width:95%;
+width:100%;
 
 
-max-width:1100px;
+max-width:900px;
 
 
-margin:20px auto;
+margin:auto;
+
+
+padding:15px;
 
 
 }
@@ -75,13 +82,36 @@ h1{
 text-align:center;
 
 
-color:#1e3a8a;
+font-size:26px;
 
 
-font-size:28px;
+color:#38bdf8;
 
 
-margin-bottom:25px;
+margin-bottom:5px;
+
+
+}
+
+
+
+
+
+
+
+h2{
+
+
+text-align:center;
+
+
+font-size:18px;
+
+
+color:#94a3b8;
+
+
+margin-top:0;
 
 
 }
@@ -95,21 +125,26 @@ margin-bottom:25px;
 .card{
 
 
-background:white;
+background:#111827;
 
 
-border-radius:15px;
+border-radius:12px;
 
 
-padding:20px;
+padding:15px;
 
 
-margin-bottom:20px;
+margin-bottom:15px;
+
+
+border:1px solid #1e293b;
 
 
 box-shadow:
 
-0 4px 15px rgba(0,0,0,0.08);
+0 5px 15px
+
+rgba(0,0,0,0.3);
 
 
 }
@@ -120,21 +155,16 @@ box-shadow:
 
 
 
-.card h2{
+.card h3{
+
+
+color:#22c55e;
 
 
 margin-top:0;
 
 
-color:#2563eb;
-
-
-border-bottom:
-
-1px solid #eee;
-
-
-padding-bottom:10px;
+font-size:18px;
 
 
 }
@@ -148,34 +178,42 @@ padding-bottom:10px;
 button{
 
 
+width:100%;
+
+
+padding:14px;
+
+
+border:none;
+
+
+border-radius:10px;
+
+
 background:#2563eb;
 
 
 color:white;
 
 
-border:none;
-
-
-padding:
-
-12px 25px;
-
-
-border-radius:8px;
-
-
 font-size:16px;
 
 
-cursor:pointer;
+font-weight:bold;
+
+
+margin-top:10px;
 
 
 }
 
 
 
-button:hover{
+
+
+
+
+button:active{
 
 
 background:#1d4ed8;
@@ -189,24 +227,13 @@ background:#1d4ed8;
 
 
 
-.ai-box{
+#status{
 
 
-background:#f8fafc;
+line-height:1.8;
 
 
-border-left:
-
-4px solid #2563eb;
-
-
-padding:15px;
-
-
-margin:15px 0;
-
-
-border-radius:8px;
+color:#facc15;
 
 
 }
@@ -217,13 +244,72 @@ border-radius:8px;
 
 
 
-.ai-box h4{
+#report{
 
 
-margin:0 0 10px 0;
+line-height:1.6;
 
 
-color:#1e40af;
+}
+
+
+
+
+
+
+
+.ai-card{
+
+
+background:#0f172a;
+
+
+border-radius:10px;
+
+
+padding:12px;
+
+
+margin-top:12px;
+
+
+border-left:
+
+4px solid #38bdf8;
+
+
+overflow:hidden;
+
+
+}
+
+
+
+
+
+
+
+.ai-card h4{
+
+
+color:#38bdf8;
+
+
+margin:0 0 8px;
+
+
+}
+
+
+
+
+
+
+
+.ai-card h3{
+
+
+color:#f97316;
 
 
 }
@@ -240,25 +326,13 @@ pre{
 white-space:pre-wrap;
 
 
-word-wrap:break-word;
+word-break:break-word;
 
 
-background:#111827;
+font-size:13px;
 
 
-color:#e5e7eb;
-
-
-padding:15px;
-
-
-border-radius:10px;
-
-
-overflow:auto;
-
-
-font-size:14px;
+color:#cbd5e1;
 
 
 }
@@ -269,37 +343,16 @@ font-size:14px;
 
 
 
-.ticket{
+p{
 
 
-background:
-
-linear-gradient(
-
-135deg,
-
-#eff6ff,
-
-#ffffff
-
-);
+background:#020617;
 
 
-border:
-
-1px solid #bfdbfe;
+padding:10px;
 
 
-padding:15px;
-
-
-margin:10px 0;
-
-
-border-radius:10px;
-
-
-font-size:16px;
+border-radius:8px;
 
 
 line-height:1.8;
@@ -313,40 +366,16 @@ line-height:1.8;
 
 
 
-.ticket:first-of-type{
+#agents{
 
 
-border:
-
-2px solid #2563eb;
+display:flex;
 
 
-}
+flex-wrap:wrap;
 
 
-
-
-
-
-
-#agentStatus{
-
-
-display:grid;
-
-
-grid-template-columns:
-
-repeat(
-
-3,
-
-1fr
-
-);
-
-
-gap:10px;
+gap:8px;
 
 
 }
@@ -357,27 +386,22 @@ gap:10px;
 
 
 
-#agentStatus br{
+.agent{
 
 
-display:none;
+background:#1e293b;
 
 
-}
+padding:8px 12px;
 
 
+border-radius:20px;
 
 
+font-size:13px;
 
 
-
-#agentStatus{
-
-
-font-size:15px;
-
-
-color:#374151;
+color:#93c5fd;
 
 
 }
@@ -388,62 +412,15 @@ color:#374151;
 
 
 
-#analysisResult{
 
-
-line-height:1.6;
-
-
-}
-
-
-
-
-
-
-
-#dataStatus{
-
-
-font-size:16px;
-
-
-line-height:2;
-
-
-}
-
-
-
-
-
-
-
-#learningStatus{
-
-
-color:#059669;
-
-
-font-weight:bold;
-
-
-}
-
-
-
-
-
-
-
-@media(max-width:700px){
+@media(max-width:600px){
 
 
 
 .container{
 
 
-width:96%;
+padding:10px;
 
 
 }
@@ -463,35 +440,7 @@ font-size:22px;
 .card{
 
 
-padding:15px;
-
-
-}
-
-
-
-#agentStatus{
-
-
-grid-template-columns:
-
-repeat(
-
-2,
-
-1fr
-
-);
-
-
-}
-
-
-
-.ticket{
-
-
-font-size:14px;
+padding:12px;
 
 
 }

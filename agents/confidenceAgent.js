@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V71.1
+V71.1 AI CORE
 
-Confidence AI
+Confidence Agent
 
-信心指数模块
+信心指数模型
 
 ================================
 */
@@ -20,7 +20,7 @@ class ConfidenceAgent {
 constructor(){
 
 
-this.name="Confidence AI";
+    this.name="Confidence AI";
 
 
 }
@@ -33,69 +33,78 @@ this.name="Confidence AI";
 
 
 
-analyze(models){
+analyze(history){
 
 
 
-if(!models){
+    let score=50;
 
 
 
-return {
+    let factors=[];
 
 
 
-agent:this.name,
 
 
-confidence:0,
 
 
-level:"无数据"
 
 
+    // =====================
+    // 数据量评分
+    // =====================
 
-};
 
 
+    if(
 
-}
+        history &&
 
+        history.length>=500
 
+    ){
 
 
 
+        score+=10;
 
-let score=50;
 
 
+        factors.push(
 
-let count=0;
+            "历史数据量充足"
 
+        );
 
 
 
+    }
 
+    else if(
 
+        history &&
 
+        history.length>=100
 
+    ){
 
-// 趋势模型参与
 
 
-if(models.trend){
+        score+=5;
 
 
 
-score+=5;
+        factors.push(
 
+            "历史数据达到基础要求"
 
+        );
 
-count++;
 
 
+    }
 
-}
 
 
 
@@ -104,169 +113,142 @@ count++;
 
 
 
-// 结构模型
+    // =====================
+    // 多模型参与
+    // =====================
 
 
-if(models.structure){
 
+    score+=5;
 
 
-score+=5;
 
+    factors.push(
 
+        "多AI模型参与"
 
-count++;
+    );
 
 
 
-}
 
 
 
 
 
 
+    // =====================
+    // 随机风险扣分
+    // =====================
 
 
-// Markov
 
+    score-=5;
 
-if(models.markov){
 
 
+    factors.push(
 
-score+=5;
+        "彩票随机性风险"
 
+    );
 
 
-count++;
 
 
 
-}
 
 
 
 
+    if(score>80){
 
 
 
+        score=80;
 
-// 风险模型
 
 
-if(models.risk){
+    }
 
 
 
-score+=5;
 
 
+    if(score<30){
 
-count++;
 
 
+        score=30;
 
-}
 
 
+    }
 
 
 
 
 
 
-// 理论模型
 
 
-if(models.theory){
 
+    let level="中等信心";
 
 
-score+=5;
 
 
 
-count++;
 
+    if(score>=70){
 
 
-}
 
+        level="较高信心";
 
 
 
+    }
 
+    else if(score<50){
 
 
 
-// Monte Carlo
+        level="低信心";
 
 
-if(models.montecarlo){
+    }
 
 
 
-score+=8;
 
 
 
-count++;
 
 
+    return {
 
-}
 
 
+        agent:this.name,
 
 
 
+        confidence:
 
+        score.toFixed(2)+"%",
 
 
-// 防止超过100
 
+        level:level,
 
-if(score>100){
 
 
+        factors:factors
 
-score=100;
 
 
-
-}
-
-
-
-
-
-
-
-
-
-let level="低信心";
-
-
-
-
-
-
-if(score>=70){
-
-
-
-level="高信心";
-
-
-
-}
-
-else if(score>=55){
-
-
-
-level="中等信心";
+    };
 
 
 
@@ -279,51 +261,27 @@ level="中等信心";
 
 
 
-return {
+
+status(){
 
 
 
-agent:this.name,
+    return {
 
 
 
-confidence:
+        agent:this.name,
 
-Number(
 
-score.toFixed(2)
-
-),
+        ready:true
 
 
 
-
-level:level,
-
-
-
-models:
-
-count,
-
-
-
-strategy:
-
-
-
-"多模型一致性评分"
-
-
-
-};
+    };
 
 
 
 }
-
-
-
 
 
 
@@ -335,6 +293,7 @@ strategy:
 
 
 
-window.ConfidenceAgent=
+
+window.ConfidenceAgent =
 
 new ConfidenceAgent();

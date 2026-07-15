@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V71.2
+V71.1 AI CORE
 
-Monte Carlo AI Engine
+Monte Carlo Engine
 
-多模型融合版
+蒙特卡罗模拟模块
 
 ================================
 */
@@ -16,78 +16,14 @@ Monte Carlo AI Engine
 class MonteCarloEngine {
 
 
+
 constructor(){
 
 
-this.name="Monte Carlo AI";
+    this.name = "Monte Carlo Engine";
 
 
-this.times=100000;
-
-
-}
-
-
-
-
-
-
-
-random(min,max){
-
-
-return Math.floor(
-
-Math.random()*(max-min+1)
-
-)+min;
-
-
-}
-
-
-
-
-
-
-
-
-
-createFront(){
-
-
-let arr=[];
-
-
-while(arr.length<5){
-
-
-
-let n=this.random(1,35);
-
-
-
-if(!arr.includes(n)){
-
-
-
-arr.push(n);
-
-
-
-}
-
-
-
-}
-
-
-
-return arr.sort(
-
-(a,b)=>a-b
-
-);
+    this.simulationCount = 100000;
 
 
 
@@ -101,208 +37,99 @@ return arr.sort(
 
 
 
-createBack(){
+simulate(history=[]){
 
 
-let arr=[];
 
+    let results=[];
 
-while(arr.length<2){
 
 
 
-let n=this.random(1,12);
 
 
+    for(let i=0;i<20000;i++){
 
-if(!arr.includes(n)){
 
 
+        let ticket = this.randomTicket();
 
-arr.push(n);
 
 
 
-}
+        let score =
 
+        this.scoreTicket(
 
+            ticket,
 
-}
+            history
 
+        );
 
 
-return arr.sort(
 
-(a,b)=>a-b
 
-);
 
+        results.push({
 
 
-}
 
+            front:ticket.front,
 
 
+            back:ticket.back,
 
 
+            score:score
 
 
 
+        });
 
-structureScore(front){
 
 
+    }
 
-let score=0;
 
 
 
 
 
 
-// 奇偶
+    results.sort(
 
+        (a,b)=>b.score-a.score
 
-let odd=
+    );
 
-front.filter(
 
-n=>n%2!==0
 
-).length;
 
 
 
 
+    return {
 
 
-if(
 
-odd===2 ||
+        engine:this.name,
 
-odd===3
 
-){
 
+        simulation:
 
-score+=10;
+        this.simulationCount,
 
 
-}
 
+        top:
 
+        results.slice(0,20)
 
 
 
-
-
-
-
-// 大小
-
-
-let small=
-
-front.filter(
-
-n=>n<=17
-
-).length;
-
-
-
-
-
-
-if(
-
-small===2 ||
-
-small===3
-
-){
-
-
-score+=10;
-
-
-}
-
-
-
-
-
-
-
-
-
-// 三区
-
-
-let zone=[0,0,0];
-
-
-
-
-
-
-front.forEach(n=>{
-
-
-
-if(n<=12){
-
-
-
-zone[0]++;
-
-
-
-}
-
-else if(n<=24){
-
-
-
-zone[1]++;
-
-
-
-}
-
-else{
-
-
-
-zone[2]++;
-
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-
-if(
-
-zone[0]>0 &&
-
-zone[1]>0 &&
-
-zone[2]>0
-
-){
-
-
-
-score+=10;
+    };
 
 
 
@@ -316,165 +143,122 @@ score+=10;
 
 
 
-// 和值
+randomTicket(){
 
 
-let sum=
 
-front.reduce(
+    let front=[];
 
-(a,b)=>a+b,
 
-0
 
-);
 
+    while(front.length<5){
 
 
 
+        let n =
 
+        Math.floor(
 
-if(
+            Math.random()*35
 
-sum>=80 &&
+        )+1;
 
-sum<=120
 
-){
 
 
 
-score+=10;
+        if(!front.includes(n)){
 
 
 
-}
+            front.push(n);
 
 
+        }
 
 
 
+    }
 
-return score;
 
 
 
-}
 
+    front.sort(
 
+        (a,b)=>a-b
 
+    );
 
 
 
 
 
 
-frequencyScore(ticket){
 
+    let back=[];
 
 
-let score=0;
 
 
 
-let engine=
 
-window.FrequencyEngine;
+    while(back.length<2){
 
 
 
+        let n =
 
+        Math.floor(
 
+            Math.random()*12
 
-if(!engine){
+        )+1;
 
 
 
-return score;
 
 
+        if(!back.includes(n)){
 
-}
 
 
+            back.push(n);
 
 
+        }
 
 
-ticket.front.forEach(n=>{
 
+    }
 
 
-let f=
 
-engine.getFrontScore(n);
 
 
+    back.sort(
 
+        (a,b)=>a-b
 
+    );
 
-if(f>50){
 
 
 
-score+=2;
 
 
+    return {
 
-}
 
-else if(f<10){
+        front,
 
 
+        back
 
-score-=1;
 
 
-
-}
-
-
-
-});
-
-
-
-
-
-
-ticket.back.forEach(n=>{
-
-
-
-let f=
-
-engine.getBackScore(n);
-
-
-
-
-
-
-if(f>20){
-
-
-
-score+=1;
-
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-return score;
+    };
 
 
 
@@ -488,346 +272,229 @@ return score;
 
 
 
-riskScore(ticket){
+scoreTicket(ticket,history){
 
 
 
-let score=0;
+    let score=50;
 
 
 
 
 
 
-// 避免连续号码过多
+    // =====================
+    // 频率评分
+    // =====================
 
 
-let consecutive=0;
 
+    if(window.FrequencyEngine){
 
 
 
+        score +=
 
+        FrequencyEngine.score(
 
-for(let i=1;i<ticket.front.length;i++){
+            ticket
 
+        );
 
 
-if(
 
-ticket.front[i]-
+    }
 
-ticket.front[i-1]===1
 
-){
 
 
 
-consecutive++;
 
 
 
-}
 
+    // =====================
+    // 奇偶结构
+    // =====================
 
 
-}
 
+    let odd=0;
 
 
 
+    ticket.front.forEach(num=>{
 
 
+        if(num%2!==0){
 
-if(consecutive<=2){
 
+            odd++;
 
 
-score+=5;
+        }
 
 
 
-}
+    });
 
 
 
 
 
+    if(
 
-return score;
+        odd===2 ||
 
+        odd===3
 
+    ){
 
-}
 
 
+        score+=10;
 
 
 
+    }
 
+    else{
 
 
+        score-=5;
 
-markovScore(ticket){
 
+    }
 
 
-// Markov接口
 
-// 后续接入真实概率
 
 
 
-return 5;
 
 
 
-}
+    // =====================
+    // 三区结构
+    // =====================
 
 
 
+    let zone=[0,0,0];
 
 
 
 
 
+    ticket.front.forEach(num=>{
 
-theoryScore(ticket){
 
 
+        if(num<=12){
 
-let score=0;
 
+            zone[0]++;
 
 
-let odd=
+        }
 
-ticket.front.filter(
+        else if(num<=24){
 
-n=>n%2!==0
 
-).length;
+            zone[1]++;
 
 
+        }
 
+        else{
 
 
+            zone[2]++;
 
-if(
 
-odd===2 ||
+        }
 
-odd===3
 
-){
 
+    });
 
 
-score+=5;
 
 
 
-}
 
 
+    if(
 
+        zone[0]>=1 &&
 
+        zone[1]>=1 &&
 
+        zone[2]>=1
 
-return score;
+    ){
 
 
 
-}
+        score+=8;
 
 
 
+    }
 
 
 
 
 
 
-calculate(ticket){
 
 
+    // =====================
+    // 和值
+    // =====================
 
-let score=0;
 
 
+    let sum =
 
+    ticket.front.reduce(
 
+        (a,b)=>a+b,
 
+        0
 
+    );
 
-score+=this.structureScore(
 
-ticket.front
 
-);
 
 
+    if(
 
-score+=this.frequencyScore(
+        sum>=80 &&
 
-ticket
+        sum<=130
 
-);
+    ){
 
 
 
-score+=this.riskScore(
+        score+=8;
 
-ticket
 
-);
 
+    }
 
 
-score+=this.markovScore(
 
-ticket
 
-);
 
 
+    return Number(
 
-score+=this.theoryScore(
+        score.toFixed(2)
 
-ticket
-
-);
-
-
-
-
-
-
-
-
-return Number(
-
-score.toFixed(2)
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-simulate(){
-
-
-
-let results=[];
-
-
-
-
-
-
-for(
-
-let i=0;
-
-i<this.times;
-
-i++
-
-){
-
-
-
-let ticket={
-
-
-
-front:
-
-this.createFront(),
-
-
-
-back:
-
-this.createBack()
-
-
-
-};
-
-
-
-
-
-
-
-ticket.score=
-
-this.calculate(ticket);
-
-
-
-
-
-
-
-results.push(ticket);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-results.sort(
-
-(a,b)=>
-
-b.score-a.score
-
-);
-
-
-
-
-
-
-
-
-return {
-
-
-
-agent:this.name,
-
-
-
-simulation:this.times,
-
-
-
-top:
-
-results.slice(0,20)
-
-
-
-};
+    );
 
 
 
@@ -845,18 +512,20 @@ status(){
 
 
 
-return {
+    return {
 
 
 
-name:this.name,
+        engine:this.name,
 
 
-simulation:this.times
+        simulation:
+
+        this.simulationCount
 
 
 
-};
+    };
 
 
 
@@ -871,6 +540,8 @@ simulation:this.times
 
 
 
-window.MonteCarloEngine=
+
+
+window.MonteCarloEngine =
 
 new MonteCarloEngine();

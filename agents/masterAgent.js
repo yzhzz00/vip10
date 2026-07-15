@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V71.1
+V71.1 AI CORE
 
-Master AI
+Master Agent
 
-总控决策模块
+总控决策模型
 
 ================================
 */
@@ -20,7 +20,7 @@ class MasterAgent {
 constructor(){
 
 
-this.name="Master AI";
+    this.name="Master AI";
 
 
 }
@@ -33,83 +33,279 @@ this.name="Master AI";
 
 
 
-analyze(input){
+decide(result){
 
 
 
-let simulation=
-
-input.simulation;
+    let recommend=null;
 
 
-
-
-
-
-let recommend=null;
-
-
-
-let backup=[];
+    let confidence=60;
 
 
 
 
-
-
-let confidence=0.65;
-
-
-
+    // =====================
+    // 优先采用 Monte Carlo
+    // =====================
 
 
 
+    if(
+
+        result.simulation &&
+
+        result.simulation.top &&
+
+        result.simulation.top.length>0
+
+    ){
 
 
 
-if(
+        let best =
 
-simulation &&
-
-simulation.top &&
-
-simulation.top.length>0
-
-){
+        result.simulation.top[0];
 
 
 
 
 
-// 第一推荐
-
-
-recommend=
-
-simulation.top[0];
+        recommend={
 
 
 
+            front:
 
-// 备用5组
+            best.front,
 
 
-backup=
 
-simulation.top.slice(
+            back:
 
-1,
+            best.back,
 
-6
 
-);
+
+            score:
+
+            best.score
+
+
+
+        };
 
 
 
 
 
 
-confidence=0.67;
+        confidence+=5;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // =====================
+    // 理论模型校验
+    // =====================
+
+
+
+    let reasons=[];
+
+
+
+    if(
+
+        result.models &&
+
+        result.models.theory
+
+    ){
+
+
+
+        reasons.push(
+
+            "Theory理论结构验证完成"
+
+        );
+
+
+
+        confidence+=3;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // =====================
+    // Markov
+    // =====================
+
+
+
+    if(
+
+        result.models &&
+
+        result.models.markov
+
+    ){
+
+
+
+        reasons.push(
+
+            "Markov转移模型参与"
+
+        );
+
+
+
+        confidence+=2;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // =====================
+    // Frequency
+    // =====================
+
+
+
+    if(
+
+        result.frequency
+
+    ){
+
+
+
+        reasons.push(
+
+            "历史频率评分参与"
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    if(confidence>75){
+
+
+
+        confidence=75;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    return {
+
+
+
+        agent:this.name,
+
+
+
+        confidence:
+
+        confidence/100,
+
+
+
+        decision:{
+
+
+
+            strategy:
+
+            "Monte Carlo + Theory + Markov综合决策",
+
+
+
+
+
+            recommend:
+
+
+
+            recommend,
+
+
+
+
+
+
+            reasons:
+
+            reasons.length
+
+            ?
+
+            reasons
+
+            :
+
+            [
+
+
+            "多模型综合分析"
+
+
+            ]
+
+
+
+        }
+
+
+
+    };
 
 
 
@@ -123,88 +319,26 @@ confidence=0.67;
 
 
 
-let strategy=
-
-"Monte Carlo + Frequency + Theory + Multi Agent综合决策";
+status(){
 
 
 
+    return {
 
 
 
-
-let reasons=[
-
+        agent:this.name,
 
 
-"Monte Carlo候选排序完成",
+        ready:true
 
 
 
-"历史频率模型参与",
-
-
-
-"理论结构验证完成",
-
-
-
-"多AI模型会议完成"
-
-
-
-];
-
-
-
-
-
-
-
-
-return {
-
-
-
-agent:this.name,
-
-
-
-confidence:confidence,
-
-
-
-decision:{
-
-
-
-strategy:strategy,
-
-
-
-recommend:recommend,
-
-
-
-backup:backup,
-
-
-
-reasons:reasons
+    };
 
 
 
 }
-
-
-
-};
-
-
-
-}
-
-
 
 
 
@@ -215,6 +349,8 @@ reasons:reasons
 
 
 
-window.MasterAgent=
+
+
+window.MasterAgent =
 
 new MasterAgent();

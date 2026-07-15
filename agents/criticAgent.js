@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V71.1
+V71.1 AI CORE
 
-Critic AI
+Critic Agent
 
-自我审查风险模块
+自我审查模型
 
 ================================
 */
@@ -20,7 +20,7 @@ class CriticAgent {
 constructor(){
 
 
-this.name="Critic AI";
+    this.name = "Critic AI";
 
 
 }
@@ -33,64 +33,272 @@ this.name="Critic AI";
 
 
 
-analyze(decision){
+analyze(result){
 
 
 
-let confidence=0.60;
+    let warnings=[];
 
 
 
-let challenges=[];
-
-
-let risks=[];
-
+    let confidence=60;
 
 
 
 
 
 
-
-
-if(!decision){
-
-
-
-return {
+    // =====================
+    // 检查Master推荐
+    // =====================
 
 
 
-agent:this.name,
+    if(
+
+        result &&
+
+        result.decision
+
+    ){
 
 
 
-confidence:0.50,
+        let ticket =
+
+        result.decision;
 
 
 
-level:"等待决策",
+        if(ticket.front){
 
 
 
-challenge:[
+            let nums =
 
-"暂无Master AI决策数据"
-
-],
+            ticket.front;
 
 
 
-risk:[
-
-"等待分析完成"
-
-]
+            let repeat=0;
 
 
 
-};
+
+
+            nums.forEach((n,i)=>{
+
+
+
+                for(
+
+                    let j=i+1;
+
+                    j<nums.length;
+
+                    j++
+
+                ){
+
+
+
+                    if(
+
+                        nums[i]===nums[j]
+
+                    ){
+
+
+
+                        repeat++;
+
+
+                    }
+
+
+
+                }
+
+
+
+            });
+
+
+
+
+
+
+            if(repeat>0){
+
+
+
+                warnings.push(
+
+                    "号码重复风险"
+
+                );
+
+
+
+                confidence-=10;
+
+
+
+            }
+
+
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // =====================
+    // 检查Monte Carlo集中
+    // =====================
+
+
+
+    if(
+
+        result &&
+
+        result.simulation &&
+
+        result.simulation.top
+
+    ){
+
+
+
+        let top=
+
+        result.simulation.top;
+
+
+
+        if(top.length>=10){
+
+
+
+            warnings.push(
+
+                "候选号码存在集中趋势，需要防止模型过拟合"
+
+            );
+
+
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // =====================
+    // 默认风险提醒
+    // =====================
+
+
+
+    warnings.push(
+
+        "不要盲目相信单一模型"
+
+    );
+
+
+
+    warnings.push(
+
+        "彩票结果具有随机性"
+
+    );
+
+
+
+    warnings.push(
+
+        "趋势模型只能提供概率参考"
+
+    );
+
+
+
+
+
+
+
+
+    if(confidence<50){
+
+
+
+        confidence=50;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    return {
+
+
+
+        agent:this.name,
+
+
+
+        confidence:
+
+        confidence+"%",
+
+
+
+        level:
+
+        confidence>=70
+
+        ?
+
+        "较高信心"
+
+        :
+
+        "需要重新评估",
+
+
+
+
+        warnings:warnings
+
+
+
+    };
 
 
 
@@ -103,139 +311,27 @@ risk:[
 
 
 
-// 检查Master推荐
 
-
-if(
-
-decision.decision &&
-
-decision.decision.recommend
-
-){
+status(){
 
 
 
-confidence+=0.05;
+    return {
 
 
 
-challenges.push(
+        agent:this.name,
 
-"Master AI已生成候选方案"
 
-);
+        ready:true
+
+
+
+    };
 
 
 
 }
-
-
-
-
-
-
-
-
-// 检查备用方案
-
-
-if(
-
-decision.decision &&
-
-decision.decision.backup &&
-
-decision.decision.backup.length>0
-
-){
-
-
-
-confidence+=0.03;
-
-
-
-challenges.push(
-
-"存在多组备用方案，降低单点风险"
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-// 风险审查
-
-
-risks.push(
-
-"不要盲目相信历史规律"
-
-);
-
-
-
-risks.push(
-
-"避免单一模型决定结果"
-
-);
-
-
-
-risks.push(
-
-"彩票存在随机波动"
-
-);
-
-
-
-risks.push(
-
-"避免号码过度集中"
-
-);
-
-
-
-
-
-
-
-
-
-let level="需要重新评估";
-
-
-
-
-
-
-if(confidence>=0.70){
-
-
-
-level="较高信心";
-
-
-
-}
-
-else if(confidence>=0.60){
-
-
-
-level="中等信心";
 
 
 
@@ -249,63 +345,6 @@ level="中等信心";
 
 
 
-return {
-
-
-
-agent:this.name,
-
-
-
-confidence:
-
-Number(
-
-confidence.toFixed(2)
-
-),
-
-
-
-level:level,
-
-
-
-challenge:challenges,
-
-
-
-risk:risks,
-
-
-
-strategy:
-
-"AI反向验证与风险控制"
-
-
-
-};
-
-
-
-
-
-
-}
-
-
-
-
-
-}
-
-
-
-
-
-
-
-window.CriticAgent=
+window.CriticAgent =
 
 new CriticAgent();

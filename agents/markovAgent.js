@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V71.1
+V71.1 AI CORE
 
-Markov AI
+Markov Agent
 
-号码转移分析模块
+马尔可夫转移模型
 
 ================================
 */
@@ -16,10 +16,11 @@ Markov AI
 class MarkovAgent {
 
 
+
 constructor(){
 
 
-this.name="Markov AI";
+    this.name="Markov AI";
 
 
 }
@@ -31,29 +32,253 @@ this.name="Markov AI";
 
 
 
-analyze(history){
+
+analyze(history=[]){
 
 
 
-if(
+    if(
 
-!history ||
+        !history ||
 
-history.length<2
+        history.length<2
 
-){
-
-
-
-return {
+    ){
 
 
 
-error:"历史数据不足"
+        return {
 
 
 
-};
+            error:"历史数据不足"
+
+
+
+        };
+
+
+
+    }
+
+
+
+
+
+
+
+    let transition={};
+
+
+
+
+
+
+    for(
+
+        let i=1;
+
+        i<history.length;
+
+        i++
+
+    ){
+
+
+
+        let prev =
+
+        history[i-1].front;
+
+
+
+        let next =
+
+        history[i].front;
+
+
+
+
+
+
+
+        prev.forEach(a=>{
+
+
+
+            if(!transition[a]){
+
+
+
+                transition[a]={};
+
+
+
+            }
+
+
+
+
+
+
+            next.forEach(b=>{
+
+
+
+                if(!transition[a][b]){
+
+
+
+                    transition[a][b]=0;
+
+
+
+                }
+
+
+
+                transition[a][b]++;
+
+
+
+            });
+
+
+
+        });
+
+
+
+    }
+
+
+
+
+
+
+
+    let probability={};
+
+
+
+
+
+
+
+    Object.keys(transition)
+
+    .forEach(a=>{
+
+
+
+        let total=0;
+
+
+
+        Object.values(
+
+            transition[a]
+
+        )
+
+        .forEach(v=>{
+
+
+            total+=v;
+
+
+        });
+
+
+
+
+
+
+
+        probability[a]={};
+
+
+
+
+
+
+        Object.keys(
+
+            transition[a]
+
+        )
+
+        .forEach(b=>{
+
+
+
+            probability[a][b]=
+
+            Number(
+
+                (
+
+                transition[a][b]
+
+                /
+
+                total
+
+                )
+
+                .toFixed(4)
+
+            );
+
+
+
+        });
+
+
+
+    });
+
+
+
+
+
+
+
+
+
+    return {
+
+
+
+        agent:this.name,
+
+
+
+        transition:probability,
+
+
+
+        description:[
+
+
+
+            "分析上一期到下一期号码转移",
+
+
+
+            "计算号码出现迁移概率",
+
+
+
+            "等待蒙特卡罗概率融合"
+
+
+
+        ]
+
+
+
+    };
 
 
 
@@ -64,34 +289,37 @@ error:"历史数据不足"
 
 
 
-let transition={};
+
+
+
+
+
+// =====================
+// 获取下一期候选号码
+// =====================
+
+
+
+predict(lastNumbers=[]){
+
+
+
+    let result={};
 
 
 
 
 
 
-for(
-
-let i=0;
-
-i<history.length-1;
-
-i++
-
-){
+    lastNumbers.forEach(num=>{
 
 
 
-let current=
-
-history[i].front;
+        result[num]=[];
 
 
 
-let next=
-
-history[i+1].front;
+    });
 
 
 
@@ -99,51 +327,7 @@ history[i+1].front;
 
 
 
-
-current.forEach(from=>{
-
-
-
-if(!transition[from]){
-
-
-
-transition[from]={};
-
-
-
-}
-
-
-
-
-
-
-next.forEach(to=>{
-
-
-
-if(!transition[from][to]){
-
-
-
-transition[from][to]=0;
-
-
-
-}
-
-
-
-transition[from][to]++;
-
-
-
-});
-
-
-
-});
+    return result;
 
 
 
@@ -157,7 +341,19 @@ transition[from][to]++;
 
 
 
-let probability={};
+
+
+// =====================
+// 转移评分
+// =====================
+
+
+
+score(number,lastNumbers,history){
+
+
+
+    let score=0;
 
 
 
@@ -165,22 +361,73 @@ let probability={};
 
 
 
+    if(
 
-for(let from in transition){
+        !history ||
 
+        history.length<2
 
-
-let total=0;
-
-
-
-
-
-for(let to in transition[from]){
+    ){
 
 
 
-total+=transition[from][to];
+        return score;
+
+
+
+    }
+
+
+
+
+
+
+
+    let last =
+
+    history[
+
+        history.length-1
+
+    ].front;
+
+
+
+
+
+
+
+    if(
+
+        last.includes(number)
+
+    ){
+
+
+
+        score-=2;
+
+
+
+    }
+
+    else{
+
+
+
+        score+=1;
+
+
+
+    }
+
+
+
+
+
+
+
+    return score;
 
 
 
@@ -191,36 +438,25 @@ total+=transition[from][to];
 
 
 
-probability[from]={};
 
 
 
+status(){
 
 
 
-for(let to in transition[from]){
+    return {
 
 
 
-probability[from][to]=
+        agent:this.name,
+
+
+        ready:true
 
 
 
-Number(
-
-(
-
-transition[from][to]
-
-/
-
-total
-
-)
-
-.toFixed(3)
-
-);
+    };
 
 
 
@@ -237,125 +473,6 @@ total
 
 
 
-// 最近一期作为参考
-
-
-let last=
-
-history[history.length-1];
-
-
-
-
-
-
-
-
-let suggestion={};
-
-
-
-
-
-
-
-
-last.front.forEach(num=>{
-
-
-
-if(probability[num]){
-
-
-
-suggestion[num]=
-
-probability[num];
-
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-
-
-
-return {
-
-
-
-agent:this.name,
-
-
-
-sample:
-
-history.length,
-
-
-
-lastFront:
-
-last.front,
-
-
-
-transitionCount:
-
-Object.keys(
-
-transition
-
-).length,
-
-
-
-probability:
-
-probability,
-
-
-
-latestSuggestion:
-
-suggestion,
-
-
-
-strategy:
-
-"上一期→下一期 Markov 转移模型"
-
-
-
-};
-
-
-
-
-
-
-}
-
-
-
-
-
-}
-
-
-
-
-
-
-window.MarkovAgent=
+window.MarkovAgent =
 
 new MarkovAgent();

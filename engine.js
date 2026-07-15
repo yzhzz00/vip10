@@ -3,11 +3,11 @@
 
 大乐透智能分析系统
 
-V71.1
+V71.1 AI CORE
 
-AI Engine Core
+engine.js
 
-核心控制引擎
+核心引擎
 
 ================================
 */
@@ -19,16 +19,20 @@ class AIEngine {
 constructor(){
 
 
-    this.version="V71.1";
+    this.version = "V71.1";
 
 
-    this.dlt=[];
+    this.dlt = [];
 
 
-    this.ready=false;
+    this.ready = false;
 
 
-    this.agents={};
+    this.agents = {};
+
+
+    this.models = {};
+
 
 
 }
@@ -38,33 +42,19 @@ constructor(){
 
 
 
-
-
 async init(){
-
-
-
-    console.log(
-        "AIEngine init start"
-    );
-
 
 
     await this.loadData();
 
 
-
-
     this.registerAgents();
 
 
-
-    this.loadFrequency();
-
+    this.initEngines();
 
 
-    this.ready=true;
-
+    this.ready = true;
 
 
     return true;
@@ -79,14 +69,15 @@ async init(){
 
 
 
+
 async loadData(){
 
 
 
-    let response=
+    const response = await fetch(
 
-    await fetch(
         "data/dlt.txt?v=711"
+
     );
 
 
@@ -95,7 +86,9 @@ async loadData(){
 
 
         throw new Error(
-            "大乐透历史数据读取失败"
+
+            "大乐透历史数据加载失败"
+
         );
 
 
@@ -104,45 +97,43 @@ async loadData(){
 
 
 
-
-
-
-    let text=
-
-    await response.text();
+    const text = await response.text();
 
 
 
 
+    const lines = text
 
-    let lines=
+    .trim()
 
-    text.trim().split(/\n+/);
+    .split(/\n+/);
 
 
 
 
 
-    this.dlt=[];
+    this.dlt = [];
 
 
 
 
 
 
-    lines.forEach(line=>{
-
-
-        let arr=
-
-        line.trim().split(/\s+/);
+    for(let line of lines){
 
 
 
+        let arr = line
+
+        .trim()
+
+        .split(/\s+/);
 
 
 
-        if(arr.length>=9){
+
+
+        if(arr.length >= 9){
 
 
 
@@ -150,11 +141,12 @@ async loadData(){
 
 
 
-                issue:arr[0],
+                issue: arr[0],
 
 
 
-                date:arr[1],
+                date: arr[1],
+
 
 
 
@@ -173,7 +165,9 @@ async loadData(){
                     Number(arr[6])
 
 
+
                 ],
+
 
 
 
@@ -184,6 +178,7 @@ async loadData(){
                     Number(arr[7]),
 
                     Number(arr[8])
+
 
 
                 ]
@@ -198,8 +193,7 @@ async loadData(){
 
 
 
-    });
-
+    }
 
 
 
@@ -207,7 +201,8 @@ async loadData(){
 
     console.log(
 
-        "历史数据:",
+        "DLT Loaded:",
+
         this.dlt.length
 
     );
@@ -223,135 +218,132 @@ async loadData(){
 
 
 
-
 registerAgents(){
 
 
 
-    this.agents={};
+    this.agents = {};
 
 
 
 
 
-    if(window.MasterAgent){
-
-        this.agents.master=
-
-        window.MasterAgent;
-
-    }
+    const list = {
 
 
 
-    if(window.TrendAgent){
+        master:
 
-        this.agents.trend=
-
-        window.TrendAgent;
-
-    }
+        window.MasterAgent,
 
 
 
-    if(window.StructureAgent){
+        trend:
 
-        this.agents.structure=
-
-        window.StructureAgent;
-
-    }
+        window.TrendAgent,
 
 
 
-    if(window.MarkovAgent){
+        structure:
 
-        this.agents.markov=
-
-        window.MarkovAgent;
-
-    }
+        window.StructureAgent,
 
 
 
-    if(window.RiskAgent){
+        markov:
 
-        this.agents.risk=
-
-        window.RiskAgent;
-
-    }
+        window.MarkovAgent,
 
 
 
-    if(window.ReviewAgent){
+        risk:
 
-        this.agents.review=
-
-        window.ReviewAgent;
-
-    }
+        window.RiskAgent,
 
 
 
-    if(window.TheoryAgent){
+        review:
 
-        this.agents.theory=
-
-        window.TheoryAgent;
-
-    }
+        window.ReviewAgent,
 
 
 
-    if(window.ConfidenceAgent){
+        theory:
 
-        this.agents.confidence=
-
-        window.ConfidenceAgent;
-
-    }
+        window.TheoryAgent,
 
 
 
-    if(window.CriticAgent){
+        confidence:
 
-        this.agents.critic=
+        window.ConfidenceAgent,
 
-        window.CriticAgent;
 
-    }
+
+        critic:
+
+        window.CriticAgent
+
+
+
+    };
+
+
+
+
+
+    Object.keys(list)
+
+    .forEach(key=>{
+
+
+
+        if(list[key]){
+
+
+            this.agents[key]=list[key];
+
+
+        }
+
+
+
+    });
 
 
 
 }
+initEngines(){
+
+
+
+    this.engines={};
+
+
+
+
+
+    if(window.FrequencyEngine){
+
+
+        this.engines.frequency =
+
+        window.FrequencyEngine;
+
+
+    }
 
 
 
 
 
 
+    if(window.MonteCarloEngine){
 
 
+        this.engines.montecarlo =
 
-loadFrequency(){
-
-
-
-    if(
-
-        window.FrequencyEngine
-
-    ){
-
-
-
-        FrequencyEngine.load(
-
-            this.dlt
-
-        );
-
+        window.MonteCarloEngine;
 
 
     }
@@ -369,6 +361,24 @@ loadFrequency(){
 
 
 async analyze(){
+
+
+
+    if(!this.ready){
+
+
+
+        throw new Error(
+
+            "AI系统未初始化"
+
+        );
+
+
+    }
+
+
+
 
 
 
@@ -413,36 +423,234 @@ async analyze(){
 
 
 
-// 各AI模型分析
+
+    // =====================
+    // Agent分析
+    // =====================
 
 
 
-for(let key in this.agents){
+    for(let key in this.agents){
 
 
 
-    let agent=
+        let agent =
 
-    this.agents[key];
-
-
-
-    if(agent.analyze){
+        this.agents[key];
 
 
 
-        result.models[key]=
 
-        agent.analyze(
+
+        if(
+
+            agent &&
+
+            typeof agent.analyze === "function"
+
+        ){
+
+
+
+            try{
+
+
+
+                result.models[key]=
+
+                agent.analyze(
+
+                    this.dlt
+
+                );
+
+
+
+            }
+
+            catch(e){
+
+
+
+                result.models[key]={
+
+
+                    error:e.message
+
+
+                };
+
+
+
+            }
+
+
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // =====================
+    // Frequency评分
+    // =====================
+
+
+
+    if(
+
+        this.engines.frequency
+
+    ){
+
+
+
+        result.frequency =
+
+        this.engines.frequency.status();
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // =====================
+    // Monte Carlo
+    // =====================
+
+
+
+    if(
+
+        this.engines.montecarlo &&
+
+        typeof this.engines.montecarlo.simulate === "function"
+
+    ){
+
+
+
+        result.simulation =
+
+        this.engines.montecarlo.simulate(
 
             this.dlt
 
         );
 
 
+
     }
 
 
+
+
+
+
+
+
+
+    // =====================
+    // Master决策
+    // =====================
+
+
+
+    if(
+
+        this.agents.master &&
+
+        typeof this.agents.master.decide === "function"
+
+    ){
+
+
+
+        result.decision =
+
+        this.agents.master.decide(
+
+            result
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // =====================
+    // Critic审查
+    // =====================
+
+
+
+    if(
+
+        this.agents.critic &&
+
+        typeof this.agents.critic.analyze === "function"
+
+    ){
+
+
+
+        result.critic =
+
+        this.agents.critic.analyze(
+
+            result
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    return result;
+
+
+
+}
+getHistory(){
+
+
+
+    return this.dlt;
+
+
+
 }
 
 
@@ -453,102 +661,26 @@ for(let key in this.agents){
 
 
 
-// Monte Carlo
+getLatest(){
 
 
 
-if(
+    if(this.dlt.length===0){
 
-window.MonteCarloEngine
 
-){
+        return null;
 
 
+    }
 
-    result.simulation=
 
-    MonteCarloEngine.simulate();
 
 
+    return this.dlt[
 
-}
+        this.dlt.length-1
 
-
-
-
-
-
-
-
-
-// Master
-
-
-
-if(
-
-this.agents.master
-
-&&
-
-this.agents.master.decide
-
-){
-
-
-
-    result.decision=
-
-    this.agents.master.decide(
-
-        result
-
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-// Critic
-
-
-
-if(
-
-this.agents.critic
-
-&&
-
-this.agents.critic.analyze
-
-){
-
-
-
-    result.critic=
-
-    this.agents.critic.analyze(
-
-        result.decision
-
-    );
-
-
-}
-
-
-
-
-
-
-return result;
+    ];
 
 
 
@@ -566,31 +698,39 @@ status(){
 
 
 
-return {
+    return {
 
 
 
-version:this.version,
+        version:this.version,
 
 
 
-data:this.dlt.length,
+        data:this.dlt.length,
 
 
 
-agents:Object.keys(
+        agents:Object.keys(
 
-this.agents
+            this.agents
 
-),
-
-
-
-ready:this.ready
+        ),
 
 
 
-};
+        engines:Object.keys(
+
+            this.engines
+
+        ),
+
+
+
+        ready:this.ready
+
+
+
+    };
 
 
 
@@ -600,6 +740,23 @@ ready:this.ready
 
 
 
+
+
+
+
+reset(){
+
+
+
+    this.dlt=[];
+
+
+    this.ready=false;
+
+
+    this.agents={};
+
+
 }
 
 
@@ -608,6 +765,18 @@ ready:this.ready
 
 
 
-window.AIEngine=
+
+
+}
+
+
+
+
+
+
+
+
+
+window.AIEngine =
 
 new AIEngine();

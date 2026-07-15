@@ -1,11 +1,15 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 
 <head>
 
+
 <meta charset="UTF-8">
 
+
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
 
 <title>
 大乐透智能分析系统 V71.1
@@ -18,32 +22,41 @@
 </head>
 
 
+
+
+
 <body>
+
 
 
 <div class="container">
 
 
+
 <h1>
 大乐透智能分析系统
-<br>
-V71.1 AI CORE
 </h1>
 
 
+<h2>
+V71.1 AI CORE
+</h2>
+
+
 
 
 
 <div class="card">
 
-<h2>
+
+<h3>
 数据状态
-</h2>
+</h3>
 
 
-<div id="dataStatus">
+<div id="status">
 
-系统启动中...
+系统加载中...
 
 </div>
 
@@ -60,9 +73,10 @@ V71.1 AI CORE
 <div class="card">
 
 
-<h2>
+<h3>
 AI智能分析中心
-</h2>
+</h3>
+
 
 
 <button onclick="startAI()">
@@ -72,7 +86,24 @@ AI智能分析中心
 </button>
 
 
-<div id="analysisResult">
+
+</div>
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h3>
+AI多模型会议报告
+</h3>
+
+
+<div id="report">
 
 等待分析...
 
@@ -87,37 +118,12 @@ AI智能分析中心
 
 
 
-
 <div class="card">
 
 
-<h2>
-AI多维分析报告
-</h2>
-
-
-<div id="aiReport">
-
-等待生成...
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h2>
+<h3>
 开奖反馈学习
-</h2>
+</h3>
 
 
 <button onclick="saveFeedback()">
@@ -127,7 +133,7 @@ AI多维分析报告
 </button>
 
 
-<div id="learningStatus">
+<div id="feedback">
 
 等待反馈...
 
@@ -142,27 +148,22 @@ AI多维分析报告
 
 
 
-
 <div class="card">
 
 
-<h2>
+<h3>
 V71 AI Agent模型
-</h2>
+</h3>
 
 
-<div id="agentStatus">
+
+<div id="agents">
 
 加载中...
 
 </div>
 
 
-</div>
-
-
-
-
 
 </div>
 
@@ -171,10 +172,17 @@ V71 AI Agent模型
 
 
 
-<!-- =====================
-     Engine
-===================== -->
+</div>
 
+
+
+
+
+
+
+
+
+<!-- Engine -->
 
 <script src="engine/frequencyEngine.js"></script>
 
@@ -184,11 +192,7 @@ V71 AI Agent模型
 
 
 
-
-<!-- =====================
-     Agents
-===================== -->
-
+<!-- Agents -->
 
 <script src="agents/trendAgent.js"></script>
 
@@ -213,17 +217,14 @@ V71 AI Agent模型
 
 
 
-<!-- =====================
-     Core
-===================== -->
+<!-- Core -->
 
 
 <script src="engine.js"></script>
 
 
-<!-- =====================
-     UI
-===================== -->
+
+<!-- UI -->
 
 
 <script src="script.js"></script>
@@ -231,6 +232,29 @@ V71 AI Agent模型
 
 
 
+
+<script>
+
+
+function saveFeedback(){
+
+
+document.getElementById(
+"feedback"
+).innerHTML=
+
+"开奖反馈已保存";
+
+
+}
+
+
+
+</script>
+
+
+
 </body>
+
 
 </html>
