@@ -1,100 +1,52 @@
-window.DLT_PREDICTOR = {
+window.DLT_PREDICTOR={
 
 
 
-/*
-==========================
-单号码综合评分
-==========================
-*/
-
-
-numberScore(number,history){
+scoreNumber(n,data){
 
 
 
-let w = DLT_CONFIG.modelWeights;
+let w=
+
+DLT_CONFIG.modelWeights;
 
 
 
-let scores={
+let score=0;
 
 
 
-frequency:
+score+=
 
-DLT_MODELS.frequency(
-number,
-history
-),
+DLT_MODELS.frequency(n,data)
 
-
-
-trend:
-
-DLT_MODELS.trend(
-number,
-history
-),
+*w.frequency;
 
 
 
-missing:
+score+=
 
-DLT_MODELS.missing(
-number,
-history
-),
+DLT_MODELS.trend(n,data)
 
-
-
-markov:
-
-DLT_MODELS.markov(
-number,
-history
-)
+*w.trend;
 
 
 
-};
+score+=
 
+DLT_MODELS.missing(n,data)
 
-
-
-
-let total=0;
-
-
-
-total += scores.frequency*w.frequency;
-
-
-
-total += scores.trend*w.trend;
-
-
-
-total += scores.missing*w.missing;
-
-
-
-total += scores.markov*w.markov;
+*w.missing;
 
 
 
 return {
 
 
-
-number:number,
-
-
-score:total,
+number:n,
 
 
-detail:scores
-
+score:score
 
 
 };
@@ -109,59 +61,41 @@ detail:scores
 
 
 
-/*
-==========================
-生成号码池
-==========================
-*/
-
-
-buildPool(history){
+buildPool(data){
 
 
 
-let pool=[];
+let arr=[];
 
 
 
-for(
-let i=1;
-i<=35;
-i++
-){
+for(let i=1;i<=35;i++){
 
 
+arr.push(
 
-pool.push(
-
-this.numberScore(
-i,
-history
-)
+this.scoreNumber(i,data)
 
 );
-
 
 
 }
 
 
 
-pool.sort(
+arr.sort(
 
-(a,b)=>
-
-b.score-a.score
+(a,b)=>b.score-a.score
 
 );
 
 
 
-return pool.slice(
+return arr.slice(
 
 0,
 
-DLT_CONFIG.candidate.frontPool
+DLT_CONFIG.mobile.numberPool
 
 );
 
@@ -175,22 +109,14 @@ DLT_CONFIG.candidate.frontPool
 
 
 
-/*
-==========================
-组合生成
-==========================
-*/
+makeCombination(pool){
 
 
-generateCombination(pool){
 
+let temp=[...pool];
 
 
 let result=[];
-
-
-
-let copy=[...pool];
 
 
 
@@ -198,9 +124,11 @@ while(result.length<5){
 
 
 
-let index=Math.floor(
+let index=
 
-Math.random()*copy.length
+Math.floor(
+
+Math.random()*temp.length
 
 );
 
@@ -208,13 +136,13 @@ Math.random()*copy.length
 
 result.push(
 
-copy[index].number
+temp[index].number
 
 );
 
 
 
-copy.splice(index,1);
+temp.splice(index,1);
 
 
 
@@ -238,96 +166,11 @@ return result.sort(
 
 
 
-/*
-==========================
-组合评分
-==========================
-*/
-
-
-combinationScore(front,history){
+predict(data){
 
 
 
-let score=0;
-
-
-
-// 结构
-
-score +=
-
-DLT_MODELS.structure(front)
-
-*
-
-DLT_CONFIG.modelWeights.structure;
-
-
-
-// 形态
-
-score +=
-
-DLT_MODELS.shape(front)
-
-*
-
-DLT_CONFIG.modelWeights.shape;
-
-
-
-// 矩阵
-
-score +=
-
-DLT_MODELS.matrix(
-front,
-history
-)
-
-*
-
-DLT_CONFIG.modelWeights.matrix;
-
-
-
-// 反人类
-
-score +=
-
-DLT_MODELS.antiHuman(front)
-
-*
-
-DLT_CONFIG.modelWeights.antiHuman;
-
-
-
-return score;
-
-
-
-},
-
-
-
-
-
-
-
-/*
-==========================
-最终预测
-==========================
-*/
-
-
-predict(history){
-
-
-
-let pool=this.buildPool(history);
+let pool=this.buildPool(data);
 
 
 
@@ -335,46 +178,45 @@ let result=[];
 
 
 
-let times=
-
-DLT_CONFIG.candidate.combinations;
-
-
-
 for(
+
 let i=0;
-i<times;
+
+i<DLT_CONFIG.mobile.combinations;
+
 i++
+
 ){
 
 
 
 let front=
 
-this.generateCombination(pool);
+this.makeCombination(pool);
 
 
 
 let score=
 
-this.combinationScore(
+DLT_MODELS.structure(front)
 
-front,
++
 
-history
+DLT_MODELS.shape(front)
 
-);
++
 
+DLT_MODELS.antiHuman(front);
 
 
 
 result.push({
 
 
-front:front,
+front,
 
 
-score:score
+score
 
 
 });
@@ -385,13 +227,9 @@ score:score
 
 
 
-
-
 result.sort(
 
-(a,b)=>
-
-b.score-a.score
+(a,b)=>b.score-a.score
 
 );
 
@@ -401,14 +239,13 @@ return result.slice(
 
 0,
 
-DLT_CONFIG.candidate.outputTop
+DLT_CONFIG.mobile.outputTop
 
 );
 
 
 
 }
-
 
 
 

@@ -1,4 +1,4 @@
-window.DLT_ENGINE = {
+window.DLT_ENGINE={
 
 
 
@@ -6,45 +6,22 @@ history:[],
 
 
 
-/*
-==========================
-初始化系统
-==========================
-*/
 
 
 init(text){
 
 
 
-this.history =
+this.history=
 
 DLT_PARSER.parse(text);
-
-
-
-let check =
-
-DLT_PARSER.check(
-
-this.history
-
-);
 
 
 
 return {
 
 
-
-dataCount:
-
-this.history.length,
-
-
-
-check:check
-
+count:this.history.length
 
 
 };
@@ -59,30 +36,15 @@ check:check
 
 
 
-/*
-==========================
-开始AI分析
-==========================
-*/
-
-
-analyze(deep=false){
+async analyze(callback){
 
 
 
-if(
-
-this.history.length===0
-
-){
+if(this.history.length===0){
 
 
 
-return {
-
-error:"没有历史数据"
-
-};
+return [];
 
 
 
@@ -90,9 +52,7 @@ error:"没有历史数据"
 
 
 
-
-
-let first =
+let result=
 
 DLT_PREDICTOR.predict(
 
@@ -102,21 +62,15 @@ this.history
 
 
 
-let result =
+return await DLT_MONTECARLO.run(
 
-DLT_MONTECARLO.run(
+result,
 
-first,
+false,
 
-this.history,
-
-deep
+callback
 
 );
-
-
-
-return result;
 
 
 
@@ -128,20 +82,15 @@ return result;
 
 
 
-/*
-==========================
-开始滚动训练
-==========================
-*/
-
-
-train(){
+train(callback){
 
 
 
 return DLT_TRAINING.start(
 
-this.history
+this.history,
+
+callback
 
 );
 
@@ -153,40 +102,6 @@ this.history
 
 
 
-
-
-/*
-==========================
-保存开奖
-==========================
-*/
-
-
-feedback(data){
-
-
-
-return DLT_FEEDBACK.save(
-
-data
-
-);
-
-
-
-},
-
-
-
-
-
-
-
-/*
-==========================
-获取报告
-==========================
-*/
 
 
 report(){
@@ -198,7 +113,6 @@ return DLT_REPORT.generate();
 
 
 }
-
 
 
 

@@ -2,86 +2,95 @@ window.DLT_DATABASE = {
 
 
 
-    keys:{
+keys:{
 
 
-        weights:"DLT_MODEL_WEIGHTS",
+weights:"DLT_V11_WEIGHTS",
 
 
-        train:"DLT_TRAIN_RECORD",
+train:"DLT_V11_TRAIN",
 
 
-        feedback:"DLT_FEEDBACK_RECORD",
+feedback:"DLT_V11_FEEDBACK",
 
 
-        report:"DLT_AI_REPORT"
+report:"DLT_V11_REPORT",
 
 
-    },
+matrix:"DLT_V11_MATRIX",
 
 
+checkpoint:"DLT_V11_CHECKPOINT"
 
 
+},
 
 
 
-    // 保存模型权重
 
-    saveWeights(data){
 
 
-        localStorage.setItem(
 
+/*
+========================
+通用保存
+========================
+*/
 
-            this.keys.weights,
 
+save(key,data){
 
-            JSON.stringify(data)
 
 
-        );
+localStorage.setItem(
 
+key,
 
-    },
+JSON.stringify(data)
 
+);
 
 
+},
 
 
 
 
-    // 获取模型权重
 
-    getWeights(){
 
 
+/*
+========================
+通用读取
+========================
+*/
 
-        let data = localStorage.getItem(
 
+load(key,defaultValue=null){
 
-            this.keys.weights
 
 
-        );
+let data=
 
+localStorage.getItem(key);
 
 
-        if(data){
 
+if(data){
 
-            return JSON.parse(data);
 
+return JSON.parse(data);
 
-        }
 
+}
 
 
-        return DLT_CONFIG.modelWeights;
 
+return defaultValue;
 
 
-    },
 
+},
 
 
 
@@ -89,204 +98,232 @@ window.DLT_DATABASE = {
 
 
 
+/*
+========================
+权重
+========================
+*/
 
-    // 保存训练记录
 
-    saveTrainRecord(record){
+saveWeights(data){
 
 
 
-        let old = this.getTrainRecord();
+this.save(
 
+this.keys.weights,
 
+data
 
-        old.push(record);
+);
 
 
 
-        localStorage.setItem(
+},
 
 
-            this.keys.train,
 
+getWeights(){
 
-            JSON.stringify(old)
 
 
-        );
+return this.load(
 
+this.keys.weights,
 
+DLT_CONFIG.modelWeights
 
-    },
+);
 
 
 
+},
 
 
 
 
 
 
-    // 获取训练记录
 
-    getTrainRecord(){
+/*
+========================
+训练记录
+========================
+*/
 
 
+addTrain(record){
 
-        let data = localStorage.getItem(
 
 
-            this.keys.train
+let list=
 
+this.getTrain();
 
-        );
 
 
+list.push(record);
 
-        return data ?
 
 
-        JSON.parse(data)
+this.save(
 
+this.keys.train,
 
-        :
+list
 
+);
 
-        [];
 
 
+},
 
-    },
 
 
 
+getTrain(){
 
 
 
+return this.load(
 
+this.keys.train,
 
+[]
 
-    // 清空训练记录
+);
 
-    clearTrainRecord(){
 
 
+},
 
-        localStorage.removeItem(
 
 
-            this.keys.train
 
 
-        );
 
 
-    },
+clearTrain(){
 
 
 
+localStorage.removeItem(
 
+this.keys.train
 
+);
 
 
 
+},
 
-    // 保存开奖反馈
 
-    saveFeedback(data){
 
 
 
-        let old = this.getFeedback();
 
 
+/*
+========================
+开奖反馈
+========================
+*/
 
-        old.push(data);
 
+addFeedback(data){
 
 
-        localStorage.setItem(
 
+let list=
 
-            this.keys.feedback,
+this.getFeedback();
 
 
-            JSON.stringify(old)
 
+list.push(data);
 
-        );
 
 
+this.save(
 
-    },
+this.keys.feedback,
 
+list
 
+);
 
 
 
+},
 
 
 
 
-    // 获取反馈数据
 
-    getFeedback(){
+getFeedback(){
 
 
 
-        let data = localStorage.getItem(
+return this.load(
 
+this.keys.feedback,
 
-            this.keys.feedback
+[]
 
+);
 
-        );
 
 
+},
 
-        return data ?
 
 
-        JSON.parse(data)
 
 
-        :
 
 
-        [];
+/*
+========================
+矩阵缓存
+========================
+*/
 
 
+saveMatrix(data){
 
-    },
 
 
+this.save(
 
+this.keys.matrix,
 
+data
 
+);
 
 
 
+},
 
-    // 保存成长报告
 
-    saveReport(data){
 
 
 
-        localStorage.setItem(
+getMatrix(){
 
 
-            this.keys.report,
 
+return this.load(
 
-            JSON.stringify(data)
+this.keys.matrix,
 
+null
 
-        );
+);
 
 
-    },
 
+},
 
 
 
@@ -294,37 +331,123 @@ window.DLT_DATABASE = {
 
 
 
+/*
+========================
+训练断点
+========================
+*/
 
-    // 获取成长报告
 
-    getReport(){
+saveCheckpoint(data){
 
 
 
-        let data = localStorage.getItem(
+this.save(
 
+this.keys.checkpoint,
 
-            this.keys.report
+data
 
+);
 
-        );
 
 
+},
 
-        return data ?
 
 
-        JSON.parse(data)
 
 
-        :
 
+getCheckpoint(){
 
-        null;
 
 
+return this.load(
 
-    }
+this.keys.checkpoint,
+
+{
+
+index:0
+
+}
+
+);
+
+
+
+},
+
+
+
+
+
+
+
+clearCheckpoint(){
+
+
+
+localStorage.removeItem(
+
+this.keys.checkpoint
+
+);
+
+
+
+},
+
+
+
+
+
+
+
+/*
+========================
+报告
+========================
+*/
+
+
+saveReport(data){
+
+
+
+this.save(
+
+this.keys.report,
+
+data
+
+);
+
+
+
+},
+
+
+
+
+
+
+getReport(){
+
+
+
+return this.load(
+
+this.keys.report,
+
+null
+
+);
+
+
+
+}
 
 
 

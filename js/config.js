@@ -1,33 +1,33 @@
 window.DLT_CONFIG = {
 
 
-    // 系统版本
-
-    version: "DLT-AI-CORE-V1",
+    version:"DLT-AI-CORE-V1.1",
 
 
 
-    // 数据文件
+    // 数据
 
-    dataFile: "data/dlt.txt",
+    dataFile:"data/dlt.txt",
 
 
 
     // 大乐透规则
 
-    frontCount: 5,
+    frontMax:35,
 
-    frontMax: 35,
+    backMax:12,
 
-    backCount: 2,
+    frontCount:5,
 
-    backMax: 12,
+    backCount:2,
 
 
 
-    // =====================
-    // AI模型初始权重
-    // =====================
+    /*
+    =====================
+    AI模型权重
+    =====================
+    */
 
 
     modelWeights:{
@@ -69,36 +69,39 @@ window.DLT_CONFIG = {
 
 
 
-    // =====================
-    // 训练参数
-    // =====================
+    /*
+    =====================
+    手机计算参数
+    =====================
+    */
 
 
-    training:{
+    mobile:{
 
 
-        // 滚动窗口
+        // 候选号码数量
 
-        shortWindow:100,
-
-
-        middleWindow:500,
+        numberPool:15,
 
 
-        longWindow:0,
+        // 组合数量
+
+        combinations:100,
 
 
+        // 输出数量
 
-        // 每次训练批量
-
-        batchSize:30,
-
+        outputTop:10,
 
 
-        // 防止手机卡死
+        // 每批计算量
 
-        pauseTime:100
+        batchSize:100,
 
+
+        // 释放UI时间
+
+        delay:20
 
 
     },
@@ -109,29 +112,25 @@ window.DLT_CONFIG = {
 
 
 
-    // =====================
-    // Monte Carlo参数
-    // =====================
+
+
+    /*
+    =====================
+    Monte Carlo
+    =====================
+    */
 
 
     monteCarlo:{
 
 
-
-        normalSimulation:100000,
-
+        normal:5000,
 
 
-        deepSimulation:1000000,
+        deep:20000,
 
 
-
-        trainingSimulation:5000,
-
-
-
-        batch:500
-
+        training:1000
 
 
     },
@@ -142,28 +141,25 @@ window.DLT_CONFIG = {
 
 
 
-    // =====================
-    // 候选池
-    // =====================
 
 
-    candidate:{
+    /*
+    =====================
+    滚动学习
+    =====================
+    */
 
 
-
-        // 单号保留数量
-
-        frontPool:20,
+    training:{
 
 
-
-        // 组合数量
-
-        combinations:5000,
+        window:500,
 
 
+        batchPeriod:30,
 
-        outputTop:10
+
+        maxWeightChange:0.03
 
 
 
@@ -176,25 +172,20 @@ window.DLT_CONFIG = {
 
 
 
-    // =====================
-    // 学习限制
-    // =====================
+    /*
+    =====================
+    矩阵缓存
+    =====================
+    */
 
 
-    learning:{
+    matrix:{
 
 
-
-        maxWeightChange:0.03,
-
-
-
-        minModelScore:40
-
+        recentPeriod:500
 
 
     }
-
 
 
 

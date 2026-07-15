@@ -1,51 +1,16 @@
-window.DLT_FEEDBACK = {
+window.DLT_FEEDBACK={
 
-
-
-/*
-==========================
-保存开奖反馈
-==========================
-*/
 
 
 save(data){
 
 
 
-let feedback={
+DLT_DATABASE.addFeedback(data);
 
 
 
-period:data.period,
-
-
-
-front:data.front,
-
-
-
-back:data.back,
-
-
-
-time:Date.now()
-
-
-
-};
-
-
-
-DLT_DATABASE.saveFeedback(
-
-feedback
-
-);
-
-
-
-return feedback;
+return true;
 
 
 
@@ -55,136 +20,61 @@ return feedback;
 
 
 
-
-
-/*
-==========================
-预测对比开奖
-==========================
-*/
 
 
 compare(prediction,real){
 
 
 
-let frontHit=0;
+let front=0;
 
-let backHit=0;
+let back=0;
 
 
 
 prediction.front.forEach(n=>{
 
 
-
 if(real.front.includes(n)){
 
 
-
-frontHit++;
-
+front++;
 
 
 }
-
 
 
 });
 
 
 
-
-prediction.back.forEach(n=>{
-
+prediction.back?.forEach(n=>{
 
 
 if(real.back.includes(n)){
 
 
-
-backHit++;
-
+back++;
 
 
 }
-
 
 
 });
 
 
 
-
-
 return {
 
 
 
-frontHit:frontHit,
+frontHit:front,
 
 
-backHit:backHit,
+backHit:back,
 
 
-total:
-
-frontHit+backHit
-
-
-
-};
-
-
-
-},
-
-
-
-
-
-
-
-/*
-==========================
-生成学习记录
-==========================
-*/
-
-
-createLearning(prediction,real){
-
-
-
-let result=
-
-this.compare(
-
-prediction,
-
-real
-
-);
-
-
-
-return {
-
-
-
-prediction:prediction,
-
-
-
-real:real,
-
-
-
-result:result,
-
-
-
-time:Date.now()
+total:front+back
 
 
 
@@ -193,8 +83,6 @@ time:Date.now()
 
 
 }
-
-
 
 
 

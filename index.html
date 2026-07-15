@@ -2,64 +2,44 @@
 
 <html lang="zh-CN">
 
-
 <head>
-
 
 <meta charset="UTF-8">
 
-
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-
 <title>
-
-大乐透 AI CORE V1
-
+大乐透 AI CORE V1.1
 </title>
-
 
 <link rel="stylesheet" href="css/app.css">
 
-
 </head>
-
-
-
 
 
 <body>
 
 
-
 <div class="container">
 
 
-
 <h1>
-
-大乐透 AI CORE V1
-
+大乐透 AI CORE V1.1
 </h1>
 
 
 
 <div class="card">
 
-
-<h2>数据状态</h2>
-
+<h2>
+数据状态
+</h2>
 
 <div id="dataStatus">
-
-等待加载...
-
+等待加载
 </div>
 
-
 </div>
-
-
 
 
 
@@ -68,37 +48,27 @@
 <div class="card">
 
 
-<h2>AI分析中心</h2>
-
+<h2>
+AI分析中心
+</h2>
 
 
 <button id="analyzeBtn">
-
 开始 AI 分析
-
 </button>
-
 
 
 <button id="trainBtn">
-
 滚动训练
-
 </button>
-
 
 
 <div id="trainStatus">
-
 等待训练...
-
 </div>
 
 
-
 </div>
-
-
 
 
 
@@ -110,25 +80,16 @@
 
 
 <h2>
-
 预测结果
-
 </h2>
-
 
 
 <div id="prediction">
-
-
 等待分析...
-
 </div>
 
 
-
 </div>
-
-
 
 
 
@@ -140,70 +101,20 @@
 
 
 <h2>
-
-开奖反馈
-
-</h2>
-
-
-
-<textarea id="feedbackInput"
-
-placeholder="输入开奖数据">
-
-</textarea>
-
-
-
-<button id="feedbackBtn">
-
-提交反馈
-
-</button>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h2>
-
 AI成长报告
-
 </h2>
-
 
 
 <div id="report">
-
-
 暂无报告
+</div>
+
 
 </div>
 
 
 
 </div>
-
-
-
-
-
-</div>
-
-
-
-
 
 
 
@@ -211,38 +122,25 @@ AI成长报告
 
 <script src="js/config.js"></script>
 
-
 <script src="js/database.js"></script>
-
 
 <script src="js/parser.js"></script>
 
-
 <script src="js/models.js"></script>
-
 
 <script src="js/predictor.js"></script>
 
-
 <script src="js/montecarlo.js"></script>
-
 
 <script src="js/training.js"></script>
 
-
 <script src="js/feedback.js"></script>
-
 
 <script src="js/report.js"></script>
 
-
 <script src="js/engine.js"></script>
 
-
 <script src="js/ui.js"></script>
-
-
-
 
 
 
@@ -250,28 +148,11 @@ AI成长报告
 <script>
 
 
+fetch("data/dlt.txt")
 
-let demoData="";
-
-
-
-
-
-// 加载数据
-
-fetch(
-
-"data/dlt.txt"
-
-)
-
-.then(res=>res.text())
+.then(r=>r.text())
 
 .then(text=>{
-
-
-demoData=text;
-
 
 
 let info=
@@ -280,9 +161,11 @@ DLT_ENGINE.init(text);
 
 
 
-DLT_UI.showData(
+DLT_UI.set(
 
-info.dataCount
+"dataStatus",
+
+"历史数据："+info.count+"期"
 
 );
 
@@ -294,34 +177,28 @@ info.dataCount
 
 
 
-
-
-
-
-// 分析按钮
-
-
 document.getElementById(
-
 "analyzeBtn"
+).onclick=async()=>{
 
-)
 
-.onclick=function(){
+DLT_UI.set(
+
+"prediction",
+
+"计算中..."
+
+);
 
 
 
 let result=
 
-DLT_ENGINE.analyze();
+await DLT_ENGINE.analyze();
 
 
 
-DLT_UI.showPrediction(
-
-result
-
-);
+DLT_UI.showPrediction(result);
 
 
 
@@ -333,99 +210,27 @@ result
 
 
 
-
-
-// 训练按钮
-
-
 document.getElementById(
-
 "trainBtn"
-
-)
-
-.onclick=function(){
+).onclick=()=>{
 
 
+DLT_ENGINE.train(
 
-DLT_UI.trainingStatus(
+(num)=>{
 
-"训练开始..."
 
-);
+DLT_UI.progress(num);
 
 
 
-DLT_ENGINE.train();
-
-
-
-DLT_UI.trainingStatus(
-
-"训练完成"
-
-);
-
-
-
-let report=
-
-DLT_ENGINE.report();
-
-
-
-DLT_UI.showReport(
-
-report
+}
 
 );
 
 
 
 };
-
-
-
-
-
-
-
-
-
-// 反馈按钮
-
-
-document.getElementById(
-
-"feedbackBtn"
-
-)
-
-.onclick=function(){
-
-
-
-let text=
-
-document.getElementById(
-
-"feedbackInput"
-
-).value;
-
-
-
-alert(
-
-"反馈已保存"
-
-);
-
-
-
-};
-
-
 
 
 
@@ -434,6 +239,5 @@ alert(
 
 
 </body>
-
 
 </html>

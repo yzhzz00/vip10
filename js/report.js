@@ -1,12 +1,5 @@
-window.DLT_REPORT = {
+window.DLT_REPORT={
 
-
-
-/*
-==========================
-生成成长报告
-==========================
-*/
 
 
 generate(){
@@ -15,19 +8,35 @@ generate(){
 
 let train=
 
-DLT_TRAINING.summary();
+DLT_DATABASE.getTrain();
 
 
 
-let weights=
-
-DLT_DATABASE.getWeights();
+let total=train.length;
 
 
 
-let feedback=
+let hit3=0;
 
-DLT_DATABASE.getFeedback();
+let hit4=0;
+
+let hit5=0;
+
+
+
+train.forEach(r=>{
+
+
+
+if(r.hit>=3)hit3++;
+
+if(r.hit>=4)hit4++;
+
+if(r.hit===5)hit5++;
+
+
+
+});
 
 
 
@@ -43,7 +52,7 @@ DLT_CONFIG.version,
 
 
 
-createTime:
+time:
 
 new Date().toLocaleString(),
 
@@ -53,69 +62,34 @@ training:{
 
 
 
-total:
-
-train.total,
+total:total,
 
 
-
-hit3:
-
-train.hit3,
+hit3:hit3,
 
 
-
-hit4:
-
-train.hit4,
+hit4:hit4,
 
 
-
-hit5:
-
-train.hit5,
-
-
-
-hitRate:
-
-train.rate+"%"
+hit5:hit5
 
 
 
 },
-
-
-
-
-
-feedback:{
-
-
-
-total:
-
-feedback.length
-
-
-
-},
-
-
-
-
-
-weights:weights,
-
-
-
-
 
 
 
 status:
 
-this.status(train)
+total>0
+
+?
+
+"学习中"
+
+:
+
+"等待训练"
 
 
 
@@ -125,11 +99,7 @@ this.status(train)
 
 
 
-DLT_DATABASE.saveReport(
-
-report
-
-);
+DLT_DATABASE.saveReport(report);
 
 
 
@@ -145,66 +115,6 @@ return report;
 
 
 
-/*
-==========================
-模型状态判断
-==========================
-*/
-
-
-status(train){
-
-
-
-if(!train.total){
-
-
-return "等待训练";
-
-
-}
-
-
-
-if(train.rate>=20){
-
-
-return "优秀";
-
-
-}
-
-
-
-if(train.rate>=10){
-
-
-return "稳定";
-
-
-}
-
-
-
-return "需要优化";
-
-
-
-},
-
-
-
-
-
-
-
-/*
-==========================
-获取报告
-==========================
-*/
-
-
 get(){
 
 
@@ -214,8 +124,6 @@ return DLT_DATABASE.getReport();
 
 
 }
-
-
 
 
 
