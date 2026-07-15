@@ -1,334 +1,122 @@
 /*
-================================
+====================================
 
 大乐透智能分析系统
 
-V71.1 AI CORE
+V71.2 AI CORE
 
 engine.js
 
-核心引擎
+核心控制引擎
 
-================================
+====================================
 */
 
 
 class AIEngine {
 
 
+
 constructor(){
 
 
-    this.version = "V71.1";
+    this.version="V71.2";
 
 
-    this.dlt = [];
+    this.dlt=[];
 
 
-    this.ready = false;
+    this.ready=false;
 
 
-    this.agents = {};
 
-
-    this.models = {};
-
-
-
-}
-
-
-
-
-
-
-async init(){
-
-
-    await this.loadData();
-
-
-    this.registerAgents();
-
-
-    this.initEngines();
-
-
-    this.ready = true;
-
-
-    return true;
-
-
-}
-
-
-
-
-
-
-
-
-
-async loadData(){
-
-
-
-    const response = await fetch(
-
-        "data/dlt.txt?v=711"
-
-    );
-
-
-
-    if(!response.ok){
-
-
-        throw new Error(
-
-            "大乐透历史数据加载失败"
-
-        );
-
-
-    }
-
-
-
-
-    const text = await response.text();
-
-
-
-
-    const lines = text
-
-    .trim()
-
-    .split(/\n+/);
-
-
-
-
-
-    this.dlt = [];
-
-
-
-
-
-
-    for(let line of lines){
-
-
-
-        let arr = line
-
-        .trim()
-
-        .split(/\s+/);
-
-
-
-
-
-        if(arr.length >= 9){
-
-
-
-            this.dlt.push({
-
-
-
-                issue: arr[0],
-
-
-
-                date: arr[1],
-
-
-
-
-                front:[
-
-
-
-                    Number(arr[2]),
-
-                    Number(arr[3]),
-
-                    Number(arr[4]),
-
-                    Number(arr[5]),
-
-                    Number(arr[6])
-
-
-
-                ],
-
-
-
-
-                back:[
-
-
-
-                    Number(arr[7]),
-
-                    Number(arr[8])
-
-
-
-                ]
-
-
-
-            });
-
-
-
-        }
-
-
-
-    }
-
-
-
-
-
-    console.log(
-
-        "DLT Loaded:",
-
-        this.dlt.length
-
-    );
-
-
-
-}
-
-
-
-
-
-
-
-
-registerAgents(){
-
-
-
-    this.agents = {};
-
-
-
-
-
-    const list = {
-
-
-
-        master:
-
-        window.MasterAgent,
-
-
-
-        trend:
-
-        window.TrendAgent,
-
-
-
-        structure:
-
-        window.StructureAgent,
-
-
-
-        markov:
-
-        window.MarkovAgent,
-
-
-
-        risk:
-
-        window.RiskAgent,
-
-
-
-        review:
-
-        window.ReviewAgent,
-
-
-
-        theory:
-
-        window.TheoryAgent,
-
-
-
-        confidence:
-
-        window.ConfidenceAgent,
-
-
-
-        critic:
-
-        window.CriticAgent
-
-
-
-    };
-
-
-
-
-
-    Object.keys(list)
-
-    .forEach(key=>{
-
-
-
-        if(list[key]){
-
-
-            this.agents[key]=list[key];
-
-
-        }
-
-
-
-    });
-
-
-
-}
-initEngines(){
-
+    this.agents={};
 
 
     this.engines={};
 
 
 
+}
+
+
+
+
+
+
+
+
+
+// ============================
+// 初始化
+// ============================
+
+
+async init(){
+
+
+
+    console.log(
+
+        "AIEngine init"
+
+    );
+
+
+
+
+
+    this.loadAgents();
+
+
+
+    this.loadEngines();
+
+
+
+
+
+    await this.loadData();
+
+
+
+
+
+    this.ready=true;
+
+
+
+    return true;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ============================
+// 加载引擎
+// ============================
+
+
+loadEngines(){
+
 
 
     if(window.FrequencyEngine){
 
 
-        this.engines.frequency =
 
-        window.FrequencyEngine;
+        this.engines.frequency=
+
+        FrequencyEngine;
+
 
 
     }
@@ -341,9 +129,11 @@ initEngines(){
     if(window.MonteCarloEngine){
 
 
-        this.engines.montecarlo =
 
-        window.MonteCarloEngine;
+        this.engines.montecarlo=
+
+        MonteCarloEngine;
+
 
 
     }
@@ -360,19 +150,299 @@ initEngines(){
 
 
 
-async analyze(){
+// ============================
+// 加载AI Agent
+// ============================
 
+
+loadAgents(){
+
+
+
+    if(window.MasterAgent)
+
+    this.agents.master=
+
+    MasterAgent;
+
+
+
+
+
+    if(window.TrendAgent)
+
+    this.agents.trend=
+
+    TrendAgent;
+
+
+
+
+
+    if(window.StructureAgent)
+
+    this.agents.structure=
+
+    StructureAgent;
+
+
+
+
+
+    if(window.MarkovAgent)
+
+    this.agents.markov=
+
+    MarkovAgent;
+
+
+
+
+
+    if(window.RiskAgent)
+
+    this.agents.risk=
+
+    RiskAgent;
+
+
+
+
+
+    if(window.ReviewAgent)
+
+    this.agents.review=
+
+    ReviewAgent;
+
+
+
+
+
+    if(window.TheoryAgent)
+
+    this.agents.theory=
+
+    TheoryAgent;
+
+
+
+
+
+    if(window.ConfidenceAgent)
+
+    this.agents.confidence=
+
+    ConfidenceAgent;
+
+
+
+
+
+    if(window.CriticAgent)
+
+    this.agents.critic=
+
+    CriticAgent;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ============================
+// 加载历史数据
+// ============================
+
+
+async loadData(){
+
+
+
+    try{
+
+
+
+        let res=
+
+        await fetch(
+
+        "data/dlt.txt"
+
+        );
+
+
+
+
+
+        let text=
+
+        await res.text();
+
+
+
+
+
+        this.parseData(text);
+
+
+
+
+
+    }
+
+    catch(e){
+
+
+
+        console.log(
+
+        "数据读取失败",
+
+        e
+
+        );
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ============================
+// 大乐透数据解析
+// ============================
+
+
+parseData(text){
+
+
+
+    let lines=
+
+    text.split("\n");
+
+
+
+    this.dlt=[];
+
+
+
+
+
+    lines.forEach(line=>{
+
+
+
+        let arr=
+
+        line.trim()
+
+        .split(/\s+/);
+
+
+
+
+
+
+        if(arr.length>=8){
+
+
+
+            let front=arr.slice(
+
+                2,
+
+                7
+
+            )
+
+            .map(Number);
+
+
+
+
+
+            let back=arr.slice(
+
+                7,
+
+                9
+
+            )
+
+            .map(Number);
+
+
+
+
+
+            this.dlt.push({
+
+
+
+                front:front,
+
+
+
+                back:back
+
+
+
+            });
+
+
+
+        }
+
+
+
+    });
+
+
+
+
+
+    console.log(
+
+        "历史数据",
+
+        this.dlt.length
+
+    );
+
+
+
+}
+// ============================
+// AI分析总入口
+// ============================
+
+
+async analyze(){
 
 
     if(!this.ready){
 
 
-
-        throw new Error(
-
-            "AI系统未初始化"
-
-        );
+        await this.init();
 
 
     }
@@ -381,33 +451,16 @@ async analyze(){
 
 
 
-
     let result={
-
-
-
-        version:this.version,
-
-
-
-        agents:Object.keys(
-
-            this.agents
-
-        ),
-
 
 
         models:{},
 
 
-
         simulation:null,
 
 
-
         decision:null,
-
 
 
         critic:null
@@ -423,71 +476,21 @@ async analyze(){
 
 
 
-
-    // =====================
-    // Agent分析
-    // =====================
-
+    // ========================
+    // Trend AI
+    // ========================
 
 
-    for(let key in this.agents){
+    if(this.agents.trend){
 
 
+        result.models.trend =
 
-        let agent =
+        this.agents.trend.analyze(
 
-        this.agents[key];
+            this.dlt
 
-
-
-
-
-        if(
-
-            agent &&
-
-            typeof agent.analyze === "function"
-
-        ){
-
-
-
-            try{
-
-
-
-                result.models[key]=
-
-                agent.analyze(
-
-                    this.dlt
-
-                );
-
-
-
-            }
-
-            catch(e){
-
-
-
-                result.models[key]={
-
-
-                    error:e.message
-
-
-                };
-
-
-
-            }
-
-
-
-        }
-
+        );
 
 
     }
@@ -500,17 +503,154 @@ async analyze(){
 
 
 
-    // =====================
-    // Frequency评分
-    // =====================
+    // ========================
+    // Structure AI
+    // ========================
+
+
+    if(this.agents.structure){
+
+
+        result.models.structure =
+
+        this.agents.structure.analyze(
+
+            this.dlt
+
+        );
+
+
+    }
 
 
 
-    if(
 
-        this.engines.frequency
 
-    ){
+
+
+
+
+    // ========================
+    // Markov AI
+    // ========================
+
+
+    if(this.agents.markov){
+
+
+        result.models.markov =
+
+        this.agents.markov.analyze(
+
+            this.dlt
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ========================
+    // Risk AI
+    // ========================
+
+
+    if(this.agents.risk){
+
+
+        result.models.risk =
+
+        this.agents.risk.analyze(
+
+            this.dlt
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ========================
+    // Theory AI
+    // ========================
+
+
+    if(this.agents.theory){
+
+
+        result.models.theory =
+
+        this.agents.theory.analyze(
+
+            this.dlt
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ========================
+    // Confidence AI
+    // ========================
+
+
+    if(this.agents.confidence){
+
+
+        result.models.confidence =
+
+        this.agents.confidence.analyze(
+
+            this.dlt
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ========================
+    // Frequency Engine
+    // ========================
+
+
+    if(this.engines.frequency){
+
+
+        this.engines.frequency.load(
+
+            this.dlt
+
+        );
 
 
 
@@ -519,7 +659,6 @@ async analyze(){
         this.engines.frequency.status();
 
 
-
     }
 
 
@@ -530,20 +669,12 @@ async analyze(){
 
 
 
-    // =====================
-    // Monte Carlo
-    // =====================
+    // ========================
+    // Monte Carlo Engine
+    // ========================
 
 
-
-    if(
-
-        this.engines.montecarlo &&
-
-        typeof this.engines.montecarlo.simulate === "function"
-
-    ){
-
+    if(this.engines.montecarlo){
 
 
         result.simulation =
@@ -555,7 +686,6 @@ async analyze(){
         );
 
 
-
     }
 
 
@@ -566,20 +696,12 @@ async analyze(){
 
 
 
-    // =====================
-    // Master决策
-    // =====================
+    // ========================
+    // Master AI
+    // ========================
 
 
-
-    if(
-
-        this.agents.master &&
-
-        typeof this.agents.master.decide === "function"
-
-    ){
-
+    if(this.agents.master){
 
 
         result.decision =
@@ -591,7 +713,6 @@ async analyze(){
         );
 
 
-
     }
 
 
@@ -602,20 +723,20 @@ async analyze(){
 
 
 
-    // =====================
-    // Critic审查
-    // =====================
-
+    // ========================
+    // Critic AI
+    // ========================
 
 
     if(
 
-        this.agents.critic &&
+        this.agents.critic
 
-        typeof this.agents.critic.analyze === "function"
+        &&
+
+        this.agents.critic.analyze
 
     ){
-
 
 
         result.critic =
@@ -627,10 +748,40 @@ async analyze(){
         );
 
 
-
     }
 
 
+
+
+
+
+
+
+
+    // ========================
+    // Review AI记录预测
+    // ========================
+
+
+    if(
+
+        this.agents.review
+
+        &&
+
+        result.decision
+
+    ){
+
+
+        this.agents.review.savePrediction(
+
+            result.decision.decision.recommend
+
+        );
+
+
+    }
 
 
 
@@ -643,15 +794,6 @@ async analyze(){
 
 
 }
-getHistory(){
-
-
-
-    return this.dlt;
-
-
-
-}
 
 
 
@@ -661,26 +803,33 @@ getHistory(){
 
 
 
-getLatest(){
+// ============================
+// 开奖反馈
+// ============================
 
 
+saveFeedback(data){
 
-    if(this.dlt.length===0){
+
+    if(
+
+        this.agents.review
+
+    ){
 
 
-        return null;
+        return this.agents.review.feedback(
+
+            data
+
+        );
 
 
     }
 
 
 
-
-    return this.dlt[
-
-        this.dlt.length-1
-
-    ];
+    return null;
 
 
 
@@ -694,20 +843,21 @@ getLatest(){
 
 
 
-status(){
+// ============================
+// 系统状态
+// ============================
 
+
+status(){
 
 
     return {
 
 
-
         version:this.version,
 
 
-
         data:this.dlt.length,
-
 
 
         agents:Object.keys(
@@ -717,13 +867,11 @@ status(){
         ),
 
 
-
         engines:Object.keys(
 
             this.engines
 
         ),
-
 
 
         ready:this.ready
@@ -733,47 +881,13 @@ status(){
     };
 
 
-
 }
-
-
-
-
-
-
-
-
-
-reset(){
-
-
-
-    this.dlt=[];
-
-
-    this.ready=false;
-
-
-    this.agents={};
+// ============================
+// 导出AI核心
+// ============================
 
 
 }
-
-
-
-
-
-
-
-
-
-}
-
-
-
-
-
-
 
 
 
