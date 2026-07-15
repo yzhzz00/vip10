@@ -1,17 +1,20 @@
 *{
+
 box-sizing:border-box;
+
 }
+
 
 
 body{
 
 margin:0;
 
-padding:15px;
+padding:20px;
 
-background:#07111f;
+background:#06101d;
 
-color:#fff;
+color:#ffffff;
 
 font-family:
 
@@ -23,7 +26,7 @@ sans-serif;
 
 
 
-.app{
+.container{
 
 max-width:900px;
 
@@ -33,13 +36,11 @@ margin:auto;
 
 
 
-
-
 header{
 
 text-align:center;
 
-padding:20px 0;
+margin-bottom:20px;
 
 }
 
@@ -47,11 +48,11 @@ padding:20px 0;
 
 h1{
 
-margin:0;
-
-font-size:30px;
+font-size:32px;
 
 color:#00e5ff;
+
+margin-bottom:10px;
 
 }
 
@@ -59,33 +60,29 @@ color:#00e5ff;
 
 h2{
 
-font-size:20px;
-
 color:#76ff03;
 
+font-size:22px;
+
 }
-
-
 
 
 
 .status{
 
-margin-top:20px;
+background:#111827;
 
 padding:15px;
 
-background:#111827;
-
 border-radius:15px;
 
-color:#ffd740;
+margin-top:20px;
 
 }
 
 
 
-.status span{
+#status{
 
 color:#00ff99;
 
@@ -97,17 +94,15 @@ font-weight:bold;
 
 
 
-
-
-.card{
-
-margin-top:18px;
-
-padding:20px;
+.panel{
 
 background:#111827;
 
 border-radius:18px;
+
+padding:20px;
+
+margin-top:18px;
 
 border:1px solid #263238;
 
@@ -115,11 +110,7 @@ border:1px solid #263238;
 
 
 
-
-
-h3{
-
-margin-top:0;
+.panel h3{
 
 color:#ffd740;
 
@@ -133,8 +124,6 @@ padding-bottom:10px;
 
 
 
-
-
 button{
 
 width:100%;
@@ -143,7 +132,7 @@ padding:15px;
 
 margin-top:15px;
 
-border:0;
+border:none;
 
 border-radius:12px;
 
@@ -155,11 +144,11 @@ linear-gradient(
 #00b8d4
 );
 
-color:white;
-
 font-size:17px;
 
 font-weight:bold;
+
+color:white;
 
 cursor:pointer;
 
@@ -167,25 +156,17 @@ cursor:pointer;
 
 
 
+button:hover{
 
-
-button:active{
-
-transform:scale(.98);
+opacity:.9;
 
 }
 
 
 
-
-
-
-
 .progress{
 
-margin-top:20px;
-
-height:20px;
+height:22px;
 
 background:#263238;
 
@@ -193,17 +174,17 @@ border-radius:20px;
 
 overflow:hidden;
 
+margin-top:20px;
+
 }
-
-
 
 
 
 #progressBar{
 
-height:100%;
-
 width:0%;
+
+height:100%;
 
 background:
 
@@ -219,15 +200,85 @@ transition:.3s;
 
 
 
-
-
 #progressText{
 
 text-align:center;
 
-margin-top:12px;
-
 color:#00e5ff;
+
+margin-top:10px;
+
+}
+
+
+
+
+
+#finalResult{
+
+background:#050914;
+
+padding:20px;
+
+border-radius:12px;
+
+font-size:22px;
+
+line-height:2;
+
+color:#00ff99;
+
+}
+
+
+
+
+
+#topList{
+
+background:#050914;
+
+padding:15px;
+
+border-radius:12px;
+
+line-height:2;
+
+}
+
+
+
+
+
+#aiMeeting{
+
+background:#050914;
+
+padding:15px;
+
+border-radius:12px;
+
+line-height:2;
+
+color:#81d4fa;
+
+}
+
+
+
+
+
+#records,
+#learning,
+#review{
+
+background:#050914;
+
+padding:15px;
+
+border-radius:12px;
+
+line-height:2;
 
 }
 
@@ -244,19 +295,17 @@ margin-top:12px;
 
 padding:14px;
 
-background:#050914;
+border-radius:10px;
 
-color:#fff;
+background:#020617;
 
 border:1px solid #455a64;
 
-border-radius:10px;
+color:white;
 
 font-size:15px;
 
 }
-
-
 
 
 
@@ -272,118 +321,12 @@ resize:none;
 
 
 
-#finalResult{
-
-padding:20px;
-
-background:#050914;
-
-border-radius:12px;
-
-font-size:22px;
-
-line-height:2;
-
-color:#00ff99;
-
-}
-
-
-
-
-
-#candidateList{
-
-padding:15px;
-
-background:#050914;
-
-border-radius:12px;
-
-line-height:2;
-
-}
-
-
-
-
-
-#aiMeeting{
-
-padding:15px;
-
-background:#050914;
-
-border-radius:12px;
-
-line-height:2;
-
-color:#81d4fa;
-
-}
-
-
-
-
-
-#predictionRecord{
-
-padding:15px;
-
-background:#050914;
-
-border-radius:12px;
-
-line-height:2;
-
-}
-
-
-
-
-
-#reviewResult{
-
-padding:15px;
-
-background:#050914;
-
-border-radius:12px;
-
-line-height:2;
-
-color:#ffeb3b;
-
-}
-
-
-
-
-
-#learningStatus{
-
-padding:15px;
-
-background:#050914;
-
-border-radius:12px;
-
-color:#80cbc4;
-
-line-height:2;
-
-}
-
-
-
-
-
 @media(max-width:600px){
 
 
 body{
 
-padding:8px;
+padding:10px;
 
 }
 
@@ -397,7 +340,7 @@ font-size:24px;
 
 
 
-.card{
+.panel{
 
 padding:15px;
 

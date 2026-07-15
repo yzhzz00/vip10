@@ -1,6 +1,6 @@
 // ================================================
-// 大乐透AI V90 FINAL R2
-// 核心统计模型
+// 大乐透AI V90 CORE FINAL
+// 核心数学模型
 // ================================================
 
 "use strict";
@@ -10,10 +10,16 @@ window.V90Model={
 
 
 
+
+
+
+
 history(){
 
 
+
 return V90Data.get();
+
 
 
 },
@@ -25,7 +31,7 @@ return V90Data.get();
 
 
 // =================================
-// 前区频率
+// 号码频率
 // =================================
 
 
@@ -44,7 +50,9 @@ i++
 ){
 
 
+
 freq[i]=0;
+
 
 
 }
@@ -52,20 +60,29 @@ freq[i]=0;
 
 
 
+
 this.history()
+
 .forEach(item=>{
 
 
-item.front.forEach(n=>{
+
+item.front
+
+.forEach(n=>{
+
 
 
 freq[n]++;
 
 
+
 });
 
 
+
 });
+
 
 
 
@@ -84,36 +101,61 @@ return freq;
 
 
 // =================================
-// 热门排序
+// 冷热评分
 // =================================
 
 
-hot(){
+hotCold(){
 
 
 
-let freq=this.frequency();
+let freq=
+
+this.frequency();
 
 
 
 
-return Object.keys(freq)
-
-.map(n=>({
+let arr=[];
 
 
 
-number:Number(n),
+for(
+let i=1;
+i<=35;
+i++
+){
 
 
-count:freq[n]
+
+arr.push({
 
 
-}))
 
-.sort(
+number:i,
+
+
+score:freq[i]
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+return arr.sort(
+
 (a,b)=>
-b.count-a.count
+
+b.score-a.score
+
 );
 
 
@@ -127,7 +169,7 @@ b.count-a.count
 
 
 // =================================
-// 遗漏
+// 遗漏周期
 // =================================
 
 
@@ -135,7 +177,11 @@ missing(){
 
 
 
-let data=this.history();
+let data=
+
+this.history();
+
+
 
 
 
@@ -156,7 +202,9 @@ i++
 miss[i]=data.length;
 
 
+
 }
+
 
 
 
@@ -172,6 +220,7 @@ i--
 
 
 data[i].front
+
 .forEach(n=>{
 
 
@@ -202,6 +251,8 @@ data.length-i-1;
 
 
 
+
+
 return miss;
 
 
@@ -215,7 +266,7 @@ return miss;
 
 
 // =================================
-// 结构分析
+// 奇偶 大小 和值
 // =================================
 
 
@@ -228,8 +279,17 @@ let odd=0;
 let big=0;
 
 
+let sum=0;
+
+
+
+
 
 nums.forEach(n=>{
+
+
+
+sum+=n;
 
 
 
@@ -255,6 +315,7 @@ big++;
 
 
 
+
 return {
 
 
@@ -273,12 +334,7 @@ small:
 5-big,
 
 
-sum:
-
-nums.reduce(
-(a,b)=>a+b,
-0
-)
+sum
 
 
 
@@ -295,7 +351,7 @@ nums.reduce(
 
 
 // =================================
-// Bayes评分
+// Bayes概率评分
 // =================================
 
 
@@ -306,6 +362,7 @@ bayes(){
 let freq=
 
 this.frequency();
+
 
 
 
@@ -328,7 +385,9 @@ total+=v;
 
 
 
+
 let score={};
+
 
 
 
@@ -378,7 +437,7 @@ return score;
 
 // =================================
 // Markov 一阶转移
-// 上一期 -> 下一期
+// 上一期 → 下一期
 // =================================
 
 
@@ -386,11 +445,14 @@ markov(){
 
 
 
-let data=this.history();
+let data=
+
+this.history();
 
 
 
-let map={};
+let matrix={};
+
 
 
 
@@ -418,16 +480,16 @@ data[i].front;
 
 
 
+
 before.forEach(a=>{
 
 
 
-if(!map[a])
+if(
+!matrix[a]
+)
 
-map[a]={};
-
-
-
+matrix[a]={};
 
 
 
@@ -435,13 +497,15 @@ after.forEach(b=>{
 
 
 
-if(!map[a][b])
+if(
+!matrix[a][b]
+)
 
-map[a][b]=0;
+matrix[a][b]=0;
 
 
 
-map[a][b]++;
+matrix[a][b]++;
 
 
 
@@ -458,7 +522,9 @@ map[a][b]++;
 
 
 
-return map;
+
+
+return matrix;
 
 
 
@@ -485,6 +551,8 @@ this.structure(nums);
 
 
 
+
+
 let score=50;
 
 
@@ -493,6 +561,7 @@ let score=50;
 
 
 // 奇偶平衡
+
 
 if(
 s.odd>=1 &&
@@ -504,7 +573,9 @@ s.odd<=4
 score+=10;
 
 
+
 }
+
 
 
 
@@ -523,7 +594,9 @@ s.big<=4
 score+=10;
 
 
+
 }
+
 
 
 
@@ -539,36 +612,7 @@ s.sum<=140
 
 
 
-score+=15;
-
-
-}
-
-
-
-
-
-
-// 连号控制
-
-
-let link=0;
-
-
-
-for(
-let i=1;
-i<nums.length;
-i++
-){
-
-
-
-if(
-nums[i]-nums[i-1]===1
-)
-
-link++;
+score+=20;
 
 
 
@@ -578,37 +622,8 @@ link++;
 
 
 
-if(
-link<=2
-){
 
-
-
-score+=10;
-
-
-
-}else{
-
-
-score-=10;
-
-
-}
-
-
-
-
-
-
-
-return Math.max(
-0,
-Math.min(
-100,
-score
-)
-);
+return score;
 
 
 

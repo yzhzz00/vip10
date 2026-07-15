@@ -1,6 +1,6 @@
 // ================================================
-// 大乐透AI V90 FINAL R2
-// Monte Carlo 100万模拟
+// 大乐透AI V90 CORE FINAL
+// Monte Carlo 模拟引擎
 // ================================================
 
 "use strict";
@@ -10,20 +10,27 @@ window.V90MonteCarlo={
 
 
 
-// 生成前区
+
+
+
+
+// =================================
+// 随机生成前区
+// =================================
 
 
 createFront(){
 
 
 
-let arr=[];
+let nums=[];
+
 
 
 
 
 while(
-arr.length<5
+nums.length<5
 ){
 
 
@@ -38,13 +45,14 @@ Math.random()*35
 
 
 
+
 if(
-!arr.includes(n)
+!nums.includes(n)
 ){
 
 
 
-arr.push(n);
+nums.push(n);
 
 
 
@@ -56,8 +64,12 @@ arr.push(n);
 
 
 
-return arr.sort(
+
+
+return nums.sort(
+
 (a,b)=>a-b
+
 );
 
 
@@ -70,19 +82,24 @@ return arr.sort(
 
 
 
-// 生成后区
+// =================================
+// 随机生成后区
+// =================================
 
 
 createBack(){
 
 
 
-let arr=[];
+let nums=[];
+
+
+
 
 
 
 while(
-arr.length<2
+nums.length<2
 ){
 
 
@@ -97,13 +114,14 @@ Math.random()*12
 
 
 
+
 if(
-!arr.includes(n)
+!nums.includes(n)
 ){
 
 
 
-arr.push(n);
+nums.push(n);
 
 
 
@@ -115,8 +133,13 @@ arr.push(n);
 
 
 
-return arr.sort(
+
+
+
+return nums.sort(
+
 (a,b)=>a-b
+
 );
 
 
@@ -130,11 +153,14 @@ return arr.sort(
 
 
 // =================================
-// 分批模拟
+// 模拟100万次
 // =================================
 
 
-run(times,progress){
+run(
+times=1000000,
+callback
+){
 
 
 
@@ -142,7 +168,7 @@ return new Promise(resolve=>{
 
 
 
-let result={};
+let pool={};
 
 
 
@@ -151,11 +177,14 @@ let current=0;
 
 
 
+
+
 function batch(){
 
 
 
-let batchSize=5000;
+let size=5000;
+
 
 
 
@@ -164,11 +193,12 @@ let batchSize=5000;
 for(
 let i=0;
 
-i<batchSize && current<times;
+i<size && current<times;
 
 i++,current++
-
 ){
+
+
 
 
 
@@ -186,14 +216,13 @@ V90MonteCarlo.createBack();
 
 
 
-
 let key=
 
 front.join("-")
 
 +
 
-"|"
+"+"
 
 +
 
@@ -204,13 +233,14 @@ back.join("-");
 
 
 
+
 if(
-!result[key]
+!pool[key]
 ){
 
 
 
-result[key]={
+pool[key]={
 
 
 
@@ -235,7 +265,8 @@ count:0
 
 
 
-result[key].count++;
+
+pool[key].count++;
 
 
 
@@ -246,10 +277,13 @@ result[key].count++;
 
 
 
-let p=
+
+let progress=
 
 Math.floor(
+
 current/times*100
+
 );
 
 
@@ -257,11 +291,12 @@ current/times*100
 
 
 
-if(progress){
+
+if(callback){
 
 
 
-progress(p);
+callback(progress);
 
 
 
@@ -280,22 +315,26 @@ current<times
 
 
 setTimeout(
+
 batch,
+
 0
+
 );
 
 
 
-}else{
+}
+
+else{
 
 
 
 
 
+let result=
 
-let ranking=
-
-Object.values(result)
+Object.values(pool)
 
 .sort(
 
@@ -312,7 +351,8 @@ b.count-a.count
 
 
 
-resolve(ranking);
+
+resolve(result);
 
 
 
@@ -323,11 +363,16 @@ resolve(ranking);
 
 
 
+
 }
+
+
+
 
 
 
 batch();
+
 
 
 
@@ -338,7 +383,6 @@ batch();
 
 
 }
-
 
 
 

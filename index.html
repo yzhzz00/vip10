@@ -5,13 +5,15 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>
-大乐透AI V90 FINAL R2
+大乐透AI V90 CORE FINAL
 </title>
 
+
 <link rel="stylesheet" href="style.css">
+
 
 </head>
 
@@ -19,14 +21,19 @@
 <body>
 
 
-<div class="app">
+<div class="container">
 
 
 <header>
 
-<h1>大乐透智能分析系统</h1>
+<h1>
+大乐透智能分析系统
+</h1>
 
-<h2>V90 AI CORE FINAL R2</h2>
+
+<h2>
+V90 AI CORE FINAL
+</h2>
 
 
 <div class="status">
@@ -34,8 +41,9 @@
 系统状态：
 
 <span id="status">
-初始化中...
+启动中...
 </span>
+
 
 </div>
 
@@ -46,7 +54,8 @@
 
 
 
-<section class="card">
+<section class="panel">
+
 
 <h3>
 数据中心
@@ -55,14 +64,7 @@
 
 <div id="dataStatus">
 
-历史数据：等待加载
-
-</div>
-
-
-<div id="modelStatus">
-
-模型状态：等待初始化
+历史数据等待加载
 
 </div>
 
@@ -76,8 +78,30 @@
 
 
 
+<section class="panel">
 
-<section class="card">
+
+<h3>
+AI模型中心
+</h3>
+
+
+<div id="modelStatus">
+
+等待初始化
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+<section class="panel">
 
 
 <h3>
@@ -112,7 +136,6 @@ AI分析中心
 </div>
 
 
-
 </section>
 
 
@@ -123,7 +146,7 @@ AI分析中心
 
 
 
-<section class="card">
+<section class="panel">
 
 
 <h3>
@@ -148,15 +171,15 @@ AI分析中心
 
 
 
-<section class="card">
+<section class="panel">
 
 
 <h3>
-TOP10候选方案
+TOP10预测池
 </h3>
 
 
-<div id="candidateList">
+<div id="topList">
 
 等待生成
 
@@ -173,11 +196,12 @@ TOP10候选方案
 
 
 
-<section class="card">
+<section class="panel">
 
 
 <h3>
-AI会议中心
+AI会议 / 自我反驳
+
 </h3>
 
 
@@ -198,15 +222,16 @@ AI会议中心
 
 
 
-<section class="card">
+<section class="panel">
 
 
 <h3>
 预测记录
+
 </h3>
 
 
-<div id="predictionRecord">
+<div id="records">
 
 暂无预测记录
 
@@ -223,28 +248,24 @@ AI会议中心
 
 
 
-<section class="card">
+<section class="panel">
 
 
 <h3>
 开奖反馈学习
+
 </h3>
 
 
 <input 
 id="period"
-placeholder="输入开奖期号">
+placeholder="开奖期号">
 
 
 <textarea
 id="openResult"
-placeholder="
-输入7个开奖号码
-
-例如:
-03 12 18 26 34 05 11
-">
-
+placeholder="输入7个开奖号码，例如：
+03 12 18 26 34 05 11">
 </textarea>
 
 
@@ -257,7 +278,7 @@ placeholder="
 
 
 
-<div id="reviewResult">
+<div id="review">
 
 等待反馈
 
@@ -274,15 +295,16 @@ placeholder="
 
 
 
-<section class="card">
+<section class="panel">
 
 
 <h3>
 AI成长记录
+
 </h3>
 
 
-<div id="learningStatus">
+<div id="learning">
 
 暂无学习数据
 
@@ -290,8 +312,6 @@ AI成长记录
 
 
 </section>
-
-
 
 
 
@@ -309,9 +329,9 @@ AI成长记录
 
 <script src="js/montecarlo.js"></script>
 
-<script src="js/ai.js"></script>
+<script src="js/core.js"></script>
 
-<script src="js/record.js"></script>
+<script src="js/learning.js"></script>
 
 <script src="js/review.js"></script>
 
@@ -320,5 +340,6 @@ AI成长记录
 
 
 </body>
+
 
 </html>

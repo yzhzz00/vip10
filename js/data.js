@@ -1,14 +1,15 @@
-"use strict";
+// ================================================
+// 大乐透AI V90 CORE FINAL
+// 数据中心模块
+// ================================================
 
+"use strict";
 
 
 window.V90Data={
 
 
-
 history:[],
-
-
 
 
 
@@ -16,14 +17,13 @@ history:[],
 // 加载历史数据
 // =================================
 
-
 async load(){
 
 
 try{
 
 
-let res=
+let response=
 
 await fetch(
 "data/dlt.txt"
@@ -33,12 +33,12 @@ await fetch(
 
 let text=
 
-await res.text();
+await response.text();
 
 
 
 
-let data=
+this.history=
 
 this.parse(text);
 
@@ -46,25 +46,18 @@ this.parse(text);
 
 
 
-this.history=data;
+
+return this.history;
 
 
 
-window.V90.history=data;
-
-
-
-return data;
-
-
-
-}catch(e){
+}catch(error){
 
 
 
 console.error(
-"数据加载失败",
-e
+"历史数据加载失败:",
+error
 );
 
 
@@ -87,10 +80,8 @@ return [];
 
 // =================================
 // 数据解析
-// 自动兼容：
-// 期号+号码
-// 号码直接排列
-// 空格/逗号
+// 支持:
+// 03 12 18 26 34 05 11
 // =================================
 
 
@@ -98,7 +89,7 @@ parse(text){
 
 
 
-let list=[];
+let result=[];
 
 
 
@@ -111,7 +102,9 @@ text.split(/\r?\n/);
 
 
 
-for(let line of lines){
+for(
+let line of lines
+){
 
 
 
@@ -119,7 +112,11 @@ line=line.trim();
 
 
 
-if(!line)
+
+
+if(
+line.length===0
+)
 
 continue;
 
@@ -128,6 +125,8 @@ continue;
 
 
 let nums=
+
+
 
 line
 
@@ -138,7 +137,7 @@ line
 .map(Number)
 
 .filter(
-x=>!isNaN(x)
+n=>!isNaN(n)
 );
 
 
@@ -146,7 +145,9 @@ x=>!isNaN(x)
 
 
 
-if(nums.length<7)
+if(
+nums.length<7
+)
 
 continue;
 
@@ -154,9 +155,9 @@ continue;
 
 
 
-// 取最后7个数字
 
-let arr=
+
+let last7=
 
 nums.slice(
 nums.length-7
@@ -169,13 +170,13 @@ nums.length-7
 
 let front=
 
-arr.slice(0,5);
+last7.slice(0,5);
 
 
 
 let back=
 
-arr.slice(5,7);
+last7.slice(5,7);
 
 
 
@@ -183,25 +184,30 @@ arr.slice(5,7);
 
 
 
-// 大乐透范围过滤
+// 大乐透号码范围检查
 
 
-let ok=
+let valid=
 
 
 
 front.every(
 
-n=>n>=1&&n<=35
+n=>
+
+n>=1&&n<=35
 
 )
 
 &&
 
 
+
 back.every(
 
-n=>n>=1&&n<=12
+n=>
+
+n>=1&&n<=12
 
 );
 
@@ -211,11 +217,11 @@ n=>n>=1&&n<=12
 
 
 
-if(ok){
+if(valid){
 
 
 
-list.push({
+result.push({
 
 
 
@@ -234,15 +240,13 @@ back
 
 
 
-
-
 }
 
 
 
 
 
-return list;
+return result;
 
 
 
@@ -255,7 +259,7 @@ return list;
 
 
 // =================================
-// 获取数据
+// 获取历史
 // =================================
 
 
@@ -289,9 +293,6 @@ return this.history.length;
 
 
 }
-
-
-
 
 
 
