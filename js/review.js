@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE R5
-// 开奖反馈复盘中心
+// V90 AI CORE FINAL R6
+// 开奖反馈复盘模块
 // ================================================
 
 "use strict";
@@ -15,7 +15,7 @@ window.V90Review={
 // =================================
 
 
-getDraw(){
+getInput(){
 
 
 
@@ -29,38 +29,38 @@ document.getElementById(
 
 
 
+
 let front=[
 
 
 
 Number(
-document.getElementById("front1").value
+document.getElementById("f1").value
 ),
 
 
 Number(
-document.getElementById("front2").value
+document.getElementById("f2").value
 ),
 
 
 Number(
-document.getElementById("front3").value
+document.getElementById("f3").value
 ),
 
 
 Number(
-document.getElementById("front4").value
+document.getElementById("f4").value
 ),
 
 
 Number(
-document.getElementById("front5").value
+document.getElementById("f5").value
 )
 
 
 
 ];
-
 
 
 
@@ -73,12 +73,12 @@ let back=[
 
 
 Number(
-document.getElementById("back1").value
+document.getElementById("b1").value
 ),
 
 
 Number(
-document.getElementById("back2").value
+document.getElementById("b2").value
 )
 
 
@@ -91,19 +91,13 @@ document.getElementById("back2").value
 
 
 
-
-
 if(
 
-front.some(
-n=>!n
-)
+front.some(n=>!n)
 
 ||
 
-back.some(
-n=>!n
-)
+back.some(n=>!n)
 
 ){
 
@@ -120,14 +114,14 @@ return null;
 
 
 
-
 return {
-
 
 
 period,
 
+
 front,
+
 
 back
 
@@ -146,7 +140,75 @@ back
 
 
 // =================================
-// 命中计算
+// 获取预测
+// =================================
+
+
+getPrediction(){
+
+
+
+let data=
+
+localStorage.getItem(
+
+"V90_FINAL_PREDICTION"
+
+);
+
+
+
+
+
+
+
+if(!data)
+
+return null;
+
+
+
+
+
+
+let obj=
+
+JSON.parse(data);
+
+
+
+
+
+
+return {
+
+
+
+front:
+
+obj.final.front,
+
+
+back:
+
+obj.final.back
+
+
+
+};
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 比较
 // =================================
 
 
@@ -169,7 +231,6 @@ real.front.includes(n)
 
 
 
-
 let backHit=
 
 pred.back.filter(
@@ -185,18 +246,16 @@ real.back.includes(n)
 
 
 
+
 return {
 
 
 
-front:
-
 frontHit,
 
 
-back:
-
 backHit,
+
 
 
 frontCount:
@@ -204,9 +263,11 @@ frontCount:
 frontHit.length,
 
 
+
 backCount:
 
 backHit.length,
+
 
 
 total:
@@ -232,7 +293,7 @@ backHit.length
 
 
 // =================================
-// 保存开奖并学习
+// 保存开奖学习
 // =================================
 
 
@@ -242,7 +303,7 @@ save(){
 
 let real=
 
-this.getDraw();
+this.getInput();
 
 
 
@@ -258,7 +319,7 @@ document.getElementById(
 "review"
 ).innerHTML=
 
-"请输入完整7个号码";
+"请输入完整开奖信息";
 
 
 
@@ -276,7 +337,9 @@ return;
 
 let pred=
 
-V90Review.lastPrediction();
+this.getPrediction();
+
+
 
 
 
@@ -324,10 +387,9 @@ real
 
 
 
-// 加入历史库
+// 添加历史
 
-
-V90Data.addDraw(
+V90Database.add(
 
 real.period,
 
@@ -344,8 +406,7 @@ real.back
 
 
 
-// AI学习
-
+// 学习
 
 V90Learning.learn(
 
@@ -399,12 +460,14 @@ ${result.frontCount}/5
 
 <br>
 
+
 后区命中：
 
 ${result.backCount}/2
 
 
 <br>
+
 
 总命中：
 
@@ -413,7 +476,8 @@ ${result.total}/7
 
 <br><br>
 
-AI已完成学习
+
+AI已经完成学习
 
 `;
 
@@ -421,126 +485,6 @@ AI已完成学习
 
 
 
-
-V90Learning.show();
-
-
-
-},
-
-
-
-
-
-
-
-// =================================
-// 获取最近预测
-// =================================
-
-
-lastPrediction(){
-
-
-
-let data=
-
-localStorage.getItem(
-"V90_CURRENT_PREDICTION"
-);
-
-
-
-
-
-
-if(!data)
-
-return null;
-
-
-
-
-
-
-
-let obj=
-
-JSON.parse(data);
-
-
-
-
-
-
-return {
-
-
-
-front:
-
-obj.final.front,
-
-
-back:
-
-obj.final.back
-
-
-
-};
-
-
-
-},
-
-
-
-
-
-
-
-// =================================
-// 初始化
-// =================================
-
-
-init(){
-
-
-
-let btn=
-
-document.getElementById(
-"reviewBtn"
-);
-
-
-
-
-
-
-
-if(btn){
-
-
-
-btn.onclick=()=>{
-
-
-
-this.save();
-
-
-
-};
-
-
-
-}
-
-
-
 }
 
 
@@ -549,6 +493,7 @@ this.save();
 
 
 };
+
 
 
 
@@ -562,7 +507,32 @@ document.addEventListener(
 ()=>{
 
 
-V90Review.init();
+
+let btn=
+
+document.getElementById(
+"saveDraw"
+);
+
+
+
+
+
+if(btn){
+
+
+
+btn.onclick=
+
+()=>{
+
+V90Review.save();
+
+};
+
+
+
+}
 
 
 

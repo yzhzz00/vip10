@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>
-大乐透智能分析系统 V90 AI CORE R5
+大乐透智能分析系统 V90 AI CORE R6
 </title>
 
 
@@ -17,118 +17,89 @@
 </head>
 
 
-
 <body>
 
 
 <div class="container">
 
 
-
-<header>
-
 <h1>
 大乐透智能分析系统
 </h1>
 
+
 <h2>
-V90 AI CORE R5
+V90 AI CORE FINAL R6
 </h2>
 
 
-<div class="status">
+
+<div class="card">
 
 系统状态：
 
 <span id="status">
-启动中...
+启动中
+</span>
+
+
+<br>
+
+
+数据状态：
+
+<span id="dataStatus">
+读取中
 </span>
 
 </div>
 
 
-</header>
 
 
 
-
-
-<section class="card">
-
-<h3>
-数据中心
-</h3>
-
-
-<div id="dataStatus">
-历史数据加载中...
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-<section class="card">
+<div class="card">
 
 <h3>
 AI模型中心
 </h3>
 
-
-<div id="modelStatus">
-
-等待训练
+<div id="models">
 
 </div>
 
 
-</section>
+</div>
 
 
 
 
 
 
+<div class="card">
 
-<section class="card">
 
 <h3>
 AI分析中心
 </h3>
 
 
-
 <button id="startBtn">
 
-开始 V90 AI分析
+开始V90 AI分析
 
 </button>
 
 
-
-<div class="progress">
-
-
-<div id="progressBar"></div>
-
-
-</div>
-
-
 <div id="progressText">
 
-等待分析...
+等待分析
 
 </div>
 
 
-</section>
+
+</div>
 
 
 
@@ -137,8 +108,8 @@ AI分析中心
 
 
 
+<div class="card">
 
-<section class="card">
 
 <h3>
 最终预测结果
@@ -147,82 +118,34 @@ AI分析中心
 
 <div id="finalResult">
 
-等待AI分析
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-<section class="card">
-
-<h3>
-TOP10预测池
-</h3>
-
-
-<div id="topList">
-
 等待生成
 
 </div>
 
 
-</section>
-
-
-
-
-
-
-
-
-<section class="card">
-
-<h3>
-AI会议 / 自我反驳
-</h3>
-
-
-<div id="aiMeeting">
-
-等待分析
 
 </div>
 
 
-</section>
 
 
 
 
 
+<div class="card">
 
-
-
-
-<section class="card">
 
 <h3>
-预测记录
+TOP候选池
 </h3>
 
 
-<div id="records">
-
-暂无预测记录
+<div id="topList">
 
 </div>
 
 
-</section>
+</div>
 
 
 
@@ -230,55 +153,76 @@ AI会议 / 自我反驳
 
 
 
-
-
-<!-- =========================
-开奖反馈新版
-========================= -->
-
-
-<section class="card">
+<div class="card">
 
 
 <h3>
-开奖反馈学习中心
+AI会议
+
+</h3>
+
+
+<div id="meeting">
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h3>
+开奖反馈学习
+
 </h3>
 
 
 
+期号:
 
-<label>
-开奖期号
-</label>
+<input id="period">
 
 
-<input 
-id="period"
-placeholder="例如：20260715">
 
+<h4>
+前区
+</h4>
+
+
+<div class="nums">
+
+
+<input id="f1">
+<input id="f2">
+<input id="f3">
+<input id="f4">
+<input id="f5">
+
+
+</div>
 
 
 
 
 
 <h4>
-前区号码
+后区
 </h4>
 
 
+<div class="nums">
 
-<div class="number-box">
 
-
-<input id="front1" placeholder="第1位">
-
-<input id="front2" placeholder="第2位">
-
-<input id="front3" placeholder="第3位">
-
-<input id="front4" placeholder="第4位">
-
-<input id="front5" placeholder="第5位">
+<input id="b1">
+<input id="b2">
 
 
 </div>
@@ -287,49 +231,49 @@ placeholder="例如：20260715">
 
 
 
+<button id="saveDraw">
 
-
-<h4>
-后区号码
-</h4>
-
-
-<div class="number-box">
-
-
-<input id="back1" placeholder="第1位">
-
-<input id="back2" placeholder="第2位">
-
-
-</div>
-
-
-
-
-
-
-
-<button id="reviewBtn">
-
-保存开奖并AI学习
+保存开奖并学习
 
 </button>
 
 
 
-
-
-
 <div id="review">
 
-等待反馈
+</div>
+
 
 </div>
 
 
 
-</section>
+
+
+
+
+<div class="card">
+
+
+<h3>
+回测中心
+</h3>
+
+
+<button id="backtestBtn">
+
+执行最近100期回测
+
+</button>
+
+
+
+<div id="backtest">
+
+</div>
+
+
+</div>
 
 
 
@@ -338,25 +282,21 @@ placeholder="例如：20260715">
 
 
 
-
-<section class="card">
+<div class="card">
 
 
 <h3>
 AI成长记录
+
 </h3>
 
 
-<div id="learning">
-
-暂无学习数据
+<div id="growth">
 
 </div>
 
 
-</section>
-
-
+</div>
 
 
 
@@ -371,24 +311,27 @@ AI成长记录
 
 
 
-
-
-<script src="js/data.js"></script>
+<script src="js/database.js"></script>
 
 <script src="js/model.js"></script>
+
+<script src="js/bayes.js"></script>
+
+<script src="js/markov.js"></script>
 
 <script src="js/montecarlo.js"></script>
 
 <script src="js/core.js"></script>
 
+<script src="js/review.js"></script>
+
 <script src="js/learning.js"></script>
 
-<script src="js/review.js"></script>
+<script src="js/backtest.js"></script>
 
 <script src="js/app.js"></script>
 
 
 </body>
-
 
 </html>

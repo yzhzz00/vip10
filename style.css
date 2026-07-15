@@ -1,6 +1,6 @@
 /* ==========================================
-   V90 AI CORE R5
-   UI样式
+ V90 AI CORE FINAL R6
+ UI样式
 ========================================== */
 
 
@@ -16,11 +16,11 @@ body{
 
 margin:0;
 
-padding:20px;
+padding:15px;
 
-background:#050b18;
+background:#050816;
 
-color:#ffffff;
+color:#fff;
 
 font-family:
 
@@ -32,11 +32,9 @@ sans-serif;
 
 
 
-
-
 .container{
 
-max-width:950px;
+max-width:900px;
 
 margin:auto;
 
@@ -45,26 +43,13 @@ margin:auto;
 
 
 
-
-header{
+h1{
 
 text-align:center;
 
-margin-bottom:25px;
-
-}
-
-
-
-
-
-h1{
-
-font-size:32px;
-
 color:#00e5ff;
 
-margin-bottom:10px;
+font-size:30px;
 
 }
 
@@ -72,38 +57,11 @@ margin-bottom:10px;
 
 h2{
 
-font-size:22px;
+text-align:center;
 
 color:#76ff03;
 
 }
-
-
-
-.status{
-
-background:#111827;
-
-padding:15px;
-
-border-radius:15px;
-
-margin-top:20px;
-
-}
-
-
-
-
-
-#status{
-
-color:#00ff99;
-
-font-weight:bold;
-
-}
-
 
 
 
@@ -116,9 +74,11 @@ border-radius:18px;
 
 padding:20px;
 
-margin-top:20px;
+margin-top:18px;
 
-border:1px solid #263238;
+border:
+
+1px solid #263238;
 
 }
 
@@ -126,7 +86,7 @@ border:1px solid #263238;
 
 
 
-.card h3{
+h3{
 
 color:#ffd740;
 
@@ -142,11 +102,23 @@ padding-bottom:10px;
 
 
 
+h4{
+
+color:#81d4fa;
+
+margin-top:20px;
+
+}
+
+
+
+
+
 button{
 
 width:100%;
 
-padding:15px;
+height:45px;
 
 margin-top:15px;
 
@@ -162,9 +134,10 @@ linear-gradient(
 #00b8d4
 );
 
+
 color:white;
 
-font-size:17px;
+font-size:16px;
 
 font-weight:bold;
 
@@ -174,81 +147,20 @@ cursor:pointer;
 
 
 
+
 button:hover{
 
-opacity:.9;
+opacity:.85;
 
 }
 
 
 
-
-
-.progress{
-
-height:22px;
-
-background:#263238;
-
-border-radius:20px;
-
-overflow:hidden;
-
-margin-top:20px;
-
-}
-
-
-
-
-
-#progressBar{
-
-height:100%;
-
-width:0%;
-
-background:
-
-linear-gradient(
-90deg,
-#00e5ff,
-#76ff03
-);
-
-transition:.3s;
-
-}
-
-
-
-
-
-#progressText{
-
-text-align:center;
-
-margin-top:10px;
-
-color:#00e5ff;
-
-}
-
-
-
-
-
-
-/* ======================
-   输入框
-====================== */
 
 
 input{
 
 background:#020617;
-
-color:white;
 
 border:
 
@@ -256,9 +168,15 @@ border:
 
 border-radius:10px;
 
-padding:13px;
+height:42px;
+
+color:white;
+
+padding:10px;
 
 font-size:16px;
+
+text-align:center;
 
 }
 
@@ -268,25 +186,9 @@ font-size:16px;
 
 input:focus{
 
-outline:none;
-
 border-color:#00e5ff;
 
-}
-
-
-
-
-
-
-
-label{
-
-display:block;
-
-margin-top:10px;
-
-color:#81d4fa;
+outline:none;
 
 }
 
@@ -294,49 +196,26 @@ color:#81d4fa;
 
 
 
+/* 开奖号码 */
 
 
-/* ======================
-   开奖号码输入
-====================== */
-
-
-.number-box{
+.nums{
 
 display:flex;
 
 gap:10px;
 
-margin-top:15px;
-
 flex-wrap:wrap;
 
-}
-
-
-
-
-
-.number-box input{
-
-
-width:80px;
-
-height:45px;
-
-text-align:center;
+margin-top:10px;
 
 }
 
 
 
+.nums input{
 
-
-h4{
-
-color:#ffca28;
-
-margin-top:20px;
+width:65px;
 
 }
 
@@ -344,11 +223,7 @@ margin-top:20px;
 
 
 
-
-
-/* ======================
-   预测结果
-====================== */
+/* 预测结果 */
 
 
 #finalResult{
@@ -357,13 +232,13 @@ background:#020617;
 
 padding:20px;
 
-border-radius:15px;
+border-radius:12px;
+
+color:#00ff99;
 
 font-size:22px;
 
 line-height:2;
-
-color:#00ff99;
 
 }
 
@@ -377,7 +252,7 @@ background:#020617;
 
 padding:15px;
 
-border-radius:15px;
+border-radius:12px;
 
 line-height:2;
 
@@ -387,33 +262,33 @@ line-height:2;
 
 
 
-#aiMeeting{
+#meeting{
 
 background:#020617;
 
 padding:15px;
 
-border-radius:15px;
-
-line-height:2;
+border-radius:12px;
 
 color:#81d4fa;
 
+line-height:2;
+
 }
 
 
 
 
 
-#records,
 #review,
-#learning{
+#backtest,
+#growth{
 
 background:#020617;
 
 padding:15px;
 
-border-radius:15px;
+border-radius:12px;
 
 line-height:2;
 
@@ -423,26 +298,35 @@ line-height:2;
 
 
 
-/* ======================
-   手机适配
-====================== */
+#progressText{
 
+margin-top:15px;
+
+text-align:center;
+
+color:#00e5ff;
+
+}
+
+
+
+
+
+/* 手机 */
 
 @media(max-width:600px){
 
 
-
 body{
 
-padding:10px;
+padding:8px;
 
 }
 
 
-
 h1{
 
-font-size:25px;
+font-size:24px;
 
 }
 
@@ -456,29 +340,19 @@ padding:15px;
 
 
 
+.nums{
 
-
-.number-box{
-
-gap:8px;
+gap:6px;
 
 }
 
 
 
+.nums input{
 
-
-.number-box input{
-
-width:55px;
-
-height:42px;
-
-font-size:14px;
+width:52px;
 
 }
-
-
 
 
 

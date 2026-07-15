@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE R5
-// 加权蒙特卡罗引擎
+// V90 AI CORE FINAL R6
+// 蒙特卡罗预测引擎
 // ================================================
 
 "use strict";
@@ -11,11 +11,11 @@ window.V90MonteCarlo={
 
 
 // =================================
-// 按权重选择数字
+// 权重随机选择
 // =================================
 
 
-weightedPick(pool,count){
+pickWeighted(list,count){
 
 
 
@@ -23,35 +23,24 @@ let result=[];
 
 
 
-let arr=Object.keys(pool).map(n=>({
-
-
-num:Number(n),
-
-
-weight:
-
-pool[n].score+1
-
-
-
-}));
+let pool=[...list];
 
 
 
 
 
 
-
-while(result.length<count){
+while(result.length<count && pool.length){
 
 
 
 let total=
 
-arr.reduce(
+pool.reduce(
 
-(a,b)=>a+b.weight,
+(a,b)=>
+
+a+b.weight,
 
 0
 
@@ -75,14 +64,18 @@ let sum=0;
 
 
 
+for(
+let i=0;
+
+i<pool.length;
+
+i++
+
+){
 
 
 
-for(let item of arr){
-
-
-
-sum+=item.weight;
+sum+=pool[i].weight;
 
 
 
@@ -93,17 +86,15 @@ if(sum>=r){
 
 
 
-if(
-!result.includes(item.num)
-){
+result.push(
+
+pool[i].number
+
+);
 
 
 
-result.push(item.num);
-
-
-
-}
+pool.splice(i,1);
 
 
 
@@ -126,9 +117,12 @@ break;
 
 
 
+
 return result.sort(
 
-(a,b)=>a-b
+(a,b)=>
+
+a-b
 
 );
 
@@ -143,21 +137,47 @@ return result.sort(
 
 
 // =================================
-// 生成前区
+// 构建前区概率池
 // =================================
 
 
-createFront(frontModel){
+frontPool(){
 
 
 
-return this.weightedPick(
+let model=
 
-frontModel,
+V90Model.trainFront();
 
-5
 
-);
+
+let bayes=
+
+V90Bayes.final(model);
+
+
+
+
+
+return Object.values(bayes)
+
+.map(item=>({
+
+
+
+number:item.number,
+
+
+
+weight:
+
+item.bayesScore
+
+
+
+}))
+
+;
 
 
 
@@ -170,21 +190,48 @@ frontModel,
 
 
 // =================================
-// 生成后区
+// 后区概率池
 // =================================
 
 
-createBack(backModel){
+backPool(){
 
 
 
-return this.weightedPick(
+let model=
 
-backModel,
+V90Model.trainBack();
 
-2
 
-);
+
+let bayes=
+
+V90Bayes.final(model);
+
+
+
+
+
+
+return Object.values(bayes)
+
+.map(item=>({
+
+
+
+number:item.number,
+
+
+
+weight:
+
+item.bayesScore
+
+
+
+}))
+
+;
 
 
 
@@ -197,55 +244,83 @@ backModel,
 
 
 // =================================
-// 单组评分
+// 结构评分
 // =================================
 
 
-evaluate(front,back){
+structure(front){
 
 
 
-let score=
+let odd=
 
-V90Model.structure(
-front
+front.filter(
+
+n=>n%2===1
+
+).length;
+
+
+
+let big=
+
+front.filter(
+
+n=>n>=18
+
+).length;
+
+
+
+let sum=
+
+front.reduce(
+
+(a,b)=>a+b,
+
+0
+
 );
 
 
 
 
 
-// 后区奖励
 
-
-let backScore=0;
-
-
-
-
-
-
-back.forEach(n=>{
-
-
-
-backScore+=
-
-n;
-
-
-
-});
+let score=0;
 
 
 
 
 
 
+if(
+odd>=2&&odd<=3
+)
 
-score+=
+score+=20;
 
-backScore*0.5;
+
+
+
+
+
+if(
+big>=2&&big<=3
+)
+
+score+=20;
+
+
+
+
+
+
+if(
+sum>=80&&sum<=150
+)
+
+score+=20;
 
 
 
@@ -266,11 +341,95 @@ return score;
 
 
 // =================================
-// 主模拟
+// 单组评分
 // =================================
 
 
-run(times=1000000,progress){
+score(front,back){
+
+
+
+let score=
+
+this.structure(front);
+
+
+
+
+
+
+// Markov趋势
+
+
+let last=
+
+V90Database.last();
+
+
+
+
+
+
+if(last){
+
+
+
+score+=
+
+V90Markov.adjust(
+
+front,
+
+last
+
+)
+
+*0.1;
+
+
+
+}
+
+
+
+
+
+
+
+back.forEach(n=>{
+
+
+
+score+=n;
+
+
+
+});
+
+
+
+
+
+
+
+return score;
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 百万模拟
+// =================================
+
+
+async run(times=1000000){
 
 
 
@@ -280,25 +439,24 @@ return new Promise(resolve=>{
 
 
 
-
-let frontModel=
-
-V90Model.trainFront();
+let results={};
 
 
 
 
+let front=
 
-let backModel=
-
-V90Model.trainBack();
-
+this.frontPool();
 
 
 
 
+let back=
 
-let pool={};
+this.backPool();
+
+
+
 
 
 
@@ -309,13 +467,11 @@ let current=0;
 
 
 
-
-
-function batch(){
+function loop(){
 
 
 
-let size=5000;
+let batch=5000;
 
 
 
@@ -326,7 +482,7 @@ let size=5000;
 for(
 let i=0;
 
-i<size&&current<times;
+i<batch && current<times;
 
 i++,current++
 
@@ -334,43 +490,30 @@ i++,current++
 
 
 
+let f=
 
-
-let front=
-
-V90MonteCarlo.createFront(
-
-frontModel
-
-);
-
-
-
-
-
-let back=
-
-V90MonteCarlo.createBack(
-
-backModel
-
-);
-
-
-
-
-
-
-let score=
-
-V90MonteCarlo.evaluate(
+V90MonteCarlo.pickWeighted(
 
 front,
 
-back
+5
 
 );
 
+
+
+
+
+
+let b=
+
+V90MonteCarlo.pickWeighted(
+
+back,
+
+2
+
+);
 
 
 
@@ -379,7 +522,7 @@ back
 
 let key=
 
-front.join("-")
+f.join("-")
 
 +
 
@@ -387,26 +530,40 @@ front.join("-")
 
 +
 
-back.join("-");
+b.join("-");
 
 
 
 
 
 
+let s=
+
+V90MonteCarlo.score(
+
+f,
+
+b
+
+);
 
 
-if(!pool[key]){
-
-
-pool[key]={
 
 
 
-front,
+
+if(!results[key]){
 
 
-back,
+
+results[key]={
+
+
+
+front:f,
+
+
+back:b,
 
 
 count:0,
@@ -427,48 +584,15 @@ score:0
 
 
 
-
-pool[key].count++;
-
+results[key].count++;
 
 
 
-
-pool[key].score+=score;
-
-
-
+results[key].score+=s;
 
 
 
 }
-
-
-
-
-
-
-
-
-
-let p=
-
-Math.floor(
-
-current/times*100
-
-);
-
-
-
-
-
-
-
-if(progress)
-
-progress(p);
-
 
 
 
@@ -481,11 +605,8 @@ if(current<times){
 
 
 setTimeout(
-
-batch,
-
+loop,
 0
-
 );
 
 
@@ -494,21 +615,24 @@ batch,
 
 
 
-let result=
-
-Object.values(pool)
-
-.map(item=>({
 
 
 
-front:item.front,
+let output=
+
+Object.values(results)
+
+.map(x=>({
 
 
-back:item.back,
+
+front:x.front,
 
 
-count:item.count,
+back:x.back,
+
+
+count:x.count,
 
 
 
@@ -518,7 +642,7 @@ Number(
 
 (
 
-item.score/item.count
+x.score/x.count
 
 ).toFixed(2)
 
@@ -543,7 +667,8 @@ b.score-a.score
 
 
 
-resolve(result);
+
+resolve(output);
 
 
 
@@ -553,19 +678,13 @@ resolve(result);
 
 
 
-
 }
 
 
 
 
 
-
-
-batch();
-
-
-
+loop();
 
 
 
@@ -574,9 +693,8 @@ batch();
 
 
 
-
-
 }
+
 
 
 

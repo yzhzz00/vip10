@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE R5
-// 数字训练模型
+// V90 AI CORE FINAL R6
+// 数字模型训练中心
 // ================================================
 
 "use strict";
@@ -10,19 +10,15 @@ window.V90Model={
 
 
 
-
-
-
-
 // ================================
 // 获取历史
 // ================================
 
 
-history(){
+getHistory(){
 
 
-return V90Data.get();
+return V90Database.get();
 
 
 },
@@ -34,14 +30,16 @@ return V90Data.get();
 
 
 // ================================
-// 初始化数字评分
+// 创建评分表
 // ================================
 
 
-initScore(max){
+create(max){
+
 
 
 let obj={};
+
 
 
 for(
@@ -49,10 +47,17 @@ let i=1;i<=max;i++
 ){
 
 
+
 obj[i]={
 
 
+number:i,
+
+
 frequency:0,
+
+
+recent:0,
 
 
 missing:0,
@@ -61,10 +66,7 @@ missing:0,
 hot:0,
 
 
-bayes:0,
-
-
-markov:0,
+cold:0,
 
 
 score:0
@@ -79,7 +81,9 @@ score:0
 
 
 
+
 return obj;
+
 
 
 },
@@ -101,21 +105,19 @@ trainFront(){
 
 let data=
 
-this.history();
+this.getHistory();
 
 
 
 
-let score=
+let model=
 
-this.initScore(35);
-
-
+this.create(35);
 
 
 
 
-// 出现频率
+
 
 
 data.forEach((item,index)=>{
@@ -126,7 +128,32 @@ item.front.forEach(n=>{
 
 
 
-score[n].frequency++;
+if(model[n]){
+
+
+
+model[n].frequency++;
+
+
+
+// 最近50期加权
+
+if(
+index>
+data.length-50
+){
+
+
+
+model[n].recent++;
+
+
+
+}
+
+
+
+}
 
 
 
@@ -136,6 +163,23 @@ score[n].frequency++;
 
 });
 
+
+
+
+
+
+
+
+
+for(
+let n=1;n<=35;n++
+){
+
+
+
+let item=
+
+model[n];
 
 
 
@@ -143,12 +187,6 @@ score[n].frequency++;
 
 
 // 遗漏
-
-
-for(
-let n=1;n<=35;n++
-){
-
 
 
 let miss=0;
@@ -177,8 +215,6 @@ break;
 
 
 
-
-
 miss++;
 
 
@@ -190,56 +226,10 @@ miss++;
 
 
 
-score[n].missing=
+item.missing=
 
 miss;
 
-
-
-}
-
-
-
-
-
-
-
-
-
-// 综合计算
-
-
-
-let total=
-
-data.length*5;
-
-
-
-
-
-
-for(
-let n=1;n<=35;n++
-){
-
-
-
-let s=
-
-score[n];
-
-
-
-
-
-
-// 频率
-
-
-s.bayes=
-
-s.frequency/total;
 
 
 
@@ -250,23 +240,9 @@ s.frequency/total;
 // 热度
 
 
-s.hot=
+item.hot=
 
-s.frequency/data.length;
-
-
-
-
-
-
-
-
-// 遗漏适中
-
-
-s.markov=
-
-1/(s.missing+1);
+item.recent/50;
 
 
 
@@ -274,26 +250,42 @@ s.markov=
 
 
 
+// 冷度
 
-s.score=
+
+item.cold=
+
+miss/(data.length+1);
+
+
+
+
+
+
+
+// 综合评分
+
+
+item.score=
 
 (
 
-s.frequency*0.35
+item.frequency*0.35
 
 +
 
-s.hot*30
+item.hot*40
 
 +
 
-s.markov*20
+(1-item.cold)*20
 
 +
 
-s.bayes*100
+1/(item.missing+1)*50
 
 );
+
 
 
 
@@ -307,7 +299,7 @@ s.bayes*100
 
 
 
-return score;
+return model;
 
 
 
@@ -330,22 +322,22 @@ trainBack(){
 
 let data=
 
-this.history();
+this.getHistory();
 
 
 
 
-let score=
+let model=
 
-this.initScore(12);
-
-
+this.create(12);
 
 
 
 
 
-data.forEach(item=>{
+
+
+data.forEach((item,index)=>{
 
 
 
@@ -353,7 +345,32 @@ item.back.forEach(n=>{
 
 
 
-score[n].frequency++;
+if(model[n]){
+
+
+
+model[n].frequency++;
+
+
+
+
+
+if(
+index>
+data.length-50
+){
+
+
+
+model[n].recent++;
+
+
+
+}
+
+
+
+}
 
 
 
@@ -362,7 +379,6 @@ score[n].frequency++;
 
 
 });
-
 
 
 
@@ -376,7 +392,18 @@ let n=1;n<=12;n++
 
 
 
+let item=
+
+model[n];
+
+
+
+
+
+
 let miss=0;
+
+
 
 
 
@@ -412,13 +439,19 @@ miss++;
 
 
 
-score[n].missing=
+item.missing=
 
 miss;
 
 
 
-}
+
+
+
+
+item.hot=
+
+item.recent/50;
 
 
 
@@ -426,66 +459,40 @@ miss;
 
 
 
-for(
-let n=1;n<=12;n++
-){
+item.cold=
 
-
-
-let s=
-
-score[n];
+miss/(data.length+1);
 
 
 
 
 
 
-s.bayes=
-
-s.frequency/(data.length*2);
 
 
-
-
-
-s.hot=
-
-s.frequency/data.length;
-
-
-
-
-
-
-s.markov=
-
-1/(s.missing+1);
-
-
-
-
-
-
-s.score=
+item.score=
 
 (
 
-s.frequency*0.4
+item.frequency*0.4
 
 +
 
-s.hot*40
+item.hot*50
 
 +
 
-s.markov*20
+(1-item.cold)*20
 
 +
 
-s.bayes*100
+1/(item.missing+1)*50
 
 );
+
+
+
+
 
 
 
@@ -496,7 +503,8 @@ s.bayes*100
 
 
 
-return score;
+
+return model;
 
 
 
@@ -509,201 +517,27 @@ return score;
 
 
 // ================================
-// Markov 转移
+// 获取排名
 // ================================
 
 
-markovFront(){
+rank(model){
 
 
 
-let data=
+return Object.values(model)
 
-this.history();
+.sort(
 
+(a,b)=>
 
-
-
-let map={};
-
-
-
-
-
-
-for(
-let i=1;
-
-i<data.length;
-
-i++
-
-){
-
-
-
-let last=
-
-data[i-1].front;
-
-
-
-let now=
-
-data[i].front;
-
-
-
-
-
-
-
-last.forEach(a=>{
-
-
-
-if(!map[a])
-
-map[a]={};
-
-
-
-now.forEach(b=>{
-
-
-
-if(!map[a][b])
-
-map[a][b]=0;
-
-
-
-map[a][b]++;
-
-
-
-});
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-return map;
-
-
-
-},
-
-
-
-
-
-
-
-// ================================
-// 结构评分
-// ================================
-
-
-structure(nums){
-
-
-
-let odd=
-
-nums.filter(
-
-n=>n%2
-
-).length;
-
-
-
-
-
-let big=
-
-nums.filter(
-
-n=>n>=18
-
-).length;
-
-
-
-
-
-let sum=
-
-nums.reduce(
-
-(a,b)=>a+b,
-
-0
+b.score-a.score
 
 );
 
 
 
-
-
-
-let score=50;
-
-
-
-
-
-
-if(
-odd>=2&&odd<=3
-)
-
-score+=15;
-
-
-
-
-
-
-if(
-big>=2&&big<=3
-)
-
-score+=15;
-
-
-
-
-
-
-if(
-sum>=90&&sum<=140
-)
-
-score+=20;
-
-
-
-
-
-
-
-return score;
-
-
-
 }
-
 
 
 

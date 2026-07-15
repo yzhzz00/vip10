@@ -1,5 +1,5 @@
 // ================================================
-// V90 AI CORE R5
+// V90 AI CORE FINAL R6
 // 系统主控制中心
 // ================================================
 
@@ -8,104 +8,31 @@
 
 
 
-
-
 // =================================
-// 模拟进度显示
+// 模型状态显示
 // =================================
 
 
-window.V90Progress=function(p){
-
-
-
-let bar=
-
-document.getElementById(
-"progressBar"
-);
-
-
-
-
-let text=
-
-document.getElementById(
-"progressText"
-);
-
-
-
-
-
-
-if(bar){
-
-
-bar.style.width=
-
-p+"%";
-
-
-}
-
-
-
-
-
-if(text){
-
-
-text.innerHTML=
-
-"蒙特卡罗优化："
-
-+
-
-p
-
-+
-
-"%";
-
-
-
-}
-
-
-
-};
-
-
-
-
-
-
-
-
-
-// =================================
-// 显示模型状态
-// =================================
-
-
-function showModelStatus(){
+function showModels(){
 
 
 
 let box=
 
 document.getElementById(
-"modelStatus"
+"models"
 );
 
 
 
 
 
+if(!box)
+
+return;
 
 
-if(box){
+
 
 
 
@@ -133,11 +60,19 @@ Markov转移 ✓
 
 <br>
 
-加权蒙特卡罗 ✓
+蒙特卡罗模拟 ✓
 
 <br>
 
-AI CORE R5裁决 ✓
+AI CORE裁决 ✓
+
+<br>
+
+自动学习 ✓
+
+<br>
+
+回测中心 ✓
 
 `;
 
@@ -147,10 +82,6 @@ AI CORE R5裁决 ✓
 
 
 
-}
-
-
-
 
 
 
@@ -158,11 +89,11 @@ AI CORE R5裁决 ✓
 
 
 // =================================
-// 显示最终结果
+// 显示预测
 // =================================
 
 
-function showAIResult(data){
+function showResult(data){
 
 
 
@@ -218,25 +149,25 @@ ${final.score}
 
 
 
+
 document.getElementById(
 "topList"
 ).innerHTML=
 
-data.top10
-
-.map(
+data.top10.map(
 
 (item,index)=>
 
 `
 
-第${index+1}组：
+第 ${index+1} 组：
 
 ${item.front.join("-")}
 
 +
 
 ${item.back.join("-")}
+
 
 <br>
 
@@ -248,9 +179,7 @@ ${item.score}
 
 `
 
-)
-
-.join("");
+).join("");
 
 
 
@@ -260,16 +189,12 @@ ${item.score}
 
 
 document.getElementById(
-"aiMeeting"
+"meeting"
 ).innerHTML=
 
-final.meeting.join(
+data.meeting.join(
 "<br>"
 );
-
-
-
-
 
 
 
@@ -284,15 +209,15 @@ final.meeting.join(
 
 
 // =================================
-// 开始AI分析
+// AI分析按钮
 // =================================
 
 
-async function startAI(){
+async function startAnalyze(){
 
 
 
-let text=
+let box=
 
 document.getElementById(
 "progressText"
@@ -303,7 +228,8 @@ document.getElementById(
 
 
 
-text.innerHTML=
+
+box.innerHTML=
 
 "正在读取历史数据...";
 
@@ -313,9 +239,9 @@ text.innerHTML=
 
 
 
-let data=
+let history=
 
-V90Data.get();
+V90Database.get();
 
 
 
@@ -324,14 +250,14 @@ V90Data.get();
 
 
 if(
-data.length===0
+history.length===0
 ){
 
 
 
-text.innerHTML=
+box.innerHTML=
 
-"历史数据为空";
+"没有历史数据";
 
 
 
@@ -346,13 +272,9 @@ return;
 
 
 
+box.innerHTML=
 
-
-
-text.innerHTML=
-
-"AI训练中...";
-
+"AI模型计算中...";
 
 
 
@@ -362,7 +284,7 @@ text.innerHTML=
 
 let result=
 
-await V90Core.run();
+await V90Core.analyze();
 
 
 
@@ -371,9 +293,7 @@ await V90Core.run();
 
 
 
-
-showAIResult(result);
-
+showResult(result);
 
 
 
@@ -381,61 +301,7 @@ showAIResult(result);
 
 
 
-// 保存预测记录
-
-
-localStorage.setItem(
-
-"V90_LAST_PREDICTION",
-
-JSON.stringify(result)
-
-);
-
-
-
-
-
-
-
-
-
-document.getElementById(
-"records"
-).innerHTML=
-
-`
-
-预测编号：
-
-${result.id}
-
-<br><br>
-
-最近预测：
-
-${result.final.front.join(" ")}
-
-+
-
-${result.final.back.join(" ")}
-
-<br><br>
-
-评分：
-
-${result.final.score}
-
-`;
-
-
-
-
-
-
-
-
-text.innerHTML=
+box.innerHTML=
 
 "分析完成";
 
@@ -454,17 +320,11 @@ text.innerHTML=
 
 
 // =================================
-// 页面启动
+// 初始化
 // =================================
 
 
-document.addEventListener(
-
-"DOMContentLoaded",
-
-async()=>{
-
-
+async function initSystem(){
 
 
 
@@ -474,8 +334,7 @@ document.getElementById(
 "status"
 ).innerHTML=
 
-"V90 AI CORE R5启动完成";
-
+"V90 AI CORE R6启动完成";
 
 
 
@@ -485,7 +344,7 @@ document.getElementById(
 
 let data=
 
-await V90Data.load();
+await V90Database.init();
 
 
 
@@ -498,17 +357,15 @@ document.getElementById(
 "dataStatus"
 ).innerHTML=
 
-"历史数据：已加载 "
+`
 
-+
+历史数据：
 
-data.length
+${data.length}
 
-+
+期
 
-"期";
-
-
+`;
 
 
 
@@ -516,9 +373,8 @@ data.length
 
 
 
-showModelStatus();
 
-
+showModels();
 
 
 
@@ -538,13 +394,14 @@ document.getElementById(
 
 
 
+
 if(btn){
 
 
 
 btn.onclick=
 
-startAI;
+startAnalyze;
 
 
 
@@ -556,7 +413,24 @@ startAI;
 
 
 
-V90Learning.show();
+}
+
+
+
+
+
+
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+
+initSystem();
 
 
 

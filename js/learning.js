@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE R5
-// 数字学习引擎
+// V90 AI CORE FINAL R6
+// AI成长学习模块
 // ================================================
 
 "use strict";
@@ -9,16 +9,19 @@
 window.V90Learning={
 
 
-recordKey:"V90_AI_LEARNING",
-
-weightKey:"V90_NUMBER_WEIGHT",
+weightKey:"V90_NUMBER_WEIGHTS",
 
 
-
+recordKey:"V90_LEARNING_RECORDS",
 
 
 
+
+
+// =================================
 // 初始化权重
+// =================================
+
 
 init(){
 
@@ -31,28 +34,28 @@ this.weightKey
 
 
 
-
-if(data)
+if(data){
 
 return JSON.parse(data);
 
+}
 
 
 
 
 
 
-let weight={
-
+let obj={
 
 
 front:{},
 
+
 back:{}
 
 
-
 };
+
 
 
 
@@ -64,14 +67,10 @@ let i=1;i<=35;i++
 ){
 
 
-
-weight.front[i]=1;
-
+obj.front[i]=1;
 
 
 }
-
-
 
 
 
@@ -82,9 +81,7 @@ let i=1;i<=12;i++
 ){
 
 
-
-weight.back[i]=1;
-
+obj.back[i]=1;
 
 
 }
@@ -95,30 +92,11 @@ weight.back[i]=1;
 
 
 
-this.saveWeight(weight);
+this.save(obj);
 
 
 
-return weight;
-
-
-
-},
-
-
-
-
-
-
-
-// 获取权重
-
-
-getWeight(){
-
-
-
-return this.init();
+return obj;
 
 
 
@@ -130,10 +108,12 @@ return this.init();
 
 
 
+// =================================
 // 保存权重
+// =================================
 
 
-saveWeight(data){
+save(data){
 
 
 
@@ -155,239 +135,9 @@ JSON.stringify(data)
 
 
 
-// ================================
-// 开奖学习
-// ================================
-
-
-learn(pred,real){
-
-
-
-let weight=
-
-this.getWeight();
-
-
-
-
-
-let hitFront=[];
-
-let hitBack=[];
-
-
-
-
-
-
-
-pred.front.forEach(n=>{
-
-
-
-if(
-real.front.includes(n)
-){
-
-
-
-hitFront.push(n);
-
-
-
-}else{
-
-
-
-weight.front[n]-=0.01;
-
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-
-
-pred.back.forEach(n=>{
-
-
-
-if(
-real.back.includes(n)
-){
-
-
-
-hitBack.push(n);
-
-
-
-}else{
-
-
-
-weight.back[n]-=0.01;
-
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-
-
-// 命中奖励
-
-
-hitFront.forEach(n=>{
-
-
-weight.front[n]+=0.05;
-
-
-});
-
-
-
-
-
-
-hitBack.forEach(n=>{
-
-
-weight.back[n]+=0.05;
-
-
-});
-
-
-
-
-
-
-
-this.saveWeight(weight);
-
-
-
-
-
-
-
-let records=
-
-this.records();
-
-
-
-
-
-
-
-records.push({
-
-
-
-time:
-
-new Date()
-.toLocaleString(),
-
-
-
-prediction:pred,
-
-
-
-real,
-
-
-hit:{
-
-
-
-front:
-
-hitFront,
-
-
-back:
-
-hitBack
-
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-
-localStorage.setItem(
-
-this.recordKey,
-
-JSON.stringify(records)
-
-);
-
-
-
-
-
-
-
-return {
-
-
-
-frontHit:
-
-hitFront.length,
-
-
-
-backHit:
-
-hitBack.length
-
-
-
-};
-
-
-
-},
-
-
-
-
-
-
-
-// 获取成长记录
+// =================================
+// 获取记录
+// =================================
 
 
 records(){
@@ -397,7 +147,9 @@ records(){
 return JSON.parse(
 
 localStorage.getItem(
+
 this.recordKey
+
 )
 
 ||
@@ -416,27 +168,39 @@ this.recordKey
 
 
 
-// 显示
+// =================================
+// 保存学习记录
+// =================================
 
 
-show(){
+saveRecord(data){
 
 
 
-let box=
+let arr=
 
-document.getElementById(
-"learning"
+this.records();
+
+
+
+arr.push(data);
+
+
+
+
+
+
+localStorage.setItem(
+
+this.recordKey,
+
+JSON.stringify(arr)
+
 );
 
 
 
-
-
-
-if(!box)
-
-return;
+},
 
 
 
@@ -444,25 +208,283 @@ return;
 
 
 
-box.innerHTML=
+// =================================
+// 开奖反馈学习
+// =================================
 
-`
 
-累计学习次数：
+learn(pred,real){
 
-${this.records().length}
 
-<br><br>
 
-数字权重：
+let weight=
 
-已更新
+this.init();
 
-`;
+
+
+
+
+
+let frontHit=[];
+
+
+let backHit=[];
+
+
+
+
+
+
+
+// 前区学习
+
+
+pred.front.forEach(n=>{
+
+
+
+if(
+real.front.includes(n)
+){
+
+
+
+weight.front[n]+=0.05;
+
+
+frontHit.push(n);
+
+
+
+}else{
+
+
+
+weight.front[n]-=0.01;
 
 
 
 }
+
+
+
+
+
+
+});
+
+
+
+
+
+
+
+
+// 后区学习
+
+
+pred.back.forEach(n=>{
+
+
+
+if(
+real.back.includes(n)
+){
+
+
+
+weight.back[n]+=0.08;
+
+
+backHit.push(n);
+
+
+
+}else{
+
+
+
+weight.back[n]-=0.02;
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+
+// 防止负数
+
+
+Object.keys(weight.front)
+
+.forEach(n=>{
+
+
+
+if(weight.front[n]<0.1)
+
+weight.front[n]=0.1;
+
+
+
+});
+
+
+
+
+
+
+
+Object.keys(weight.back)
+
+.forEach(n=>{
+
+
+
+if(weight.back[n]<0.1)
+
+weight.back[n]=0.1;
+
+
+
+});
+
+
+
+
+
+
+
+
+
+this.save(weight);
+
+
+
+
+
+
+
+
+
+this.saveRecord({
+
+
+
+time:
+
+new Date()
+.toLocaleString(),
+
+
+
+prediction:pred,
+
+
+
+result:real,
+
+
+
+hit:{
+
+
+
+front:frontHit,
+
+
+back:backHit
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+
+
+return {
+
+
+
+frontHit,
+
+
+
+backHit
+
+
+
+};
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 成长统计
+// =================================
+
+
+stats(){
+
+
+
+let list=
+
+this.records();
+
+
+
+
+
+
+return {
+
+
+
+count:
+
+list.length,
+
+
+
+last:
+
+list[list.length-1]
+
+
+
+};
+
+
+
+}
+
 
 
 

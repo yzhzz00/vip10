@@ -1,5 +1,5 @@
 // ================================================
-// V90 AI CORE R5
+// V90 AI CORE FINAL R6
 // AI最终裁决中心
 // ================================================
 
@@ -9,16 +9,13 @@
 window.V90Core={
 
 
-
-cacheKey:"V90_CURRENT_PREDICTION",
-
-
+cacheKey:"V90_FINAL_PREDICTION",
 
 
 
 
 // =================================
-// 获取缓存预测
+// 获取已有预测
 // =================================
 
 
@@ -42,13 +39,10 @@ return JSON.parse(data);
 }
 
 
-
 return null;
 
 
-
 },
-
 
 
 
@@ -60,8 +54,7 @@ return null;
 // =================================
 
 
-saveCache(data){
-
+save(data){
 
 
 localStorage.setItem(
@@ -71,86 +64,6 @@ this.cacheKey,
 JSON.stringify(data)
 
 );
-
-
-
-},
-
-
-
-
-
-
-
-// =================================
-// AI评分
-// =================================
-
-
-finalScore(item){
-
-
-
-let score=0;
-
-
-
-
-
-
-// 模拟评分
-
-
-score+=
-
-item.score;
-
-
-
-
-
-
-// 出现稳定性
-
-
-score+=
-
-Math.min(
-
-item.count,
-
-20
-
-);
-
-
-
-
-
-
-// 结构评分
-
-
-score+=
-
-V90Model.structure(
-
-item.front
-
-);
-
-
-
-
-
-
-
-return Number(
-
-score.toFixed(2)
-
-);
-
 
 
 },
@@ -170,13 +83,32 @@ risk(front){
 
 
 
-let s=
-
-V90Model.structure(front);
+let risk=[];
 
 
 
-let arr=[];
+let sum=
+
+front.reduce(
+
+(a,b)=>a+b,
+
+0
+
+);
+
+
+
+
+
+
+let odd=
+
+front.filter(
+
+n=>n%2
+
+).length;
 
 
 
@@ -184,13 +116,13 @@ let arr=[];
 
 
 if(
-s.odd===0 ||
-s.odd===5
+odd===0 ||
+odd===5
 ){
 
 
 
-arr.push(
+risk.push(
 "奇偶极端"
 );
 
@@ -204,14 +136,14 @@ arr.push(
 
 
 if(
-s.sum<70 ||
-s.sum>160
+sum<80 ||
+sum>150
 ){
 
 
 
-arr.push(
-"和值异常"
+risk.push(
+"和值偏离"
 );
 
 
@@ -223,14 +155,27 @@ arr.push(
 
 
 
-if(
-new Set(front).size!==5
-){
+let repeat=
+
+front.some(
+
+(n,i)=>
+
+front.indexOf(n)!==i
+
+);
 
 
 
-arr.push(
-"重复号码"
+
+
+
+if(repeat){
+
+
+
+risk.push(
+"号码重复"
 );
 
 
@@ -242,13 +187,13 @@ arr.push(
 
 
 
-return arr.length?
+return risk.length?
 
-arr.join("、")
+risk.join("、")
 
 :
 
-"未发现明显风险";
+"未发现明显结构风险";
 
 
 
@@ -265,16 +210,7 @@ arr.join("、")
 // =================================
 
 
-meeting(front,back){
-
-
-
-let s=
-
-V90Model.structure(front);
-
-
-
+meeting(result){
 
 
 
@@ -282,27 +218,25 @@ return [
 
 
 
-"趋势AI：2896期历史趋势训练完成",
+"趋势AI：历史数据训练完成",
 
 
 
-"概率AI：Bayes数字概率评分完成",
+"概率AI：Bayes概率更新完成",
 
 
 
-"结构AI：奇偶"+s.odd+
-" 大小"+s.big+
-" 和值"+s.sum,
+"结构AI：奇偶/大小/和值分析完成",
 
 
 
-"Markov AI：号码转移分析完成",
+"Markov AI：号码转移趋势完成",
 
 
 
 "风险AI："+
 
-this.risk(front)
+this.risk(result.front)
 
 
 
@@ -319,18 +253,15 @@ this.risk(front)
 
 
 // =================================
-// 主运行
+// 主分析
 // =================================
 
 
-async run(){
+async analyze(force=false){
 
 
 
-
-
-
-// 已经分析过
+// 已存在预测
 
 let cache=
 
@@ -340,8 +271,7 @@ this.getCache();
 
 
 
-
-if(cache){
+if(cache && !force){
 
 
 
@@ -357,30 +287,11 @@ return cache;
 
 
 
-
 let pool=
 
 await V90MonteCarlo.run(
 
-1000000,
-
-function(p){
-
-
-
-if(window.V90Progress){
-
-
-
-window.V90Progress(p);
-
-
-
-}
-
-
-
-}
+1000000
 
 );
 
@@ -403,12 +314,23 @@ front:item.front,
 back:item.back,
 
 
-count:item.count,
-
-
 score:
 
-this.finalScore(item)
+Number(
+
+(
+
+item.score
+
++
+
+item.count
+
+)
+
+.toFixed(2)
+
+)
 
 
 
@@ -445,19 +367,25 @@ list[0];
 
 
 
-
 let result={
 
 
 
 id:
 
-"V90-"
+"R6-"
 
 +
 
 Date.now(),
 
+
+
+
+time:
+
+new Date()
+.toLocaleString(),
 
 
 
@@ -471,31 +399,18 @@ front:
 best.front,
 
 
-
 back:
 
 best.back,
 
 
-
 score:
 
-best.score,
+best.score
 
 
-
-meeting:
-
-this.meeting(
-
-best.front,
-
-best.back
-
-)
 
 },
-
 
 
 
@@ -503,6 +418,9 @@ best.back
 top10:
 
 list.slice(0,10)
+
+
+
 
 
 
@@ -514,8 +432,23 @@ list.slice(0,10)
 
 
 
+result.meeting=
 
-this.saveCache(result);
+this.meeting(
+
+result.final
+
+);
+
+
+
+
+
+
+
+
+this.save(result);
+
 
 
 
@@ -523,9 +456,6 @@ this.saveCache(result);
 
 
 return result;
-
-
-
 
 
 
