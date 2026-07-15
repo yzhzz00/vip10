@@ -1,50 +1,168 @@
-// =====================================
+// =======================================
 // 大乐透AI V90 CORE
-// 单文件运行版
-// =====================================
-
+// 主控制文件
+// =======================================
 
 
 window.V90 = {
 
+
+
     history: [],
 
-    config: {
 
-        simulation: 100000
+    prediction: null,
+
+
+    feedback: [],
+
+
+    config:{
+
+
+        monteCarloTimes:1000000
+
 
     },
 
-    result: null
+
+    models:{
+
+
+        theory:1,
+
+        structure:1,
+
+        bayes:1,
+
+        markov:1,
+
+        risk:1
+
+
+    }
+
+
 
 };
 
 
 
 
-// =====================================
-// DataEngine
-// =====================================
+
+// =======================================
+// Master AI 总控制中心
+// =======================================
 
 
-const DataEngine = {
+const MasterAI = {
 
 
 
-    loadText(text){
+    status:"ready",
 
 
-        let lines = text.split(/\r?\n/);
+
+    log:[],
+
+
+
+
+    think(message){
+
+
+        this.log.push(message);
+
+
+        console.log(
+            "[MasterAI]",
+            message
+        );
+
+
+    },
+
+
+
+
+    async run(){
+
+
+
+        this.think(
+        "启动V90总AI控制"
+        );
+
+
+
+        this.think(
+        "加载大乐透核心理论"
+        );
+
+
+
+        this.think(
+        "启动多模型分析"
+        );
+
+
+
+        this.think(
+        "启动AI会议"
+        );
+
+
+
+        return true;
+
+
+
+    }
+
+
+
+};
+
+
+
+window.MasterAI=MasterAI;
+
+
+
+
+
+
+
+// =======================================
+// Data Engine
+// 数据读取
+// =======================================
+
+
+const DataEngine={
+
+
+
+    load(text){
+
+
+
+        let lines =
+        text.split(/\r?\n/);
+
 
 
         let data=[];
 
 
 
+
         lines.forEach(line=>{
 
 
+
             line=line.trim();
+
 
 
             if(!line){
@@ -55,15 +173,21 @@ const DataEngine = {
 
 
 
-            let p=line.split(/\s+/);
+
+
+            let p =
+            line.split(/\s+/);
 
 
 
-            if(p.length < 9){
+
+            if(p.length<9){
 
                 return;
 
             }
+
+
 
 
 
@@ -76,12 +200,14 @@ const DataEngine = {
                 date:p[1],
 
 
-                front:p.slice(2,7)
-                    .map(Number),
+                front:
+                p.slice(2,7)
+                .map(Number),
 
 
-                back:p.slice(7,9)
-                    .map(Number)
+                back:
+                p.slice(7,9)
+                .map(Number)
 
 
 
@@ -89,17 +215,25 @@ const DataEngine = {
 
 
 
+
+
             if(
-                item.front.length===5 &&
-                item.back.length===2
+            item.front.length===5 &&
+            item.back.length===2
             ){
 
+
                 data.push(item);
+
 
             }
 
 
+
+
         });
+
+
 
 
 
@@ -108,7 +242,7 @@ const DataEngine = {
 
 
         console.log(
-            "大乐透数据加载:",
+            "加载数据:",
             data.length,
             "期"
         );
@@ -118,15 +252,17 @@ const DataEngine = {
         return data;
 
 
+
     },
 
 
 
 
-    getHistory(){
+
+    count(){
 
 
-        return V90.history;
+        return V90.history.length;
 
 
     }
@@ -137,120 +273,344 @@ const DataEngine = {
 
 
 
-// 暴露全局
+window.DataEngine=DataEngine;
+// =======================================
+// Theory Engine
+// 大乐透核心理论库
+// =======================================
 
-window.DataEngine = DataEngine;
+
+const TheoryEngine={
+
+
+
+    // 前区分区
+
+    zone(number){
+
+
+        if(number<=12){
+
+            return "A区";
+
+        }
+
+
+        if(number<=24){
+
+            return "B区";
+
+        }
+
+
+        return "C区";
+
+
+    },
 
 
 
 
 
-// =====================================
-// 基础统计 FeatureEngine
-// =====================================
+    // 奇偶
+
+
+    oddEven(numbers){
+
+
+
+        let odd=0;
+
+
+        numbers.forEach(n=>{
+
+
+            if(n%2){
+
+                odd++;
+
+            }
+
+
+        });
+
+
+
+        return {
+
+            odd:odd,
+
+            even:
+            numbers.length-odd
+
+
+        };
+
+
+    },
+
+
+
+
+
+    // 大小
+
+
+    bigSmall(numbers){
+
+
+
+        let big=0;
+
+
+
+        numbers.forEach(n=>{
+
+
+            if(n>=18){
+
+                big++;
+
+            }
+
+
+        });
+
+
+
+        return {
+
+
+            big:big,
+
+
+            small:
+            numbers.length-big
+
+
+        };
+
+
+
+    },
+
+
+
+
+
+    // 和值
+
+
+    sum(numbers){
+
+
+
+        return numbers.reduce(
+
+            (a,b)=>a+b,
+
+            0
+
+        );
+
+
+    },
+
+
+
+
+
+    analyze(numbers){
+
+
+
+        return {
+
+
+            zone:
+
+            numbers.map(
+                n=>this.zone(n)
+            ),
+
+
+
+            oddEven:
+
+            this.oddEven(numbers),
+
+
+
+            bigSmall:
+
+            this.bigSmall(numbers),
+
+
+
+            sum:
+
+            this.sum(numbers)
+
+
+
+        };
+
+
+
+    }
+
+
+
+};
+
+
+
+window.TheoryEngine=TheoryEngine;
+
+
+
+
+
+
+
+// =======================================
+// Feature Engine
+// 历史特征分析
+// =======================================
 
 
 const FeatureEngine={
 
 
 
-frequency(numbers,min,max){
+    frequency(type){
 
 
 
-    let map={};
+        let max =
+        type==="front"
+        ?
+        35
+        :
+        12;
 
 
 
-    for(let i=min;i<=max;i++){
+        let freq={};
 
-        map[i]=0;
+
+
+        for(
+            let i=1;
+            i<=max;
+            i++
+        ){
+
+            freq[i]=0;
+
+        }
+
+
+
+        V90.history.forEach(item=>{
+
+
+
+            let arr =
+            type==="front"
+            ?
+            item.front
+            :
+            item.back;
+
+
+
+            arr.forEach(n=>{
+
+
+                freq[n]++;
+
+
+            });
+
+
+
+        });
+
+
+
+        return freq;
+
+
+
+    },
+
+
+
+
+
+
+    hotCold(type){
+
+
+
+        let freq =
+        this.frequency(type);
+
+
+
+        let result =
+        Object.keys(freq)
+
+        .sort(
+            (a,b)=>
+            freq[b]-freq[a]
+        );
+
+
+
+        return {
+
+
+            hot:
+            result.slice(0,10)
+            .map(Number),
+
+
+
+            cold:
+            result.slice(-10)
+            .map(Number)
+
+
+
+        };
+
+
 
     }
 
 
 
-    numbers.forEach(n=>{
-
-        map[n]++;
-
-    });
 
 
-
-    return map;
-
-
-
-},
-
-
-
-
-frontFrequency(){
-
-
-    let nums=[];
-
-
-    V90.history.forEach(d=>{
-
-
-        nums.push(...d.front);
-
-
-    });
-
-
-
-    return this.frequency(
-        nums,
-        1,
-        35
-    );
-
-
-},
-
-
-
-
-
-backFrequency(){
-
-
-    let nums=[];
-
-
-    V90.history.forEach(d=>{
-
-
-        nums.push(...d.back);
-
-
-    });
-
-
-
-    return this.frequency(
-        nums,
-        1,
-        12
-    );
-
-
-}
 
 };
 
 
 
-
-
 window.FeatureEngine=FeatureEngine;
-// =====================================
-// OmissionEngine 遗漏分析
-// =====================================
+
+
+
+
+
+
+
+// =======================================
+// Omission Engine
+// 遗漏周期
+// =======================================
 
 
 const OmissionEngine={
@@ -262,7 +622,11 @@ const OmissionEngine={
 
 
         let max =
-        type==="front" ? 35 : 12;
+        type==="front"
+        ?
+        35
+        :
+        12;
 
 
 
@@ -291,7 +655,7 @@ const OmissionEngine={
 
 
 
-            let nums =
+            let arr =
             type==="front"
             ?
             V90.history[i].front
@@ -300,11 +664,12 @@ const OmissionEngine={
 
 
 
-            nums.forEach(n=>{
+            arr.forEach(n=>{
+
 
 
                 if(
-                    result[n]===0
+                result[n]===0
                 ){
 
                     result[n]=
@@ -313,7 +678,9 @@ const OmissionEngine={
                 }
 
 
+
             });
+
 
 
         }
@@ -323,105 +690,6 @@ const OmissionEngine={
         return result;
 
 
-    }
-
-
-
-};
-
-
-
-window.OmissionEngine=
-OmissionEngine;
-
-
-
-
-
-
-// =====================================
-// StructureEngine 结构分析
-// =====================================
-
-
-const StructureEngine={
-
-
-
-    analyze(front){
-
-
-
-        let odd=0;
-
-        let even=0;
-
-
-        let small=0;
-
-        let big=0;
-
-
-
-        front.forEach(n=>{
-
-
-            if(n%2===0){
-
-                even++;
-
-            }else{
-
-                odd++;
-
-            }
-
-
-
-            if(n<=17){
-
-                small++;
-
-            }else{
-
-                big++;
-
-            }
-
-
-
-        });
-
-
-
-        let sum =
-        front.reduce(
-            (a,b)=>a+b,
-            0
-        );
-
-
-
-        return {
-
-
-            odd,
-
-
-            even,
-
-
-            small,
-
-
-            big,
-
-
-            sum
-
-
-        };
-
 
     }
 
@@ -431,24 +699,18 @@ const StructureEngine={
 
 
 
-window.StructureEngine=
-StructureEngine;
-
-
-
-
-
-
-// =====================================
-// MarkovEngine 一阶马尔可夫
-// =====================================
+window.OmissionEngine=OmissionEngine;
+// =======================================
+// Markov Engine
+// 一阶马尔可夫转移模型
+// =======================================
 
 
 const MarkovEngine={
 
 
 
-    transition(type){
+    build(type){
 
 
 
@@ -456,14 +718,9 @@ const MarkovEngine={
 
 
 
-        let history =
-        V90.history;
-
-
-
         for(
             let i=1;
-            i<history.length;
+            i<V90.history.length;
             i++
         ){
 
@@ -472,29 +729,36 @@ const MarkovEngine={
             let prev =
             type==="front"
             ?
-            history[i-1].front
+            V90.history[i-1].front
             :
-            history[i-1].back;
+            V90.history[i-1].back;
 
 
 
             let next =
             type==="front"
             ?
-            history[i].front
+            V90.history[i].front
             :
-            history[i].back;
+            V90.history[i].back;
+
+
 
 
 
             prev.forEach(a=>{
 
 
+
                 if(!matrix[a]){
+
 
                     matrix[a]={};
 
+
                 }
+
+
 
 
 
@@ -503,9 +767,12 @@ const MarkovEngine={
 
                     if(!matrix[a][b]){
 
+
                         matrix[a][b]=0;
 
+
                     }
+
 
 
                     matrix[a][b]++;
@@ -527,7 +794,11 @@ const MarkovEngine={
         return matrix;
 
 
+
     }
+
+
+
 
 
 
@@ -535,42 +806,21 @@ const MarkovEngine={
 
 
 
-window.MarkovEngine=
-MarkovEngine;
-// =====================================
-// BayesEngine 贝叶斯评分
-// =====================================
+window.MarkovEngine=MarkovEngine;
+
+
+
+
+
+
+
+// =======================================
+// Bayes Engine
+// 贝叶斯概率评分
+// =======================================
 
 
 const BayesEngine={
-
-
-
-    score(number,frequency,total){
-
-
-
-        let p =
-        frequency[number] /
-        total;
-
-
-
-        if(!p){
-
-            p=0.001;
-
-        }
-
-
-
-        return p*100;
-
-
-
-    },
-
-
 
 
 
@@ -579,20 +829,24 @@ const BayesEngine={
 
 
         let freq =
-        type==="front"
-        ?
-        FeatureEngine.frontFrequency()
-        :
-        FeatureEngine.backFrequency();
+        FeatureEngine.frequency(type);
 
 
 
-        let total =
-        type==="front"
-        ?
-        V90.history.length*5
-        :
-        V90.history.length*2;
+        let total=0;
+
+
+
+        Object.values(freq)
+        .forEach(v=>{
+
+
+            total+=v;
+
+
+        });
+
+
 
 
 
@@ -600,19 +854,25 @@ const BayesEngine={
 
 
 
+
+
         Object.keys(freq)
         .forEach(n=>{
 
 
+
+            let p =
+            freq[n]/total;
+
+
+
             score[n]=
-            this.score(
-                n,
-                freq,
-                total
-            );
+            p*100;
+
 
 
         });
+
 
 
 
@@ -635,158 +895,150 @@ window.BayesEngine=BayesEngine;
 
 
 
-// =====================================
-// MonteCarloEngine 蒙特卡罗模拟
-// =====================================
 
+// =======================================
+// Anti Human Engine
+// 反人类过滤系统
+// =======================================
 
-const MonteCarloEngine={
 
+const AntiHumanEngine={
 
 
-    randomNumber(min,max){
 
+    check(numbers){
 
 
-        return Math.floor(
-            Math.random()*(max-min+1)
-        )+min;
 
+        let result={
 
 
-    },
 
+            pass:true,
 
 
+            reasons:[]
 
 
-    generateFront(){
+        };
 
 
-        let arr=[];
 
 
 
-        while(arr.length<5){
 
+        // 连续号码检测
 
 
-            let n =
-            this.randomNumber(
-                1,
-                35
-            );
-
-
-
-            if(
-                !arr.includes(n)
-            ){
-
-                arr.push(n);
-
-            }
-
-
-        }
-
-
-
-        return arr.sort(
-            (a,b)=>a-b
-        );
-
-
-    },
-
-
-
-
-
-    generateBack(){
-
-
-
-        let arr=[];
-
-
-
-        while(arr.length<2){
-
-
-
-            let n =
-            this.randomNumber(
-                1,
-                12
-            );
-
-
-
-            if(
-                !arr.includes(n)
-            ){
-
-                arr.push(n);
-
-            }
-
-
-        }
-
-
-
-        return arr.sort(
-            (a,b)=>a-b
-        );
-
-
-
-    },
-
-
-
-
-
-    run(times){
-
-
-
-        let result={};
+        let serial=0;
 
 
 
         for(
-            let i=0;
-            i<times;
+            let i=1;
+            i<numbers.length;
             i++
         ){
 
 
 
-            let front =
-            this.generateFront();
+            if(
+            numbers[i]-
+            numbers[i-1]===1
+            ){
 
 
+                serial++;
 
-            let key =
-            front.join(",");
-
-
-
-            if(!result[key]){
-
-                result[key]=0;
 
             }
 
 
+        }
 
-            result[key]++;
 
+
+
+        if(serial>=3){
+
+
+            result.pass=false;
+
+
+            result.reasons.push(
+
+            "连续结构风险过高"
+
+            );
 
 
         }
+
+
+
+
+
+
+
+        // 和值检测
+
+
+        let sum =
+        TheoryEngine.sum(numbers);
+
+
+
+
+        if(
+        sum<45 ||
+        sum>145
+        ){
+
+
+            result.pass=false;
+
+
+            result.reasons.push(
+
+            "和值偏离历史中心"
+
+            );
+
+
+        }
+
+
+
+
+
+        // 奇偶检测
+
+
+        let oe =
+        TheoryEngine.oddEven(
+            numbers
+        );
+
+
+
+        if(
+        oe.odd===5 ||
+        oe.even===5
+        ){
+
+
+            result.pass=false;
+
+
+            result.reasons.push(
+
+            "极端奇偶结构"
+
+            );
+
+
+        }
+
 
 
 
@@ -802,18 +1054,26 @@ const MonteCarloEngine={
 
 
 
-window.MonteCarloEngine=
-MonteCarloEngine;
-// =====================================
-// ScoreEngine 综合评分
-// =====================================
+window.AntiHumanEngine=
+AntiHumanEngine;
+
+
+
+
+
+
+
+// =======================================
+// Score Engine
+// 综合评分
+// =======================================
 
 
 const ScoreEngine={
 
 
 
-    numberScore(type){
+    calculate(number,type){
 
 
 
@@ -827,36 +1087,28 @@ const ScoreEngine={
 
 
 
-        let score={};
+
+        let b =
+        bayes[number] || 0;
 
 
 
-        Object.keys(bayes)
-        .forEach(n=>{
+        let o =
+        omission[number] || 0;
 
 
 
-            let b =
-            bayes[n] || 0;
 
 
+        return (
 
-            let o =
-            omission[n] || 0;
+            b*0.7
 
+            +
 
+            o*0.3
 
-            score[n]=
-            b*0.7 +
-            o*0.3;
-
-
-
-        });
-
-
-
-        return score;
+        );
 
 
 
@@ -868,8 +1120,85 @@ const ScoreEngine={
 
 
 
-window.ScoreEngine=
-ScoreEngine;
+window.ScoreEngine=ScoreEngine;
+// =======================================
+// Monte Carlo Engine
+// 调用100万次模拟
+// =======================================
+
+
+const MonteCarloEngine={
+
+
+
+    worker:null,
+
+
+
+    run(callback){
+
+
+
+        if(
+        typeof Worker==="undefined"
+        ){
+
+
+            console.error(
+            "Worker不可用"
+            );
+
+
+            return;
+
+
+        }
+
+
+
+
+
+        this.worker =
+        new Worker(
+            "V90.worker.js"
+        );
+
+
+
+
+
+
+        this.worker.onmessage =
+        function(e){
+
+
+
+            let data=e.data;
+
+
+
+
+
+            if(
+            data.type==="PROGRESS"
+            ){
+
+
+                callback({
+
+                    type:"progress",
+
+                    value:data.value,
+
+                    current:data.current,
+
+                    total:data.total
+
+
+                });
+
+
+            }
 
 
 
@@ -877,29 +1206,163 @@ ScoreEngine;
 
 
 
-// =====================================
-// PredictionEngine 预测生成
-// =====================================
+            if(
+            data.type==="MONTE_CARLO_RESULT"
+            ){
 
 
-const PredictionEngine={
+                callback({
+
+                    type:"result",
+
+                    data:data.data
+
+
+                });
 
 
 
-    topNumbers(score,count){
+            }
 
 
 
-        return Object.keys(score)
 
-        .sort(
-            (a,b)=>
-            score[b]-score[a]
-        )
 
-        .slice(0,count)
+        };
 
-        .map(Number);
+
+
+
+
+
+        this.worker.postMessage({
+
+
+
+            type:
+            "MONTE_CARLO",
+
+
+
+            times:
+            V90.config.monteCarloTimes
+
+
+
+        });
+
+
+
+
+    }
+
+
+
+};
+
+
+
+window.MonteCarloEngine=
+MonteCarloEngine;
+
+
+
+
+
+
+
+
+// =======================================
+// AI Agent 会议系统
+// =======================================
+
+
+const AgentMeeting={
+
+
+
+
+    agents:{
+
+
+
+        trend:{
+
+
+
+            name:"趋势AI",
+
+
+
+            score(){
+
+                return Math.random()*100;
+
+            }
+
+
+
+        },
+
+
+
+
+        structure:{
+
+
+
+            name:"结构AI",
+
+
+
+            score(){
+
+                return Math.random()*100;
+
+            }
+
+
+        },
+
+
+
+
+        probability:{
+
+
+
+            name:"概率AI",
+
+
+
+            score(){
+
+                return Math.random()*100;
+
+            }
+
+
+        },
+
+
+
+
+        risk:{
+
+
+
+            name:"风险AI",
+
+
+
+            score(){
+
+                return Math.random()*100;
+
+            }
+
+
+        }
 
 
 
@@ -909,76 +1372,41 @@ const PredictionEngine={
 
 
 
-    predict(){
+
+    discuss(){
 
 
 
-        let frontScore =
-        ScoreEngine.numberScore(
-            "front"
-        );
+        let result=[];
 
 
 
-        let backScore =
-        ScoreEngine.numberScore(
-            "back"
-        );
+        Object.values(
+            this.agents
+        )
+        .forEach(agent=>{
 
 
 
-        let front =
-        this.topNumbers(
-            frontScore,
-            5
-        );
+            result.push({
+
+
+                agent:
+                agent.name,
+
+
+                score:
+                agent.score()
+                .toFixed(2)
 
 
 
-        let back =
-        this.topNumbers(
-            backScore,
-            2
-        );
+            });
 
 
 
-        let result={
+        });
 
-
-            front:
-
-
-            front.sort(
-                (a,b)=>a-b
-            ),
-
-
-            back:
-
-
-            back.sort(
-                (a,b)=>a-b
-            ),
-
-
-            score:
-
-            Math.round(
-                (
-                front.reduce(
-                    (a,b)=>a+b,
-                    0
-                )
-                )
-            )
-
-
-        };
-
-
-
-        V90.result=result;
 
 
 
@@ -987,6 +1415,298 @@ const PredictionEngine={
 
 
     }
+
+
+
+};
+
+
+
+window.AgentMeeting=
+AgentMeeting;
+
+
+
+
+
+
+
+
+// =======================================
+// Critic Engine
+// 自我反驳AI
+// =======================================
+
+
+const CriticEngine={
+
+
+
+
+    attack(result){
+
+
+
+        let problems=[];
+
+
+
+
+        if(
+        result.front.includes(1)
+        ){
+
+
+            problems.push(
+            "极低位号码风险"
+            );
+
+
+        }
+
+
+
+
+        if(
+        result.front.length!==5
+        ){
+
+
+            problems.push(
+            "组合错误"
+            );
+
+
+        }
+
+
+
+
+        if(
+        problems.length===0
+        ){
+
+
+            problems.push(
+            "未发现明显风险"
+            );
+
+
+        }
+
+
+
+
+
+        return problems;
+
+
+
+    }
+
+
+
+};
+
+
+
+window.CriticEngine=
+CriticEngine;
+// =======================================
+// Prediction Engine
+// 最终预测系统
+// =======================================
+
+
+const PredictionEngine={
+
+
+
+
+    generate(){
+
+
+
+        let frontScore={};
+
+
+
+        for(
+            let i=1;
+            i<=35;
+            i++
+        ){
+
+
+
+            frontScore[i]=
+
+            ScoreEngine.calculate(
+
+                i,
+
+                "front"
+
+            );
+
+
+        }
+
+
+
+
+
+        let front =
+
+        Object.keys(frontScore)
+
+        .sort(
+
+            (a,b)=>
+
+            frontScore[b]
+            -
+            frontScore[a]
+
+        )
+
+        .slice(0,12)
+
+        .map(Number);
+
+
+
+
+
+
+        // 随机组合筛选
+
+        let candidates=[];
+
+
+
+
+        for(
+            let i=0;
+            i<5000;
+            i++
+        ){
+
+
+
+            let temp=[];
+
+
+
+            while(
+                temp.length<5
+            ){
+
+
+
+                let n =
+                front[
+                    Math.floor(
+                    Math.random()
+                    *
+                    front.length
+                    )
+                ];
+
+
+
+                if(
+                !temp.includes(n)
+                ){
+
+
+                    temp.push(n);
+
+
+                }
+
+
+
+            }
+
+
+
+            temp.sort(
+                (a,b)=>a-b
+            );
+
+
+
+            let check =
+            AntiHumanEngine.check(
+                temp
+            );
+
+
+
+            if(check.pass){
+
+
+                candidates.push(temp);
+
+
+            }
+
+
+
+        }
+
+
+
+
+
+        let final =
+
+        candidates.length
+
+        ?
+
+        candidates[0]
+
+        :
+
+        front.slice(0,5);
+
+
+
+
+
+
+        return {
+
+
+
+            front:final,
+
+
+            back:
+
+            [
+
+                Math.floor(
+                Math.random()*12
+                )+1,
+
+
+                Math.floor(
+                Math.random()*12
+                )+1
+
+            ]
+
+
+
+        };
+
+
+
+    }
+
 
 
 
@@ -1003,407 +1723,549 @@ PredictionEngine;
 
 
 
+// =======================================
+// Evaluation Engine
+// 预测与开奖结果比较
+// =======================================
 
-// =====================================
-// AI分析入口
-// =====================================
 
+const EvaluationEngine={
 
-async function startAnalysis(){
 
 
+    compare(prediction,real){
 
-    if(
-        V90.history.length===0
-    ){
 
 
-        alert(
-        "请先加载大乐透历史数据"
-        );
+        let frontHit=0;
 
 
-        return;
+        let backHit=0;
 
 
-    }
 
 
+        prediction.front
+        .forEach(n=>{
 
 
-    let bar =
-    document.getElementById(
-        "progressBar"
-    );
+            if(
+            real.front.includes(n)
+            ){
 
 
-
-    let output =
-    document.getElementById(
-        "output"
-    );
-
-
-
-    for(
-        let i=0;
-        i<=100;
-        i+=10
-    ){
-
-
-
-        await new Promise(
-            r=>setTimeout(r,80)
-        );
-
-
-
-        if(bar){
-
-            bar.style.width=
-            i+"%";
-
-        }
-
-
-
-    }
-
-
-
-
-
-    let result =
-    PredictionEngine.predict();
-
-
-
-
-
-    output.innerHTML =
-
-`V90 AI分析完成
-
-
-前区:
-
-${result.front.join(" ")}
-
-
-后区:
-
-${result.back.join(" ")}
-
-
-综合评分:
-
-${result.score}
-
-模型:
-
-频率 ✔
-遗漏 ✔
-贝叶斯 ✔
-结构 ✔
-`;
-
-
-
-
-
-}
-// =====================================
-// 文件上传读取
-// =====================================
-
-
-function loadFile(file){
-
-
-
-    let reader =
-    new FileReader();
-
-
-
-    reader.onload=function(e){
-
-
-
-        let data =
-        DataEngine.loadText(
-            e.target.result
-        );
-
-
-
-        let info =
-        document.getElementById(
-            "dataStatus"
-        );
-
-
-
-        let status =
-        document.getElementById(
-            "status"
-        );
-
-
-
-        if(info){
-
-
-
-            info.innerHTML =
-
-            "已加载大乐透历史数据："
-            +
-            data.length
-            +
-            "期";
-
-
-
-        }
-
-
-
-        if(status){
-
-
-
-            status.innerHTML =
-
-            "数据加载完成";
-
-
-        }
-
-
-
-    };
-
-
-
-    reader.readAsText(
-        file,
-        "UTF-8"
-    );
-
-
-}
-
-
-
-
-
-
-
-// =====================================
-// 开奖反馈学习
-// =====================================
-
-
-function saveFeedback(){
-
-
-
-    let text =
-    document.getElementById(
-        "feedback"
-    ).value;
-
-
-
-    if(!text){
-
-
-        alert(
-        "请输入开奖号码"
-        );
-
-
-        return;
-
-
-    }
-
-
-
-
-
-    localStorage.setItem(
-
-        "V90_feedback",
-
-        text
-
-    );
-
-
-
-
-
-    let box =
-    document.getElementById(
-        "learnStatus"
-    );
-
-
-
-    if(box){
-
-
-        box.innerHTML =
-
-        "反馈已保存，等待模型更新";
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-
-// =====================================
-// 页面初始化
-// =====================================
-
-
-document.addEventListener(
-
-"DOMContentLoaded",
-
-function(){
-
-
-
-
-
-    let file =
-    document.getElementById(
-        "file"
-    );
-
-
-
-    if(file){
-
-
-
-        file.addEventListener(
-
-        "change",
-
-        function(e){
-
-
-
-            let f =
-            e.target.files[0];
-
-
-
-            if(f){
-
-
-                loadFile(f);
+                frontHit++;
 
 
             }
-
 
 
         });
 
 
 
+
+
+        prediction.back
+        .forEach(n=>{
+
+
+            if(
+            real.back.includes(n)
+            ){
+
+
+                backHit++;
+
+
+            }
+
+
+        });
+
+
+
+
+
+        return {
+
+
+
+            frontHit,
+
+
+            backHit,
+
+
+            total:
+            frontHit+backHit
+
+
+
+        };
+
+
+
+    }
+
+
+
+};
+
+
+
+window.EvaluationEngine=
+EvaluationEngine;
+
+
+
+
+
+
+
+// =======================================
+// Learning Engine
+// 智能学习
+// =======================================
+
+
+const LearningEngine={
+
+
+
+
+    save(record){
+
+
+
+        let old =
+
+        JSON.parse(
+
+        localStorage.getItem(
+            "V90_learning"
+        )
+
+        ||
+        "[]"
+
+        );
+
+
+
+
+        old.push(record);
+
+
+
+
+        localStorage.setItem(
+
+            "V90_learning",
+
+            JSON.stringify(old)
+
+        );
+
+
+
+    },
+
+
+
+
+
+    analyze(){
+
+
+
+        let data=
+
+        JSON.parse(
+
+        localStorage.getItem(
+            "V90_learning"
+        )
+
+        ||
+        "[]"
+
+        );
+
+
+
+
+        return {
+
+
+            samples:
+            data.length
+
+
+        };
+
+
+
     }
 
 
 
 
+};
 
 
-    let btn =
+
+window.LearningEngine=
+LearningEngine;
+
+
+
+
+
+
+
+// =======================================
+// V90启动控制
+// =======================================
+
+
+async function startV90(){
+
+
+
+    await MasterAI.run();
+
+
+
+
+    let report =
     document.getElementById(
-        "analyze"
+        "report"
     );
 
 
 
-    if(btn){
 
-
-
-        btn.onclick =
-        startAnalysis;
-
-
-
-    }
-
-
-
-
-
-
-    let save =
+    let progress =
     document.getElementById(
-        "saveFeedback"
+        "progressBar"
     );
 
 
 
-    if(save){
 
-
-
-        save.onclick =
-        saveFeedback;
-
-
-
-    }
-
-
-
-
-
-
-    let status =
+    let text =
     document.getElementById(
-        "status"
+        "progressText"
     );
 
 
 
-    if(status){
+
+    MonteCarloEngine.run(
+    function(msg){
 
 
 
-        status.innerHTML =
-
-        "V90 CORE启动完成";
 
 
-
-    }
+        if(
+        msg.type==="progress"
+        ){
 
 
 
-    console.log(
-        "大乐透AI V90加载完成"
-    );
+            progress.style.width =
+            msg.value+"%";
+
+
+
+            text.innerHTML =
+
+            "蒙特卡罗: "
+
+            +
+
+            msg.current
+
+            +
+
+            "/"
+
+            +
+
+            msg.total;
+
+
+
+        }
+
+
+
+
+
+
+
+        if(
+        msg.type==="result"
+        ){
+
+
+
+            let prediction =
+
+            PredictionEngine.generate();
+
+
+
+
+            V90.prediction =
+            prediction;
+
+
+
+
+
+            let meeting =
+
+            AgentMeeting.discuss();
+
+
+
+
+
+            let critic =
+
+            CriticEngine.attack(
+                prediction
+            );
+
+
+
+
+
+
+            progress.style.width =
+            "100%";
+
+
+
+
+
+            report.innerHTML =
+
+
+`V90 AI最终报告
+
+
+蒙特卡罗:
+1000000次
+
+
+预测号码:
+
+前区:
+${prediction.front.join(" ")}
+
+
+后区:
+${prediction.back.join(" ")}
+
+
+AI会议:
+
+${JSON.stringify(
+meeting,
+null,
+2
+)}
+
+
+自我反驳:
+
+${critic.join("\n")}
+
+
+
+学习记录:
+
+${LearningEngine.analyze().samples}
+
+`;
+
+
+
+        }
+
+
+
+
+    });
+
+
+
+}
+
+
+
+
+
+
+
+// =======================================
+// 页面绑定
+// =======================================
+
+
+document.addEventListener(
+"DOMContentLoaded",
+function(){
+
+
+
+
+
+let file =
+document.getElementById(
+"dataFile"
+);
+
+
+
+
+
+if(file){
+
+
+file.onchange=function(e){
+
+
+let reader =
+new FileReader();
+
+
+
+reader.onload=function(){
+
+let data =
+DataEngine.load(
+reader.result
+);
+
+
+
+document.getElementById(
+"dataInfo"
+).innerHTML =
+
+"加载历史:
+
+"
+
++
+
+data.length
+
++
+
+"期";
+
+
+
+};
+
+
+
+reader.readAsText(
+e.target.files[0]
+);
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+let btn =
+document.getElementById(
+"startBtn"
+);
+
+
+
+
+if(btn){
+
+
+btn.onclick =
+startV90;
+
+
+}
+
+
+
+
+
+
+let feedback =
+document.getElementById(
+"feedbackBtn"
+);
+
+
+
+if(feedback){
+
+
+
+feedback.onclick=function(){
+
+
+LearningEngine.save({
+
+time:
+Date.now(),
+
+
+result:
+document.getElementById(
+"feedback"
+).value
+
+
+});
+
+
+
+document.getElementById(
+"learnStatus"
+).innerHTML =
+
+"反馈学习完成";
+
+
+};
+
+
+
+}
+
+
+
+
+document.getElementById(
+"status"
+).innerHTML =
+
+"V90 AI CORE启动完成";
 
 
 

@@ -1,49 +1,43 @@
 // =====================================
 // 大乐透AI V90 Worker
-// 后台计算引擎
+// 后台计算核心
 // =====================================
 
 
-
-self.onmessage=function(e){
-
+self.onmessage = function(e){
 
 
-    let data=e.data;
+    const msg = e.data;
 
 
 
-    if(
-        data.type==="MONTECARLO"
-    ){
+    // ===============================
+    // 100万次蒙特卡罗模拟
+    // ===============================
+
+
+    if(msg.type === "MONTE_CARLO"){
 
 
 
-        let times =
-        data.times || 10000;
+        const times =
+        msg.times || 1000000;
 
 
 
-        let result={};
+        let result = {};
 
 
 
-        for(
-            let i=0;
-            i<times;
-            i++
-        ){
+        for(let i = 0; i < times; i++){
 
 
 
-            let nums=[];
+            let front=[];
 
 
 
-            while(
-                nums.length<5
-            ){
-
+            while(front.length < 5){
 
 
                 let n =
@@ -53,11 +47,11 @@ self.onmessage=function(e){
 
 
 
-                if(
-                    !nums.includes(n)
-                ){
+                if(!front.includes(n)){
 
-                    nums.push(n);
+
+                    front.push(n);
+
 
                 }
 
@@ -67,28 +61,61 @@ self.onmessage=function(e){
 
 
 
-            nums.sort(
+            front.sort(
                 (a,b)=>a-b
             );
 
 
 
             let key =
-            nums.join(",");
+            front.join("-");
 
 
 
-            if(
-                !result[key]
-            ){
+            if(!result[key]){
+
 
                 result[key]=0;
+
 
             }
 
 
-
             result[key]++;
+
+
+
+
+            // 每5万次回传一次进度
+
+            if(i % 50000 === 0){
+
+
+
+                self.postMessage({
+
+
+                    type:"PROGRESS",
+
+
+                    value:
+                    Math.floor(
+                    i/times*100
+                    ),
+
+
+                    current:i,
+
+
+                    total:times
+
+
+
+                });
+
+
+
+            }
 
 
 
@@ -98,8 +125,8 @@ self.onmessage=function(e){
 
 
 
-
         let ranking =
+
         Object.keys(result)
 
         .sort(
@@ -107,17 +134,20 @@ self.onmessage=function(e){
             result[b]-result[a]
         )
 
+
         .slice(0,20)
 
-        .map(
-            x=>({
+        .map(x=>({
 
-                numbers:x,
 
-                count:result[x]
+            numbers:x,
 
-            })
-        );
+
+            count:
+            result[x]
+
+
+        }));
 
 
 
@@ -125,12 +155,12 @@ self.onmessage=function(e){
 
         self.postMessage({
 
-            type:
-            "MONTECARLO_RESULT",
+
+            type:"MONTE_CARLO_RESULT",
 
 
-            data:
-            ranking
+            data:ranking
+
 
 
         });
