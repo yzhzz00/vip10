@@ -1,6 +1,6 @@
 // ================================================
-// 大乐透AI V90 CORE FINAL
-// 数据中心模块
+// V90 AI CORE FINAL R3
+// 历史数据中心
 // ================================================
 
 "use strict";
@@ -13,17 +13,20 @@ history:[],
 
 
 
-// =================================
+
+
+
 // 加载历史数据
-// =================================
 
 async load(){
+
 
 
 try{
 
 
-let response=
+
+let res=
 
 await fetch(
 "data/dlt.txt"
@@ -33,7 +36,8 @@ await fetch(
 
 let text=
 
-await response.text();
+await res.text();
+
 
 
 
@@ -51,13 +55,15 @@ return this.history;
 
 
 
-}catch(error){
+
+
+}catch(e){
 
 
 
 console.error(
-"历史数据加载失败:",
-error
+"数据读取失败",
+e
 );
 
 
@@ -78,24 +84,21 @@ return [];
 
 
 
-// =================================
 // 数据解析
-// 支持:
-// 03 12 18 26 34 05 11
-// =================================
 
 
 parse(text){
 
 
 
-let result=[];
+let list=[];
 
 
 
 let lines=
 
 text.split(/\r?\n/);
+
 
 
 
@@ -114,9 +117,8 @@ line=line.trim();
 
 
 
-if(
-line.length===0
-)
+
+if(!line)
 
 continue;
 
@@ -124,9 +126,10 @@ continue;
 
 
 
+
+
+
 let nums=
-
-
 
 line
 
@@ -137,7 +140,9 @@ line
 .map(Number)
 
 .filter(
+
 n=>!isNaN(n)
+
 );
 
 
@@ -157,7 +162,7 @@ continue;
 
 
 
-let last7=
+let arr=
 
 nums.slice(
 nums.length-7
@@ -170,45 +175,16 @@ nums.length-7
 
 let front=
 
-last7.slice(0,5);
+arr.slice(
+0,5
+);
 
 
 
 let back=
 
-last7.slice(5,7);
-
-
-
-
-
-
-
-// 大乐透号码范围检查
-
-
-let valid=
-
-
-
-front.every(
-
-n=>
-
-n>=1&&n<=35
-
-)
-
-&&
-
-
-
-back.every(
-
-n=>
-
-n>=1&&n<=12
-
+arr.slice(
+5,7
 );
 
 
@@ -217,11 +193,28 @@ n>=1&&n<=12
 
 
 
-if(valid){
+
+if(
+
+front.every(
+
+n=>n>=1&&n<=35
+
+)
+
+&&
+
+back.every(
+
+n=>n>=1&&n<=12
+
+)
+
+){
 
 
 
-result.push({
+list.push({
 
 
 
@@ -240,13 +233,14 @@ back
 
 
 
+
 }
 
 
 
 
 
-return result;
+return list;
 
 
 
@@ -256,11 +250,6 @@ return result;
 
 
 
-
-
-// =================================
-// 获取历史
-// =================================
 
 
 get(){
@@ -277,11 +266,6 @@ return this.history;
 
 
 
-
-
-// =================================
-// 数据数量
-// =================================
 
 
 count(){

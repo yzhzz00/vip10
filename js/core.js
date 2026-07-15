@@ -1,5 +1,5 @@
 // ================================================
-// 大乐透AI V90 CORE FINAL
+// V90 AI CORE FINAL R3
 // 总AI裁决中心
 // ================================================
 
@@ -10,34 +10,12 @@ window.V90Core={
 
 
 
-weights:{
-
-
-
-frequency:1,
-
-hotCold:1,
-
-missing:1,
-
-bayes:1,
-
-markov:1,
-
-structure:1
-
-
-
-},
-
-
-
 
 
 
 
 // =================================
-// 单组评分
+// 候选评分
 // =================================
 
 
@@ -49,19 +27,14 @@ let score=0;
 
 
 
-let front=item.front;
 
 
-
-
-
-
-// 模拟出现次数
+// 模拟次数权重
 
 
 score +=
 
-item.count*5;
+item.count * 5;
 
 
 
@@ -69,13 +42,14 @@ item.count*5;
 
 
 
-
-// 结构模型
+// 结构评分
 
 
 score +=
 
-V90Model.score(front);
+V90Model.structureScore(
+item.front
+);
 
 
 
@@ -83,7 +57,7 @@ V90Model.score(front);
 
 
 
-// Bayes
+// Bayes概率
 
 
 let bayes=
@@ -95,7 +69,7 @@ V90Model.bayes();
 
 
 
-front.forEach(n=>{
+item.front.forEach(n=>{
 
 
 
@@ -135,14 +109,14 @@ risk(front){
 
 
 
-let risk=[];
-
-
-
 let s=
 
 V90Model.structure(front);
 
+
+
+
+let risk=[];
 
 
 
@@ -168,7 +142,6 @@ risk.push(
 
 
 
-
 if(
 s.big===0 ||
 s.big===5
@@ -183,7 +156,6 @@ risk.push(
 
 
 }
-
 
 
 
@@ -241,11 +213,12 @@ item.front
 
 
 
+
 return [
 
 
 
-"趋势AI：历史冷热趋势分析完成",
+"趋势AI：历史频率与冷热趋势分析完成",
 
 
 
@@ -253,27 +226,9 @@ return [
 
 
 
-"结构AI：奇偶"
-
-+
-
-s.odd
-
-+
-
-" 大小"
-
-+
-
-s.big
-
-+
-
-" 和值"
-
-+
-
-s.sum,
+"结构AI：奇偶"+s.odd+
+" 大小"+s.big+
+" 和值"+s.sum,
 
 
 
@@ -312,6 +267,7 @@ item.front
 
 
 
+
 return {
 
 
@@ -322,7 +278,7 @@ risk.length===0,
 
 
 
-message:
+text:
 
 risk.length===0
 
@@ -349,7 +305,7 @@ risk.length===0
 
 
 // =================================
-// 最终裁决
+// 排序裁决
 // =================================
 
 
@@ -358,6 +314,7 @@ judge(pool){
 
 
 let list=[];
+
 
 
 
@@ -417,15 +374,16 @@ count:item.count,
 
 score:
 
-
 Number(
 score.toFixed(2)
 ),
 
 
+
 risk:
 
-critic.message,
+critic.text,
+
 
 
 meeting:
@@ -439,7 +397,6 @@ this.meeting(item)
 
 
 });
-
 
 
 
@@ -466,7 +423,7 @@ b.score-a.score
 
 
 // =================================
-// 主AI运行
+// 主运行
 // =================================
 
 
@@ -484,12 +441,12 @@ function(p){
 
 
 
-if(
-window.V90Progress
-){
+if(window.V90Progress){
+
 
 
 window.V90Progress(p);
+
 
 
 }
@@ -505,10 +462,20 @@ window.V90Progress(p);
 
 
 
+
+
 let result=
 
 this.judge(pool);
 
+
+
+
+
+
+let final=
+
+result[0];
 
 
 
@@ -519,14 +486,53 @@ return {
 
 
 
-final:
+final:{
 
-result[0],
+
+
+front:
+
+final.front,
+
+
+
+back:
+
+final.back,
+
+
+
+score:
+
+final.score,
+
+
+
+meeting:
+
+final.meeting,
+
+
+
+risk:
+
+final.risk
+
+
+
+},
+
+
+
+
 
 
 top10:
 
-result.slice(0,10)
+result.slice(
+0,
+10
+)
 
 
 
@@ -535,6 +541,8 @@ result.slice(0,10)
 
 
 }
+
+
 
 
 

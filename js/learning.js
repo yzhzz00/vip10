@@ -1,6 +1,6 @@
 // ================================================
-// 大乐透AI V90 CORE FINAL
-// 智能学习引擎
+// V90 AI CORE FINAL R3
+// AI学习引擎
 // ================================================
 
 "use strict";
@@ -9,7 +9,12 @@
 window.V90Learning={
 
 
-key:"V90_AI_LEARNING",
+
+recordKey:"V90_LEARNING_RECORD",
+
+weightKey:"V90_AI_WEIGHT",
+
+
 
 
 
@@ -20,12 +25,15 @@ key:"V90_AI_LEARNING",
 // =================================
 
 
-get(){
+getRecords(){
+
 
 
 return JSON.parse(
 
-localStorage.getItem(this.key)
+localStorage.getItem(
+this.recordKey
+)
 
 ||
 
@@ -34,41 +42,6 @@ localStorage.getItem(this.key)
 );
 
 
-},
-
-
-
-
-
-
-
-// =================================
-// 保存学习
-// =================================
-
-
-save(data){
-
-
-
-let list=this.get();
-
-
-
-list.push(data);
-
-
-
-
-localStorage.setItem(
-
-this.key,
-
-JSON.stringify(list)
-
-);
-
-
 
 },
 
@@ -79,49 +52,18 @@ JSON.stringify(list)
 
 
 // =================================
-// 学习次数
+// 获取权重
 // =================================
 
 
-count(){
+getWeight(){
 
 
 
-return this.get().length;
-
-
-
-},
-
-
-
-
-
-
-
-// =================================
-// 根据开奖结果调整权重
-// =================================
-
-
-train(result){
-
-
-
-let weight=
-
-
-
-JSON.parse(
+let data=
 
 localStorage.getItem(
-"V90_AI_WEIGHT"
-)
-
-||
-
-"{}"
-
+this.weightKey
 );
 
 
@@ -129,30 +71,11 @@ localStorage.getItem(
 
 
 
-
-if(!weight.frequency){
-
-
-
-weight={
+if(data){
 
 
 
-frequency:1,
-
-hotCold:1,
-
-missing:1,
-
-bayes:1,
-
-markov:1,
-
-structure:1
-
-
-
-};
+return JSON.parse(data);
 
 
 
@@ -163,10 +86,89 @@ structure:1
 
 
 
+return {
 
 
 
-// 前区命中较高
+frequency:1,
+
+
+hotCold:1,
+
+
+missing:1,
+
+
+bayes:1,
+
+
+markov:1,
+
+
+structure:1
+
+
+
+};
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 保存权重
+// =================================
+
+
+saveWeight(weight){
+
+
+
+localStorage.setItem(
+
+this.weightKey,
+
+JSON.stringify(weight)
+
+);
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 学习训练
+// =================================
+
+
+train(result){
+
+
+
+let weight=
+
+this.getWeight();
+
+
+
+
+
+
+
+// 前区命中提高频率模型
+
 
 if(
 result.frontHit>=3
@@ -188,7 +190,10 @@ weight.bayes+=0.02;
 
 
 
-// 后区失败
+
+
+// 后区失败增加转移权重
+
 
 if(
 result.backHit===0
@@ -209,9 +214,46 @@ weight.markov+=0.03;
 
 
 
-// 记录
+// 总命中较低，加强结构
 
-this.save({
+
+if(
+result.total<=2
+){
+
+
+
+weight.structure+=0.02;
+
+
+
+}
+
+
+
+
+
+
+
+this.saveWeight(weight);
+
+
+
+
+
+
+
+let records=
+
+this.getRecords();
+
+
+
+
+
+
+
+records.push({
 
 
 
@@ -236,18 +278,13 @@ weight
 
 
 
-
 localStorage.setItem(
 
-"V90_AI_WEIGHT",
+this.recordKey,
 
-JSON.stringify(weight)
+JSON.stringify(records)
 
 );
-
-
-
-
 
 
 
@@ -260,7 +297,28 @@ JSON.stringify(weight)
 
 
 // =================================
-// 显示成长记录
+// 学习次数
+// =================================
+
+
+count(){
+
+
+
+return this.getRecords().length;
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 页面显示
 // =================================
 
 
@@ -284,8 +342,6 @@ if(box){
 
 box.innerHTML=
 
-
-
 `
 
 累计学习次数：
@@ -294,7 +350,9 @@ ${this.count()}
 
 <br><br>
 
-当前AI权重已更新
+AI动态权重：
+
+已更新
 
 `;
 

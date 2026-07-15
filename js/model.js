@@ -1,6 +1,6 @@
 // ================================================
-// 大乐透AI V90 CORE FINAL
-// 核心数学模型
+// V90 AI CORE FINAL R3
+// 数学模型中心
 // ================================================
 
 "use strict";
@@ -10,16 +10,10 @@ window.V90Model={
 
 
 
-
-
-
-
 history(){
 
 
-
 return V90Data.get();
-
 
 
 },
@@ -31,9 +25,8 @@ return V90Data.get();
 
 
 // =================================
-// 号码频率
+// 频率模型
 // =================================
-
 
 frequency(){
 
@@ -43,19 +36,17 @@ let freq={};
 
 
 
-for(
-let i=1;
-i<=35;
-i++
-){
 
+for(
+let i=1;i<=35;i++
+){
 
 
 freq[i]=0;
 
 
-
 }
+
 
 
 
@@ -67,14 +58,10 @@ this.history()
 
 
 
-item.front
-
-.forEach(n=>{
-
+item.front.forEach(n=>{
 
 
 freq[n]++;
-
 
 
 });
@@ -101,60 +88,36 @@ return freq;
 
 
 // =================================
-// 冷热评分
+// 冷热分析
 // =================================
-
 
 hotCold(){
 
 
 
-let freq=
-
-this.frequency();
+let freq=this.frequency();
 
 
 
 
-let arr=[];
+return Object.keys(freq)
+
+.map(n=>({
 
 
-
-for(
-let i=1;
-i<=35;
-i++
-){
+number:Number(n),
 
 
-
-arr.push({
-
+count:freq[n]
 
 
-number:i,
+}))
 
-
-score:freq[i]
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-return arr.sort(
+.sort(
 
 (a,b)=>
 
-b.score-a.score
+b.count-a.count
 
 );
 
@@ -172,39 +135,30 @@ b.score-a.score
 // 遗漏周期
 // =================================
 
-
 missing(){
 
 
 
-let data=
-
-this.history();
+let data=this.history();
 
 
 
+let result={};
 
-
-let miss={};
 
 
 
 
 
 for(
-let i=1;
-i<=35;
-i++
+let i=1;i<=35;i++
 ){
 
 
-
-miss[i]=data.length;
-
+result[i]=data.length;
 
 
 }
-
 
 
 
@@ -219,21 +173,17 @@ i--
 
 
 
-data[i].front
-
-.forEach(n=>{
+data[i].front.forEach(n=>{
 
 
 
 if(
-miss[n]===data.length
+result[n]===data.length
 ){
 
 
 
-miss[n]=
-
-data.length-i-1;
+result[n]=data.length-i-1;
 
 
 
@@ -252,8 +202,7 @@ data.length-i-1;
 
 
 
-
-return miss;
+return result;
 
 
 
@@ -266,9 +215,8 @@ return miss;
 
 
 // =================================
-// 奇偶 大小 和值
+// 结构分析
 // =================================
-
 
 structure(nums){
 
@@ -277,7 +225,6 @@ structure(nums){
 let odd=0;
 
 let big=0;
-
 
 let sum=0;
 
@@ -301,6 +248,8 @@ odd++;
 
 
 
+
+
 if(
 n>=18
 )
@@ -316,6 +265,7 @@ big++;
 
 
 
+
 return {
 
 
@@ -323,15 +273,13 @@ return {
 odd,
 
 
-even:
-5-odd,
+even:5-odd,
 
 
 big,
 
 
-small:
-5-big,
+small:5-big,
 
 
 sum
@@ -351,18 +299,14 @@ sum
 
 
 // =================================
-// Bayes概率评分
+// Bayes评分
 // =================================
-
 
 bayes(){
 
 
 
-let freq=
-
-this.frequency();
-
+let freq=this.frequency();
 
 
 
@@ -385,7 +329,6 @@ total+=v;
 
 
 
-
 let score={};
 
 
@@ -394,16 +337,12 @@ let score={};
 
 
 for(
-let i=1;
-i<=35;
-i++
+let i=1;i<=35;i++
 ){
 
 
 
 score[i]=
-
-
 
 total===0
 
@@ -423,6 +362,7 @@ freq[i]/total;
 
 
 
+
 return score;
 
 
@@ -437,17 +377,13 @@ return score;
 
 // =================================
 // Markov 一阶转移
-// 上一期 → 下一期
 // =================================
-
 
 markov(){
 
 
 
-let data=
-
-this.history();
+let data=this.history();
 
 
 
@@ -459,22 +395,15 @@ let matrix={};
 
 
 for(
-let i=1;
-i<data.length;
-i++
+let i=1;i<data.length;i++
 ){
 
 
 
-let before=
-
-data[i-1].front;
+let before=data[i-1].front;
 
 
-
-let after=
-
-data[i].front;
+let after=data[i].front;
 
 
 
@@ -485,9 +414,7 @@ before.forEach(a=>{
 
 
 
-if(
-!matrix[a]
-)
+if(!matrix[a])
 
 matrix[a]={};
 
@@ -497,9 +424,7 @@ after.forEach(b=>{
 
 
 
-if(
-!matrix[a][b]
-)
+if(!matrix[a][b])
 
 matrix[a][b]=0;
 
@@ -523,7 +448,6 @@ matrix[a][b]++;
 
 
 
-
 return matrix;
 
 
@@ -537,19 +461,14 @@ return matrix;
 
 
 // =================================
-// 基础评分
+// 基础结构评分
 // =================================
 
-
-score(nums){
-
+structureScore(nums){
 
 
-let s=
 
-this.structure(nums);
-
-
+let s=this.structure(nums);
 
 
 
@@ -559,29 +478,19 @@ let score=50;
 
 
 
-
-// 奇偶平衡
-
-
 if(
 s.odd>=1 &&
 s.odd<=4
 ){
 
 
-
 score+=10;
-
 
 
 }
 
 
 
-
-
-
-// 大小平衡
 
 
 if(
@@ -590,9 +499,7 @@ s.big<=4
 ){
 
 
-
 score+=10;
-
 
 
 }
@@ -601,19 +508,13 @@ score+=10;
 
 
 
-
-// 和值范围
-
-
 if(
 s.sum>=80 &&
 s.sum<=140
 ){
 
 
-
 score+=20;
-
 
 
 }
@@ -628,7 +529,6 @@ return score;
 
 
 }
-
 
 
 

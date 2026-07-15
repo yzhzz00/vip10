@@ -12,7 +12,7 @@ margin:0;
 
 padding:20px;
 
-background:#06101d;
+background:#07111f;
 
 color:#ffffff;
 
@@ -26,6 +26,8 @@ sans-serif;
 
 
 
+
+
 .container{
 
 max-width:900px;
@@ -36,13 +38,17 @@ margin:auto;
 
 
 
+
+
 header{
 
 text-align:center;
 
-margin-bottom:20px;
+margin-bottom:25px;
 
 }
+
+
 
 
 
@@ -52,33 +58,35 @@ font-size:32px;
 
 color:#00e5ff;
 
-margin-bottom:10px;
-
 }
 
 
 
 h2{
 
-color:#76ff03;
-
 font-size:22px;
 
+color:#76ff03;
+
 }
+
+
 
 
 
 .status{
 
-background:#111827;
+margin-top:20px;
 
 padding:15px;
 
+background:#111827;
+
 border-radius:15px;
 
-margin-top:20px;
-
 }
+
+
 
 
 
@@ -94,15 +102,15 @@ font-weight:bold;
 
 
 
-.panel{
+.card{
 
 background:#111827;
-
-border-radius:18px;
 
 padding:20px;
 
 margin-top:18px;
+
+border-radius:18px;
 
 border:1px solid #263238;
 
@@ -110,7 +118,9 @@ border:1px solid #263238;
 
 
 
-.panel h3{
+
+
+.card h3{
 
 color:#ffd740;
 
@@ -132,7 +142,7 @@ padding:15px;
 
 margin-top:15px;
 
-border:none;
+border:0;
 
 border-radius:12px;
 
@@ -144,15 +154,17 @@ linear-gradient(
 #00b8d4
 );
 
+color:white;
+
 font-size:17px;
 
 font-weight:bold;
 
-color:white;
-
 cursor:pointer;
 
 }
+
+
 
 
 
@@ -161,6 +173,8 @@ button:hover{
 opacity:.9;
 
 }
+
+
 
 
 
@@ -180,11 +194,13 @@ margin-top:20px;
 
 
 
+
+
 #progressBar{
 
-width:0%;
-
 height:100%;
+
+width:0%;
 
 background:
 
@@ -200,13 +216,15 @@ transition:.3s;
 
 
 
+
+
 #progressText{
 
 text-align:center;
 
-color:#00e5ff;
-
 margin-top:10px;
+
+color:#00e5ff;
 
 }
 
@@ -269,8 +287,8 @@ color:#81d4fa;
 
 
 #records,
-#learning,
-#review{
+#review,
+#learning{
 
 background:#050914;
 
@@ -295,17 +313,19 @@ margin-top:12px;
 
 padding:14px;
 
-border-radius:10px;
-
 background:#020617;
+
+color:white;
 
 border:1px solid #455a64;
 
-color:white;
+border-radius:10px;
 
 font-size:15px;
 
 }
+
+
 
 
 
@@ -334,17 +354,18 @@ padding:10px;
 
 h1{
 
-font-size:24px;
+font-size:25px;
 
 }
 
 
 
-.panel{
+.card{
 
 padding:15px;
 
 }
+
 
 
 #finalResult{

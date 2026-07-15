@@ -1,12 +1,18 @@
 // ================================================
-// 大乐透AI V90 CORE FINAL
-// 系统启动中心
+// V90 AI CORE FINAL R3
+// 系统主控制中心
 // ================================================
 
 "use strict";
 
 
 
+
+
+
+// =================================
+// 进度条
+// =================================
 
 
 window.V90Progress=function(p){
@@ -28,6 +34,7 @@ let text=
 document.getElementById(
 "progressText"
 );
+
 
 
 
@@ -84,11 +91,11 @@ p
 
 
 // =================================
-// 显示模型状态
+// 显示模型
 // =================================
 
 
-function showModelStatus(){
+function showModels(){
 
 
 
@@ -156,7 +163,7 @@ AI CORE裁决 ✓
 
 
 // =================================
-// 显示AI结果
+// 显示结果
 // =================================
 
 
@@ -167,6 +174,8 @@ function showResult(data){
 let final=
 
 data.final;
+
+
 
 
 
@@ -185,17 +194,21 @@ ${final.front.join(" ")}
 
 <br><br>
 
+
 后区：
 
 ${final.back.join(" ")}
 
+
 <br><br>
+
 
 综合评分：
 
 ${final.score}
 
 `;
+
 
 
 
@@ -214,30 +227,27 @@ data.top10
 
 .map(
 
-(x,i)=>
-
-
+(item,index)=>
 
 `
 
-第${i+1}组：
+第${index+1}组：
 
-${x.front.join("-")}
+${item.front.join("-")}
 
 +
 
-${x.back.join("-")}
+${item.back.join("-")}
 
 <br>
 
 评分：
 
-${x.score}
+${item.score}
 
 <br><br>
 
 `
-
 
 )
 
@@ -249,23 +259,24 @@ ${x.score}
 
 
 
+
+
 document.getElementById(
 "aiMeeting"
 ).innerHTML=
 
+`
+
+${final.meeting.join("<br>")}
+
+<br><br>
+
+${final.risk}
+
+`;
 
 
-final.meeting.join(
-"<br>"
-)
 
-+
-
-"<br><br>"
-
-+
-
-final.risk;
 
 
 
@@ -280,7 +291,7 @@ final.risk;
 
 
 // =================================
-// 开始AI分析
+// 开始分析
 // =================================
 
 
@@ -290,11 +301,21 @@ async function startAI(){
 
 
 
+let text=
+
 document.getElementById(
 "progressText"
-).innerHTML=
+);
 
-"读取历史数据...";
+
+
+
+
+
+text.innerHTML=
+
+"正在读取历史数据...";
+
 
 
 
@@ -311,20 +332,20 @@ V90Data.get();
 
 
 
-
-
 if(
 history.length===0
 ){
 
 
 
-alert(
-"历史数据未加载"
-);
+text.innerHTML=
+
+"历史数据为空";
+
 
 
 return;
+
 
 
 }
@@ -336,11 +357,11 @@ return;
 
 
 
-document.getElementById(
-"progressText"
-).innerHTML=
 
-"AI模型计算中...";
+text.innerHTML=
+
+"AI CORE计算中...";
+
 
 
 
@@ -351,6 +372,8 @@ document.getElementById(
 let result=
 
 await V90Core.run();
+
+
 
 
 
@@ -370,6 +393,7 @@ showResult(result);
 let final=
 
 result.final;
+
 
 
 
@@ -414,14 +438,39 @@ final.score
 
 
 
-
 document.getElementById(
-"progressText"
+"records"
 ).innerHTML=
 
+`
+
+最近预测：
+
+<br>
+
+${final.front.join(" ")}
+
++
+
+${final.back.join(" ")}
+
+<br>
+
+评分：
+
+${final.score}
+
+`;
+
+
+
+
+
+
+
+text.innerHTML=
+
 "分析完成";
-
-
 
 
 
@@ -438,7 +487,7 @@ document.getElementById(
 
 
 // =================================
-// 页面初始化
+// 页面启动
 // =================================
 
 
@@ -447,8 +496,6 @@ document.addEventListener(
 "DOMContentLoaded",
 
 async()=>{
-
-
 
 
 
@@ -466,9 +513,12 @@ document.getElementById(
 
 
 
+
 let data=
 
 await V90Data.load();
+
+
 
 
 
@@ -497,7 +547,9 @@ data.length
 
 
 
-showModelStatus();
+
+showModels();
+
 
 
 
@@ -535,11 +587,7 @@ startAI;
 
 
 
-
 V90Learning.show();
-
-
-
 
 
 

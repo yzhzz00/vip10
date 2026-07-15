@@ -1,5 +1,5 @@
 // ================================================
-// 大乐透AI V90 CORE FINAL
+// V90 AI CORE FINAL R3
 // Monte Carlo 模拟引擎
 // ================================================
 
@@ -10,29 +10,18 @@ window.V90MonteCarlo={
 
 
 
-
-
-
-
-// =================================
-// 随机生成前区
-// =================================
-
+// 生成前区
 
 createFront(){
 
 
-
-let nums=[];
-
-
+let arr=[];
 
 
 
 while(
-nums.length<5
+arr.length<5
 ){
-
 
 
 let n=
@@ -43,17 +32,12 @@ Math.random()*35
 
 
 
-
-
-
 if(
-!nums.includes(n)
+!arr.includes(n)
 ){
 
 
-
-nums.push(n);
-
+arr.push(n);
 
 
 }
@@ -64,12 +48,8 @@ nums.push(n);
 
 
 
-
-
-return nums.sort(
-
+return arr.sort(
 (a,b)=>a-b
-
 );
 
 
@@ -82,24 +62,18 @@ return nums.sort(
 
 
 
-// =================================
-// 随机生成后区
-// =================================
+// 生成后区
 
 
 createBack(){
 
 
-
-let nums=[];
-
-
-
+let arr=[];
 
 
 
 while(
-nums.length<2
+arr.length<2
 ){
 
 
@@ -112,17 +86,12 @@ Math.random()*12
 
 
 
-
-
-
 if(
-!nums.includes(n)
+!arr.includes(n)
 ){
 
 
-
-nums.push(n);
-
+arr.push(n);
 
 
 }
@@ -133,13 +102,8 @@ nums.push(n);
 
 
 
-
-
-
-return nums.sort(
-
+return arr.sort(
 (a,b)=>a-b
-
 );
 
 
@@ -153,13 +117,13 @@ return nums.sort(
 
 
 // =================================
-// 模拟100万次
+// 分批模拟
 // =================================
 
 
 run(
 times=1000000,
-callback
+progress
 ){
 
 
@@ -173,7 +137,6 @@ let pool={};
 
 
 let current=0;
-
 
 
 
@@ -196,9 +159,8 @@ let i=0;
 i<size && current<times;
 
 i++,current++
+
 ){
-
-
 
 
 
@@ -216,6 +178,7 @@ V90MonteCarlo.createBack();
 
 
 
+
 let key=
 
 front.join("-")
@@ -227,6 +190,7 @@ front.join("-")
 +
 
 back.join("-");
+
 
 
 
@@ -270,6 +234,7 @@ pool[key].count++;
 
 
 
+
 }
 
 
@@ -278,7 +243,7 @@ pool[key].count++;
 
 
 
-let progress=
+let percent=
 
 Math.floor(
 
@@ -292,16 +257,16 @@ current/times*100
 
 
 
-if(callback){
+
+if(progress){
 
 
 
-callback(progress);
+progress(percent);
 
 
 
 }
-
 
 
 
@@ -315,11 +280,8 @@ current<times
 
 
 setTimeout(
-
 batch,
-
 0
-
 );
 
 
@@ -327,8 +289,6 @@ batch,
 }
 
 else{
-
-
 
 
 
@@ -361,9 +321,6 @@ resolve(result);
 
 
 
-
-
-
 }
 
 
@@ -375,17 +332,11 @@ batch();
 
 
 
-
-
-
 });
 
 
 
 }
-
-
-
 
 
 
