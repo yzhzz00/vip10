@@ -2,52 +2,41 @@
 
 <html lang="zh-CN">
 
-
 <head>
-
 
 <meta charset="UTF-8">
 
-
-<meta name="viewport"
-content="width=device-width,initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>
-
-大乐透 V100.1 AI CORE FINAL
-
+大乐透 AI CORE V110 FINAL
 </title>
 
 
-
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/app.css">
 
 
 </head>
 
 
-
 <body>
 
 
+<div class="app">
+
+
+
+<!-- 顶部 -->
+
+<div class="top">
 
 <h1>
-
-大乐透智能分析系统
-
-<br>
-
-V100.1 AI CORE FINAL
-
+大乐透 AI CORE
 </h1>
 
-
-
-
-<div id="systemStatus">
-
-系统加载中...
+<p>
+V110 FINAL MOBILE
+</p>
 
 </div>
 
@@ -55,21 +44,64 @@ V100.1 AI CORE FINAL
 
 
 
-<hr>
+<!-- 状态 -->
 
-
-
-
+<div class="panel">
 
 <h2>
-
-AI分析中心
-
+系统状态
 </h2>
 
 
+<p>
+模型版本：
 
-<button onclick="V100App.startAnalyze()">
+<span>
+V110 FINAL
+</span>
+</p>
+
+
+<p>
+历史数据：
+
+<span id="dataCount">
+0
+</span>
+
+期
+</p>
+
+
+<p>
+状态：
+
+<span>
+READY
+</span>
+</p>
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- AI分析 -->
+
+<div class="panel">
+
+
+<h2>
+AI分析中心
+</h2>
+
+
+<button id="analyzeBtn">
 
 开始 AI 分析
 
@@ -77,7 +109,7 @@ AI分析中心
 
 
 
-<button onclick="V100App.startTraining()">
+<button id="trainBtn">
 
 开始历史滚动训练
 
@@ -86,9 +118,13 @@ AI分析中心
 
 
 
+<div id="progressBox">
+
+等待任务...
+
+</div>
 
 
-<div id="progressContainer">
 
 </div>
 
@@ -99,19 +135,29 @@ AI分析中心
 
 
 
+
+
+<!-- 预测结果 -->
+
+<div class="panel">
+
+
 <h2>
-
 最终预测结果
-
 </h2>
 
 
 
-<div id="result">
+<div id="resultBox">
 
 
 等待分析...
 
+
+</div>
+
+
+
 </div>
 
 
@@ -121,66 +167,43 @@ AI分析中心
 
 
 
-<hr>
 
 
+<!-- 开奖反馈 -->
 
-
+<div class="panel">
 
 
 <h2>
-
 开奖反馈学习
-
 </h2>
 
 
 
+
 <input
 
-id="feedbackPeriod"
+id="periodInput"
 
-placeholder="期号"
-
-
-
->
-
-
-
-<br>
-
+placeholder="输入期号">
 
 
 <input
 
-id="feedbackFront"
+id="frontInput"
 
-placeholder="前区5个号码"
-
->
-
-
-
-<br>
-
+placeholder="前区5个号码，例如：01 12 18 25 33">
 
 
 <input
 
-id="feedbackBack"
+id="backInput"
 
-placeholder="后区2个号码"
-
->
+placeholder="后区2个号码，例如：03 08">
 
 
 
-<br>
-
-
-
-<button onclick="V100Feedback.submit()">
+<button id="feedbackBtn">
 
 保存开奖并学习
 
@@ -188,28 +211,41 @@ placeholder="后区2个号码"
 
 
 
+</div>
 
 
 
 
-<hr>
 
 
 
+
+
+
+<!-- 成长报告 -->
+
+<div class="panel">
 
 
 <h2>
-
 AI成长报告
-
 </h2>
 
 
 
-<div id="aiReport">
-
+<div id="reportBox">
 
 等待训练...
+
+</div>
+
+
+
+</div>
+
+
+
+
 
 
 </div>
@@ -221,125 +257,34 @@ AI成长报告
 
 
 
-<!-- ==========================
-     数据层
-========================== -->
+
+<!-- =====================
+     JS加载顺序
+===================== -->
 
 
-<script src="js/data_parser.js"></script>
+<script src="js/config.js"></script>
 
 
 <script src="js/database.js"></script>
 
 
+<script src="js/parser.js"></script>
 
 
-
-
-<!-- ==========================
-     模型层
-========================== -->
-
-
-<script src="model/weights.js"></script>
-
-
-<script src="model/model_state.js"></script>
-
-
-<script src="model/model.js"></script>
-
-
-<script src="model/scorer.js"></script>
-
-
-
-
-
-
-<!-- ==========================
-     AI算法层
-========================== -->
-
-
-<script src="js/trend.js"></script>
-
-
-<script src="js/bayes.js"></script>
-
-
-<script src="js/markov.js"></script>
-
-
-<script src="js/probability.js"></script>
-
-
-<script src="js/structure.js"></script>
-
-
-
-
-
-
-<!-- ==========================
-     模拟预测
-========================== -->
-
-
-<script src="js/montecarlo.js"></script>
+<script src="js/ai_models.js"></script>
 
 
 <script src="js/predictor.js"></script>
 
 
-
-
-
-
-<!-- ==========================
-     学习训练
-========================== -->
-
-
 <script src="js/learning.js"></script>
 
 
-<script src="js/training_engine.js"></script>
+<script src="js/engine.js"></script>
 
 
-<script src="js/feedback.js"></script>
-
-
-
-
-
-
-<!-- ==========================
-     显示系统
-========================== -->
-
-
-<script src="js/progress.js"></script>
-
-
-<script src="js/model_version.js"></script>
-
-
-<script src="js/report.js"></script>
-
-
-
-
-
-
-<!-- ==========================
-     主控制
-========================== -->
-
-
-<script src="js/app.js"></script>
-
-
+<script src="js/ui.js"></script>
 
 
 
