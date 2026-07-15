@@ -3,7 +3,7 @@
 
 大乐透智能分析系统
 
-V71.2 AI CORE
+V80.0 AI CORE
 
 script.js
 
@@ -17,7 +17,9 @@ document.addEventListener(
 "DOMContentLoaded",
 ()=>{
 
-    initSystem();
+
+initSystem();
+
 
 });
 
@@ -30,70 +32,65 @@ document.addEventListener(
 
 
 // ============================
-// 系统初始化
+// 初始化系统
 // ============================
 
 
 async function initSystem(){
 
 
-    try{
+try{
 
 
-        if(!window.AIEngine){
-
-
-            throw new Error(
-                "AIEngine 未加载"
-            );
-
-
-        }
+    await window.AIEngine.init();
 
 
 
-        await window.AIEngine.init();
+    showStatus();
+
+
+    showAgents();
 
 
 
-        showStatus();
+}
 
 
 
-        showAgents();
+catch(e){
 
 
 
-    }
-
-
-    catch(e){
-
-
-        console.error(e);
+    console.error(e);
 
 
 
-        let box=
+    let box=
 
-        document.getElementById(
-            "status"
-        );
+    document.getElementById(
 
+        "status"
 
-
-        if(box){
+    );
 
 
-            box.innerHTML=
 
-            "加载失败："+e.message;
+    if(box){
 
 
-        }
+
+        box.innerHTML=
+
+        "加载失败："+e.message;
+
 
 
     }
+
+
+
+}
+
 
 
 }
@@ -115,36 +112,57 @@ function showStatus(){
 
 
 
-    let status=
+let status=
 
-    window.AIEngine.status();
-
-
-
-    let box=
-
-    document.getElementById(
-        "status"
-    );
+window.AIEngine.status();
 
 
 
-    if(box){
+
+
+let box=
+
+document.getElementById(
+
+"status"
+
+);
 
 
 
-        box.innerHTML=
+
+
+if(box){
+
+
+
+box.innerHTML=
 
 `
+
 系统加载成功<br>
 
 版本：
+
 ${status.version}
 
 <br>
 
 历史数据：
+
 ${status.data}
+
+<br>
+
+特征数量：
+
+${status.features}
+
+<br>
+
+核心模块：
+
+${status.core.join("/")}
 
 <br>
 
@@ -152,17 +170,12 @@ AI模型：
 
 ${status.agents.join("/")}
 
-<br>
-
-Engine：
-
-${status.engines.join("/")}
-
 `;
 
 
 
-    }
+}
+
 
 
 }
@@ -176,7 +189,7 @@ ${status.engines.join("/")}
 
 
 // ============================
-// 显示Agent
+// Agent显示
 // ============================
 
 
@@ -184,51 +197,58 @@ function showAgents(){
 
 
 
-    let box=
+let box=
 
-    document.getElementById(
-        "agents"
-    );
+document.getElementById(
 
+"agents"
 
-
-    if(!box)return;
+);
 
 
 
 
 
-    let status=
-
-    window.AIEngine.status();
+if(!box)return;
 
 
 
 
 
-    box.innerHTML="";
+
+let agents=
+
+window.AIEngine.status().agents;
 
 
 
 
 
-    status.agents.forEach(a=>{
+box.innerHTML="";
 
 
 
-        box.innerHTML+=
+
+
+agents.forEach(a=>{
+
+
+
+box.innerHTML+=
 
 `
+
 <div class="agent">
 
 ${a}
 
 </div>
+
 `;
 
 
 
-    });
+});
 
 
 
@@ -243,7 +263,7 @@ ${a}
 
 
 // ============================
-// 开始AI分析
+// 开始分析
 // ============================
 
 
@@ -251,60 +271,67 @@ async function startAI(){
 
 
 
-    let report=
+let report=
 
-    document.getElementById(
-        "report"
-    );
+document.getElementById(
 
+"report"
 
-
-    if(report){
-
-
-        report.innerHTML=
-
-        "AI多模型会议分析中...";
-
-
-    }
+);
 
 
 
 
 
 
-    try{
+if(report){
 
 
 
-        let result=
+report.innerHTML=
 
-        await window.AIEngine.analyze();
-
-
+"AI计算启动...";
 
 
 
-        renderReport(result);
+}
 
 
 
-    }
 
 
 
-    catch(e){
+try{
 
 
 
-        report.innerHTML=
+let result=
 
-        "分析失败："+e.message;
+await window.AIEngine.analyze();
 
 
 
-    }
+
+
+renderReport(result);
+
+
+
+}
+
+
+
+catch(e){
+
+
+
+report.innerHTML=
+
+"分析失败："+e.message;
+
+
+
+}
 
 
 
@@ -319,7 +346,7 @@ async function startAI(){
 
 
 // ============================
-// 渲染报告
+// 报告显示
 // ============================
 
 
@@ -327,112 +354,62 @@ function renderReport(result){
 
 
 
-    let html="";
+let html="";
 
 
-
-
-
-    html+=`
-
-<h3>
-AI多模型会议报告
-</h3>
-
-`;
-
-
-
-
-
-
-
-
-// Agent结果
-
-
-if(result.models){
-
-
-
-    Object.keys(
-
-        result.models
-
-    )
-
-    .forEach(key=>{
-
-
-
-        html+=
-
-`
-<div class="ai-card">
-
-<h4>
-
-${key.toUpperCase()} AI
-
-</h4>
-
-
-<pre>
-
-${JSON.stringify(
-
-result.models[key],
-
-null,
-
-2
-
-)}
-
-</pre>
-
-
-</div>
-`;
-
-
-
-    });
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// Monte Carlo
-
-
-if(result.simulation){
 
 
 
 html+=
 
 `
+
 <div class="ai-card">
 
 <h3>
-Monte Carlo AI
+
+V80 AI分析完成
+
 </h3>
 
+
+数据特征：
+
+${result.features}
+
+</div>
+
+`;
+
+
+
+
+
+
+
+
+
+if(result.models){
+
+
+
+html+=
+
+`
+
+<div class="ai-card">
+
+<h4>
+
+模型结果
+
+</h4>
 
 <pre>
 
 ${JSON.stringify(
 
-result.simulation,
+result.models,
 
 null,
 
@@ -444,6 +421,7 @@ null,
 
 
 </div>
+
 `;
 
 
@@ -455,10 +433,6 @@ null,
 
 
 
-
-
-
-// Master
 
 
 if(result.decision){
@@ -468,10 +442,14 @@ if(result.decision){
 html+=
 
 `
+
 <div class="ai-card">
 
+
 <h3>
-Master AI 总控决策
+
+Master AI最终决策
+
 </h3>
 
 
@@ -491,6 +469,7 @@ null,
 
 
 </div>
+
 `;
 
 
@@ -504,10 +483,6 @@ null,
 
 
 
-
-// Critic
-
-
 if(result.critic){
 
 
@@ -515,10 +490,14 @@ if(result.critic){
 html+=
 
 `
+
 <div class="ai-card">
 
+
 <h3>
-Critic AI 自我审查
+
+Critic风险审查
+
 </h3>
 
 
@@ -538,6 +517,7 @@ null,
 
 
 </div>
+
 `;
 
 
@@ -590,13 +570,15 @@ document.getElementById(
 
 
 
+
+
 if(box){
 
 
 
 box.innerHTML=
 
-"开奖反馈已保存";
+"反馈模块等待V80.1学习引擎接入";
 
 
 
@@ -612,14 +594,12 @@ box.innerHTML=
 
 
 
-
-
-// 暴露按钮函数
 
 
 window.startAI=
 
 startAI;
+
 
 
 window.saveFeedback=

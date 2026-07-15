@@ -4,19 +4,16 @@
 
 <head>
 
-
 <meta charset="UTF-8">
-
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-
 <title>
-大乐透智能分析系统 V71.2
+大乐透智能分析系统 V80.0
 </title>
 
 
-<link rel="stylesheet" href="style.css?v=712">
+<link rel="stylesheet" href="style.css?v=800">
 
 
 </head>
@@ -35,24 +32,26 @@
 
 
 <h2>
-V71.2 AI CORE
+V80.0 AI CORE
 </h2>
 
 
 
 
 
+<!-- 数据状态 -->
+
 <div class="card">
 
 
 <h3>
-数据状态
+系统状态
 </h3>
 
 
 <div id="status">
 
-系统加载中...
+系统初始化...
 
 </div>
 
@@ -64,39 +63,19 @@ V71.2 AI CORE
 
 
 
+
+
+<!-- 加载进度 -->
 
 <div class="card">
 
 
 <h3>
-AI智能分析中心
+AI分析进度
 </h3>
 
 
-<button onclick="startAI()">
-
-开始 V71.2 AI分析
-
-</button>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-AI多维分析报告
-</h3>
-
-
-<div id="report">
+<div id="loading">
 
 等待分析...
 
@@ -111,12 +90,69 @@ AI多维分析报告
 
 
 
+
+<!-- AI分析 -->
+
+<div class="card">
+
+
+<h3>
+AI智能分析中心
+</h3>
+
+
+
+<button onclick="startAI()">
+
+开始 V80 AI分析
+
+</button>
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- 报告 -->
+
+<div class="card">
+
+
+<h3>
+AI多模型报告
+</h3>
+
+
+<div id="report">
+
+等待生成...
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- 反馈 -->
+
 <div class="card">
 
 
 <h3>
 开奖反馈学习
 </h3>
+
 
 
 <button onclick="saveFeedback()">
@@ -141,11 +177,14 @@ AI多维分析报告
 
 
 
+
+<!-- Agent -->
+
 <div class="card">
 
 
 <h3>
-V71.2 AI Agent模型
+V80 AI Agent模型
 </h3>
 
 
@@ -163,7 +202,6 @@ V71.2 AI Agent模型
 
 
 
-
 </div>
 
 
@@ -175,14 +213,15 @@ V71.2 AI Agent模型
 
 
 <!-- =====================
-     Engine
+ CORE
 ===================== -->
 
 
-<script src="engine/frequencyEngine.js?v=712"></script>
+<script src="core/DataEngine.js?v=800"></script>
 
+<script src="core/FeatureEngine.js?v=800"></script>
 
-<script src="engine/monteCarloEngine.js?v=712"></script>
+<script src="core/LoadingEngine.js?v=800"></script>
 
 
 
@@ -191,35 +230,13 @@ V71.2 AI Agent模型
 
 
 <!-- =====================
-     Agents
+ ENGINE
 ===================== -->
 
 
-<script src="agents/trendAgent.js?v=712"></script>
+<script src="engine/frequencyEngine.js?v=800"></script>
 
-
-<script src="agents/structureAgent.js?v=712"></script>
-
-
-<script src="agents/markovAgent.js?v=712"></script>
-
-
-<script src="agents/riskAgent.js?v=712"></script>
-
-
-<script src="agents/reviewAgent.js?v=712"></script>
-
-
-<script src="agents/theoryAgent.js?v=712"></script>
-
-
-<script src="agents/confidenceAgent.js?v=712"></script>
-
-
-<script src="agents/criticAgent.js?v=712"></script>
-
-
-<script src="agents/masterAgent.js?v=712"></script>
+<script src="engine/monteCarloEngine.js?v=800"></script>
 
 
 
@@ -228,11 +245,27 @@ V71.2 AI Agent模型
 
 
 <!-- =====================
-     Core
+ AGENTS
 ===================== -->
 
 
-<script src="engine.js?v=712"></script>
+<script src="agents/trendAgent.js?v=800"></script>
+
+<script src="agents/structureAgent.js?v=800"></script>
+
+<script src="agents/markovAgent.js?v=800"></script>
+
+<script src="agents/riskAgent.js?v=800"></script>
+
+<script src="agents/reviewAgent.js?v=800"></script>
+
+<script src="agents/theoryAgent.js?v=800"></script>
+
+<script src="agents.confidenceAgent.js?v=800"></script>
+
+<script src="agents/criticAgent.js?v=800"></script>
+
+<script src="agents/masterAgent.js?v=800"></script>
 
 
 
@@ -241,14 +274,29 @@ V71.2 AI Agent模型
 
 
 <!-- =====================
-     UI
+ CORE AI
 ===================== -->
 
 
-<script src="script.js?v=712"></script>
+<script src="engine.js?v=800"></script>
+
+
+
+
+
+
+
+<!-- =====================
+ UI
+===================== -->
+
+
+<script src="script.js?v=800"></script>
+
 
 
 
 </body>
+
 
 </html>
