@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE FINAL R3
-// Monte Carlo 模拟引擎
+// V90 AI CORE R5
+// 加权蒙特卡罗引擎
 // ================================================
 
 "use strict";
@@ -10,46 +10,153 @@ window.V90MonteCarlo={
 
 
 
+// =================================
+// 按权重选择数字
+// =================================
+
+
+weightedPick(pool,count){
+
+
+
+let result=[];
+
+
+
+let arr=Object.keys(pool).map(n=>({
+
+
+num:Number(n),
+
+
+weight:
+
+pool[n].score+1
+
+
+
+}));
+
+
+
+
+
+
+
+while(result.length<count){
+
+
+
+let total=
+
+arr.reduce(
+
+(a,b)=>a+b.weight,
+
+0
+
+);
+
+
+
+
+
+
+let r=
+
+Math.random()*total;
+
+
+
+
+
+
+let sum=0;
+
+
+
+
+
+
+for(let item of arr){
+
+
+
+sum+=item.weight;
+
+
+
+
+
+
+if(sum>=r){
+
+
+
+if(
+!result.includes(item.num)
+){
+
+
+
+result.push(item.num);
+
+
+
+}
+
+
+
+break;
+
+
+
+}
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+return result.sort(
+
+(a,b)=>a-b
+
+);
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
 // 生成前区
-
-createFront(){
-
-
-let arr=[];
+// =================================
 
 
-
-while(
-arr.length<5
-){
-
-
-let n=
-
-Math.floor(
-Math.random()*35
-)+1;
+createFront(frontModel){
 
 
 
-if(
-!arr.includes(n)
-){
+return this.weightedPick(
 
+frontModel,
 
-arr.push(n);
+5
 
-
-}
-
-
-
-}
-
-
-
-return arr.sort(
-(a,b)=>a-b
 );
 
 
@@ -62,48 +169,21 @@ return arr.sort(
 
 
 
+// =================================
 // 生成后区
+// =================================
 
 
-createBack(){
-
-
-let arr=[];
-
-
-
-while(
-arr.length<2
-){
+createBack(backModel){
 
 
 
-let n=
+return this.weightedPick(
 
-Math.floor(
-Math.random()*12
-)+1;
+backModel,
 
+2
 
-
-if(
-!arr.includes(n)
-){
-
-
-arr.push(n);
-
-
-}
-
-
-
-}
-
-
-
-return arr.sort(
-(a,b)=>a-b
 );
 
 
@@ -117,18 +197,104 @@ return arr.sort(
 
 
 // =================================
-// 分批模拟
+// 单组评分
 // =================================
 
 
-run(
-times=1000000,
-progress
-){
+evaluate(front,back){
+
+
+
+let score=
+
+V90Model.structure(
+front
+);
+
+
+
+
+
+// 后区奖励
+
+
+let backScore=0;
+
+
+
+
+
+
+back.forEach(n=>{
+
+
+
+backScore+=
+
+n;
+
+
+
+});
+
+
+
+
+
+
+
+score+=
+
+backScore*0.5;
+
+
+
+
+
+
+
+return score;
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 主模拟
+// =================================
+
+
+run(times=1000000,progress){
 
 
 
 return new Promise(resolve=>{
+
+
+
+
+
+
+let frontModel=
+
+V90Model.trainFront();
+
+
+
+
+
+let backModel=
+
+V90Model.trainBack();
+
+
+
 
 
 
@@ -137,6 +303,9 @@ let pool={};
 
 
 let current=0;
+
+
+
 
 
 
@@ -153,10 +322,11 @@ let size=5000;
 
 
 
+
 for(
 let i=0;
 
-i<size && current<times;
+i<size&&current<times;
 
 i++,current++
 
@@ -164,15 +334,43 @@ i++,current++
 
 
 
+
+
 let front=
 
-V90MonteCarlo.createFront();
+V90MonteCarlo.createFront(
+
+frontModel
+
+);
+
+
 
 
 
 let back=
 
-V90MonteCarlo.createBack();
+V90MonteCarlo.createBack(
+
+backModel
+
+);
+
+
+
+
+
+
+let score=
+
+V90MonteCarlo.evaluate(
+
+front,
+
+back
+
+);
+
 
 
 
@@ -198,10 +396,7 @@ back.join("-");
 
 
 
-if(
-!pool[key]
-){
-
+if(!pool[key]){
 
 
 pool[key]={
@@ -214,7 +409,10 @@ front,
 back,
 
 
-count:0
+count:0,
+
+
+score:0
 
 
 
@@ -235,6 +433,14 @@ pool[key].count++;
 
 
 
+
+pool[key].score+=score;
+
+
+
+
+
+
 }
 
 
@@ -243,7 +449,9 @@ pool[key].count++;
 
 
 
-let percent=
+
+
+let p=
 
 Math.floor(
 
@@ -257,38 +465,32 @@ current/times*100
 
 
 
+if(progress)
 
-if(progress){
-
-
-
-progress(percent);
-
-
-
-}
+progress(p);
 
 
 
 
 
 
-if(
-current<times
-){
+
+
+if(current<times){
 
 
 
 setTimeout(
+
 batch,
+
 0
+
 );
 
 
 
-}
-
-else{
+}else{
 
 
 
@@ -296,16 +498,45 @@ let result=
 
 Object.values(pool)
 
+.map(item=>({
+
+
+
+front:item.front,
+
+
+back:item.back,
+
+
+count:item.count,
+
+
+
+score:
+
+Number(
+
+(
+
+item.score/item.count
+
+).toFixed(2)
+
+)
+
+
+
+}))
+
 .sort(
 
 (a,b)=>
 
-b.count-a.count
+b.score-a.score
 
 )
 
-.slice(0,100);
-
+.slice(0,50);
 
 
 
@@ -321,7 +552,10 @@ resolve(result);
 
 
 
+
+
 }
+
 
 
 
@@ -332,11 +566,19 @@ batch();
 
 
 
+
+
+
+
 });
 
 
 
+
+
 }
+
+
 
 
 

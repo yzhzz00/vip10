@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE FINAL R3
-// 总AI裁决中心
+// V90 AI CORE R5
+// AI最终裁决中心
 // ================================================
 
 "use strict";
@@ -10,85 +10,40 @@ window.V90Core={
 
 
 
+cacheKey:"V90_CURRENT_PREDICTION",
+
+
 
 
 
 
 // =================================
-// 候选评分
+// 获取缓存预测
 // =================================
 
 
-score(item){
+getCache(){
 
 
+let data=
 
-let score=0;
-
-
-
-
-
-// 模拟次数权重
-
-
-score +=
-
-item.count * 5;
-
-
-
-
-
-
-
-// 结构评分
-
-
-score +=
-
-V90Model.structureScore(
-item.front
+localStorage.getItem(
+this.cacheKey
 );
 
 
 
+if(data){
+
+
+return JSON.parse(data);
+
+
+}
 
 
 
-
-// Bayes概率
-
-
-let bayes=
-
-V90Model.bayes();
-
-
-
-
-
-
-item.front.forEach(n=>{
-
-
-
-score +=
-
-(bayes[n]||0)*100;
-
-
-
-});
-
-
-
-
-
-
-
-
-return score;
+return null;
 
 
 
@@ -101,7 +56,113 @@ return score;
 
 
 // =================================
-// 风险检测
+// 保存预测
+// =================================
+
+
+saveCache(data){
+
+
+
+localStorage.setItem(
+
+this.cacheKey,
+
+JSON.stringify(data)
+
+);
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// AI评分
+// =================================
+
+
+finalScore(item){
+
+
+
+let score=0;
+
+
+
+
+
+
+// 模拟评分
+
+
+score+=
+
+item.score;
+
+
+
+
+
+
+// 出现稳定性
+
+
+score+=
+
+Math.min(
+
+item.count,
+
+20
+
+);
+
+
+
+
+
+
+// 结构评分
+
+
+score+=
+
+V90Model.structure(
+
+item.front
+
+);
+
+
+
+
+
+
+
+return Number(
+
+score.toFixed(2)
+
+);
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 风险分析
 // =================================
 
 
@@ -115,8 +176,7 @@ V90Model.structure(front);
 
 
 
-
-let risk=[];
+let arr=[];
 
 
 
@@ -130,7 +190,7 @@ s.odd===5
 
 
 
-risk.push(
+arr.push(
 "奇偶极端"
 );
 
@@ -142,33 +202,15 @@ risk.push(
 
 
 
-if(
-s.big===0 ||
-s.big===5
-){
-
-
-
-risk.push(
-"大小极端"
-);
-
-
-
-}
-
-
-
-
 
 if(
 s.sum<70 ||
-s.sum>150
+s.sum>160
 ){
 
 
 
-risk.push(
+arr.push(
 "和值异常"
 );
 
@@ -181,8 +223,32 @@ risk.push(
 
 
 
+if(
+new Set(front).size!==5
+){
 
-return risk;
+
+
+arr.push(
+"重复号码"
+);
+
+
+
+}
+
+
+
+
+
+
+return arr.length?
+
+arr.join("、")
+
+:
+
+"未发现明显风险";
 
 
 
@@ -199,15 +265,13 @@ return risk;
 // =================================
 
 
-meeting(item){
+meeting(front,back){
 
 
 
 let s=
 
-V90Model.structure(
-item.front
-);
+V90Model.structure(front);
 
 
 
@@ -218,11 +282,11 @@ return [
 
 
 
-"趋势AI：历史频率与冷热趋势分析完成",
+"趋势AI：2896期历史趋势训练完成",
 
 
 
-"概率AI：Bayes概率评分完成",
+"概率AI：Bayes数字概率评分完成",
 
 
 
@@ -232,185 +296,17 @@ return [
 
 
 
-"Markov AI：一阶转移分析完成"
+"Markov AI：号码转移分析完成",
+
+
+
+"风险AI："+
+
+this.risk(front)
 
 
 
 ];
-
-
-
-},
-
-
-
-
-
-
-
-// =================================
-// 自我反驳
-// =================================
-
-
-critic(item){
-
-
-
-let risk=
-
-this.risk(
-item.front
-);
-
-
-
-
-
-
-return {
-
-
-
-pass:
-
-risk.length===0,
-
-
-
-text:
-
-risk.length===0
-
-?
-
-"未发现明显结构风险"
-
-:
-
-"风险："+risk.join("、")
-
-
-
-};
-
-
-
-},
-
-
-
-
-
-
-
-// =================================
-// 排序裁决
-// =================================
-
-
-judge(pool){
-
-
-
-let list=[];
-
-
-
-
-
-
-pool.forEach(item=>{
-
-
-
-let score=
-
-this.score(item);
-
-
-
-
-
-
-let critic=
-
-this.critic(item);
-
-
-
-
-
-
-if(
-!critic.pass
-){
-
-
-
-score-=20;
-
-
-
-}
-
-
-
-
-
-
-list.push({
-
-
-
-front:item.front,
-
-
-back:item.back,
-
-
-count:item.count,
-
-
-score:
-
-Number(
-score.toFixed(2)
-),
-
-
-
-risk:
-
-critic.text,
-
-
-
-meeting:
-
-this.meeting(item)
-
-
-
-});
-
-
-
-});
-
-
-
-
-
-
-
-return list.sort(
-
-(a,b)=>
-
-b.score-a.score
-
-);
 
 
 
@@ -428,6 +324,37 @@ b.score-a.score
 
 
 async run(){
+
+
+
+
+
+
+// 已经分析过
+
+let cache=
+
+this.getCache();
+
+
+
+
+
+
+if(cache){
+
+
+
+return cache;
+
+
+
+}
+
+
+
+
+
 
 
 
@@ -464,25 +391,74 @@ window.V90Progress(p);
 
 
 
-let result=
+let list=
 
-this.judge(pool);
-
-
+pool.map(item=>({
 
 
 
-
-let final=
-
-result[0];
+front:item.front,
 
 
+back:item.back,
+
+
+count:item.count,
+
+
+score:
+
+this.finalScore(item)
+
+
+
+}));
 
 
 
 
-return {
+
+
+
+list.sort(
+
+(a,b)=>
+
+b.score-a.score
+
+);
+
+
+
+
+
+
+
+
+let best=
+
+list[0];
+
+
+
+
+
+
+
+
+let result={
+
+
+
+id:
+
+"V90-"
+
++
+
+Date.now(),
+
+
 
 
 
@@ -492,33 +468,31 @@ final:{
 
 front:
 
-final.front,
+best.front,
 
 
 
 back:
 
-final.back,
+best.back,
 
 
 
 score:
 
-final.score,
+best.score,
 
 
 
 meeting:
 
-final.meeting,
+this.meeting(
 
+best.front,
 
+best.back
 
-risk:
-
-final.risk
-
-
+)
 
 },
 
@@ -526,13 +500,9 @@ final.risk
 
 
 
-
 top10:
 
-result.slice(
-0,
-10
-)
+list.slice(0,10)
 
 
 
@@ -540,7 +510,27 @@ result.slice(
 
 
 
+
+
+
+
+
+this.saveCache(result);
+
+
+
+
+
+
+return result;
+
+
+
+
+
+
 }
+
 
 
 

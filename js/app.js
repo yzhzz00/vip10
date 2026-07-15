@@ -1,5 +1,5 @@
 // ================================================
-// V90 AI CORE FINAL R3
+// V90 AI CORE R5
 // 系统主控制中心
 // ================================================
 
@@ -11,7 +11,7 @@
 
 
 // =================================
-// 进度条
+// 模拟进度显示
 // =================================
 
 
@@ -28,7 +28,6 @@ document.getElementById(
 
 
 
-
 let text=
 
 document.getElementById(
@@ -40,15 +39,12 @@ document.getElementById(
 
 
 
-
 if(bar){
-
 
 
 bar.style.width=
 
 p+"%";
-
 
 
 }
@@ -57,14 +53,12 @@ p+"%";
 
 
 
-
 if(text){
-
 
 
 text.innerHTML=
 
-"蒙特卡罗模拟："
+"蒙特卡罗优化："
 
 +
 
@@ -91,11 +85,11 @@ p
 
 
 // =================================
-// 显示模型
+// 显示模型状态
 // =================================
 
 
-function showModels(){
+function showModelStatus(){
 
 
 
@@ -104,6 +98,7 @@ let box=
 document.getElementById(
 "modelStatus"
 );
+
 
 
 
@@ -138,11 +133,11 @@ Markov转移 ✓
 
 <br>
 
-蒙特卡罗 ✓
+加权蒙特卡罗 ✓
 
 <br>
 
-AI CORE裁决 ✓
+AI CORE R5裁决 ✓
 
 `;
 
@@ -163,11 +158,11 @@ AI CORE裁决 ✓
 
 
 // =================================
-// 显示结果
+// 显示最终结果
 // =================================
 
 
-function showResult(data){
+function showAIResult(data){
 
 
 
@@ -181,16 +176,23 @@ data.final;
 
 
 
-
 document.getElementById(
 "finalResult"
 ).innerHTML=
 
 `
 
+预测编号：
+
+${data.id}
+
+<br><br>
+
+
 前区：
 
 ${final.front.join(" ")}
+
 
 <br><br>
 
@@ -216,12 +218,9 @@ ${final.score}
 
 
 
-
 document.getElementById(
 "topList"
 ).innerHTML=
-
-
 
 data.top10
 
@@ -260,20 +259,14 @@ ${item.score}
 
 
 
-
 document.getElementById(
 "aiMeeting"
 ).innerHTML=
 
-`
+final.meeting.join(
+"<br>"
+);
 
-${final.meeting.join("<br>")}
-
-<br><br>
-
-${final.risk}
-
-`;
 
 
 
@@ -291,13 +284,11 @@ ${final.risk}
 
 
 // =================================
-// 开始分析
+// 开始AI分析
 // =================================
 
 
 async function startAI(){
-
-
 
 
 
@@ -322,8 +313,7 @@ text.innerHTML=
 
 
 
-
-let history=
+let data=
 
 V90Data.get();
 
@@ -332,8 +322,9 @@ V90Data.get();
 
 
 
+
 if(
-history.length===0
+data.length===0
 ){
 
 
@@ -360,7 +351,7 @@ return;
 
 text.innerHTML=
 
-"AI CORE计算中...";
+"AI训练中...";
 
 
 
@@ -381,7 +372,7 @@ await V90Core.run();
 
 
 
-showResult(result);
+showAIResult(result);
 
 
 
@@ -390,47 +381,18 @@ showResult(result);
 
 
 
-let final=
-
-result.final;
+// 保存预测记录
 
 
+localStorage.setItem(
+
+"V90_LAST_PREDICTION",
+
+JSON.stringify(result)
+
+);
 
 
-
-
-
-
-
-V90Review.savePrediction({
-
-
-
-time:
-
-Date.now(),
-
-
-
-front:
-
-final.front,
-
-
-
-back:
-
-final.back,
-
-
-
-score:
-
-final.score
-
-
-
-});
 
 
 
@@ -444,23 +406,28 @@ document.getElementById(
 
 `
 
+预测编号：
+
+${result.id}
+
+<br><br>
+
 最近预测：
 
-<br>
-
-${final.front.join(" ")}
+${result.final.front.join(" ")}
 
 +
 
-${final.back.join(" ")}
+${result.final.back.join(" ")}
 
-<br>
+<br><br>
 
 评分：
 
-${final.score}
+${result.final.score}
 
 `;
+
 
 
 
@@ -501,11 +468,13 @@ async()=>{
 
 
 
+
+
 document.getElementById(
 "status"
 ).innerHTML=
 
-"V90 AI CORE启动完成";
+"V90 AI CORE R5启动完成";
 
 
 
@@ -517,7 +486,6 @@ document.getElementById(
 let data=
 
 await V90Data.load();
-
 
 
 
@@ -548,7 +516,8 @@ data.length
 
 
 
-showModels();
+showModelStatus();
+
 
 
 

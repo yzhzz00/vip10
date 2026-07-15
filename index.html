@@ -8,12 +8,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>
-大乐透智能分析系统 V90 AI CORE FINAL R3
+大乐透智能分析系统 V90 AI CORE R5
 </title>
 
 
 <link rel="stylesheet" href="style.css">
-
 
 </head>
 
@@ -28,14 +27,12 @@
 
 <header>
 
-
 <h1>
 大乐透智能分析系统
 </h1>
 
-
 <h2>
-V90 AI CORE FINAL R3
+V90 AI CORE R5
 </h2>
 
 
@@ -47,13 +44,10 @@ V90 AI CORE FINAL R3
 启动中...
 </span>
 
-
 </div>
 
 
 </header>
-
-
 
 
 
@@ -67,7 +61,7 @@ V90 AI CORE FINAL R3
 
 
 <div id="dataStatus">
-历史数据等待加载
+历史数据加载中...
 </div>
 
 
@@ -89,14 +83,12 @@ AI模型中心
 
 <div id="modelStatus">
 
-等待初始化
+等待训练
 
 </div>
 
 
 </section>
-
-
 
 
 
@@ -120,17 +112,13 @@ AI分析中心
 
 
 
-
 <div class="progress">
 
-<div id="progressBar">
+
+<div id="progressBar"></div>
+
 
 </div>
-
-
-</div>
-
-
 
 
 <div id="progressText">
@@ -173,7 +161,6 @@ AI分析中心
 
 
 
-
 <section class="card">
 
 <h3>
@@ -189,7 +176,6 @@ TOP10预测池
 
 
 </section>
-
 
 
 
@@ -246,32 +232,92 @@ AI会议 / 自我反驳
 
 
 
+<!-- =========================
+开奖反馈新版
+========================= -->
+
+
 <section class="card">
 
+
 <h3>
-开奖反馈学习
+开奖反馈学习中心
 </h3>
 
 
-<input
+
+
+<label>
+开奖期号
+</label>
+
+
+<input 
 id="period"
-placeholder="输入开奖期号">
+placeholder="例如：20260715">
 
 
-<textarea
-id="openResult"
-placeholder="输入7个开奖号码，例如：
-03 12 18 26 34 05 11">
-</textarea>
+
+
+
+
+<h4>
+前区号码
+</h4>
+
+
+
+<div class="number-box">
+
+
+<input id="front1" placeholder="第1位">
+
+<input id="front2" placeholder="第2位">
+
+<input id="front3" placeholder="第3位">
+
+<input id="front4" placeholder="第4位">
+
+<input id="front5" placeholder="第5位">
+
+
+</div>
+
+
+
+
+
+
+
+<h4>
+后区号码
+</h4>
+
+
+<div class="number-box">
+
+
+<input id="back1" placeholder="第1位">
+
+<input id="back2" placeholder="第2位">
+
+
+</div>
+
+
+
 
 
 
 
 <button id="reviewBtn">
 
-开始开奖复盘
+保存开奖并AI学习
 
 </button>
+
+
+
 
 
 
@@ -280,6 +326,7 @@ placeholder="输入7个开奖号码，例如：
 等待反馈
 
 </div>
+
 
 
 </section>
@@ -293,6 +340,7 @@ placeholder="输入7个开奖号码，例如：
 
 
 <section class="card">
+
 
 <h3>
 AI成长记录
@@ -314,7 +362,9 @@ AI成长记录
 
 
 
+
 </div>
+
 
 
 
@@ -336,7 +386,6 @@ AI成长记录
 <script src="js/review.js"></script>
 
 <script src="js/app.js"></script>
-
 
 
 </body>

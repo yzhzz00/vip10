@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE FINAL R3
-// 历史数据中心
+// V90 AI CORE R5
+// 数据中心
 // ================================================
 
 "use strict";
@@ -12,18 +12,51 @@ window.V90Data={
 history:[],
 
 
+storageKey:"V90_HISTORY_DATA",
 
 
 
 
-// 加载历史数据
+
+
+// =================================
+// 初始化数据
+// =================================
+
 
 async load(){
 
 
+let local=
+
+localStorage.getItem(
+this.storageKey
+);
+
+
+
+
+
+if(local){
+
+
+this.history=
+
+JSON.parse(local);
+
+
+return this.history;
+
+
+}
+
+
+
+
+
+
 
 try{
-
 
 
 let res=
@@ -51,9 +84,14 @@ this.parse(text);
 
 
 
+this.save();
+
+
+
+
+
+
 return this.history;
-
-
 
 
 
@@ -62,7 +100,7 @@ return this.history;
 
 
 console.error(
-"数据读取失败",
+"历史数据读取失败",
 e
 );
 
@@ -84,15 +122,16 @@ return [];
 
 
 
-// 数据解析
+// =================================
+// 解析txt
+// =================================
 
 
 parse(text){
 
 
 
-let list=[];
-
+let arr=[];
 
 
 let lines=
@@ -104,34 +143,15 @@ text.split(/\r?\n/);
 
 
 
-
-for(
-let line of lines
-){
-
-
-
-line=line.trim();
-
-
-
-
-
-
-if(!line)
-
-continue;
-
-
-
-
-
+lines.forEach(line=>{
 
 
 
 let nums=
 
 line
+
+.trim()
 
 .replace(/,/g," ")
 
@@ -141,7 +161,7 @@ line
 
 .filter(
 
-n=>!isNaN(n)
+x=>!isNaN(x)
 
 );
 
@@ -150,19 +170,13 @@ n=>!isNaN(n)
 
 
 
-if(
-nums.length<7
-)
 
-continue;
+
+if(nums.length>=7){
 
 
 
-
-
-
-
-let arr=
+let n=
 
 nums.slice(
 nums.length-7
@@ -172,56 +186,19 @@ nums.length-7
 
 
 
-
-let front=
-
-arr.slice(
-0,5
-);
+arr.push({
 
 
 
-let back=
+front:
 
-arr.slice(
-5,7
-);
+n.slice(0,5),
 
 
 
+back:
 
-
-
-
-
-if(
-
-front.every(
-
-n=>n>=1&&n<=35
-
-)
-
-&&
-
-back.every(
-
-n=>n>=1&&n<=12
-
-)
-
-){
-
-
-
-list.push({
-
-
-
-front,
-
-
-back
+n.slice(5,7)
 
 
 
@@ -233,14 +210,14 @@ back
 
 
 
-
-}
-
+});
 
 
 
 
-return list;
+
+
+return arr;
 
 
 
@@ -250,13 +227,47 @@ return list;
 
 
 
+
+
+// =================================
+// 获取数据
+// =================================
 
 
 get(){
 
 
-
 return this.history;
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 保存数据库
+// =================================
+
+
+save(){
+
+
+
+localStorage.setItem(
+
+this.storageKey,
+
+JSON.stringify(
+
+this.history
+
+)
+
+);
 
 
 
@@ -268,15 +279,116 @@ return this.history;
 
 
 
-count(){
+// =================================
+// 新增开奖
+// =================================
 
+
+addDraw(period,front,back){
+
+
+
+let item={
+
+
+
+period,
+
+
+front,
+
+
+back,
+
+
+time:
+
+Date.now()
+
+
+
+};
+
+
+
+
+
+
+this.history.push(item);
+
+
+
+
+
+this.save();
+
+
+
+
+
+
+return item;
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 最新一期
+// =================================
+
+
+latest(){
+
+
+
+if(
+this.history.length===0
+)
+
+return null;
+
+
+
+
+
+
+return this.history[
+
+this.history.length-1
+
+];
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 期数
+// =================================
+
+
+count(){
 
 
 return this.history.length;
 
 
-
 }
+
+
 
 
 

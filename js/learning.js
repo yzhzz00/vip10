@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE FINAL R3
-// AI学习引擎
+// V90 AI CORE R5
+// 数字学习引擎
 // ================================================
 
 "use strict";
@@ -9,23 +9,388 @@
 window.V90Learning={
 
 
+recordKey:"V90_AI_LEARNING",
 
-recordKey:"V90_LEARNING_RECORD",
-
-weightKey:"V90_AI_WEIGHT",
-
+weightKey:"V90_NUMBER_WEIGHT",
 
 
 
 
 
 
-// =================================
-// 获取学习记录
-// =================================
+// 初始化权重
+
+init(){
 
 
-getRecords(){
+let data=
+
+localStorage.getItem(
+this.weightKey
+);
+
+
+
+
+if(data)
+
+return JSON.parse(data);
+
+
+
+
+
+
+
+let weight={
+
+
+
+front:{},
+
+back:{}
+
+
+
+};
+
+
+
+
+
+
+for(
+let i=1;i<=35;i++
+){
+
+
+
+weight.front[i]=1;
+
+
+
+}
+
+
+
+
+
+
+
+for(
+let i=1;i<=12;i++
+){
+
+
+
+weight.back[i]=1;
+
+
+
+}
+
+
+
+
+
+
+
+this.saveWeight(weight);
+
+
+
+return weight;
+
+
+
+},
+
+
+
+
+
+
+
+// 获取权重
+
+
+getWeight(){
+
+
+
+return this.init();
+
+
+
+},
+
+
+
+
+
+
+
+// 保存权重
+
+
+saveWeight(data){
+
+
+
+localStorage.setItem(
+
+this.weightKey,
+
+JSON.stringify(data)
+
+);
+
+
+
+},
+
+
+
+
+
+
+
+// ================================
+// 开奖学习
+// ================================
+
+
+learn(pred,real){
+
+
+
+let weight=
+
+this.getWeight();
+
+
+
+
+
+let hitFront=[];
+
+let hitBack=[];
+
+
+
+
+
+
+
+pred.front.forEach(n=>{
+
+
+
+if(
+real.front.includes(n)
+){
+
+
+
+hitFront.push(n);
+
+
+
+}else{
+
+
+
+weight.front[n]-=0.01;
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+
+pred.back.forEach(n=>{
+
+
+
+if(
+real.back.includes(n)
+){
+
+
+
+hitBack.push(n);
+
+
+
+}else{
+
+
+
+weight.back[n]-=0.01;
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+
+// 命中奖励
+
+
+hitFront.forEach(n=>{
+
+
+weight.front[n]+=0.05;
+
+
+});
+
+
+
+
+
+
+hitBack.forEach(n=>{
+
+
+weight.back[n]+=0.05;
+
+
+});
+
+
+
+
+
+
+
+this.saveWeight(weight);
+
+
+
+
+
+
+
+let records=
+
+this.records();
+
+
+
+
+
+
+
+records.push({
+
+
+
+time:
+
+new Date()
+.toLocaleString(),
+
+
+
+prediction:pred,
+
+
+
+real,
+
+
+hit:{
+
+
+
+front:
+
+hitFront,
+
+
+back:
+
+hitBack
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+localStorage.setItem(
+
+this.recordKey,
+
+JSON.stringify(records)
+
+);
+
+
+
+
+
+
+
+return {
+
+
+
+frontHit:
+
+hitFront.length,
+
+
+
+backHit:
+
+hitBack.length
+
+
+
+};
+
+
+
+},
+
+
+
+
+
+
+
+// 获取成长记录
+
+
+records(){
 
 
 
@@ -51,275 +416,7 @@ this.recordKey
 
 
 
-// =================================
-// 获取权重
-// =================================
-
-
-getWeight(){
-
-
-
-let data=
-
-localStorage.getItem(
-this.weightKey
-);
-
-
-
-
-
-
-if(data){
-
-
-
-return JSON.parse(data);
-
-
-
-}
-
-
-
-
-
-
-return {
-
-
-
-frequency:1,
-
-
-hotCold:1,
-
-
-missing:1,
-
-
-bayes:1,
-
-
-markov:1,
-
-
-structure:1
-
-
-
-};
-
-
-
-},
-
-
-
-
-
-
-
-// =================================
-// 保存权重
-// =================================
-
-
-saveWeight(weight){
-
-
-
-localStorage.setItem(
-
-this.weightKey,
-
-JSON.stringify(weight)
-
-);
-
-
-
-},
-
-
-
-
-
-
-
-// =================================
-// 学习训练
-// =================================
-
-
-train(result){
-
-
-
-let weight=
-
-this.getWeight();
-
-
-
-
-
-
-
-// 前区命中提高频率模型
-
-
-if(
-result.frontHit>=3
-){
-
-
-
-weight.frequency+=0.02;
-
-
-weight.bayes+=0.02;
-
-
-
-}
-
-
-
-
-
-
-
-
-// 后区失败增加转移权重
-
-
-if(
-result.backHit===0
-){
-
-
-
-weight.markov+=0.03;
-
-
-
-}
-
-
-
-
-
-
-
-
-// 总命中较低，加强结构
-
-
-if(
-result.total<=2
-){
-
-
-
-weight.structure+=0.02;
-
-
-
-}
-
-
-
-
-
-
-
-this.saveWeight(weight);
-
-
-
-
-
-
-
-let records=
-
-this.getRecords();
-
-
-
-
-
-
-
-records.push({
-
-
-
-time:
-
-Date.now(),
-
-
-
-result,
-
-
-weight
-
-
-
-});
-
-
-
-
-
-
-
-localStorage.setItem(
-
-this.recordKey,
-
-JSON.stringify(records)
-
-);
-
-
-
-},
-
-
-
-
-
-
-
-// =================================
-// 学习次数
-// =================================
-
-
-count(){
-
-
-
-return this.getRecords().length;
-
-
-
-},
-
-
-
-
-
-
-
-// =================================
-// 页面显示
-// =================================
+// 显示
 
 
 show(){
@@ -336,7 +433,14 @@ document.getElementById(
 
 
 
-if(box){
+
+if(!box)
+
+return;
+
+
+
+
 
 
 
@@ -346,11 +450,11 @@ box.innerHTML=
 
 累计学习次数：
 
-${this.count()}
+${this.records().length}
 
 <br><br>
 
-AI动态权重：
+数字权重：
 
 已更新
 
@@ -361,8 +465,6 @@ AI动态权重：
 }
 
 
-
-}
 
 
 
