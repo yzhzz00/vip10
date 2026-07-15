@@ -24,13 +24,9 @@
 
 <header>
 
-<h1>
-大乐透智能分析系统
-</h1>
+<h1>大乐透智能分析系统</h1>
 
-<h2>
-V90 AI CORE FINAL
-</h2>
+<h2>V90 AI CORE FINAL</h2>
 
 
 <div class="status">
@@ -38,8 +34,9 @@ V90 AI CORE FINAL
 系统状态：
 
 <span id="status">
-等待启动
+初始化中...
 </span>
+
 
 </div>
 
@@ -52,15 +49,24 @@ V90 AI CORE FINAL
 
 <section class="card">
 
+
 <h3>
 数据中心
 </h3>
 
 
-<div id="dataInfo">
+<div id="dataStatus">
 
 历史数据：
-未加载
+等待加载
+
+</div>
+
+
+<div id="modelStatus">
+
+模型状态：
+等待初始化
 
 </div>
 
@@ -88,12 +94,16 @@ AI分析中心
 </button>
 
 
-
 <div class="progress">
 
-<div id="progressBar"></div>
+
+<div id="progressBar">
 
 </div>
+
+
+</div>
+
 
 
 <div id="progressText">
@@ -118,16 +128,15 @@ AI分析中心
 
 
 <h3>
-最终预测结果
+最终推荐结果
 </h3>
 
 
-<div id="prediction">
+<div id="finalResult">
 
-等待分析
+等待AI分析
 
 </div>
-
 
 
 </section>
@@ -144,11 +153,11 @@ AI分析中心
 
 
 <h3>
-TOP10候选方案
+TOP10预测池
 </h3>
 
 
-<div id="ranking">
+<div id="candidateList">
 
 等待生成
 
@@ -169,16 +178,16 @@ TOP10候选方案
 
 
 <h3>
-AI会议中心
+AI会议
+
 </h3>
 
 
-<div id="meeting">
+<div id="aiMeeting">
 
-等待AI会议
+等待分析
 
 </div>
-
 
 
 </section>
@@ -200,12 +209,11 @@ AI会议中心
 </h3>
 
 
-<div id="records">
+<div id="predictionRecord">
 
-暂无记录
+暂无预测记录
 
 </div>
-
 
 
 </section>
@@ -222,43 +230,41 @@ AI会议中心
 
 
 <h3>
-开奖反馈复盘
+开奖反馈学习
 
 </h3>
 
 
 <input
 id="period"
-placeholder="输入开奖期号">
+placeholder="开奖期号">
 
 
 <textarea
-id="realNumber"
+id="openResult"
 placeholder="
-输入7个号码
+输入开奖号码
 
-例如:
-03 12 18 26 34 04 09
+例：
+03 12 18 26 34 05 11
 ">
 </textarea>
 
 
 
-<button id="feedbackBtn">
+<button id="reviewBtn">
 
-开始复盘学习
+开始开奖复盘
 
 </button>
 
 
 
+<div id="reviewResult">
 
-<div id="review">
-
-等待开奖反馈
+等待反馈
 
 </div>
-
 
 
 </section>
@@ -280,12 +286,11 @@ AI成长记录
 </h3>
 
 
-<div id="learning">
+<div id="learningStatus">
 
-暂无学习数据
+暂无学习
 
 </div>
-
 
 
 </section>
@@ -296,24 +301,25 @@ AI成长记录
 
 
 
-
-
 </div>
 
 
 
 
 
-<script src="V90.model.js"></script>
+<script src="js/data.js"></script>
 
-<script src="V90.record.js"></script>
+<script src="js/model.js"></script>
 
-<script src="V90.ai.js"></script>
+<script src="js/montecarlo.js"></script>
 
-<script src="V90.review.js"></script>
+<script src="js/ai.js"></script>
 
-<script src="V90.bundle.js"></script>
+<script src="js/record.js"></script>
 
+<script src="js/review.js"></script>
+
+<script src="js/app.js"></script>
 
 
 </body>
