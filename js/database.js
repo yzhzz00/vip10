@@ -1,7 +1,7 @@
 // ==================================================
-// 大乐透 AI V100 CORE FINAL
+// 大乐透 AI V100.1 CORE FINAL
 // database.js
-// 历史开奖数据中心
+// 历史数据库管理
 // ==================================================
 
 "use strict";
@@ -11,12 +11,9 @@ window.V100Database = {
 
 
 
-    key:"DLT_HISTORY",
+    key:
 
-
-
-    data:[],
-
+    "V100_DLT_DATABASE",
 
 
 
@@ -24,123 +21,36 @@ window.V100Database = {
 
 
     // ==========================
-    // 初始化
+    // 初始化数据库
     // ==========================
 
 
     init(){
 
 
-
-        let save =
+        let data =
 
         localStorage.getItem(
+
             this.key
+
         );
 
 
 
+        if(!data){
 
-        if(save){
 
+            localStorage.setItem(
 
-            this.data =
-            JSON.parse(save);
+                this.key,
+
+                JSON.stringify([])
+
+            );
 
 
         }
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 导入历史数据
-    // ==========================
-
-
-    import(data){
-
-
-
-        /*
-        
-        数据格式：
-
-        [
-          {
-            front:[1,5,12,22,33],
-            back:[3,8]
-          }
-        ]
-
-        */
-
-
-
-        this.data =
-
-        data.map(item=>{
-
-
-
-            return {
-
-
-
-                front:
-
-                item.front
-                .map(Number)
-                .sort(
-                    (a,b)=>a-b
-                ),
-
-
-
-
-                back:
-
-                item.back
-                .map(Number)
-                .sort(
-                    (a,b)=>a-b
-                ),
-
-
-
-                time:
-
-                item.time
-                ||
-                Date.now()
-
-
-
-            };
-
-
-
-        });
-
-
-
-
-
-        this.save();
-
-
-
-
-        return this.data.length;
 
 
 
@@ -162,7 +72,26 @@ window.V100Database = {
     get(){
 
 
-        return this.data;
+        let data=
+
+        localStorage.getItem(
+
+            this.key
+
+        );
+
+
+
+        if(!data){
+
+            return [];
+
+        }
+
+
+
+
+        return JSON.parse(data);
 
 
 
@@ -177,18 +106,20 @@ window.V100Database = {
 
 
     // ==========================
-    // 获取最近N期
+    // 保存数据
     // ==========================
 
 
-    recent(count){
+    save(data){
 
 
+        localStorage.setItem(
 
-        return this.data.slice(
-            -count
+            this.key,
+
+            JSON.stringify(data)
+
         );
-
 
 
     },
@@ -202,54 +133,34 @@ window.V100Database = {
 
 
     // ==========================
-    // 获取训练窗口
+    // 导入TXT解析结果
     // ==========================
 
 
-    getWindow(
-        index,
-        size=500
-    ){
+    importData(list){
 
 
 
-        return this.data.slice(
+        if(
 
-            index-size,
+            !Array.isArray(list)
 
-            index
+        ){
 
-        );
+            return false;
 
-
-
-    },
+        }
 
 
 
 
 
+        this.save(list);
 
 
 
+        return true;
 
-    // ==========================
-    // 获取训练总次数
-    // ==========================
-
-
-    trainingCount(
-        size=500
-    ){
-
-
-        return Math.max(
-
-            0,
-
-            this.data.length-size
-
-        );
 
 
     },
@@ -267,45 +178,25 @@ window.V100Database = {
     // ==========================
 
 
-    add(draw){
+    add(item){
 
 
 
-        this.data.push({
+        let data=
 
-
-            front:
-
-            draw.front
-            .map(Number)
-            .sort(
-                (a,b)=>a-b
-            ),
-
-
-
-            back:
-
-            draw.back
-            .map(Number)
-            .sort(
-                (a,b)=>a-b
-            ),
-
-
-
-            time:
-
-            Date.now()
-
-
-
-        });
+        this.get();
 
 
 
 
-        this.save();
+
+        data.push(item);
+
+
+
+
+
+        this.save(data);
 
 
 
@@ -320,68 +211,19 @@ window.V100Database = {
 
 
     // ==========================
-    // 删除数据
-    // ==========================
-
-
-    clear(){
-
-
-
-        this.data=[];
-
-
-
-        localStorage.removeItem(
-            this.key
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 保存
-    // ==========================
-
-
-    save(){
-
-
-        localStorage.setItem(
-
-            this.key,
-
-            JSON.stringify(
-                this.data
-            )
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 数据报告
+    // 数据统计
     // ==========================
 
 
     report(){
+
+
+
+        let data=
+
+        this.get();
+
+
 
 
 
@@ -390,25 +232,26 @@ window.V100Database = {
 
             total:
 
-            this.data.length,
+            data.length,
 
 
 
-            training:
+            first:
 
-            this.trainingCount(),
+            data[0],
 
 
 
             last:
 
-            this.data[
-                this.data.length-1
+            data[
+                data.length-1
             ]
 
 
 
         };
+
 
 
     }
@@ -419,21 +262,3 @@ window.V100Database = {
 
 
 };
-
-
-
-
-
-
-
-document.addEventListener(
-
-"DOMContentLoaded",
-
-()=>{
-
-
-    V100Database.init();
-
-
-});

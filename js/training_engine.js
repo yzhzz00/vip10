@@ -1,7 +1,7 @@
 // ==================================================
-// 大乐透 AI V100 CORE FINAL
+// 大乐透 AI V100.1 CORE FINAL
 // training_engine.js
-// 滚动窗口真实考试训练引擎
+// 历史滚动考试训练系统
 // ==================================================
 
 "use strict";
@@ -10,35 +10,21 @@
 window.V100TrainingEngine = {
 
 
-    windowSize:500,
-
-    records:[],
-
 
     running:false,
+
 
     current:0,
 
 
-    // ==========================
-    // 初始化
-    // ==========================
-
-    init(){
-
-        let save = localStorage.getItem(
-            "V100_TRAIN_RECORD"
-        );
+    total:0,
 
 
-        if(save){
-
-            this.records = JSON.parse(save);
-
-        }
+    records:[],
 
 
-    },
+
+
 
 
 
@@ -46,45 +32,90 @@ window.V100TrainingEngine = {
     // 开始训练
     // ==========================
 
+
     async start(){
 
 
-        if(this.running){
+
+        if(
+            this.running
+        ){
 
             return;
 
         }
+
+
+
+
+        let history =
+
+        V100Database.get();
+
+
+
+
+
+        let windowSize=500;
+
+
+
+        if(
+            history.length<=windowSize
+        ){
+
+
+            alert(
+            "数据不足500期"
+            );
+
+
+            return;
+
+
+        }
+
+
+
 
 
         this.running=true;
-
-
-        let history = V100Database.get();
-
-
-        if(history.length <= this.windowSize){
-
-
-            alert("历史数据不足");
-
-
-            return;
-
-        }
-
-
-
-        let total =
-        history.length-this.windowSize;
 
 
 
         this.current=0;
 
 
+        this.records=[];
+
+
+
+
+        this.total=
+
+        history.length-windowSize;
+
+
+
+
+
+        V100Progress.start(
+
+            "AI历史滚动考试",
+
+            this.total
+
+        );
+
+
+
+
+
+
 
         for(
-            let i=this.windowSize;
+
+            let i=windowSize;
 
             i<history.length;
 
@@ -93,7 +124,10 @@ window.V100TrainingEngine = {
         ){
 
 
-            if(!this.running){
+
+            if(
+                !this.running
+            ){
 
                 break;
 
@@ -101,67 +135,119 @@ window.V100TrainingEngine = {
 
 
 
-            let trainData =
+
+
+
+            let trainData=
+
             history.slice(
-                i-this.windowSize,
+
+                i-windowSize,
+
                 i
+
             );
 
 
 
-            let real =
+
+
+
+
+            let real=
+
             history[i];
 
 
 
-            // AI预测
 
-            let prediction =
-            await this.predict(
+
+
+
+
+            // 使用新版预测
+
+
+            let prediction=
+
+            await V100Predictor.analyze(
+
                 trainData
+
             );
 
 
 
-            // 比较结果
 
-            let result =
+
+
+
+            let result=
+
             this.compare(
-                prediction,
+
+                prediction.final,
+
                 real
+
             );
 
 
 
-            let record={
-
-
-                round:
-                i-this.windowSize+1,
-
-
-                predict:prediction,
-
-
-                real:real,
-
-
-                result:result,
-
-
-                time:
-                Date.now()
-
-
-            };
 
 
 
-            this.records.push(record);
+
+            this.records.push({
+
+
+                period:
+
+                real.period,
+
+
+                predict:
+
+                prediction.final,
+
+
+                real,
+
+
+                result
 
 
 
-            this.save();
+            });
+
+
+
+
+
+
+
+
+            // 学习
+
+
+            if(
+                window.V100Learning
+            ){
+
+
+                V100Learning.learn({
+
+                    result
+
+                });
+
+
+            }
+
+
+
+
+
 
 
 
@@ -169,25 +255,30 @@ window.V100TrainingEngine = {
 
 
 
-            // 更新界面
+            V100Progress.update(
 
-            if(window.V100TrainingUI){
+                this.current
 
-
-                V100TrainingUI.update(
-                    this.current,
-                    total,
-                    record
-                );
-
-
-            }
+            );
 
 
 
-            // 释放手机线程
 
-            await this.sleep(30);
+            this.updateUI(
+
+                result
+
+            );
+
+
+
+
+
+
+            // 释放手机性能
+
+
+            await this.sleep(20);
 
 
 
@@ -195,14 +286,20 @@ window.V100TrainingEngine = {
 
 
 
+
+
+
         this.running=false;
 
 
 
-        console.log(
-            "训练完成",
-            this.records.length
-        );
+        V100Progress.finish();
+
+
+
+
+        this.report();
+
 
 
     },
@@ -211,63 +308,52 @@ window.V100TrainingEngine = {
 
 
 
-    // ==========================
-    // 单次预测
-    // ==========================
-
-
-    async predict(data){
-
-
-        /*
-        
-        这里调用正式预测核心
-
-        注意：
-
-        训练模型和正式模型分开
-        
-        */
-
-
-        return await V100Predictor.analyze(
-            data,
-            true
-        );
-
-
-    },
-
 
 
 
 
     // ==========================
-    // 命中比较
+    // 对比开奖
     // ==========================
 
 
-    compare(pred,real){
+    compare(
+
+        predict,
+
+        real
+
+    ){
 
 
 
-        let frontHit =
-        pred.front.filter(
+        let frontHit=
 
-            x=>
-            real.front.includes(x)
+        predict.front.filter(
+
+            n=>
+
+            real.front.includes(n)
 
         );
 
 
 
-        let backHit =
-        pred.back.filter(
 
-            x=>
-            real.back.includes(x)
+
+        let backHit=
+
+        predict.back.filter(
+
+            n=>
+
+            real.back.includes(n)
 
         );
+
+
+
+
 
 
 
@@ -275,46 +361,176 @@ window.V100TrainingEngine = {
 
 
             front:
+
             frontHit.length,
 
 
+
             back:
+
             backHit.length,
 
 
+
             total:
+
             frontHit.length+
+
             backHit.length
 
 
 
         };
 
+
+
     },
 
 
 
 
 
+
+
+
+
     // ==========================
-    // 保存记录
+    // 训练报告
     // ==========================
 
 
-    save(){
+    report(){
+
+
+
+        let front3=0;
+
+        let front2=0;
+
+        let front1=0;
+
+        let back2=0;
+
+        let back1=0;
+
+
+
+
+        this.records.forEach(r=>{
+
+
+
+            if(
+                r.result.front>=3
+            ){
+
+                front3++;
+
+            }
+
+
+            if(
+                r.result.front>=2
+            ){
+
+                front2++;
+
+            }
+
+
+
+            if(
+                r.result.front>=1
+            ){
+
+                front1++;
+
+            }
+
+
+
+            if(
+                r.result.back===2
+            ){
+
+                back2++;
+
+            }
+
+
+
+            if(
+                r.result.back>=1
+            ){
+
+                back1++;
+
+            }
+
+
+
+        });
+
+
+
+
+
+
+        let report={
+
+
+            total:
+
+            this.records.length,
+
+
+            front3,
+
+
+            front2,
+
+
+            front1,
+
+
+            back2,
+
+
+            back1
+
+
+
+        };
+
+
+
+
 
 
         localStorage.setItem(
 
-            "V100_TRAIN_RECORD",
+            "V100_TRAIN_REPORT",
 
             JSON.stringify(
-                this.records
+                report
             )
 
         );
 
 
+
+
+
+        console.log(
+            report
+        );
+
+
+
+        return report;
+
+
+
     },
 
 
@@ -322,8 +538,11 @@ window.V100TrainingEngine = {
 
 
 
+
+
+
     // ==========================
-    // 停止训练
+    // 停止
     // ==========================
 
 
@@ -340,19 +559,21 @@ window.V100TrainingEngine = {
 
 
 
-    // ==========================
-    // 清空记录
-    // ==========================
 
 
-    clear(){
+
+    sleep(ms){
 
 
-        this.records=[];
+        return new Promise(
 
+            r=>
 
-        localStorage.removeItem(
-            "V100_TRAIN_RECORD"
+            setTimeout(
+                r,
+                ms
+            )
+
         );
 
 
@@ -363,18 +584,51 @@ window.V100TrainingEngine = {
 
 
 
-    sleep(ms){
 
 
-        return new Promise(
 
-            resolve=>
-            setTimeout(
-                resolve,
-                ms
-            )
+    updateUI(result){
 
+
+
+        let box=
+
+        document.getElementById(
+            "trainDetail"
         );
+
+
+
+        if(box){
+
+
+            box.innerHTML=
+
+            `
+
+            当前考试：
+
+            ${this.current}
+
+            /
+
+            ${this.total}
+
+
+            <br>
+
+
+            本次命中：
+
+            前区${result.front}
+
+            后区${result.back}
+
+            `;
+
+
+        }
+
 
 
     }
@@ -384,19 +638,3 @@ window.V100TrainingEngine = {
 
 
 };
-
-
-
-// 自动初始化
-
-document.addEventListener(
-
-"DOMContentLoaded",
-
-()=>{
-
-
-    V100TrainingEngine.init();
-
-
-});

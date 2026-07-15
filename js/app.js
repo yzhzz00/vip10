@@ -1,5 +1,5 @@
 // ==================================================
-// 大乐透 AI V100 CORE FINAL
+// 大乐透 AI V100.1 CORE FINAL
 // app.js
 // 系统总控制中心
 // ==================================================
@@ -11,15 +11,8 @@ window.V100App = {
 
 
 
-    lastResult:null,
-
-
-
-
-
-
     // ==========================
-    // 系统启动
+    // 初始化
     // ==========================
 
 
@@ -28,30 +21,22 @@ window.V100App = {
 
 
         console.log(
-            "V100 AI CORE启动"
+            "V100.1 AI CORE启动"
         );
 
 
 
-        V100Database.init();
+        if(
+            window.V100Learning
+        ){
 
+            V100Learning.init();
 
-
-        V100Bayes.init();
-
-
-
-        V100Learning.init();
-
-
-
-        V100ModelVersion.init();
-
+        }
 
 
 
         this.updateStatus();
-
 
 
 
@@ -66,7 +51,7 @@ window.V100App = {
 
 
     // ==========================
-    // 更新系统状态
+    // 数据状态
     // ==========================
 
 
@@ -74,68 +59,70 @@ window.V100App = {
 
 
 
-        let data =
-
-        V100Database.report();
-
-
-
-
-        let box =
+        let box=
 
         document.getElementById(
+
             "systemStatus"
+
         );
 
 
 
-        if(box){
+        if(!box){
 
-
-
-            box.innerHTML=
-
-
-            `
-
-            V100 AI CORE FINAL
-
-
-            <br>
-
-
-            历史数据：
-
-            ${data.total}
-
-            期
-
-
-            <br>
-
-
-            训练窗口：
-
-            500期
-
-
-            <br>
-
-
-            模型版本：
-
-            ${
-
-            V100ModelVersion.currentVersion
-
-            }
-
-
-            `;
-
-
+            return;
 
         }
+
+
+
+
+
+        let total=0;
+
+
+
+        if(
+            window.V100Database
+        ){
+
+            total=
+
+            V100Database.get().length;
+
+        }
+
+
+
+
+
+        box.innerHTML=
+
+        `
+
+        V100.1 AI CORE FINAL
+
+
+        <br>
+
+
+        历史数据：
+
+        ${total}
+
+        期
+
+
+        <br>
+
+
+        模型：
+
+        已加载
+
+
+        `;
 
 
 
@@ -154,33 +141,11 @@ window.V100App = {
     // ==========================
 
 
-    async startAnalysis(){
+    async startAnalyze(){
 
 
 
-        let status =
-
-        document.getElementById(
-            "analysisStatus"
-        );
-
-
-
-        if(status){
-
-
-            status.innerHTML=
-
-            "AI分析启动...";
-
-
-        }
-
-
-
-
-
-        let history =
+        let history=
 
         V100Database.get();
 
@@ -207,13 +172,11 @@ window.V100App = {
 
 
 
+        V100Progress.start(
 
+            "AI综合分析",
 
-        let result =
-
-        await V100Predictor.analyze(
-
-            history
+            100
 
         );
 
@@ -221,28 +184,38 @@ window.V100App = {
 
 
 
+        try{
 
 
 
-        this.lastResult=result.final;
+            V100Progress.update(10);
+
+
+
+            let result=
+
+            await V100Predictor.analyze(
+
+                history
+
+            );
 
 
 
 
 
-        // 保存最后预测
+            V100Progress.update(100);
 
 
-        localStorage.setItem(
 
-            "V100_LAST_RESULT",
 
-            JSON.stringify(
+
+
+            this.showResult(
+
                 result.final
-            )
 
-        );
-
+            );
 
 
 
@@ -250,139 +223,32 @@ window.V100App = {
 
 
 
-
-        this.showResult(
-            result
-        );
+            V100Report.render();
 
 
 
 
-
-    },
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 显示结果
-    // ==========================
-
-
-    showResult(result){
-
-
-
-        let box=
-
-        document.getElementById(
-            "predictionResult"
-        );
-
-
-
-        if(!box){
-
-            return;
 
         }
 
+        catch(e){
 
 
 
+            console.error(e);
 
 
 
-        box.innerHTML=
+            alert(
+
+            "AI分析异常"
+
+            );
 
 
-        `
-
-
-        <h3>
-        最终预测
-        </h3>
-
-
-        前区：
-
-        ${
-
-        result.final.front.join(" ")
 
         }
 
-
-        <br>
-
-
-        后区：
-
-        ${
-
-        result.final.back.join(" ")
-
-        }
-
-
-        <hr>
-
-
-        TOP10
-
-
-        <br>
-
-
-        ${
-
-        result.top10.map(
-
-            (x,i)=>
-
-            `
-
-            第${i+1}组：
-
-            ${x.front.join("-")}
-
-            +
-
-            ${x.back.join("-")}
-
-            <br>
-
-            `
-
-
-        ).join("")
-
-        }
-
-
-
-        <hr>
-
-
-        AI会议：
-
-
-        <br>
-
-
-        ${
-
-        result.meeting.join("<br>")
-
-        }
-
-
-        `;
 
 
 
@@ -418,46 +284,83 @@ window.V100App = {
 
 
 
+
     // ==========================
-    // 蒙特卡罗控制
+    // 显示结果
     // ==========================
 
 
-    stopMonte(){
+    showResult(result){
 
 
 
-        V100MonteCarlo.stop();
+        let box=
+
+        document.getElementById(
+
+            "result"
+
+        );
 
 
 
-    },
+        if(!box){
 
+            return;
 
-
-
-
-
-    pauseMonte(){
-
-
-
-        V100MonteCarlo.pauseRun();
-
-
-
-    },
+        }
 
 
 
 
 
+        box.innerHTML=
 
-    continueMonte(){
+        `
+
+
+        <h3>
+
+        V100.1最终预测
+
+        </h3>
+
+
+        前区：
+
+        ${
+
+        result.front.join(" ")
+
+        }
+
+
+        <br>
+
+
+        后区：
+
+        ${
+
+        result.back.join(" ")
+
+        }
+
+
+        <br>
+
+
+        综合评分：
+
+        ${
+
+        result.score
+
+        }
 
 
 
-        V100MonteCarlo.continueRun();
+        `;
 
 
 
@@ -476,16 +379,12 @@ window.V100App = {
 
 
 
+// 页面启动
 
-
-document.addEventListener(
-
-"DOMContentLoaded",
-
-()=>{
+window.onload=function(){
 
 
     V100App.init();
 
 
-});
+};

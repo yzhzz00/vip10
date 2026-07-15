@@ -1,5 +1,5 @@
 // ==================================================
-// 大乐透 AI V100 CORE FINAL
+// 大乐透 AI V100.1 CORE FINAL
 // feedback.js
 // 开奖反馈学习模块
 // ==================================================
@@ -12,82 +12,37 @@ window.V100Feedback = {
 
 
     // ==========================
-    // 获取输入开奖
+    // 提交开奖
     // ==========================
 
 
-    getInput(){
-
-
-        let front=[];
-
-
-        let back=[];
+    submit(){
 
 
 
-        for(
-            let i=1;
-            i<=5;
-            i++
-        ){
+        let period =
 
-
-            let value =
-
-            document.getElementById(
-
-                "front"+i
-
-            ).value;
-
-
-
-            if(value){
-
-                front.push(
-                    Number(value)
-                );
-
-            }
-
-
-        }
+        document.getElementById(
+            "feedbackPeriod"
+        ).value;
 
 
 
 
+        let frontText =
 
-
-        for(
-            let i=1;
-            i<=2;
-            i++
-        ){
-
-
-            let value =
-
-            document.getElementById(
-
-                "back"+i
-
-            ).value;
+        document.getElementById(
+            "feedbackFront"
+        ).value;
 
 
 
 
-            if(value){
+        let backText =
 
-                back.push(
-                    Number(value)
-                );
-
-
-            }
-
-
-        }
+        document.getElementById(
+            "feedbackBack"
+        ).value;
 
 
 
@@ -95,22 +50,57 @@ window.V100Feedback = {
 
 
 
-        return {
+        let front =
+
+        frontText
+
+        .trim()
+
+        .split(/\s+/)
+
+        .map(Number);
 
 
-            front:
-
-            front.sort(
-                (a,b)=>a-b
-            ),
 
 
 
-            back:
 
-            back.sort(
-                (a,b)=>a-b
-            )
+
+        let back =
+
+        backText
+
+        .trim()
+
+        .split(/\s+/)
+
+        .map(Number);
+
+
+
+
+
+
+
+        let result={
+
+
+
+            period,
+
+
+            date:
+
+            new Date()
+            .toISOString()
+            .slice(0,10),
+
+
+
+            front,
+
+
+            back
 
 
 
@@ -118,7 +108,17 @@ window.V100Feedback = {
 
 
 
-    },
+
+
+
+        // 保存开奖
+
+
+        V100Database.add(
+
+            result
+
+        );
 
 
 
@@ -127,36 +127,51 @@ window.V100Feedback = {
 
 
 
-    // ==========================
-    // 保存开奖
-    // ==========================
+        // 分析上一期预测
 
 
-    save(){
+        let last =
 
+        localStorage.getItem(
 
+            "V100_LAST_RESULT"
 
-        let result =
-
-        this.getInput();
-
+        );
 
 
 
 
-        if(
-            result.front.length!==5
-            ||
-            result.back.length!==2
-        ){
 
 
-            alert(
-            "请输入完整开奖"
+
+        let compare=null;
+
+
+
+
+        if(last){
+
+
+
+            compare=
+
+            this.compare(
+
+                JSON.parse(last),
+
+                result
+
             );
 
 
-            return;
+
+
+            this.learning(
+
+                compare
+
+            );
+
 
 
         }
@@ -166,73 +181,26 @@ window.V100Feedback = {
 
 
 
+        this.saveRecord(
 
-        let history =
+            result,
 
-        JSON.parse(
-
-        localStorage.getItem(
-            "DLT_HISTORY"
-        )
-
-        ||
-
-        "[]"
+            compare
 
         );
 
 
-
-
-
-
-        history.push({
-
-            front:
-            result.front,
-
-
-            back:
-            result.back,
-
-
-            time:
-            Date.now()
-
-
-        });
-
-
-
-
-
-
-
-        localStorage.setItem(
-
-            "DLT_HISTORY",
-
-            JSON.stringify(
-                history
-            )
-
-        );
-
-
-
-
-
-
-
-        this.learn(result);
 
 
 
 
 
         alert(
-            "开奖保存完成，AI已复盘"
+
+        "开奖反馈完成，AI已学习"
+
         );
+
 
 
 
@@ -247,45 +215,23 @@ window.V100Feedback = {
 
 
     // ==========================
-    // 复盘学习
+    // 比较预测
     // ==========================
 
 
-    learn(real){
+    compare(
+
+        predict,
+
+        real
+
+    ){
 
 
 
-        let lastPredict =
+        let frontHit=
 
-        JSON.parse(
-
-        localStorage.getItem(
-            "V100_LAST_RESULT"
-        )
-
-        );
-
-
-
-
-
-
-        if(
-            !lastPredict
-        ){
-
-            return;
-
-        }
-
-
-
-
-
-
-        let frontHit =
-
-        lastPredict.front.filter(
+        predict.front.filter(
 
             n=>
 
@@ -298,9 +244,9 @@ window.V100Feedback = {
 
 
 
-        let backHit =
+        let backHit=
 
-        lastPredict.back.filter(
+        predict.back.filter(
 
             n=>
 
@@ -314,42 +260,90 @@ window.V100Feedback = {
 
 
 
-
-        let record={
-
-
-            predict:
-            lastPredict,
+        return {
 
 
 
-            real,
+            front:
+
+            frontHit.length,
 
 
 
-            result:{
+            back:
+
+            backHit.length,
+
+
+
+            frontNumbers:
+
+            frontHit,
+
+
+
+            backNumbers:
+
+            backHit
+
+
+
+        };
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 学习
+    // ==========================
+
+
+    learning(compare){
+
+
+
+        if(
+            !window.V100Learning
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+        let score=
+
+        {
+
+
+            result:
+
+            {
 
 
                 front:
-                frontHit.length,
+
+                compare.front,
 
 
                 back:
-                backHit.length,
+
+                compare.back
 
 
-                total:
-
-                frontHit.length+
-                backHit.length
-
-
-            },
-
-
-
-            time:
-            Date.now()
+            }
 
 
 
@@ -360,19 +354,52 @@ window.V100Feedback = {
 
 
 
+        V100Learning.learn(
+
+            score
+
+        );
 
 
-        let logs =
+
+    },
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 保存成长记录
+    // ==========================
+
+
+    saveRecord(
+
+        real,
+
+        compare
+
+    ){
+
+
+
+        let list=
 
         JSON.parse(
 
-        localStorage.getItem(
-            "V100_FEEDBACK_LOG"
-        )
+            localStorage.getItem(
 
-        ||
+                "V100_FEEDBACK_LOG"
 
-        "[]"
+            )
+
+            ||
+
+            "[]"
 
         );
 
@@ -381,7 +408,30 @@ window.V100Feedback = {
 
 
 
-        logs.push(record);
+
+
+        list.push({
+
+
+
+            time:
+
+            new Date()
+            .toLocaleString(),
+
+
+
+            real,
+
+
+
+            compare
+
+
+
+        });
+
+
 
 
 
@@ -393,39 +443,49 @@ window.V100Feedback = {
             "V100_FEEDBACK_LOG",
 
             JSON.stringify(
-                logs
+                list
             )
 
         );
 
 
 
+    },
 
 
 
 
-        // 调用贝叶斯学习
 
 
-        if(
-            window.V100Bayes
-        ){
 
 
-            V100Bayes.learn(
-                record
-            );
+
+    // ==========================
+    // 获取成长记录
+    // ==========================
 
 
-        }
+    getRecords(){
 
 
+
+        return JSON.parse(
+
+            localStorage.getItem(
+
+                "V100_FEEDBACK_LOG"
+
+            )
+
+            ||
+
+            "[]"
+
+        );
 
 
 
     }
-
-
 
 
 

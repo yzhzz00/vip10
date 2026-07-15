@@ -1,7 +1,7 @@
 // ==================================================
-// 大乐透 AI V100 CORE FINAL
+// 大乐透 AI V100.1 CORE FINAL
 // montecarlo.js
-// 手机优化版蒙特卡罗引擎
+// 加权分段蒙特卡罗模拟
 // ==================================================
 
 "use strict";
@@ -10,96 +10,85 @@
 window.V100MonteCarlo = {
 
 
-
-    total:100000,
-
-
-    batch:1000,
-
-
     running:false,
 
 
-    pause:false,
+    result:[],
 
 
-    current:0,
+    // 默认模拟次数
 
+    total:
 
-
-    results:[],
-
-
-
+    100000,
 
 
 
-    // ==========================
-    // 开始模拟
-    // ==========================
+    // 分段大小
+
+    batch:
+
+    1000,
+
+
+
 
 
     async run(
-        candidates
+
+        candidates,
+
+        total=100000
+
     ){
 
 
 
         this.running=true;
 
-        this.pause=false;
 
-        this.current=0;
-
-        this.results=[];
+        this.result=[];
 
 
 
+        let count=0;
 
-        let rounds =
-        this.total;
+
+
+
+        let scoreMap={};
+
+
+
+
+        V100Progress.start(
+
+            "蒙特卡罗模拟",
+
+            total
+
+        );
+
 
 
 
 
 
         while(
-            this.current < rounds
+
+            count < total
+
         ){
 
 
 
-            // 暂停
-
-            while(this.pause){
-
-
-                await this.sleep(200);
-
-
-            }
-
-
-
-
-            if(
-                !this.running
-            ){
-
-                break;
-
-            }
-
-
-
-
-            let count =
+            let currentBatch=
 
             Math.min(
 
                 this.batch,
 
-                rounds-this.current
+                total-count
 
             );
 
@@ -107,10 +96,12 @@ window.V100MonteCarlo = {
 
 
 
+
             for(
+
                 let i=0;
 
-                i<count;
+                i<currentBatch;
 
                 i++
 
@@ -118,17 +109,66 @@ window.V100MonteCarlo = {
 
 
 
-                let item =
+                let item=
 
-                this.pick(
+                this.weightPick(
+
                     candidates
+
                 );
 
 
 
-                this.results.push(
-                    item
-                );
+
+
+                let key=
+
+                item.front.join("-")
+
+                +
+
+                "+"
+
+                +
+
+                item.back.join("-");
+
+
+
+
+
+
+
+                if(
+                    !scoreMap[key]
+                ){
+
+
+                    scoreMap[key]={
+
+
+                        front:item.front,
+
+
+                        back:item.back,
+
+
+                        hit:0,
+
+
+                        score:item.score
+
+
+                    };
+
+
+                }
+
+
+
+
+
+                scoreMap[key].hit++;
 
 
 
@@ -138,22 +178,26 @@ window.V100MonteCarlo = {
 
 
 
-            this.current += count;
+
+            count += currentBatch;
+
+
+
+            V100Progress.update(
+
+                count
+
+            );
 
 
 
 
 
-            this.updateProgress();
 
 
+            // 给手机释放时间
 
-
-
-
-            // 释放手机线程
-
-            await this.sleep(30);
+            await this.sleep(20);
 
 
 
@@ -165,66 +209,59 @@ window.V100MonteCarlo = {
 
 
 
-        this.running=false;
+        this.result=
+
+        Object.values(
+
+            scoreMap
+
+        )
+
+        .sort(
+
+            (a,b)=>{
 
 
+                return (
 
-        return this.rank();
+                    b.hit
 
+                    -
 
+                    a.hit
 
-
-    },
-
-
-
-
+                );
 
 
+            }
 
+        )
 
-    // ==========================
-    // 随机抽样
-    // ==========================
+        .slice(
 
+            0,
 
-    pick(candidates){
-
-
-
-        let index =
-
-        Math.floor(
-
-            Math.random()
-            *
-            candidates.length
+            10
 
         );
 
 
 
-        let item =
-        candidates[index];
 
 
 
-        return {
+
+        this.running=false;
 
 
-            front:
-            item.front,
+
+        V100Progress.finish();
 
 
-            back:
-            item.back,
 
 
-            score:
-            item.score || 0
+        return this.result;
 
-
-        };
 
 
     },
@@ -236,63 +273,36 @@ window.V100MonteCarlo = {
 
 
 
+
     // ==========================
-    // 排序
+    // 权重抽样
     // ==========================
 
 
-    rank(){
+    weightPick(
+
+        candidates
+
+    ){
 
 
 
-        let map={};
+        let total=0;
 
 
 
-
-        this.results.forEach(item=>{
-
-
-            let key=
-
-            item.front.join("-")
-
-            +
-
-            "+"
-
-            +
-
-            item.back.join("-");
+        candidates.forEach(c=>{
 
 
+            total +=
 
+            Math.max(
 
-            if(
-                !map[key]
-            ){
+                c.score,
 
+                1
 
-                map[key]={
-
-                    front:item.front,
-
-                    back:item.back,
-
-                    count:0,
-
-                    score:item.score
-
-                };
-
-
-            }
-
-
-
-            map[key].count++;
-
-
+            );
 
 
         });
@@ -302,138 +312,60 @@ window.V100MonteCarlo = {
 
 
 
-        return Object.values(map)
 
-        .sort(
+        let random=
 
-            (a,b)=>
+        Math.random()
 
-            b.count-a.count
+        *
 
-        )
+        total;
 
-        .slice(
-            0,
-            10
-        );
 
 
 
-    },
 
 
+        let current=0;
 
 
 
 
+        for(
 
+            let c of candidates
 
+        ){
 
-    // ==========================
-    // 暂停
-    // ==========================
 
 
-    pauseRun(){
+            current +=
 
+            Math.max(
 
-        this.pause=true;
+                c.score,
 
+                1
 
-    },
+            );
 
 
 
 
 
+            if(
 
-    // ==========================
-    // 继续
-    // ==========================
+                current >= random
 
+            ){
 
-    continueRun(){
 
 
-        this.pause=false;
+                return c;
 
 
-    },
+            }
 
-
-
-
-
-
-
-    // ==========================
-    // 停止
-    // ==========================
-
-
-    stop(){
-
-
-        this.running=false;
-
-
-    },
-
-
-
-
-
-
-
-
-    // ==========================
-    // 进度显示
-    // ==========================
-
-
-    updateProgress(){
-
-
-
-        let percent=
-
-        Math.floor(
-
-            this.current
-            /
-            this.total
-            *
-            100
-
-        );
-
-
-
-
-
-        let bar=
-
-        document.getElementById(
-            "progressBar"
-        );
-
-
-
-        let text=
-
-        document.getElementById(
-            "progressNumber"
-        );
-
-
-
-
-
-        if(bar){
-
-
-            bar.style.width =
-            percent+"%";
 
 
         }
@@ -442,25 +374,7 @@ window.V100MonteCarlo = {
 
 
 
-        if(text){
-
-
-            text.innerHTML=
-
-            `蒙特卡罗：
-
-            ${this.current}
-
-            /
-
-            ${this.total}
-
-            (${percent}%)
-
-            `;
-
-
-        }
+        return candidates[0];
 
 
 
@@ -477,20 +391,22 @@ window.V100MonteCarlo = {
     sleep(ms){
 
 
+
         return new Promise(
 
             resolve=>
 
             setTimeout(
+
                 resolve,
+
                 ms
+
             )
 
         );
 
-
     }
-
 
 
 

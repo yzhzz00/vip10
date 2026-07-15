@@ -1,7 +1,7 @@
 // ==================================================
-// 大乐透 AI V100 CORE FINAL
+// 大乐透 AI V100.1 CORE FINAL
 // trend.js
-// 大乐透走势分析引擎
+// 趋势分析模块
 // ==================================================
 
 "use strict";
@@ -11,399 +11,86 @@ window.V100Trend = {
 
 
 
-    // ===============================
-    // 主分析入口
-    // ===============================
+    // ==========================
+    // 号码趋势评分
+    // ==========================
 
+    score(
 
-    analyze(history){
+        number,
 
-
-        if(
-            !history ||
-            history.length < 100
-        ){
-
-            return null;
-
-        }
-
-
-
-        return {
-
-
-            zone:
-            this.zoneAnalyze(history),
-
-
-
-            oddEven:
-            this.oddEvenAnalyze(history),
-
-
-
-            bigSmall:
-            this.bigSmallAnalyze(history),
-
-
-
-            sum:
-            this.sumAnalyze(history),
-
-
-
-            repeat:
-            this.repeatAnalyze(history),
-
-
-
-            connect:
-            this.connectAnalyze(history),
-
-
-
-            missing:
-            this.missingAnalyze(history),
-
-
-
-            hotCold:
-            this.hotCold(history)
-
-
-
-        };
-
-
-    },
-
-
-
-
-
-    // ===============================
-    // 分区分析
-    // ===============================
-
-
-    zoneAnalyze(history){
-
-
-
-        let recent =
-        history.slice(-500);
-
-
-
-        let low=0;
-
-        let middle=0;
-
-        let high=0;
-
-
-
-        recent.forEach(draw=>{
-
-
-            draw.front.forEach(num=>{
-
-
-                if(num<=12){
-
-                    low++;
-
-                }
-
-                else if(num<=24){
-
-                    middle++;
-
-                }
-
-                else{
-
-                    high++;
-
-                }
-
-
-
-            });
-
-
-
-        });
-
-
-
-
-        let total =
-        low+middle+high;
-
-
-
-        return {
-
-
-            low:
-            Number(
-            (low/total*5)
-            .toFixed(2)
-            ),
-
-
-
-            middle:
-            Number(
-            (middle/total*5)
-            .toFixed(2)
-            ),
-
-
-
-            high:
-            Number(
-            (high/total*5)
-            .toFixed(2)
-            )
-
-        };
-
-
-
-    },
-
-
-
-
-
-
-
-
-    // ===============================
-    // 奇偶走势
-    // ===============================
-
-
-    oddEvenAnalyze(history){
-
-
-
-        let recent =
-        history.slice(-100);
-
-
-
-        let odd=0;
-
-        let even=0;
-
-
-
-        recent.forEach(d=>{
-
-
-            d.front.forEach(n=>{
-
-
-                if(n%2){
-
-                    odd++;
-
-                }
-                else{
-
-                    even++;
-
-                }
-
-
-            });
-
-
-        });
-
-
-
-        return {
-
-
-            odd,
-
-            even,
-
-
-            suggest:
-
-            odd>even
-
-            ?
-
-            "偏奇"
-
-            :
-
-            "偏偶"
-
-
-        };
-
-    },
-
-
-
-
-
-
-
-    // ===============================
-    // 大小走势
-    // ===============================
-
-
-    bigSmallAnalyze(history){
-
-
-
-        let recent =
-        history.slice(-100);
-
-
-
-        let big=0;
-
-        let small=0;
-
-
-
-        recent.forEach(d=>{
-
-
-            d.front.forEach(n=>{
-
-
-                if(n>=18){
-
-                    big++;
-
-                }
-
-                else{
-
-                    small++;
-
-                }
-
-
-            });
-
-
-
-        });
-
-
-
-        return {
-
-
-            big,
-
-            small,
-
-
-            suggest:
-
-
-            big>small
-
-            ?
-
-            "偏大"
-
-            :
-
-            "偏小"
-
-
-
-        };
-
-    },
-
-
-
-
-
-
-
-
-    // ===============================
-    // 和值分析
-    // ===============================
-
-
-    sumAnalyze(history){
-
-
-
-        let arr =
         history
-        .slice(-100)
-        .map(
 
-            x=>
+    ){
 
-            x.front.reduce(
-                (a,b)=>a+b,
-                0
-            )
+
+
+        let short =
+
+        this.periodScore(
+
+            number,
+
+            history,
+
+            50
 
         );
 
 
 
 
-        let avg =
+        let medium =
 
-        arr.reduce(
-            (a,b)=>a+b,
-            0
-        )
+        this.periodScore(
 
-        /
+            number,
 
-        arr.length;
+            history,
 
+            200
 
-
-
-        return {
-
-
-            average:
-
-            Number(
-            avg.toFixed(2)
-            ),
+        );
 
 
 
-            range:
+
+        let long =
+
+        this.periodScore(
+
+            number,
+
+            history,
+
+            history.length
+
+        );
 
 
-            [
-
-            Math.min(...arr),
-
-            Math.max(...arr)
-
-            ]
 
 
 
-        };
+
+        return Number(
+
+            (
+
+            short *0.5
+
+            +
+
+            medium*0.3
+
+            +
+
+            long*0.2
+
+            )
+
+            .toFixed(3)
+
+        );
 
 
 
@@ -416,28 +103,31 @@ window.V100Trend = {
 
 
 
-    // ===============================
-    // 重号分析
-    // ===============================
+
+    // ==========================
+    // 周期统计
+    // ==========================
 
 
-    repeatAnalyze(history){
+    periodScore(
+
+        number,
+
+        history,
+
+        size
+
+    ){
 
 
 
-        let last =
+        let data=
 
-        history[
-            history.length-1
-        ];
+        history.slice(
 
+            -size
 
-
-        let before =
-
-        history[
-            history.length-2
-        ];
+        );
 
 
 
@@ -445,11 +135,13 @@ window.V100Trend = {
 
 
 
-        last.front.forEach(n=>{
+        data.forEach(item=>{
 
 
             if(
-            before.front.includes(n)
+
+            item.front.includes(number)
+
             ){
 
                 count++;
@@ -461,30 +153,22 @@ window.V100Trend = {
 
 
 
-        return {
-
-
-            lastRepeat:
-
-            count,
-
-
-            suggest:
-
-
-            count<=1
-
-            ?
-
-            "防1-2个重号"
-
-            :
-
-            "降低重号"
 
 
 
-        };
+        return (
+
+            count
+
+            /
+
+            data.length
+
+            *
+
+            100
+
+        );
 
 
 
@@ -497,208 +181,215 @@ window.V100Trend = {
 
 
 
-    // ===============================
-    // 连号分析
-    // ===============================
+
+    // ==========================
+    // 趋势方向
+    // ==========================
 
 
-    connectAnalyze(history){
+    direction(
 
+        number,
 
+        history
 
-        let recent =
-        history.slice(-100);
-
-
-
-        let count=0;
-
-
-
-        recent.forEach(d=>{
-
-
-            let nums =
-            [...d.front]
-            .sort(
-                (a,b)=>a-b
-            );
+    ){
 
 
 
-            for(
-            let i=0;
-            i<4;
+        let recent=
+
+        this.periodScore(
+
+            number,
+
+            history,
+
+            50
+
+        );
+
+
+
+
+        let old=
+
+        this.periodScore(
+
+            number,
+
+            history,
+
+            200
+
+        );
+
+
+
+
+
+        if(
+
+            recent>old
+
+        ){
+
+
+            return "UP";
+
+
+        }
+
+
+
+        if(
+
+            recent<old
+
+        ){
+
+
+            return "DOWN";
+
+
+        }
+
+
+
+        return "STABLE";
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 热度排名
+    // ==========================
+
+
+    ranking(history){
+
+
+
+        let list=[];
+
+
+
+
+        for(
+
+            let i=1;
+
+            i<=35;
+
             i++
-            ){
 
-
-                if(
-                nums[i+1]-nums[i]===1
-                ){
-
-                    count++;
-
-                }
-
-
-            }
-
-
-
-        });
-
-
-
-
-        return {
-
-
-            count,
-
-
-            probability:
-
-            Number(
-            (count/100)
-            .toFixed(2)
-            )
-
-
-        };
-
-
-    },
-
-
-
-
-
-
-
-
-    // ===============================
-    // 遗漏分析
-    // ===============================
-
-
-    missingAnalyze(history){
-
-
-
-        let miss={};
-
-
-
-        for(
-        let n=1;
-        n<=35;
-        n++
         ){
 
 
-            miss[n]=0;
+
+            list.push({
 
 
 
-            for(
-            let i=history.length-1;
-            i>=0;
-            i--
-            ){
-
-
-                if(
-                history[i]
-                .front
-                .includes(n)
-                ){
-
-                    break;
-
-                }
+                number:i,
 
 
 
-                miss[n]++;
+                score:
 
+                this.score(
 
-            }
+                    i,
 
+                    history
 
-        }
+                )
 
-
-
-        return miss;
-
-
-
-    },
-
-
-
-
-
-
-
-
-    // ===============================
-    // 冷热分析
-    // ===============================
-
-
-    hotCold(history){
-
-
-
-        let recent =
-        history.slice(-100);
-
-
-
-        let count={};
-
-
-
-        for(
-        let i=1;
-        i<=35;
-        i++
-        ){
-
-            count[i]=0;
-
-        }
-
-
-
-
-        recent.forEach(d=>{
-
-
-            d.front.forEach(n=>{
-
-
-                count[n]++;
 
 
             });
 
 
 
-        });
+        }
 
 
 
 
-        return count;
+
+
+        return list.sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 趋势报告
+    // ==========================
+
+
+    report(history){
+
+
+
+        return {
+
+
+            hot:
+
+            this.ranking(history)
+
+            .slice(
+
+                0,
+
+                5
+
+            ),
+
+
+
+            cold:
+
+            this.ranking(history)
+
+            .slice(
+
+                -5
+
+            )
+
+
+
+        };
 
 
 
     }
-
-
 
 
 

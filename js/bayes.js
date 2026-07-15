@@ -1,7 +1,7 @@
 // ==================================================
-// 大乐透 AI V100 CORE FINAL
+// 大乐透 AI V100.1 CORE FINAL
 // bayes.js
-// 贝叶斯后验概率修正
+// 贝叶斯概率修正模块
 // ==================================================
 
 "use strict";
@@ -11,117 +11,92 @@ window.V100Bayes = {
 
 
 
-    // 当前模型权重
-
-    weights:{
-
-
-        trend:1,
+    // ==========================
+    // 号码后验评分
+    // ==========================
 
 
-        probability:1,
+    score(
 
+        number,
 
-        structure:1,
-
-
-        markov:1
-
-
-
-    },
-
-
-
-
-
-    // =================================
-    // 初始化
-    // =================================
-
-
-    init(){
-
-
-        let data =
-
-        localStorage.getItem(
-            "V100_BAYES_WEIGHT"
-        );
-
-
-
-        if(data){
-
-
-            this.weights =
-            JSON.parse(data);
-
-
-        }
-
-
-    },
-
-
-
-
-
-
-
-    // =================================
-    // 后验评分
-    // =================================
-
-
-    posterior(
-        item,
         history
+
     ){
 
 
 
-        let score=0;
+        let prior =
 
+        this.priorProbability(
 
+            number,
 
+            history
 
-        // 走势权重
-
-
-        score +=
-
-        item.trendScore *
-
-        this.weights.trend;
+        );
 
 
 
 
 
-        // 概率权重
+        let recent =
 
+        this.recentEvidence(
 
-        score +=
+            number,
 
-        item.probabilityScore *
+            history
 
-        this.weights.probability;
+        );
 
 
 
 
 
 
+        let posterior =
 
-        // 结构权重
+        this.calculate(
+
+            prior,
+
+            recent
+
+        );
 
 
-        score +=
 
-        item.structureScore *
 
-        this.weights.structure;
+
+
+        let weight=1;
+
+
+
+
+
+        // 调用AI学习权重
+
+
+        if(
+            window.V100Learning
+        ){
+
+
+            let w=
+
+            V100Learning.getWeights();
+
+
+
+            weight=
+
+            w.probability || 1;
+
+
+
+        }
 
 
 
@@ -130,101 +105,24 @@ window.V100Bayes = {
 
         return Number(
 
-            score.toFixed(3)
+            (
 
-        );
+            posterior
 
+            *
 
-    },
+            100
 
+            *
 
+            weight
 
-
-
-
-
-
-
-    // =================================
-    // 根据考试结果调整
-    // =================================
-
-
-    learn(record){
-
-
-
-        let hit =
-
-        record.result.total;
-
-
-
-        if(hit>=4){
-
-
-
-            this.weights.trend +=0.05;
-
-
-            this.weights.structure +=0.03;
-
-
-
-        }
-
-
-
-        else if(hit<=1){
-
-
-
-            this.weights.probability +=0.03;
-
-
-            this.weights.trend -=0.01;
-
-
-
-        }
-
-
-
-
-        this.save();
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // =================================
-    // 保存权重
-    // =================================
-
-
-    save(){
-
-
-        localStorage.setItem(
-
-
-            "V100_BAYES_WEIGHT",
-
-
-            JSON.stringify(
-                this.weights
             )
 
+            .toFixed(3)
 
         );
+
 
 
     },
@@ -237,37 +135,264 @@ window.V100Bayes = {
 
 
 
-    // =================================
-    // 获取当前状态
-    // =================================
+    // ==========================
+    // 先验概率
+    // ==========================
 
 
-    report(){
+    priorProbability(
 
+        number,
 
+        history
 
-        return {
-
-
-            trend:
-
-            this.weights.trend,
+    ){
 
 
 
-            probability:
-
-            this.weights.probability,
+        let count=0;
 
 
 
-            structure:
 
-            this.weights.structure
-
+        history.forEach(item=>{
 
 
-        };
+
+            if(
+
+            item.front.includes(number)
+
+            ){
+
+
+                count++;
+
+
+            }
+
+
+
+        });
+
+
+
+
+
+
+        return (
+
+            count
+
+            /
+
+            history.length
+
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 近期证据
+    // ==========================
+
+
+    recentEvidence(
+
+        number,
+
+        history
+
+    ){
+
+
+
+        let recent=
+
+        history.slice(
+
+            -100
+
+        );
+
+
+
+
+
+        let count=0;
+
+
+
+
+        recent.forEach(item=>{
+
+
+
+            if(
+
+            item.front.includes(number)
+
+            ){
+
+
+                count++;
+
+
+            }
+
+
+        });
+
+
+
+
+
+
+
+        // 平滑处理
+
+
+        return (
+
+            count+1
+
+        )
+
+        /
+
+        (
+
+            recent.length+2
+
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 贝叶斯计算
+    // ==========================
+
+
+    calculate(
+
+        prior,
+
+        evidence
+
+    ){
+
+
+
+        let result=
+
+        (
+
+            prior
+
+            *
+
+            evidence
+
+        )
+
+        /
+
+        (
+
+            evidence
+
+            ||
+
+            1
+
+        );
+
+
+
+
+
+
+
+        return result;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 组合修正
+    // ==========================
+
+
+    combinationAdjust(
+
+        front,
+
+        history
+
+    ){
+
+
+
+        let total=0;
+
+
+
+
+        front.forEach(n=>{
+
+
+            total +=
+
+            this.score(
+
+                n,
+
+                history
+
+            );
+
+
+        });
+
+
+
+
+
+        return Number(
+
+            total.toFixed(3)
+
+        );
+
 
 
     }
@@ -276,19 +401,5 @@ window.V100Bayes = {
 
 
 
+
 };
-
-
-
-
-document.addEventListener(
-
-"DOMContentLoaded",
-
-()=>{
-
-
-    V100Bayes.init();
-
-
-});

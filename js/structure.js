@@ -1,7 +1,7 @@
 // ==================================================
-// 大乐透 AI V100 CORE FINAL
+// 大乐透 AI V100.1 CORE FINAL
 // structure.js
-// 大乐透号码结构过滤引擎
+// 大乐透号码结构分析模块
 // ==================================================
 
 "use strict";
@@ -11,44 +11,60 @@ window.V100Structure = {
 
 
 
-    // =================================
-    // 主过滤
-    // =================================
+    // ==========================
+    // 主检查
+    // ==========================
 
 
-    check(front,trend){
-
-
-        let result={
-
-            pass:true,
-
-            score:100,
-
-            reason:[]
-
-        };
+    check(front){
 
 
 
-        // 分区
+        let score=100;
 
-        let zone =
+
+        let reasons=[];
+
+
+
+
+        // 排序
+
+        front=
+
+        front.sort(
+            (a,b)=>a-b
+        );
+
+
+
+
+
+
+        // 三区
+
+        let zone=
+
         this.zone(front);
 
 
 
         if(
-            !this.zoneCheck(zone,trend)
+            !this.checkZone(zone)
         ){
 
-            result.pass=false;
 
-            result.reason.push(
-                "分区异常"
+            score-=20;
+
+
+            reasons.push(
+            "三区比例异常"
             );
 
+
         }
+
+
 
 
 
@@ -56,46 +72,38 @@ window.V100Structure = {
 
         // 奇偶
 
-        let oddEven =
-        this.oddEven(front);
+
+        let odd=
+
+        front.filter(
+
+            n=>
+
+            n%2===1
+
+        ).length;
+
 
 
 
         if(
-            !this.oddEvenCheck(oddEven)
+            odd<1
+            ||
+            odd>4
         ){
 
-            result.score-=10;
 
-            result.reason.push(
-                "奇偶偏离"
+            score-=15;
+
+
+            reasons.push(
+            "奇偶比例异常"
             );
+
 
         }
 
 
-
-
-
-
-        // 大小
-
-        let bigSmall =
-        this.bigSmall(front);
-
-
-
-        if(
-            !this.bigSmallCheck(bigSmall)
-        ){
-
-            result.score-=10;
-
-            result.reason.push(
-                "大小异常"
-            );
-
-        }
 
 
 
@@ -104,23 +112,79 @@ window.V100Structure = {
 
         // 和值
 
-        let sum =
-        this.sum(front);
+
+        let sum=
+
+        front.reduce(
+
+            (a,b)=>
+
+            a+b,
+
+            0
+
+        );
+
 
 
 
         if(
-            sum<80 ||
-            sum>150
+            sum<80
+            ||
+            sum>140
         ){
 
-            result.pass=false;
 
-            result.reason.push(
-                "和值异常"
+            score-=20;
+
+
+            reasons.push(
+            "和值异常"
             );
 
+
         }
+
+
+
+
+
+
+
+
+        // 跨度
+
+
+        let span=
+
+        front[4]
+
+        -
+
+        front[0];
+
+
+
+
+
+        if(
+            span<15
+            ||
+            span>34
+        ){
+
+
+            score-=10;
+
+
+            reasons.push(
+            "跨度异常"
+            );
+
+
+        }
+
+
 
 
 
@@ -130,18 +194,27 @@ window.V100Structure = {
 
         // 连号
 
-        let connect =
-        this.connect(front);
+
+        let consecutive=
+
+        this.hasConsecutive(
+            front
+        );
 
 
 
-        if(connect>2){
+        if(
+            consecutive>2
+        ){
 
-            result.score-=15;
 
-            result.reason.push(
-                "连号过多"
+            score-=10;
+
+
+            reasons.push(
+            "连号过多"
             );
+
 
         }
 
@@ -149,7 +222,56 @@ window.V100Structure = {
 
 
 
-        return result;
+
+
+        // 分数保护
+
+
+        if(
+            score<0
+        ){
+
+            score=0;
+
+        }
+
+
+
+
+        return {
+
+
+            pass:
+
+            score>=60,
+
+
+
+            score,
+
+
+
+            zone,
+
+
+
+            sum,
+
+
+
+            odd,
+
+
+
+            span,
+
+
+
+            reasons
+
+
+
+        };
 
 
 
@@ -161,12 +283,15 @@ window.V100Structure = {
 
 
 
-    // =================================
-    // 分区
-    // =================================
+
+
+    // ==========================
+    // 三区计算
+    // ==========================
 
 
     zone(front){
+
 
 
         let low=0;
@@ -177,26 +302,35 @@ window.V100Structure = {
 
 
 
+
         front.forEach(n=>{
 
 
-            if(n<=12)
+            if(
+                n<=12
+            ){
 
                 low++;
 
-
-            else if(n<=24)
+            }
+            else if(
+                n<=24
+            ){
 
                 mid++;
 
-
-            else
+            }
+            else{
 
                 high++;
+
+            }
 
 
 
         });
+
+
 
 
 
@@ -213,45 +347,6 @@ window.V100Structure = {
         };
 
 
-    },
-
-
-
-
-
-    zoneCheck(zone,trend){
-
-
-
-        /*
-        
-        推荐结构：
-
-        2低2中1高
-
-        或
-
-        1低2中2高
-        
-        */
-
-
-        if(
-            zone.low>=1 &&
-            zone.low<=3 &&
-            zone.mid>=1 &&
-            zone.high>=1
-        ){
-
-            return true;
-
-        }
-
-
-
-        return false;
-
-
 
     },
 
@@ -262,63 +357,62 @@ window.V100Structure = {
 
 
 
-    // =================================
-    // 奇偶
-    // =================================
+
+    // ==========================
+    // 三区合理性
+    // ==========================
 
 
-    oddEven(front){
-
-
-
-        let odd=0;
-
-        let even=0;
+    checkZone(zone){
 
 
 
-        front.forEach(n=>{
+        let key=
 
+        zone.low
 
-            if(n%2)
+        +
 
-                odd++;
+        "-"
 
-            else
+        +
 
-                even++;
+        zone.mid
 
+        +
 
+        "-"
 
-        });
+        +
 
-
-
-        return {
-
-            odd,
-
-            even
-
-        };
-
-
-    },
+        zone.high;
 
 
 
 
 
-    oddEvenCheck(data){
+        let allow=[
+
+
+            "2-2-1",
+
+            "2-1-2",
+
+            "1-2-2",
+
+            "1-3-1",
+
+            "3-1-1"
+
+
+        ];
 
 
 
-        return (
 
-            data.odd>=1 &&
 
-            data.even>=1
-
+        return allow.includes(
+            key
         );
 
 
@@ -331,117 +425,13 @@ window.V100Structure = {
 
 
 
-    // =================================
-    // 大小
-    // =================================
 
+    // ==========================
+    // 连号数量
+    // ==========================
 
-    bigSmall(front){
 
-
-
-        let big=0;
-
-        let small=0;
-
-
-
-        front.forEach(n=>{
-
-
-            if(n>=18)
-
-                big++;
-
-            else
-
-                small++;
-
-
-
-        });
-
-
-
-        return {
-
-            big,
-
-            small
-
-        };
-
-
-    },
-
-
-
-
-
-    bigSmallCheck(data){
-
-
-
-        return (
-
-            data.big>=1 &&
-
-            data.small>=1
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-    // =================================
-    // 和值
-    // =================================
-
-
-    sum(front){
-
-
-
-        return front.reduce(
-
-            (a,b)=>a+b,
-
-            0
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-    // =================================
-    // 连号
-    // =================================
-
-
-    connect(front){
-
-
-
-        let nums=
-
-        [...front]
-        .sort(
-            (a,b)=>a-b
-        );
+    hasConsecutive(front){
 
 
 
@@ -450,18 +440,31 @@ window.V100Structure = {
 
 
         for(
-            let i=0;
-            i<4;
+            let i=1;
+
+            i<front.length;
+
             i++
+
         ){
 
 
+
             if(
-                nums[i+1]-nums[i]
-                ===1
+
+            front[i]
+
+            -
+
+            front[i-1]
+
+            ===1
+
             ){
 
+
                 count++;
+
 
             }
 
@@ -470,11 +473,13 @@ window.V100Structure = {
 
 
 
+
         return count;
 
 
 
     }
+
 
 
 

@@ -1,7 +1,7 @@
 // ==================================================
-// 大乐透 AI V100 CORE FINAL
+// 大乐透 AI V100.1 CORE FINAL
 // report.js
-// AI分析报告中心
+// AI智能报告中心
 // ==================================================
 
 "use strict";
@@ -12,39 +12,29 @@ window.V100Report = {
 
 
     // ==========================
-    // 生成总报告
+    // 生成报告
     // ==========================
+
 
     generate(){
 
 
-
         return {
 
-
-
             system:
-
-            this.systemReport(),
-
-
-
-            model:
-
-            this.modelReport(),
-
+            this.system(),
 
 
             training:
-
-            this.trainingReport(),
-
+            this.training(),
 
 
-            learning:
+            model:
+            this.model(),
 
-            this.learningReport()
 
+            prediction:
+            this.prediction()
 
 
         };
@@ -59,12 +49,13 @@ window.V100Report = {
 
 
 
+
     // ==========================
-    // 系统状态
+    // 系统信息
     // ==========================
 
 
-    systemReport(){
+    system(){
 
 
 
@@ -75,6 +66,7 @@ window.V100Report = {
 
 
         return {
+
 
 
             version:
@@ -98,6 +90,79 @@ window.V100Report = {
         };
 
 
+    },
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 训练报告
+    // ==========================
+
+
+    training(){
+
+
+
+        let save =
+
+        localStorage.getItem(
+
+            "V100_TRAIN_REPORT"
+
+        );
+
+
+
+
+
+        if(
+            !save
+        ){
+
+
+            return {
+
+
+                total:0,
+
+
+                front3:0,
+
+
+                front2:0,
+
+
+                front1:0,
+
+
+                back2:0,
+
+
+                back1:0
+
+
+
+            };
+
+
+        }
+
+
+
+
+
+
+        return JSON.parse(
+            save
+        );
+
+
 
     },
 
@@ -110,17 +175,103 @@ window.V100Report = {
 
 
     // ==========================
-    // 模型报告
+    // 模型权重
     // ==========================
 
 
-    modelReport(){
+    model(){
 
 
 
-        let weight =
+        if(
+            !window.V100Learning
+        ){
 
-        V100Learning.getWeights();
+            return null;
+
+        }
+
+
+
+
+        return V100Learning.getWeights();
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 最新预测
+    // ==========================
+
+
+    prediction(){
+
+
+
+        let last=
+
+        localStorage.getItem(
+
+            "V100_LAST_RESULT"
+
+        );
+
+
+
+
+
+        if(
+            !last
+        ){
+
+            return null;
+
+        }
+
+
+
+
+        let result=
+
+        JSON.parse(
+            last
+        );
+
+
+
+
+
+
+
+        let structure=null;
+
+
+
+        if(
+            window.V100Structure
+        ){
+
+
+
+            structure=
+
+            V100Structure.check(
+
+                result.front
+
+            );
+
+
+        }
 
 
 
@@ -129,34 +280,17 @@ window.V100Report = {
         return {
 
 
+            front:
 
-            trend:
-
-            weight.trend,
-
-
-
-            structure:
-
-            weight.structure,
-
-
-
-            probability:
-
-            weight.probability,
-
-
-
-            markov:
-
-            weight.markov,
-
+            result.front,
 
 
             back:
 
-            weight.back
+            result.back,
+
+
+            structure
 
 
 
@@ -175,75 +309,7 @@ window.V100Report = {
 
 
     // ==========================
-    // 训练报告
-    // ==========================
-
-
-    trainingReport(){
-
-
-
-        if(
-            !V100Learning
-        ){
-
-            return null;
-
-        }
-
-
-
-
-        return V100Learning.report();
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 学习报告
-    // ==========================
-
-
-    learningReport(){
-
-
-
-        if(
-            !V100Bayes
-        ){
-
-            return null;
-
-        }
-
-
-
-
-        return V100Bayes.report();
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 显示报告
+    // 页面显示
     // ==========================
 
 
@@ -254,16 +320,22 @@ window.V100Report = {
         let box=
 
         document.getElementById(
+
             "aiReport"
+
         );
 
 
 
-        if(!box){
+        if(
+            !box
+        ){
 
             return;
 
         }
+
+
 
 
 
@@ -277,17 +349,29 @@ window.V100Report = {
 
 
 
+
+
+        let p=
+
+        data.prediction;
+
+
+
+
         box.innerHTML=
+
 
 
         `
 
         <h3>
-        V100 AI报告
+
+        V100.1 AI报告
+
         </h3>
 
 
-        模型版本：
+        当前版本：
 
         ${data.system.version}
 
@@ -297,31 +381,81 @@ window.V100Report = {
 
         历史数据：
 
-        ${data.system.history}期
+        ${data.system.history}
+
+        期
 
 
         <br>
 
 
-        训练次数：
+        训练窗口：
 
-        ${data.training.training}
+        ${data.system.window}
 
-
-        <br>
-
-
-        命中次数：
-
-        ${data.training.hit}
+        期
 
 
         <hr>
 
 
-        权重：
+        <h4>
+
+        滚动考试
+
+        </h4>
+
+
+        总考试：
+
+        ${data.training.total}
+
+
+        次
+
 
         <br>
+
+
+        前区≥3：
+
+        ${data.training.front3}
+
+
+        次
+
+
+        <br>
+
+
+        前区≥2：
+
+        ${data.training.front2}
+
+
+        次
+
+
+        <br>
+
+
+        后区2个：
+
+        ${data.training.back2}
+
+
+        次
+
+
+        <hr>
+
+
+        <h4>
+
+        当前模型权重
+
+        </h4>
+
 
 
         走势：
@@ -348,7 +482,7 @@ window.V100Report = {
         <br>
 
 
-        马尔可夫：
+        Markov：
 
         ${data.model.markov}
 
@@ -361,12 +495,84 @@ window.V100Report = {
         ${data.model.back}
 
 
+
+        <hr>
+
+
+        <h4>
+
+        最新预测
+
+        </h4>
+
+
+
+        前区：
+
+        ${
+        p
+        ?
+        p.front.join(" ")
+
+        :
+
+        "暂无"
+
+        }
+
+
+        <br>
+
+
+        后区：
+
+        ${
+        p
+        ?
+        p.back.join(" ")
+
+        :
+
+        "暂无"
+
+        }
+
+
+
+        <br>
+
+
+        结构：
+
+        ${
+        p&&p.structure
+
+        ?
+
+        p.structure.zone.low
+
+        +"-"+
+
+        p.structure.zone.mid
+
+        +"-"+
+
+        p.structure.zone.high
+
+
+        :
+
+        ""
+
+        }
+
+
+
         `;
 
 
 
     }
-
 
 
 

@@ -1,7 +1,7 @@
 // ==================================================
-// 大乐透 AI V100 CORE FINAL
+// 大乐透 AI V100.1 CORE FINAL
 // progress.js
-// 全局进度管理
+// AI统一进度管理
 // ==================================================
 
 "use strict";
@@ -11,36 +11,45 @@ window.V100Progress = {
 
 
 
+    total:0,
+
+
     current:0,
 
 
-    total:100,
+    title:"",
 
-
-    title:"等待任务",
 
 
 
 
     // ==========================
-    // 开始任务
+    // 开始
     // ==========================
 
 
-    start(name,total){
+    start(
+
+        title,
+
+        total
+
+    ){
 
 
-        this.title=name;
+
+        this.title = title;
 
 
-        this.total=total;
+        this.total = total;
 
 
-        this.current=0;
+        this.current = 0;
 
 
 
         this.render();
+
 
 
     },
@@ -51,8 +60,10 @@ window.V100Progress = {
 
 
 
+
+
     // ==========================
-    // 更新进度
+    // 更新
     // ==========================
 
 
@@ -77,38 +88,6 @@ window.V100Progress = {
 
 
 
-    // ==========================
-    // 增加进度
-    // ==========================
-
-
-    add(step=1){
-
-
-        this.current+=step;
-
-
-        if(
-            this.current>this.total
-        ){
-
-            this.current=this.total;
-
-        }
-
-
-        this.render();
-
-
-    },
-
-
-
-
-
-
-
-
 
     // ==========================
     // 完成
@@ -119,10 +98,42 @@ window.V100Progress = {
 
 
 
-        this.current=this.total;
+        this.current=
+
+        this.total;
+
 
 
         this.render();
+
+
+
+        setTimeout(()=>{
+
+
+            let bar=
+
+            document.getElementById(
+
+                "progressContainer"
+
+            );
+
+
+
+            if(bar){
+
+
+                bar.style.display=
+
+                "none";
+
+
+            }
+
+
+
+        },1500);
 
 
 
@@ -135,8 +146,9 @@ window.V100Progress = {
 
 
 
+
     // ==========================
-    // 显示
+    // 页面显示
     // ==========================
 
 
@@ -144,53 +156,53 @@ window.V100Progress = {
 
 
 
-        let percent =
-
-        Math.floor(
-
-            this.current
-            /
-            this.total
-            *
-            100
-
-        );
-
-
-
-
-        let bar=
+        let box=
 
         document.getElementById(
-            "globalProgressBar"
+
+            "progressContainer"
+
         );
 
 
 
-        let text=
+        if(!box){
 
-        document.getElementById(
-            "globalProgressText"
-        );
+            return;
 
-
-
-        let name=
-
-        document.getElementById(
-            "globalProgressTitle"
-        );
+        }
 
 
 
 
 
-        if(bar){
+
+        let percent=0;
 
 
-            bar.style.width=
 
-            percent+"%";
+        if(
+
+            this.total>0
+
+        ){
+
+
+            percent=
+
+            Math.floor(
+
+                this.current
+
+                /
+
+                this.total
+
+                *
+
+                100
+
+            );
 
 
         }
@@ -200,36 +212,60 @@ window.V100Progress = {
 
 
 
-        if(text){
+        box.style.display=
 
-
-            text.innerHTML=
-
-            percent+"%";
-
-
-        }
+        "block";
 
 
 
 
 
-        if(name){
+        box.innerHTML=
+
+        `
 
 
-            name.innerHTML=
+        <div class="progress-title">
 
-            this.title;
+        ${this.title}
+
+        </div>
 
 
 
-        }
+        <div class="progress-bar">
+
+
+            <div
+
+            class="progress-value"
+
+            style="width:${percent}%">
+
+            </div>
+
+
+        </div>
+
+
+
+        <div class="progress-text">
+
+
+        ${percent}%
+
+
+        (${this.current}/${this.total})
+
+
+        </div>
+
+
+        `;
 
 
 
     }
-
-
 
 
 

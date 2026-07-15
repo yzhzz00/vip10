@@ -1,7 +1,7 @@
 // ==================================================
-// 大乐透 AI V100 CORE FINAL
+// 大乐透 AI V100.1 CORE FINAL
 // probability.js
-// 概率评分模型
+// 号码概率评分系统
 // ==================================================
 
 "use strict";
@@ -11,9 +11,9 @@ window.V100Probability = {
 
 
 
-    // ==================================
-    // 单个号码评分
-    // ==================================
+    // ==========================
+    // 前区号码评分
+    // ==========================
 
 
     numberScore(
@@ -22,101 +22,56 @@ window.V100Probability = {
     ){
 
 
-        let score=0;
 
+        let frequency =
 
+        this.frequencyScore(
 
-        // 最近500期
-
-        let recent=
-
-        history.slice(-500);
-
-
-
-
-
-        let count=0;
-
-
-
-        recent.forEach(draw=>{
-
-
-            if(
-                draw.front.includes(number)
-            ){
-
-                count++;
-
-            }
-
-
-        });
-
-
-
-
-        // 频率评分
-
-        score +=
-
-        count/500*40;
-
-
-
-
-
-
-        // 遗漏评分
-
-
-        let miss=
-
-        this.missing(
             number,
+
             history
+
         );
 
 
 
-        if(miss>20){
 
-            score+=15;
+        let recent =
 
-        }
+        this.recentScore(
 
-        else if(miss>10){
-
-            score+=8;
-
-        }
-
-        else{
-
-            score+=3;
-
-        }
-
-
-
-
-
-
-        // 热度评分
-
-
-        let hot=
-
-        this.recentHot(
             number,
+
             history
+
         );
 
 
 
-        score += hot;
 
+        let missing =
+
+        this.missingScore(
+
+            number,
+
+            history
+
+        );
+
+
+
+
+
+        let coldHot =
+
+        this.coldHotScore(
+
+            number,
+
+            history
+
+        );
 
 
 
@@ -125,9 +80,28 @@ window.V100Probability = {
 
         return Number(
 
-            score.toFixed(3)
+        (
+
+            frequency*0.35
+
+            +
+
+            recent*0.25
+
+            +
+
+            missing*0.25
+
+            +
+
+            coldHot*0.15
+
+
+        )
+        .toFixed(3)
 
         );
+
 
 
     },
@@ -139,12 +113,184 @@ window.V100Probability = {
 
 
 
-    // ==================================
-    // 遗漏计算
-    // ==================================
+
+    // ==========================
+    // 后区评分
+    // ==========================
 
 
-    missing(
+    backScore(
+        number,
+        history
+    ){
+
+
+
+        let count=0;
+
+
+
+        history.forEach(item=>{
+
+
+            if(
+
+            item.back.includes(number)
+
+            ){
+
+
+                count++;
+
+
+            }
+
+
+
+        });
+
+
+
+
+
+        return count;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 历史频率
+    // ==========================
+
+
+    frequencyScore(
+        number,
+        history
+    ){
+
+
+
+        let count=0;
+
+
+
+        history.forEach(item=>{
+
+
+            if(
+
+            item.front.includes(number)
+
+            ){
+
+
+                count++;
+
+
+            }
+
+
+
+        });
+
+
+
+
+        return count /
+
+        history.length *
+
+        100;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 最近热度
+    // ==========================
+
+
+    recentScore(
+        number,
+        history
+    ){
+
+
+
+        let recent =
+
+        history.slice(
+            -100
+        );
+
+
+
+
+        let count=0;
+
+
+
+        recent.forEach(item=>{
+
+
+            if(
+
+            item.front.includes(number)
+
+            ){
+
+
+                count++;
+
+
+            }
+
+
+
+        });
+
+
+
+
+
+        return count;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 遗漏评分
+    // ==========================
+
+
+    missingScore(
         number,
         history
     ){
@@ -156,28 +302,34 @@ window.V100Probability = {
 
 
         for(
-            let i=history.length-1;
+            let i=
+            history.length-1;
 
             i>=0;
 
             i--
+
         ){
 
 
 
             if(
-                history[i]
-                .front
-                .includes(number)
+
+            history[i]
+            .front
+            .includes(number)
+
             ){
 
+
                 break;
+
 
             }
 
 
-
             miss++;
+
 
 
         }
@@ -185,7 +337,38 @@ window.V100Probability = {
 
 
 
-        return miss;
+
+
+        /*
+        遗漏不是越大越好
+
+        转换：
+
+        中等遗漏提高
+
+        极端遗漏降低
+
+        */
+
+
+
+        if(
+            miss>30
+        ){
+
+            return 10;
+
+
+        }
+
+
+
+        return 30-
+
+        Math.abs(
+            miss-15
+        );
+
 
 
     },
@@ -197,20 +380,24 @@ window.V100Probability = {
 
 
 
-    // ==================================
-    // 最近热度
-    // ==================================
+
+    // ==========================
+    // 冷热评分
+    // ==========================
 
 
-    recentHot(
+    coldHotScore(
         number,
         history
     ){
 
 
+
         let recent=
 
-        history.slice(-30);
+        history.slice(
+            -50
+        );
 
 
 
@@ -218,14 +405,18 @@ window.V100Probability = {
 
 
 
-        recent.forEach(draw=>{
+        recent.forEach(item=>{
 
 
             if(
-                draw.front.includes(number)
+
+            item.front.includes(number)
+
             ){
 
+
                 count++;
+
 
             }
 
@@ -236,7 +427,29 @@ window.V100Probability = {
 
 
 
-        return count*2;
+
+        if(
+            count>=8
+        ){
+
+            return 80;
+
+        }
+
+
+
+        if(
+            count<=2
+        ){
+
+            return 60;
+
+        }
+
+
+
+
+        return 70;
 
 
 
@@ -250,19 +463,26 @@ window.V100Probability = {
 
 
 
-    // ==================================
-    // 一组号码评分
-    // ==================================
+    // ==========================
+    // 组合评分
+    // ==========================
 
 
     combinationScore(
+
         front,
+
         back,
+
         history
+
     ){
 
 
+
         let score=0;
+
+
 
 
 
@@ -272,8 +492,11 @@ window.V100Probability = {
             score +=
 
             this.numberScore(
+
                 n,
+
                 history
+
             );
 
 
@@ -283,9 +506,6 @@ window.V100Probability = {
 
 
 
-
-
-        // 后区评分
 
         back.forEach(n=>{
 
@@ -293,12 +513,45 @@ window.V100Probability = {
             score +=
 
             this.backScore(
+
                 n,
+
                 history
+
             );
 
 
         });
+
+
+
+
+
+
+
+
+        // 结构加分
+
+
+        if(
+            window.V100Structure
+        ){
+
+
+            let s=
+
+            V100Structure.check(
+                front
+            );
+
+
+            score +=
+
+            s.score || 0;
+
+
+
+        }
 
 
 
@@ -312,143 +565,7 @@ window.V100Probability = {
 
 
 
-    },
-
-
-
-
-
-
-
-
-    // ==================================
-    // 后区评分
-    // ==================================
-
-
-    backScore(
-        number,
-        history
-    ){
-
-
-        let score=0;
-
-
-
-        let recent=
-
-        history.slice(-300);
-
-
-
-        let count=0;
-
-
-
-        recent.forEach(draw=>{
-
-
-            if(
-                draw.back.includes(number)
-            ){
-
-                count++;
-
-            }
-
-
-        });
-
-
-
-
-
-        score +=
-
-        count/300*50;
-
-
-
-
-
-        let miss=
-
-        this.backMissing(
-            number,
-            history
-        );
-
-
-
-        if(miss>15){
-
-            score+=10;
-
-        }
-
-
-
-
-        return score;
-
-
-
-    },
-
-
-
-
-
-
-
-    backMissing(
-        number,
-        history
-    ){
-
-
-
-        let miss=0;
-
-
-
-        for(
-            let i=history.length-1;
-
-            i>=0;
-
-            i--
-        ){
-
-
-
-            if(
-                history[i]
-                .back
-                .includes(number)
-            ){
-
-                break;
-
-            }
-
-
-            miss++;
-
-
-        }
-
-
-
-
-        return miss;
-
-
     }
-
-
-
 
 
 

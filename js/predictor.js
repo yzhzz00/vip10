@@ -1,7 +1,7 @@
 // ==================================================
-// 大乐透 AI V100 CORE FINAL
+// 大乐透 AI V100.1 CORE FINAL
 // predictor.js
-// 总预测裁决中心
+// AI综合预测中心
 // ==================================================
 
 "use strict";
@@ -11,65 +11,80 @@ window.V100Predictor = {
 
 
 
-    // =====================================
-    // 主分析入口
-    // =====================================
-
-
-    async analyze(
-        history,
-        trainingMode=false
-    ){
+    async analyze(history){
 
 
 
-        console.log(
-            "V100预测开始"
-        );
+        if(
+            !history ||
+            history.length < 500
+        ){
 
+            throw new Error(
+                "历史数据不足500期"
+            );
 
-
-        // 1.走势分析
-
-
-        let trend =
-
-        V100Trend.analyze(
-            history
-        );
+        }
 
 
 
 
 
-        // 2.生成候选池
 
 
-        let candidates =
-
-        this.generateCandidates(
-            history,
-            trend
-        );
+        // ==========================
+        // Markov训练
+        // ==========================
 
 
+        if(
+            window.V100Markov
+        ){
+
+            V100Markov.train(
+
+                history
+
+            );
+
+        }
 
 
 
-        // 3.概率评分
 
 
-        candidates.forEach(item=>{
 
 
-            item.score =
 
-            V100Probability
-            .combinationScore(
 
-                item.front,
+        let candidates=[];
 
-                item.back,
+
+
+
+
+        // ==========================
+        // 号码评分
+        // ==========================
+
+
+        for(
+
+            let i=1;
+
+            i<=35;
+
+            i++
+
+        ){
+
+
+
+            let score=
+
+            V100Model.analyzeNumber(
+
+                i,
 
                 history
 
@@ -77,14 +92,32 @@ window.V100Predictor = {
 
 
 
-        });
+
+
+            candidates.push({
+
+
+                number:i,
+
+
+                score
+
+
+
+            });
+
+
+
+        }
 
 
 
 
 
 
-        // 4.排序
+
+
+        // 排序取高分号码
 
 
         candidates.sort(
@@ -101,16 +134,95 @@ window.V100Predictor = {
 
 
 
-        // 5.取TOP10
 
 
-        let top10 =
+        // ==========================
+        // 生成组合池
+        // ==========================
 
-        candidates.slice(
-            0,
-            10
+
+        let pool=
+
+        this.createPool(
+
+            candidates,
+
+            history
+
         );
 
+
+
+
+
+
+
+        // ==========================
+        // 蒙特卡罗
+        // ==========================
+
+
+        let monteResult=
+
+        await V100MonteCarlo.run(
+
+            pool,
+
+            100000
+
+        );
+
+
+
+
+
+
+
+        let final=
+
+
+
+        {
+
+            front:
+
+            monteResult[0].front,
+
+
+            back:
+
+            monteResult[0].back,
+
+
+            score:
+
+            monteResult[0].hit
+
+
+
+        };
+
+
+
+
+
+
+
+
+        // 保存最后预测
+
+
+        localStorage.setItem(
+
+            "V100_LAST_RESULT",
+
+            JSON.stringify(
+
+                final
+
+            )
+
+        );
 
 
 
@@ -121,24 +233,12 @@ window.V100Predictor = {
 
 
 
-            trend,
+            final,
 
 
-            final:
+            top10:
 
-            top10[0],
-
-
-
-            top10,
-
-
-            meeting:
-
-            this.createMeeting(
-                trend,
-                top10[0]
-            )
+            monteResult
 
 
 
@@ -146,6 +246,7 @@ window.V100Predictor = {
 
 
 
+
     },
 
 
@@ -156,281 +257,312 @@ window.V100Predictor = {
 
 
 
-    // =====================================
-    // 生成候选池
-    // =====================================
+    // ==========================
+    // 创建候选组合池
+    // ==========================
 
 
-    generateCandidates(
-        history,
-        trend
+    createPool(
+
+        numbers,
+
+        history
+
     ){
 
 
 
-        let pool=[];
-
-
-
-        let count=0;
+        let result=[];
 
 
 
 
-        while(
-            pool.length<5000 &&
-            count<200000
+
+
+        let top=
+
+        numbers.slice(
+
+            0,
+
+            15
+
+        );
+
+
+
+
+
+
+
+        for(
+
+            let i=0;
+
+            i<top.length;
+
+            i++
+
         ){
 
 
 
-            count++;
+            for(
 
+                let j=i+1;
 
+                j<top.length;
 
+                j++
 
-            let front =
-
-            this.randomFront();
-
-
-
-
-            let check =
-
-            V100Structure.check(
-
-                front,
-
-                trend
-
-            );
-
-
-
-
-
-            if(
-                !check.pass
             ){
 
-                continue;
+
+
+                let front=
+
+                this.randomFront(
+
+                    top
+
+                );
+
+
+
+
+
+                let check=
+
+                V100Structure.check(
+
+                    front
+
+                );
+
+
+
+
+
+                if(
+
+                    check.pass
+
+                ){
+
+
+
+                    let back=
+
+                    this.backPool(
+
+                        history
+
+                    );
+
+
+
+
+
+                    result.push({
+
+
+                        front,
+
+
+                        back,
+
+
+                        score:
+
+                        check.score
+
+
+                    });
+
+
+
+                }
+
+
 
             }
 
 
 
-
-
-
-            let back =
-
-            this.randomBack();
+        }
 
 
 
 
 
+        return result.slice(
 
-            pool.push({
+            0,
+
+            1000
+
+        );
 
 
-                front,
+
+    },
 
 
-                back,
 
 
-                structureScore:
-                check.score
 
+
+
+
+
+    // ==========================
+    // 前区组合
+    // ==========================
+
+
+    randomFront(pool){
+
+
+
+        let arr=pool
+
+        .map(x=>x.number)
+
+        .sort(
+
+            ()=>Math.random()-0.5
+
+        )
+
+        .slice(
+
+            0,
+
+            5
+
+        );
+
+
+
+
+
+        return arr.sort(
+
+            (a,b)=>a-b
+
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 后区生成
+    // ==========================
+
+
+    backPool(history){
+
+
+
+        let scores=[];
+
+
+
+        for(
+
+            let i=1;
+
+            i<=12;
+
+            i++
+
+        ){
+
+
+
+            let score=
+
+            0;
+
+
+
+            if(
+
+                V100Bayes
+
+            ){
+
+
+                score +=
+
+                V100Bayes.score(
+
+                    i,
+
+                    history
+
+                );
+
+            }
+
+
+
+            scores.push({
+
+                number:i,
+
+                score
 
 
             });
 
 
 
-
         }
 
 
 
 
-        return pool;
 
 
+        scores.sort(
 
-    },
+            (a,b)=>
 
-
-
-
-
-
-
-
-
-    // =====================================
-    // 前区生成
-    // =====================================
-
-
-    randomFront(){
-
-
-
-        let arr=[];
-
-
-
-        while(
-            arr.length<5
-        ){
-
-
-
-            let n =
-
-            Math.floor(
-                Math.random()*35
-            )+1;
-
-
-
-
-            if(
-                !arr.includes(n)
-            ){
-
-                arr.push(n);
-
-            }
-
-
-
-        }
-
-
-
-
-        return arr.sort(
-
-            (a,b)=>a-b
+            b.score-a.score
 
         );
 
 
-
-    },
-
-
-
-
-
-
-
-
-
-
-    // =====================================
-    // 后区生成
-    // =====================================
-
-
-    randomBack(){
-
-
-
-        let arr=[];
-
-
-
-        while(
-            arr.length<2
-        ){
-
-
-            let n=
-
-            Math.floor(
-                Math.random()*12
-            )+1;
-
-
-
-            if(
-                !arr.includes(n)
-            ){
-
-                arr.push(n);
-
-            }
-
-
-
-        }
-
-
-
-
-        return arr.sort(
-
-            (a,b)=>a-b
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // =====================================
-    // AI会议
-    // =====================================
-
-
-    createMeeting(
-        trend,
-        result
-    ){
 
 
 
         return [
 
-            "走势AI：分区趋势分析完成",
+            scores[0].number,
 
+            scores[1].number
 
-            "结构AI：结构过滤完成",
+        ].sort(
 
+            (a,b)=>a-b
 
-            "概率AI：历史概率评分完成",
-
-
-            "最终结构："+
-
-            result.front.join("-"),
-
-
-            "和值："+
-
-            result.front.reduce(
-                (a,b)=>a+b,
-                0
-            )
-
-
-        ];
+        );
 
 
 
     }
+
+
 
 
 

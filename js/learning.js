@@ -1,7 +1,7 @@
 // ==================================================
-// 大乐透 AI V100 CORE FINAL
+// 大乐透 AI V100.1 CORE FINAL
 // learning.js
-// AI长期学习权重管理
+// AI权重学习系统
 // ==================================================
 
 "use strict";
@@ -10,41 +10,30 @@
 window.V100Learning = {
 
 
-
-    model:{
-
-
-        trainCount:0,
+    key:
+    "V100_MODEL_WEIGHTS",
 
 
-        hitCount:0,
+
+    weights:{
 
 
-        missCount:0,
+        trend:1.00,
 
 
-        weights:{
+        structure:1.00,
 
 
-            trend:1,
+        probability:1.00,
 
 
-            structure:1,
+        markov:1.00,
 
 
-            probability:1,
+        montecarlo:1.00,
 
 
-            markov:1,
-
-
-            back:1
-
-
-        },
-
-
-        history:[]
+        back:1.00
 
 
     },
@@ -54,20 +43,20 @@ window.V100Learning = {
 
 
 
-
     // ==========================
-    // 初始化模型
+    // 初始化
     // ==========================
 
 
     init(){
 
 
-
         let save =
 
         localStorage.getItem(
-            "V100_AI_MODEL"
+
+            this.key
+
         );
 
 
@@ -75,12 +64,12 @@ window.V100Learning = {
         if(save){
 
 
-            this.model =
+            this.weights=
+
             JSON.parse(save);
 
 
         }
-
 
 
 
@@ -95,48 +84,63 @@ window.V100Learning = {
 
 
     // ==========================
-    // 学习一次结果
+    // 学习入口
     // ==========================
 
 
-    learn(record){
+    learn(data){
 
 
 
-        this.model.trainCount++;
+        if(
+            !data
+            ||
+            !data.result
+        ){
 
+            return;
 
-
-
-
-        let hit =
-        record.result.total;
-
-
-
-
-
-
-        if(hit>=3){
-
-
-            this.model.hitCount++;
+        }
 
 
 
 
 
-            // 命中后增强有效模块
+
+        let result=
+
+        data.result;
 
 
-            this.model.weights.trend
-            +=0.02;
 
 
 
-            this.model.weights.structure
-            +=0.02;
+        let reward=0;
 
+
+
+
+
+        if(
+
+            result.front>=3
+
+        ){
+
+
+            reward=0.05;
+
+
+        }
+
+        else if(
+
+            result.front>=2
+
+        ){
+
+
+            reward=0.02;
 
 
         }
@@ -144,17 +148,7 @@ window.V100Learning = {
         else{
 
 
-            this.model.missCount++;
-
-
-
-
-            // 未命中降低随机因素
-
-
-            this.model.weights.probability
-            +=0.01;
-
+            reward=-0.01;
 
 
         }
@@ -164,63 +158,33 @@ window.V100Learning = {
 
 
 
-        // 后区单独学习
+        this.adjust(
 
+            "probability",
 
-        if(
-            record.result.back>=1
-        ){
+            reward
 
-
-            this.model.weights.back
-            +=0.015;
-
-
-        }
+        );
 
 
 
+        this.adjust(
+
+            "structure",
+
+            reward
+
+        );
 
 
 
+        this.adjust(
 
+            "markov",
 
-        this.model.history.push({
+            reward
 
-
-            time:
-            Date.now(),
-
-
-            hit,
-
-
-            weights:
-            this.model.weights
-
-
-
-        });
-
-
-
-
-
-
-
-
-        // 防止无限增长
-
-
-        if(
-            this.model.history.length>500
-        ){
-
-
-            this.model.history.shift();
-
-
-        }
+        );
 
 
 
@@ -231,6 +195,17 @@ window.V100Learning = {
 
 
 
+
+        console.log(
+
+            "AI学习完成",
+
+            this.weights
+
+        );
+
+
+
     },
 
 
@@ -242,14 +217,83 @@ window.V100Learning = {
 
 
     // ==========================
-    // 获取权重
+    // 权重调整
     // ==========================
 
 
-    getWeights(){
+    adjust(
+
+        name,
+
+        value
+
+    ){
 
 
-        return this.model.weights;
+
+        if(
+
+            this.weights[name]
+
+            ===undefined
+
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+
+        this.weights[name]
+
+        += value;
+
+
+
+
+
+
+
+        // 防止无限增加
+
+
+        if(
+
+            this.weights[name]
+
+            <0.5
+
+        ){
+
+
+            this.weights[name]=0.5;
+
+
+        }
+
+
+
+
+
+        if(
+
+            this.weights[name]
+
+            >2
+
+        ){
+
+
+            this.weights[name]=2;
+
+
+        }
+
+
 
 
     },
@@ -261,8 +305,9 @@ window.V100Learning = {
 
 
 
+
     // ==========================
-    // 保存模型
+    // 保存
     // ==========================
 
 
@@ -271,14 +316,15 @@ window.V100Learning = {
 
         localStorage.setItem(
 
-            "V100_AI_MODEL",
+            this.key,
 
             JSON.stringify(
-                this.model
+
+                this.weights
+
             )
 
         );
-
 
 
     },
@@ -292,109 +338,14 @@ window.V100Learning = {
 
 
     // ==========================
-    // 重置模型
+    // 提供权重
     // ==========================
 
 
-    reset(){
+    getWeights(){
 
 
-
-        localStorage.removeItem(
-
-            "V100_AI_MODEL"
-
-        );
-
-
-
-        this.init();
-
-
-
-    },
-
-
-
-
-
-
-
-
-    // ==========================
-    // 模型报告
-    // ==========================
-
-
-    report(){
-
-
-
-        return {
-
-
-
-            training:
-
-            this.model.trainCount,
-
-
-
-            hit:
-
-            this.model.hitCount,
-
-
-
-            miss:
-
-            this.model.missCount,
-
-
-
-            accuracy:
-
-
-            this.model.trainCount===0
-
-            ?
-
-            0
-
-            :
-
-            (
-
-            this.model.hitCount
-
-            /
-
-            this.model.trainCount
-
-            *
-
-            100
-
-            )
-            .toFixed(2)
-
-
-
-            +
-
-            "%",
-
-
-
-
-            weights:
-
-            this.model.weights
-
-
-
-        };
-
+        return this.weights;
 
 
     }
@@ -403,21 +354,6 @@ window.V100Learning = {
 
 
 
+
+
 };
-
-
-
-
-
-
-document.addEventListener(
-
-"DOMContentLoaded",
-
-()=>{
-
-
-    V100Learning.init();
-
-
-});

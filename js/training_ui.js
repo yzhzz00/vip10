@@ -1,197 +1,57 @@
 // ==================================================
-// 大乐透 AI V100 CORE FINAL
-// training_ui.js
-// AI滚动考试显示中心
+// 大乐透 AI V100.1 CORE FINAL
+// training_engine.js
+// AI历史滚动训练中心
 // ==================================================
 
 "use strict";
 
 
-window.V100TrainingUI = {
-
-
-    // ==========================
-    // 更新界面
-    // ==========================
-
-    update(
-        current,
-        total,
-        record
-    ){
+window.V100TrainingEngine = {
 
 
 
-        let percent =
-        Math.floor(
-            current / total * 100
-        );
+    running:false,
+
+
+    windowSize:500,
+
+
+    records:[],
 
 
 
-        let progress =
-        document.getElementById(
-            "trainProgressBar"
-        );
+
+
+    async start(){
 
 
 
-        let number =
-        document.getElementById(
-            "trainProgressNumber"
-        );
+        if(this.running){
 
-
-
-        let status =
-        document.getElementById(
-            "trainStatus"
-        );
-
-
-
-        let detail =
-        document.getElementById(
-            "trainDetail"
-        );
-
-
-
-        if(progress){
-
-
-            progress.style.width =
-            percent+"%";
-
+            return;
 
         }
 
 
 
-        if(number){
+        let history=
 
+        V100Database.get();
 
-            number.innerHTML =
-            percent+"%";
 
 
-        }
 
 
+        if(
+            history.length<=this.windowSize
+        ){
 
-        if(status){
+            alert(
+            "历史数据不足500期"
+            );
 
-
-            status.innerHTML =
-
-            `
-            AI滚动考试：
-
-            ${current}/${total}
-
-            <br>
-
-            当前窗口：
-
-            500期
-
-            `;
-
-
-        }
-
-
-
-
-        if(detail){
-
-
-
-            detail.innerHTML =
-
-
-            `
-
-            <hr>
-
-
-            <b>第 ${record.round} 次考试</b>
-
-
-            <br><br>
-
-
-            AI预测：
-
-            <br>
-
-            前区：
-
-            ${record.predict.front.join(" ")}
-
-
-            <br>
-
-            后区：
-
-            ${record.predict.back.join(" ")}
-
-
-
-            <br><br>
-
-
-
-            实际开奖：
-
-            <br>
-
-            前区：
-
-            ${record.real.front.join(" ")}
-
-
-            <br>
-
-            后区：
-
-            ${record.real.back.join(" ")}
-
-
-
-            <br><br>
-
-
-
-            命中：
-
-            <br>
-
-
-            前区：
-
-            ${record.result.front}/5
-
-
-            <br>
-
-
-            后区：
-
-            ${record.result.back}/2
-
-
-            <br>
-
-
-            总：
-
-            ${record.result.total}/7
-
-
-            `;
-
-
+            return;
 
         }
 
@@ -199,7 +59,269 @@ window.V100TrainingUI = {
 
 
 
-        this.updateSummary();
+        this.running=true;
+
+
+        this.records=[];
+
+
+
+
+
+        let total=
+
+        history.length-
+
+        this.windowSize;
+
+
+
+
+
+        V100Progress.start(
+
+            "AI历史滚动考试",
+
+            total
+
+        );
+
+
+
+
+
+
+
+
+        for(
+
+            let i=this.windowSize;
+
+            i<history.length;
+
+            i++
+
+        ){
+
+
+
+            if(
+                !this.running
+            ){
+
+                break;
+
+            }
+
+
+
+
+
+
+            // 前500期训练数据
+
+
+            let trainHistory=
+
+            history.slice(
+
+                i-this.windowSize,
+
+                i
+
+            );
+
+
+
+
+
+
+
+            // 下一期开奖
+
+
+            let real=
+
+            history[i];
+
+
+
+
+
+
+
+
+
+            // AI预测
+
+
+            let result=
+
+            await V100Predictor.analyze(
+
+                trainHistory
+
+            );
+
+
+
+
+
+
+
+            // 比较结果
+
+
+            let compare=
+
+            this.compare(
+
+                result.final,
+
+                real
+
+            );
+
+
+
+
+
+
+
+            this.records.push({
+
+
+                period:
+
+                real.period,
+
+
+                predict:
+
+                result.final,
+
+
+                real,
+
+
+                compare
+
+
+
+            });
+
+
+
+
+
+
+
+
+            // 学习
+
+
+            if(
+                window.V100Learning
+            ){
+
+
+
+                V100Learning.learn({
+
+
+                    result:
+
+
+                    {
+
+
+                        front:
+
+                        compare.front,
+
+
+                        back:
+
+                        compare.back
+
+
+
+                    }
+
+
+                });
+
+
+
+            }
+
+
+
+
+
+
+
+            V100Progress.update(
+
+                i-this.windowSize+1
+
+            );
+
+
+
+
+
+
+
+
+            // 给手机释放CPU
+
+
+            await this.sleep(30);
+
+
+
+        }
+
+
+
+
+
+
+        this.running=false;
+
+
+
+
+        this.saveReport();
+
+
+
+
+        V100Progress.finish();
+
+
+
+
+
+        if(
+            window.V100Report
+        ){
+
+            V100Report.render();
+
+        }
+
+
+
+
+
+        console.log(
+
+            "训练完成"
+
+        );
+
 
 
     },
@@ -208,121 +330,206 @@ window.V100TrainingUI = {
 
 
 
-    // ==========================
-    // 总成绩
-    // ==========================
-
-
-    updateSummary(){
-
-
-
-        let box =
-        document.getElementById(
-            "trainSummary"
-        );
-
-
-
-        if(!box){
-
-            return;
-
-        }
-
-
-
-        let records =
-        V100TrainingEngine.records;
-
-
-
-        if(
-            records.length===0
-        ){
-
-            return;
-
-        }
 
 
 
 
-        let front=0;
+    compare(
 
-        let back=0;
+        predict,
 
+        real
 
-
-        records.forEach(
-
-            r=>{
+    ){
 
 
-                front +=
-                r.result.front;
 
+        let frontHit=
 
-                back +=
-                r.result.back;
+        predict.front.filter(
 
+            n=>
 
-            }
+            real.front.includes(n)
 
         );
 
 
 
 
-        box.innerHTML =
 
+        let backHit=
 
-        `
+        predict.back.filter(
 
-        累计考试：
+            n=>
 
-        ${records.length}轮
+            real.back.includes(n)
 
-
-        <br>
-
-
-        前区累计命中：
-
-        ${front}
-
-
-        <br>
-
-
-        后区累计命中：
-
-        ${back}
+        );
 
 
 
-        <br>
-
-
-        平均前区：
-
-        ${(front/records.length).toFixed(2)}
 
 
 
-        <br>
+        return {
 
 
-        平均后区：
+            front:
 
-        ${(back/records.length).toFixed(2)}
+            frontHit.length,
 
-        `;
 
+
+            back:
+
+            backHit.length
+
+
+
+        };
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    saveReport(){
+
+
+
+        let report={
+
+
+            time:
+
+            new Date()
+            .toLocaleString(),
+
+
+
+            total:
+
+            this.records.length,
+
+
+
+            front3:
+
+            this.records.filter(
+
+                x=>
+
+                x.compare.front>=3
+
+            ).length,
+
+
+
+            front2:
+
+            this.records.filter(
+
+                x=>
+
+                x.compare.front>=2
+
+            ).length,
+
+
+
+            back2:
+
+            this.records.filter(
+
+                x=>
+
+                x.compare.back===2
+
+            ).length,
+
+
+
+            records:
+
+            this.records
+
+
+
+        };
+
+
+
+
+
+
+        localStorage.setItem(
+
+            "V100_TRAIN_REPORT",
+
+            JSON.stringify(
+
+                report
+
+            )
+
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    stop(){
+
+
+        this.running=false;
+
+
+    },
+
+
+
+
+
+
+
+
+
+    sleep(ms){
+
+
+        return new Promise(
+
+            r=>
+
+            setTimeout(
+
+                r,
+
+                ms
+
+            )
+
+        );
 
 
     }
-
 
 
 

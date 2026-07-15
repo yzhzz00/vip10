@@ -1,5 +1,5 @@
 // ==================================================
-// 大乐透 AI V100 CORE FINAL
+// 大乐透 AI V100.1 CORE FINAL
 // markov.js
 // 一阶马尔可夫转移模型
 // ==================================================
@@ -10,19 +10,24 @@
 window.V100Markov = {
 
 
-
     frontMatrix:{},
+
 
     backMatrix:{},
 
 
+    trained:false,
 
-    // ==============================
-    // 建立转移矩阵
-    // ==============================
+
+
+
+    // ==========================
+    // 训练转移矩阵
+    // ==========================
 
 
     train(history){
+
 
 
         this.frontMatrix={};
@@ -31,26 +36,38 @@ window.V100Markov = {
 
 
 
+
         for(
             let i=0;
+
             i<history.length-1;
+
             i++
+
         ){
 
 
-            let current =
+
+            let current=
+
             history[i];
 
 
-            let next =
+
+            let next=
+
             history[i+1];
 
 
 
-            // 前区
+
+
+
+            // 前区转移
 
 
             current.front.forEach(a=>{
+
 
 
                 if(
@@ -63,7 +80,10 @@ window.V100Markov = {
 
 
 
+
+
                 next.front.forEach(b=>{
+
 
 
                     if(
@@ -75,10 +95,13 @@ window.V100Markov = {
                     }
 
 
+
                     this.frontMatrix[a][b]++;
 
 
+
                 });
+
 
 
             });
@@ -87,10 +110,14 @@ window.V100Markov = {
 
 
 
-            // 后区
+
+
+
+            // 后区转移
 
 
             current.back.forEach(a=>{
+
 
 
                 if(
@@ -104,7 +131,9 @@ window.V100Markov = {
 
 
 
+
                 next.back.forEach(b=>{
+
 
 
                     if(
@@ -114,6 +143,7 @@ window.V100Markov = {
                         this.backMatrix[a][b]=0;
 
                     }
+
 
 
                     this.backMatrix[a][b]++;
@@ -132,125 +162,17 @@ window.V100Markov = {
 
 
 
-        this.normalize();
 
 
-    },
-
-
+        this.trained=true;
 
 
 
+        console.log(
 
+            "Markov训练完成"
 
-
-    // ==============================
-    // 概率化
-    // ==============================
-
-
-    normalize(){
-
-
-
-        for(
-            let a in this.frontMatrix
-        ){
-
-
-
-            let total=0;
-
-
-
-            for(
-                let b in this.frontMatrix[a]
-            ){
-
-                total +=
-                this.frontMatrix[a][b];
-
-            }
-
-
-
-
-
-            for(
-                let b in this.frontMatrix[a]
-            ){
-
-                this.frontMatrix[a][b]
-                =
-                Number(
-
-                (
-                this.frontMatrix[a][b]
-                /
-                total
-
-                )
-                .toFixed(4)
-
-                );
-
-
-            }
-
-
-        }
-
-
-
-
-
-
-        for(
-            let a in this.backMatrix
-        ){
-
-
-
-            let total=0;
-
-
-
-            for(
-                let b in this.backMatrix[a]
-            ){
-
-                total +=
-                this.backMatrix[a][b];
-
-            }
-
-
-
-
-            for(
-                let b in this.backMatrix[a]
-            ){
-
-
-                this.backMatrix[a][b]
-                =
-                Number(
-
-                (
-                this.backMatrix[a][b]
-                /
-                total
-
-                )
-                .toFixed(4)
-
-                );
-
-
-            }
-
-
-        }
+        );
 
 
 
@@ -264,34 +186,61 @@ window.V100Markov = {
 
 
 
-    // ==============================
-    // 获取下一期转移评分
-    // ==============================
+    // ==========================
+    // 前区号码转移评分
+    // ==========================
 
 
     frontScore(
+
         number,
-        lastNumbers
+
+        lastFront
+
     ){
+
+
+
+        if(
+            !this.trained
+        ){
+
+            return 0;
+
+        }
+
+
+
 
 
         let score=0;
 
 
 
-        lastNumbers.forEach(last=>{
+
+        lastFront.forEach(last=>{
+
+
+
+            let map=
+
+            this.frontMatrix[last];
+
+
+
 
 
             if(
-                this.frontMatrix[last]
+                map
                 &&
-                this.frontMatrix[last][number]
+                map[number]
             ){
 
 
                 score +=
 
-                this.frontMatrix[last][number];
+                map[number];
+
 
 
             }
@@ -302,11 +251,10 @@ window.V100Markov = {
 
 
 
-        return Number(
 
-            score.toFixed(4)
 
-        );
+
+        return score;
 
 
 
@@ -318,36 +266,62 @@ window.V100Markov = {
 
 
 
+
+
+    // ==========================
+    // 后区评分
+    // ==========================
 
 
     backScore(
+
         number,
-        lastNumbers
+
+        lastBack
+
     ){
+
+
+
+        if(
+            !this.trained
+        ){
+
+            return 0;
+
+        }
+
+
+
 
 
         let score=0;
 
 
 
-        lastNumbers.forEach(last=>{
+
+        lastBack.forEach(last=>{
+
+
+
+            let map=
+
+            this.backMatrix[last];
+
+
+
 
 
             if(
-
-                this.backMatrix[last]
-
+                map
                 &&
-
-                this.backMatrix[last][number]
-
+                map[number]
             ){
 
 
                 score +=
 
-                this.backMatrix[last][number];
-
+                map[number];
 
             }
 
@@ -357,11 +331,9 @@ window.V100Markov = {
 
 
 
-        return Number(
 
-            score.toFixed(4)
 
-        );
+        return score;
 
 
 
@@ -374,39 +346,47 @@ window.V100Markov = {
 
 
 
-    // ==============================
-    // 报告
-    // ==============================
+
+    // ==========================
+    // 输出报告
+    // ==========================
 
 
     report(){
 
 
+
         return {
 
 
-            front:
+
+            trained:
+
+            this.trained,
+
+
+
+            frontStates:
 
             Object.keys(
                 this.frontMatrix
-            )
-            .length,
+            ).length,
 
 
 
-            back:
+            backStates:
 
             Object.keys(
                 this.backMatrix
-            )
-            .length
+            ).length
+
 
 
         };
 
 
-    }
 
+    }
 
 
 
