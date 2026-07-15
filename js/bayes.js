@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE FINAL R6
-// Bayes概率分析模块
+// V90 AI CORE FINAL R6.1
+// Bayes概率评分中心
 // ================================================
 
 "use strict";
@@ -15,15 +15,79 @@ window.V90Bayes={
 
 
 // =================================
-// 计算概率
+// 归一化
 // =================================
 
 
-calculate(model){
+normalize(list){
 
 
 
-let total=0;
+let total=
+
+list.reduce(
+
+(a,b)=>
+
+a+b.value,
+
+0
+
+);
+
+
+
+
+
+
+return list.map(x=>({
+
+
+
+number:x.number,
+
+
+
+value:
+
+Number(
+
+(
+
+x.value/total
+
+)
+
+.toFixed(6)
+
+)
+
+
+
+}));
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// Bayes计算
+// =================================
+
+
+calculate(model,type){
+
+
+
+let result=[];
+
+
 
 
 
@@ -36,19 +100,11 @@ Object.values(model)
 
 
 
-total+=item.score;
 
 
+let prior=
 
-});
-
-
-
-
-
-
-
-let result={};
+item.frequency+1;
 
 
 
@@ -56,13 +112,165 @@ let result={};
 
 
 
-Object.values(model)
+let trend=
 
-.forEach(item=>{
+item.recent+1;
 
 
 
-result[item.number]={
+
+
+
+
+let miss=
+
+1/(item.missing+1);
+
+
+
+
+
+
+
+
+let coldHot=
+
+item.hot
+
++
+
+(1-item.cold);
+
+
+
+
+
+
+
+
+let learning=1;
+
+
+
+
+
+
+if(
+window.V90Learning
+){
+
+
+
+let w=
+
+V90Learning.getWeight();
+
+
+
+
+
+if(type==="front"){
+
+
+
+learning=
+
+w.front[item.number]
+
+||1;
+
+
+
+}else{
+
+
+
+learning=
+
+w.back[item.number]
+
+||1;
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+// Bayes后验近似
+
+
+let posterior=
+
+
+prior
+
+*
+
+0.35
+
+
++
+
+trend
+
+*
+
+0.25
+
+
++
+
+miss
+
+*
+
+0.15
+
+
++
+
+coldHot
+
+*
+
+20
+
+*
+
+0.15
+
+
++
+
+learning
+
+*
+
+10
+
+*
+
+0.10;
+
+
+
+
+
+
+
+
+
+result.push({
 
 
 
@@ -70,198 +278,17 @@ number:item.number,
 
 
 
-probability:
-
-Number(
-
-(
-
-item.score/(total||1)
-
-).toFixed(6)
-
-),
-
-
-
-score:item.score
-
-
-
-};
-
-
-
-});
-
-
-
-
-
-
-return result;
-
-
-
-},
-
-
-
-
-
-
-
-// =================================
-// 近期修正
-// =================================
-
-
-recentAdjust(model){
-
-
-
-let result={};
-
-
-
-Object.values(model)
-
-.forEach(item=>{
-
-
-
-let adjust=1;
-
-
-
-
-
-
-if(
-item.recent>5
-){
-
-
-
-adjust+=0.15;
-
-
-
-}
-
-
-
-
-
-
-
-if(
-item.missing>50
-){
-
-
-
-adjust+=0.05;
-
-
-
-}
-
-
-
-
-
-
-
-result[item.number]=
-
-
-
-item.score*
-
-adjust;
-
-
-
-});
-
-
-
-
-
-
-return result;
-
-
-
-},
-
-
-
-
-
-
-
-// =================================
-// Bayes最终权重
-// =================================
-
-
-final(model){
-
-
-
-let probability=
-
-this.calculate(model);
-
-
-
-
-
-let adjust=
-
-this.recentAdjust(model);
-
-
-
-
-
-
-let result={};
-
-
-
-
-
-
-Object.keys(probability)
-
-.forEach(n=>{
-
-
-
-result[n]={
-
-
-
-number:Number(n),
-
-
-
-probability:
-
-probability[n].probability,
+value:posterior,
 
 
 
 bayesScore:
 
-adjust[n]
+Number(
 
+posterior.toFixed(3)
 
-
-};
+)
 
 
 
@@ -273,7 +300,42 @@ adjust[n]
 
 
 
-return result;
+});
+
+
+
+
+
+
+
+return this.normalize(result);
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 最终接口
+// =================================
+
+
+final(model,type="front"){
+
+
+
+return this.calculate(
+
+model,
+
+type
+
+);
 
 
 

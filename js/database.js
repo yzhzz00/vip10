@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE FINAL R6
-// 数据库管理中心
+// V90 AI CORE FINAL R6.1
+// 历史数据中心
 // ================================================
 
 "use strict";
@@ -9,10 +9,11 @@
 window.V90Database={
 
 
-key:"V90_DLT_DATABASE",
+
+key:"V90_R61_DATABASE",
 
 
-drawKey:"V90_DRAW_RECORD",
+recordKey:"V90_R61_DRAW_RECORD",
 
 
 history:[],
@@ -20,12 +21,16 @@ history:[],
 
 
 
+
+
+
 // =================================
-// 初始化数据库
+// 初始化
 // =================================
 
 
 async init(){
+
 
 
 let save=
@@ -38,7 +43,10 @@ this.key
 
 
 
+
+
 if(save){
+
 
 
 this.history=
@@ -46,7 +54,9 @@ this.history=
 JSON.parse(save);
 
 
+
 return this.history;
+
 
 
 }
@@ -56,10 +66,12 @@ return this.history;
 
 
 
+
 try{
 
 
-let res=
+
+let response=
 
 await fetch(
 "data/dlt.txt"
@@ -67,9 +79,13 @@ await fetch(
 
 
 
-let txt=
 
-await res.text();
+
+
+let text=
+
+await response.text();
+
 
 
 
@@ -77,7 +93,9 @@ await res.text();
 
 this.history=
 
-this.parse(txt);
+this.parse(text);
+
+
 
 
 
@@ -87,16 +105,20 @@ this.save();
 
 
 
+
+
+
 return this.history;
 
 
 
-}catch(e){
+}
+catch(e){
 
 
 
 console.log(
-"读取失败",
+"数据读取失败",
 e
 );
 
@@ -119,11 +141,11 @@ return [];
 
 
 // =================================
-// 解析历史数据
+// 解析txt
 // =================================
 
 
-parse(txt){
+parse(text){
 
 
 
@@ -131,9 +153,15 @@ let result=[];
 
 
 
+
+
+
 let lines=
 
-txt.split(/\r?\n/);
+text.split(/\r?\n/);
+
+
+
 
 
 
@@ -154,8 +182,12 @@ line
 .map(Number)
 
 .filter(
-n=>!isNaN(n)
+
+x=>!isNaN(x)
+
 );
+
+
 
 
 
@@ -197,6 +229,7 @@ nums.slice(5,7)
 
 
 
+
 return result;
 
 
@@ -223,7 +256,9 @@ localStorage.setItem(
 this.key,
 
 JSON.stringify(
+
 this.history
+
 )
 
 );
@@ -239,7 +274,7 @@ this.history
 
 
 // =================================
-// 获取全部历史
+// 获取数据
 // =================================
 
 
@@ -265,6 +300,44 @@ return this.history;
 
 
 add(period,front,back){
+
+
+
+// 防重复
+
+
+let exists=
+
+this.history.some(
+
+item=>
+
+
+item.period===period
+
+);
+
+
+
+
+
+
+
+
+if(exists){
+
+
+
+return false;
+
+
+
+}
+
+
+
+
+
 
 
 
@@ -316,6 +389,7 @@ this.saveRecord(draw);
 
 
 
+
 return draw;
 
 
@@ -329,7 +403,7 @@ return draw;
 
 
 // =================================
-// 开奖记录
+// 保存开奖记录
 // =================================
 
 
@@ -342,7 +416,9 @@ let list=
 JSON.parse(
 
 localStorage.getItem(
-this.drawKey
+
+this.recordKey
+
 )
 
 ||
@@ -363,13 +439,39 @@ list.push(draw);
 
 
 
+
 localStorage.setItem(
 
-this.drawKey,
+this.recordKey,
 
 JSON.stringify(list)
 
 );
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 最新一期
+// =================================
+
+
+last(){
+
+
+
+return this.history[
+
+this.history.length-1
+
+];
 
 
 
@@ -391,31 +493,6 @@ count(){
 
 
 return this.history.length;
-
-
-
-},
-
-
-
-
-
-
-
-// =================================
-// 最近一期
-// =================================
-
-
-last(){
-
-
-
-return this.history[
-
-this.history.length-1
-
-];
 
 
 

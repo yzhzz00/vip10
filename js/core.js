@@ -1,5 +1,5 @@
 // ================================================
-// V90 AI CORE FINAL R6
+// V90 AI CORE FINAL R6.1
 // AI最终裁决中心
 // ================================================
 
@@ -9,13 +9,16 @@
 window.V90Core={
 
 
-cacheKey:"V90_FINAL_PREDICTION",
+cacheKey:"V90_R61_PREDICTION",
+
+
+
 
 
 
 
 // =================================
-// 获取已有预测
+// 读取缓存预测
 // =================================
 
 
@@ -39,10 +42,13 @@ return JSON.parse(data);
 }
 
 
+
 return null;
 
 
+
 },
+
 
 
 
@@ -57,6 +63,7 @@ return null;
 save(data){
 
 
+
 localStorage.setItem(
 
 this.cacheKey,
@@ -64,6 +71,7 @@ this.cacheKey,
 JSON.stringify(data)
 
 );
+
 
 
 },
@@ -75,56 +83,29 @@ JSON.stringify(data)
 
 
 // =================================
-// 风险分析
+// 学习权重融合
 // =================================
 
 
-risk(front){
+learningWeight(number,type){
 
 
 
-let risk=[];
+let data=
 
-
-
-let sum=
-
-front.reduce(
-
-(a,b)=>a+b,
-
-0
-
-);
+V90Learning.init();
 
 
 
 
 
 
-let odd=
 
-front.filter(
-
-n=>n%2
-
-).length;
+if(type==="front"){
 
 
 
-
-
-
-if(
-odd===0 ||
-odd===5
-){
-
-
-
-risk.push(
-"奇偶极端"
-);
+return data.front[number] || 1;
 
 
 
@@ -132,68 +113,83 @@ risk.push(
 
 
 
+return data.back[number] || 1;
 
 
 
-if(
-sum<80 ||
-sum>150
-){
+},
 
 
 
-risk.push(
-"和值偏离"
+
+
+
+
+// =================================
+// 最终评分
+// =================================
+
+
+finalScore(item){
+
+
+
+let score=item.score;
+
+
+
+
+
+
+
+item.front.forEach(n=>{
+
+
+score+=
+
+this.learningWeight(
+n,
+"front"
+)
+*2;
+
+
+
+});
+
+
+
+
+
+
+
+item.back.forEach(n=>{
+
+
+score+=
+
+this.learningWeight(
+n,
+"back"
+)
+*3;
+
+
+
+});
+
+
+
+
+
+
+
+
+return Number(
+
+score.toFixed(2)
+
 );
-
-
-
-}
-
-
-
-
-
-
-let repeat=
-
-front.some(
-
-(n,i)=>
-
-front.indexOf(n)!==i
-
-);
-
-
-
-
-
-
-if(repeat){
-
-
-
-risk.push(
-"号码重复"
-);
-
-
-
-}
-
-
-
-
-
-
-return risk.length?
-
-risk.join("、")
-
-:
-
-"未发现明显结构风险";
 
 
 
@@ -217,8 +213,7 @@ meeting(result){
 return [
 
 
-
-"趋势AI：历史数据训练完成",
+"趋势AI：历史频率与冷热趋势完成",
 
 
 
@@ -226,17 +221,15 @@ return [
 
 
 
-"结构AI：奇偶/大小/和值分析完成",
+"结构AI：奇偶/大小/和值检测完成",
 
 
 
-"Markov AI：号码转移趋势完成",
+"Markov AI：一阶转移完成",
 
 
 
-"风险AI："+
-
-this.risk(result.front)
+"学习AI：历史反馈权重融合完成"
 
 
 
@@ -261,7 +254,8 @@ async analyze(force=false){
 
 
 
-// 已存在预测
+// 已有预测直接返回
+
 
 let cache=
 
@@ -287,6 +281,7 @@ return cache;
 
 
 
+
 let pool=
 
 await V90MonteCarlo.run(
@@ -304,7 +299,13 @@ await V90MonteCarlo.run(
 
 let list=
 
-pool.map(item=>({
+
+
+pool.map(item=>{
+
+
+
+return {
 
 
 
@@ -314,27 +315,18 @@ front:item.front,
 back:item.back,
 
 
+
 score:
 
-Number(
-
-(
-
-item.score
-
-+
-
-item.count
-
-)
-
-.toFixed(2)
-
-)
+this.finalScore(item)
 
 
 
-}));
+};
+
+
+
+});
 
 
 
@@ -367,13 +359,14 @@ list[0];
 
 
 
+
 let result={
 
 
 
 id:
 
-"R6-"
+"R6.1-"
 
 +
 
@@ -381,11 +374,12 @@ Date.now(),
 
 
 
-
 time:
 
 new Date()
 .toLocaleString(),
+
+
 
 
 
@@ -415,30 +409,24 @@ best.score
 
 
 
+
+
 top10:
 
-list.slice(0,10)
+list.slice(0,10),
 
 
 
+
+
+meeting:
+
+this.meeting(best)
 
 
 
 };
 
-
-
-
-
-
-
-result.meeting=
-
-this.meeting(
-
-result.final
-
-);
 
 
 
@@ -460,6 +448,7 @@ return result;
 
 
 }
+
 
 
 

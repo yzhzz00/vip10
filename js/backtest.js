@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE FINAL R6
-// 回测分析中心
+// V90 AI CORE FINAL R6.1
+// 滚动回测中心
 // ================================================
 
 "use strict";
@@ -11,13 +11,12 @@ window.V90Backtest={
 
 
 
-
 // =================================
-// 获取最近多少期
+// 获取回测数据
 // =================================
 
 
-getData(count=100){
+getRange(total=100){
 
 
 
@@ -29,12 +28,11 @@ V90Database.get();
 
 
 
-
-if(data.length<=count)
+if(data.length<=total){
 
 return data;
 
-
+}
 
 
 
@@ -42,7 +40,7 @@ return data;
 
 return data.slice(
 
-data.length-count
+data.length-total
 
 );
 
@@ -57,91 +55,44 @@ data.length-count
 
 
 // =================================
-// 模拟预测
+// 单期预测
 // =================================
 
 
-simulate(){
+predict(history){
 
 
 
-let data=
-
-this.getData(100);
+// 临时训练模型
 
 
+let frontModel=
 
-
-
-
-let result={
+this.trainFront(history);
 
 
 
-periods:
+let backModel=
 
-data.length,
-
-
-
-front3:0,
-
-
-front2:0,
-
-
-front1:0,
-
-
-back2:0,
-
-
-back1:0,
-
-
-totalHit:0
-
-
-
-};
+this.trainBack(history);
 
 
 
 
-
-
-
-data.forEach(draw=>{
 
 
 
 let front=
 
-V90Model
+Object.values(frontModel)
 
-.trainFront();
+.sort(
 
+(a,b)=>
 
+b.score-a.score
 
-
-
-let back=
-
-V90Model
-
-.trainBack();
-
-
-
-
-
-
-
-let frontRank=
-
-V90Model
-
-.rank(front)
+)
 
 .slice(0,5)
 
@@ -152,11 +103,18 @@ V90Model
 
 
 
-let backRank=
 
-V90Model
+let back=
 
-.rank(back)
+Object.values(backModel)
+
+.sort(
+
+(a,b)=>
+
+b.score-a.score
+
+)
 
 .slice(0,2)
 
@@ -168,13 +126,294 @@ V90Model
 
 
 
+
+return {
+
+
+front,
+
+back
+
+
+};
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 前区临时训练
+// =================================
+
+
+trainFront(data){
+
+
+
+let model={};
+
+
+
+
+for(
+let i=1;
+
+i<=35;
+
+i++
+
+){
+
+
+
+model[i]={
+
+
+number:i,
+
+score:0
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+
+data.forEach(draw=>{
+
+
+
+draw.front.forEach(n=>{
+
+
+
+model[n].score+=1;
+
+
+
+});
+
+
+
+});
+
+
+
+
+
+return model;
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 后区临时训练
+// =================================
+
+
+trainBack(data){
+
+
+
+let model={};
+
+
+
+for(
+let i=1;
+
+i<=12;
+
+i++
+
+){
+
+
+
+model[i]={
+
+
+
+number:i,
+
+
+score:0
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+data.forEach(draw=>{
+
+
+
+draw.back.forEach(n=>{
+
+
+
+model[n].score+=1;
+
+
+
+});
+
+
+
+});
+
+
+
+
+
+
+return model;
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 执行滚动回测
+// =================================
+
+
+run(){
+
+
+
+let data=
+
+this.getRange(100);
+
+
+
+
+
+
+let result={
+
+
+
+periods:data.length,
+
+
+front5:0,
+
+
+front4:0,
+
+
+front3:0,
+
+
+front2:0,
+
+
+back2:0,
+
+
+back1:0,
+
+
+total:0
+
+
+
+};
+
+
+
+
+
+
+
+for(
+let i=20;
+
+i<data.length;
+
+i++
+
+){
+
+
+
+// 只能使用之前数据
+
+
+let history=
+
+data.slice(
+0,
+i
+);
+
+
+
+
+
+let real=
+
+data[i];
+
+
+
+
+
+
+let pred=
+
+this.predict(history);
+
+
+
+
+
+
+
+
 let fh=
 
-frontRank.filter(
+pred.front.filter(
 
 n=>
 
-draw.front.includes(n)
+real.front.includes(n)
 
 ).length;
 
@@ -186,11 +425,11 @@ draw.front.includes(n)
 
 let bh=
 
-backRank.filter(
+pred.back.filter(
 
 n=>
 
-draw.back.includes(n)
+real.back.includes(n)
 
 ).length;
 
@@ -200,6 +439,14 @@ draw.back.includes(n)
 
 
 
+if(fh>=5)
+
+result.front5++;
+
+
+if(fh>=4)
+
+result.front4++;
 
 
 if(fh>=3)
@@ -207,18 +454,9 @@ if(fh>=3)
 result.front3++;
 
 
-
 if(fh>=2)
 
 result.front2++;
-
-
-
-if(fh>=1)
-
-result.front1++;
-
-
 
 
 
@@ -229,11 +467,6 @@ if(bh===2)
 result.back2++;
 
 
-
-
-
-
-
 if(bh>=1)
 
 result.back1++;
@@ -242,16 +475,11 @@ result.back1++;
 
 
 
-
-
-result.totalHit+=
-
-fh+bh;
+result.total+=fh+bh;
 
 
 
-});
-
+}
 
 
 
@@ -271,7 +499,7 @@ return result;
 
 
 // =================================
-// 显示
+// 页面显示
 // =================================
 
 
@@ -279,9 +507,9 @@ show(){
 
 
 
-let result=
+let r=
 
-this.simulate();
+this.run();
 
 
 
@@ -308,49 +536,57 @@ box.innerHTML=
 
 `
 
-回测周期：
+真实滚动回测：
 
-${result.periods}期
-
-
-<br><br>
-
-
-前区≥3个：
-
-${result.front3}次
-
-
-<br>
-
-
-前区≥2个：
-
-${result.front2}次
-
-
-<br>
-
-
-前区≥1个：
-
-${result.front1}次
+${r.periods}期
 
 
 <br><br>
 
 
-后区2个：
+前区5中：
 
-${result.back2}次
+${r.front5} 次
 
 
 <br>
 
 
-后区命中：
+前区4中：
 
-${result.back1}次
+${r.front4} 次
+
+
+<br>
+
+
+前区3中：
+
+${r.front3} 次
+
+
+<br>
+
+
+前区2中：
+
+${r.front2} 次
+
+
+<br><br>
+
+
+后区2中：
+
+${r.back2} 次
+
+
+<br>
+
+
+后区1中：
+
+${r.back1} 次
 
 
 <br><br>
@@ -358,8 +594,7 @@ ${result.back1}次
 
 累计命中：
 
-${result.totalHit}
-
+${r.total}
 
 `;
 
@@ -372,8 +607,7 @@ ${result.totalHit}
 
 
 
-
-return result;
+return r;
 
 
 
@@ -397,7 +631,6 @@ document.addEventListener(
 "DOMContentLoaded",
 
 ()=>{
-
 
 
 let btn=

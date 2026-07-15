@@ -1,7 +1,9 @@
 // ================================================
-// V90 AI CORE FINAL R6
-// 蒙特卡罗预测引擎
+// V90 AI CORE FINAL R6.1
+// 异步蒙特卡罗引擎
+// 防卡死 + 实时进度
 // ================================================
+
 
 "use strict";
 
@@ -10,37 +12,33 @@ window.V90MonteCarlo={
 
 
 
-// =================================
-// 权重随机选择
-// =================================
+
+// ================================
+// 加权随机
+// ================================
 
 
 pickWeighted(list,count){
 
 
-
 let result=[];
-
 
 
 let pool=[...list];
 
 
 
-
-
-
-while(result.length<count && pool.length){
-
+while(
+result.length<count &&
+pool.length>0
+){
 
 
 let total=
 
 pool.reduce(
 
-(a,b)=>
-
-a+b.weight,
+(a,b)=>a+b.weight,
 
 0
 
@@ -48,15 +46,9 @@ a+b.weight,
 
 
 
-
-
-
-let r=
+let random=
 
 Math.random()*total;
-
-
-
 
 
 
@@ -74,22 +66,15 @@ i++
 ){
 
 
-
 sum+=pool[i].weight;
 
 
 
-
-
-
-if(sum>=r){
-
+if(sum>=random){
 
 
 result.push(
-
 pool[i].number
-
 );
 
 
@@ -114,16 +99,8 @@ break;
 
 
 
-
-
-
-
 return result.sort(
-
-(a,b)=>
-
-a-b
-
+(a,b)=>a-b
 );
 
 
@@ -136,9 +113,9 @@ a-b
 
 
 
-// =================================
-// 构建前区概率池
-// =================================
+// ================================
+// 前区池
+// ================================
 
 
 frontPool(){
@@ -159,25 +136,21 @@ V90Bayes.final(model);
 
 
 
+
 return Object.values(bayes)
 
-.map(item=>({
+.map(x=>({
 
 
-
-number:item.number,
-
+number:x.number,
 
 
 weight:
 
-item.bayesScore
+x.bayesScore+1
 
 
-
-}))
-
-;
+}));
 
 
 
@@ -189,13 +162,12 @@ item.bayesScore
 
 
 
-// =================================
-// 后区概率池
-// =================================
+// ================================
+// 后区池
+// ================================
 
 
 backPool(){
-
 
 
 let model=
@@ -211,27 +183,20 @@ V90Bayes.final(model);
 
 
 
-
-
 return Object.values(bayes)
 
-.map(item=>({
+.map(x=>({
 
 
-
-number:item.number,
-
+number:x.number,
 
 
 weight:
 
-item.bayesScore
+x.bayesScore+1
 
 
-
-}))
-
-;
+}));
 
 
 
@@ -243,21 +208,22 @@ item.bayesScore
 
 
 
-// =================================
+// ================================
 // 结构评分
-// =================================
+// ================================
 
 
 structure(front){
+
+
+let score=0;
 
 
 
 let odd=
 
 front.filter(
-
 n=>n%2===1
-
 ).length;
 
 
@@ -265,9 +231,7 @@ n=>n%2===1
 let big=
 
 front.filter(
-
 n=>n>=18
-
 ).length;
 
 
@@ -275,27 +239,17 @@ n=>n>=18
 let sum=
 
 front.reduce(
-
 (a,b)=>a+b,
-
 0
-
 );
 
 
 
 
 
-
-let score=0;
-
-
-
-
-
-
 if(
-odd>=2&&odd<=3
+odd>=2 &&
+odd<=3
 )
 
 score+=20;
@@ -303,10 +257,9 @@ score+=20;
 
 
 
-
-
 if(
-big>=2&&big<=3
+big>=2 &&
+big<=4
 )
 
 score+=20;
@@ -314,17 +267,12 @@ score+=20;
 
 
 
-
-
 if(
-sum>=80&&sum<=150
+sum>=90 &&
+sum<=140
 )
 
 score+=20;
-
-
-
-
 
 
 
@@ -340,9 +288,9 @@ return score;
 
 
 
-// =================================
+// ================================
 // 单组评分
-// =================================
+// ================================
 
 
 score(front,back){
@@ -357,10 +305,6 @@ this.structure(front);
 
 
 
-
-// Markov趋势
-
-
 let last=
 
 V90Database.last();
@@ -369,9 +313,7 @@ V90Database.last();
 
 
 
-
 if(last){
-
 
 
 score+=
@@ -384,7 +326,7 @@ last
 
 )
 
-*0.1;
+*0.05;
 
 
 
@@ -393,26 +335,9 @@ last
 
 
 
-
-
-
-back.forEach(n=>{
-
-
-
-score+=n;
-
-
-
-});
-
-
-
-
-
-
-
-return score;
+return Number(
+score.toFixed(2)
+);
 
 
 
@@ -424,12 +349,12 @@ return score;
 
 
 
-// =================================
-// 百万模拟
-// =================================
+// ================================
+// 异步百万模拟
+// ================================
 
 
-async run(times=1000000){
+run(total=1000000){
 
 
 
@@ -443,11 +368,17 @@ let results={};
 
 
 
+let current=0;
+
+
+
+let batch=5000;
+
+
 
 let front=
 
 this.frontPool();
-
 
 
 
@@ -460,33 +391,28 @@ this.backPool();
 
 
 
-let current=0;
-
-
-
-
-
 
 function loop(){
-
-
-
-let batch=5000;
-
-
-
-
 
 
 
 for(
 let i=0;
 
-i<batch && current<times;
+i<batch;
 
-i++,current++
+i++
 
 ){
+
+
+
+if(
+current>=total
+)
+
+break;
+
 
 
 
@@ -499,9 +425,6 @@ front,
 5
 
 );
-
-
-
 
 
 
@@ -537,7 +460,7 @@ b.join("-");
 
 
 
-let s=
+let score=
 
 V90MonteCarlo.score(
 
@@ -552,8 +475,9 @@ b
 
 
 
-if(!results[key]){
-
+if(
+!results[key]
+){
 
 
 results[key]={
@@ -583,12 +507,55 @@ score:0
 
 
 
-
 results[key].count++;
 
 
 
-results[key].score+=s;
+results[key].score+=score;
+
+
+
+
+current++;
+
+
+
+}
+
+
+
+
+
+// 更新进度
+
+
+let percent=
+
+Math.floor(
+
+current/total*100
+
+);
+
+
+
+
+
+
+if(
+window.V90Progress
+){
+
+
+window.V90Progress(
+
+percent,
+
+current,
+
+total
+
+);
 
 
 
@@ -600,13 +567,15 @@ results[key].score+=s;
 
 
 
-if(current<times){
+if(
+current<total
+){
 
 
 
 setTimeout(
 loop,
-0
+10
 );
 
 
@@ -617,8 +586,7 @@ loop,
 
 
 
-
-let output=
+let list=
 
 Object.values(results)
 
@@ -630,6 +598,7 @@ front:x.front,
 
 
 back:x.back,
+
 
 
 count:x.count,
@@ -644,13 +613,23 @@ Number(
 
 x.score/x.count
 
-).toFixed(2)
++
+
+x.count*0.01
+
+)
+
+.toFixed(2)
 
 )
 
 
 
 }))
+
+
+
+
 
 .sort(
 
@@ -668,7 +647,7 @@ b.score-a.score
 
 
 
-resolve(output);
+resolve(list);
 
 
 
@@ -685,7 +664,6 @@ resolve(output);
 
 
 loop();
-
 
 
 

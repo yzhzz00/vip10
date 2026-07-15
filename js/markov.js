@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE FINAL R6
-// Markov一阶转移模型
+// V90 AI CORE FINAL R6.1
+// 一阶Markov转移模型
 // ================================================
 
 "use strict";
@@ -11,34 +11,19 @@ window.V90Markov={
 
 
 
+
+
+
 // =================================
-// 建立前区转移矩阵
+// 初始化矩阵
 // =================================
 
 
-trainFront(){
-
-
-let data=
-
-V90Database.get();
+create(size){
 
 
 
 let matrix={};
-
-
-
-
-for(
-let i=1;i<=35;i++
-){
-
-
-matrix[i]={};
-
-
-}
 
 
 
@@ -49,7 +34,7 @@ matrix[i]={};
 for(
 let i=1;
 
-i<data.length;
+i<=size;
 
 i++
 
@@ -57,46 +42,22 @@ i++
 
 
 
-let last=
-
-data[i-1].front;
+matrix[i]={};
 
 
 
-let now=
+for(
+let j=1;
 
-data[i].front;
+j<=size;
 
+j++
 
-
-
-
-
-last.forEach(a=>{
+){
 
 
 
-now.forEach(b=>{
-
-
-
-if(
-!matrix[a][b]
-)
-
-matrix[a][b]=0;
-
-
-
-matrix[a][b]++;
-
-
-
-});
-
-
-
-});
+matrix[i][j]=0;
 
 
 
@@ -104,6 +65,7 @@ matrix[a][b]++;
 
 
 
+}
 
 
 
@@ -120,11 +82,11 @@ return matrix;
 
 
 // =================================
-// 建立后区转移
+// 生成转移矩阵
 // =================================
 
 
-trainBack(){
+build(type="front"){
 
 
 
@@ -134,21 +96,32 @@ V90Database.get();
 
 
 
-let matrix={};
 
 
 
-for(
-let i=1;i<=12;i++
-){
+
+let size=
+
+type==="front"
+
+?
+
+35
+
+:
+
+12;
 
 
 
-matrix[i]={};
 
 
 
-}
+
+let matrix=
+
+this.create(size);
+
 
 
 
@@ -167,13 +140,33 @@ i++
 
 
 
-let last=
+let prev=
+
+type==="front"
+
+?
+
+data[i-1].front
+
+:
 
 data[i-1].back;
 
 
 
-let now=
+
+
+
+
+let next=
+
+type==="front"
+
+?
+
+data[i].front
+
+:
 
 data[i].back;
 
@@ -183,19 +176,19 @@ data[i].back;
 
 
 
-last.forEach(a=>{
+prev.forEach(a=>{
 
 
 
-now.forEach(b=>{
+next.forEach(b=>{
 
 
 
 if(
-!matrix[a][b]
-)
-
-matrix[a][b]=0;
+matrix[a]
+&&
+matrix[a][b]!==undefined
+){
 
 
 
@@ -203,7 +196,73 @@ matrix[a][b]++;
 
 
 
+}
+
+
+
 });
+
+
+
+});
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+// 转概率
+
+
+Object.keys(matrix)
+
+.forEach(a=>{
+
+
+
+let total=
+
+Object.values(
+
+matrix[a]
+
+)
+
+.reduce(
+
+(x,y)=>x+y,
+
+0
+
+);
+
+
+
+
+
+
+if(total>0){
+
+
+
+Object.keys(matrix[a])
+
+.forEach(b=>{
+
+
+
+matrix[a][b]=
+
+matrix[a][b]/total;
 
 
 
@@ -212,6 +271,13 @@ matrix[a][b]++;
 
 
 }
+
+
+
+});
+
+
+
 
 
 
@@ -230,11 +296,160 @@ return matrix;
 
 
 // =================================
-// 根据上一期预测下一期趋势
+// 当前期预测影响
 // =================================
 
 
-predict(lastNumbers,matrix){
+adjust(numbers,last,type="front"){
+
+
+
+if(!last)
+
+return 0;
+
+
+
+
+
+
+
+let matrix=
+
+this.build(type);
+
+
+
+
+
+
+
+let score=0;
+
+
+
+
+
+
+
+
+numbers.forEach(n=>{
+
+
+
+last.forEach(p=>{
+
+
+
+if(
+matrix[p]
+&&
+matrix[p][n]
+){
+
+
+
+score+=
+
+matrix[p][n];
+
+
+
+}
+
+
+
+});
+
+
+
+});
+
+
+
+
+
+
+
+return Number(
+
+(score*100)
+
+.toFixed(3)
+
+);
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
+// 获取转移热门数字
+// =================================
+
+
+nextNumbers(type="front"){
+
+
+
+let data=
+
+V90Database.get();
+
+
+
+
+
+
+
+if(
+data.length===0
+)
+
+return [];
+
+
+
+
+
+
+
+
+let last=
+
+
+
+type==="front"
+
+?
+
+data[data.length-1].front
+
+:
+
+data[data.length-1].back;
+
+
+
+
+
+
+
+
+let matrix=
+
+this.build(type);
+
+
+
+
+
 
 
 
@@ -245,35 +460,29 @@ let result={};
 
 
 
-lastNumbers.forEach(n=>{
+
+
+last.forEach(n=>{
 
 
 
-let next=
+Object.keys(
 
-matrix[n];
+matrix[n]
 
+)
 
-
-
-
-
-
-Object.keys(next)
-
-.forEach(k=>{
+.forEach(next=>{
 
 
 
-if(!result[k])
+result[next]=
 
-result[k]=0;
+(result[next]||0)
 
++
 
-
-
-
-result[k]+=next[k];
+matrix[n][next];
 
 
 
@@ -298,12 +507,10 @@ return Object.keys(result)
 number:Number(n),
 
 
-
 score:result[n]
 
-
-
 }))
+
 
 .sort(
 
@@ -315,94 +522,8 @@ b.score-a.score
 
 
 
-},
-
-
-
-
-
-
-
-// =================================
-// Markov融合评分
-// =================================
-
-
-adjust(numbers,history){
-
-
-
-let frontMatrix=
-
-this.trainFront();
-
-
-
-
-
-let prediction=
-
-this.predict(
-
-history.front,
-
-frontMatrix
-
-);
-
-
-
-
-
-
-let bonus=0;
-
-
-
-
-
-
-numbers.forEach(n=>{
-
-
-
-let item=
-
-prediction.find(
-
-x=>x.number===n
-
-);
-
-
-
-
-
-
-if(item){
-
-
-
-bonus+=item.score;
-
-
-
 }
 
-
-
-});
-
-
-
-
-
-
-return bonus;
-
-
-
-}
 
 
 

@@ -1,15 +1,132 @@
 // ================================================
-// V90 AI CORE FINAL R6
+// V90 AI CORE FINAL R6.1
 // 系统主控制中心
 // ================================================
+
 
 "use strict";
 
 
 
+let analyzing=false;
+
+
+
+
 
 // =================================
-// 模型状态显示
+// 进度显示
+// =================================
+
+
+window.V90Progress=function(
+percent,
+current,
+total
+){
+
+
+
+let bar=
+
+document.getElementById(
+"progressBar"
+);
+
+
+
+let number=
+
+document.getElementById(
+"progressNumber"
+);
+
+
+
+let text=
+
+document.getElementById(
+"progressText"
+);
+
+
+
+
+
+
+if(bar){
+
+
+bar.style.width=
+
+percent+"%";
+
+
+}
+
+
+
+
+
+
+
+if(number){
+
+
+number.innerHTML=
+
+percent+"%";
+
+
+}
+
+
+
+
+
+
+if(text){
+
+
+
+text.innerHTML=
+
+`
+
+蒙特卡罗模拟中...
+
+<br>
+
+已计算：
+
+${current.toLocaleString()}
+
+/
+
+${total.toLocaleString()}
+
+组
+
+`;
+
+
+
+}
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// =================================
+// 模型显示
 // =================================
 
 
@@ -22,6 +139,7 @@ let box=
 document.getElementById(
 "models"
 );
+
 
 
 
@@ -72,7 +190,7 @@ AI CORE裁决 ✓
 
 <br>
 
-回测中心 ✓
+滚动回测 ✓
 
 `;
 
@@ -87,9 +205,8 @@ AI CORE裁决 ✓
 
 
 
-
 // =================================
-// 显示预测
+// 显示结果
 // =================================
 
 
@@ -105,11 +222,18 @@ data.final;
 
 
 
-
+let result=
 
 document.getElementById(
 "finalResult"
-).innerHTML=
+);
+
+
+
+
+
+
+result.innerHTML=
 
 `
 
@@ -149,18 +273,28 @@ ${final.score}
 
 
 
+let top=
 
 document.getElementById(
 "topList"
-).innerHTML=
+);
+
+
+
+
+
+
+top.innerHTML=
 
 data.top10.map(
 
-(item,index)=>
+(item,index)=>{
 
-`
 
-第 ${index+1} 组：
+return `
+
+
+第${index+1}组：
 
 ${item.front.join("-")}
 
@@ -177,10 +311,14 @@ ${item.score}
 
 <br><br>
 
-`
+
+`;
+
+
+
+}
 
 ).join("");
-
 
 
 
@@ -209,7 +347,7 @@ data.meeting.join(
 
 
 // =================================
-// AI分析按钮
+// 开始分析
 // =================================
 
 
@@ -217,7 +355,20 @@ async function startAnalyze(){
 
 
 
-let box=
+if(analyzing)
+
+return;
+
+
+
+analyzing=true;
+
+
+
+
+
+
+let text=
 
 document.getElementById(
 "progressText"
@@ -228,10 +379,10 @@ document.getElementById(
 
 
 
-
-box.innerHTML=
+text.innerHTML=
 
 "正在读取历史数据...";
+
 
 
 
@@ -255,10 +406,12 @@ history.length===0
 
 
 
-box.innerHTML=
+text.innerHTML=
 
-"没有历史数据";
+"历史数据为空";
 
+
+analyzing=false;
 
 
 return;
@@ -272,21 +425,27 @@ return;
 
 
 
-box.innerHTML=
 
-"AI模型计算中...";
+text.innerHTML=
+
+"AI模型初始化...";
 
 
 
 
+
+
+
+
+try{
 
 
 
 let result=
 
-await V90Core.analyze();
-
-
+await V90Core.analyze(
+true
+);
 
 
 
@@ -301,11 +460,40 @@ showResult(result);
 
 
 
-box.innerHTML=
+text.innerHTML=
 
 "分析完成";
 
 
+
+
+
+
+
+}
+catch(e){
+
+
+
+console.log(e);
+
+
+
+text.innerHTML=
+
+"分析失败";
+
+
+
+}
+
+
+
+
+
+
+
+analyzing=false;
 
 
 
@@ -328,13 +516,12 @@ async function initSystem(){
 
 
 
-
-
 document.getElementById(
 "status"
 ).innerHTML=
 
-"V90 AI CORE R6启动完成";
+"V90 AI CORE R6.1启动完成";
+
 
 
 
@@ -345,7 +532,6 @@ document.getElementById(
 let data=
 
 await V90Database.init();
-
 
 
 
@@ -409,12 +595,7 @@ startAnalyze;
 
 
 
-
-
-
-
 }
-
 
 
 
@@ -429,9 +610,7 @@ document.addEventListener(
 ()=>{
 
 
-
 initSystem();
-
 
 
 });

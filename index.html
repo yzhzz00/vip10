@@ -8,13 +8,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>
-大乐透智能分析系统 V90 AI CORE R6
+大乐透智能分析系统 V90 AI CORE FINAL R6.1
 </title>
 
 
 <link rel="stylesheet" href="style.css">
 
+
 </head>
+
 
 
 <body>
@@ -23,36 +25,17 @@
 <div class="container">
 
 
+
 <h1>
 大乐透智能分析系统
 </h1>
 
 
 <h2>
-V90 AI CORE FINAL R6
+V90 AI CORE FINAL R6.1
 </h2>
 
 
-
-<div class="card">
-
-系统状态：
-
-<span id="status">
-启动中
-</span>
-
-
-<br>
-
-
-数据状态：
-
-<span id="dataStatus">
-读取中
-</span>
-
-</div>
 
 
 
@@ -61,15 +44,56 @@ V90 AI CORE FINAL R6
 <div class="card">
 
 <h3>
+系统状态
+</h3>
+
+
+系统状态：
+
+<span id="status">
+启动中
+</span>
+
+
+<br><br>
+
+
+数据状态：
+
+<span id="dataStatus">
+读取中
+</span>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h3>
 AI模型中心
 </h3>
+
+
 
 <div id="models">
 
 </div>
 
 
+
 </div>
+
+
+
 
 
 
@@ -84,11 +108,14 @@ AI分析中心
 </h3>
 
 
+
 <button id="startBtn">
 
-开始V90 AI分析
+开始 V90 AI分析
 
 </button>
+
+
 
 
 <div id="progressText">
@@ -99,7 +126,32 @@ AI分析中心
 
 
 
+
+
+<div class="progressBox">
+
+
+<div id="progressBar">
+
 </div>
+
+
+</div>
+
+
+
+
+<div id="progressNumber">
+
+0%
+
+</div>
+
+
+
+
+</div>
+
 
 
 
@@ -116,6 +168,7 @@ AI分析中心
 </h3>
 
 
+
 <div id="finalResult">
 
 等待生成
@@ -123,8 +176,9 @@ AI分析中心
 </div>
 
 
-
 </div>
+
+
 
 
 
@@ -142,10 +196,15 @@ TOP候选池
 
 <div id="topList">
 
+等待生成
+
 </div>
 
 
+
 </div>
+
+
 
 
 
@@ -157,17 +216,20 @@ TOP候选池
 
 
 <h3>
-AI会议
-
+AI会议 / 自我反驳
 </h3>
 
 
 <div id="meeting">
 
+等待分析
+
 </div>
 
 
+
 </div>
+
 
 
 
@@ -181,14 +243,16 @@ AI会议
 
 <h3>
 开奖反馈学习
-
 </h3>
 
 
 
-期号:
+期号：
 
 <input id="period">
+
+
+
 
 
 
@@ -213,9 +277,11 @@ AI会议
 
 
 
+
 <h4>
 后区
 </h4>
+
 
 
 <div class="nums">
@@ -231,6 +297,7 @@ AI会议
 
 
 
+
 <button id="saveDraw">
 
 保存开奖并学习
@@ -239,12 +306,20 @@ AI会议
 
 
 
+
+
 <div id="review">
 
+等待反馈
+
 </div>
 
 
+
+
 </div>
+
+
 
 
 
@@ -260,6 +335,7 @@ AI会议
 </h3>
 
 
+
 <button id="backtestBtn">
 
 执行最近100期回测
@@ -270,10 +346,15 @@ AI会议
 
 <div id="backtest">
 
+等待回测
+
 </div>
 
 
+
+
 </div>
+
 
 
 
@@ -287,23 +368,27 @@ AI会议
 
 <h3>
 AI成长记录
-
 </h3>
+
 
 
 <div id="growth">
 
+暂无学习
+
 </div>
-
-
-</div>
-
-
-
 
 
 
 </div>
+
+
+
+
+
+
+</div>
+
 
 
 
@@ -332,6 +417,8 @@ AI成长记录
 <script src="js/app.js"></script>
 
 
+
 </body>
+
 
 </html>

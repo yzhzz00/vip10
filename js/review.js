@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE FINAL R6
-// 开奖反馈复盘模块
+// V90 AI CORE FINAL R6.1
+// 开奖反馈学习中心
 // ================================================
 
 "use strict";
@@ -10,8 +10,12 @@ window.V90Review={
 
 
 
+
+
+
+
 // =================================
-// 获取输入开奖
+// 获取开奖输入
 // =================================
 
 
@@ -30,8 +34,8 @@ document.getElementById(
 
 
 
-let front=[
 
+let front=[
 
 
 Number(
@@ -59,7 +63,6 @@ document.getElementById("f5").value
 )
 
 
-
 ];
 
 
@@ -68,8 +71,8 @@ document.getElementById("f5").value
 
 
 
-let back=[
 
+let back=[
 
 
 Number(
@@ -82,8 +85,8 @@ document.getElementById("b2").value
 )
 
 
-
 ];
+
 
 
 
@@ -108,6 +111,7 @@ return null;
 
 
 }
+
 
 
 
@@ -140,7 +144,7 @@ back
 
 
 // =================================
-// 获取预测
+// 获取最近预测
 // =================================
 
 
@@ -152,10 +156,9 @@ let data=
 
 localStorage.getItem(
 
-"V90_FINAL_PREDICTION"
+"V90_R61_PREDICTION"
 
 );
-
 
 
 
@@ -165,6 +168,7 @@ localStorage.getItem(
 if(!data)
 
 return null;
+
 
 
 
@@ -181,7 +185,6 @@ JSON.parse(data);
 
 
 return {
-
 
 
 front:
@@ -208,11 +211,11 @@ obj.final.back
 
 
 // =================================
-// 比较
+// 命中计算
 // =================================
 
 
-compare(pred,real){
+check(pred,real){
 
 
 
@@ -247,15 +250,13 @@ real.back.includes(n)
 
 
 
+
 return {
 
 
+front:frontHit,
 
-frontHit,
-
-
-backHit,
-
+back:backHit,
 
 
 frontCount:
@@ -263,11 +264,9 @@ frontCount:
 frontHit.length,
 
 
-
 backCount:
 
 backHit.length,
-
 
 
 total:
@@ -310,16 +309,25 @@ this.getInput();
 
 
 
+let box=
+
+document.getElementById(
+"review"
+);
+
+
+
+
+
+
 
 if(!real){
 
 
 
-document.getElementById(
-"review"
-).innerHTML=
+box.innerHTML=
 
-"请输入完整开奖信息";
+"请输入完整开奖号码";
 
 
 
@@ -328,6 +336,7 @@ return;
 
 
 }
+
 
 
 
@@ -345,14 +354,11 @@ this.getPrediction();
 
 
 
-
 if(!pred){
 
 
 
-document.getElementById(
-"review"
-).innerHTML=
+box.innerHTML=
 
 "暂无预测记录";
 
@@ -370,10 +376,9 @@ return;
 
 
 
-
 let result=
 
-this.compare(
+this.check(
 
 pred,
 
@@ -387,7 +392,8 @@ real
 
 
 
-// 添加历史
+// 保存新开奖
+
 
 V90Database.add(
 
@@ -406,7 +412,10 @@ real.back
 
 
 
-// 学习
+// AI学习
+
+
+let learn=
 
 V90Learning.learn(
 
@@ -422,10 +431,18 @@ real
 
 
 
+let stats=
 
-document.getElementById(
-"review"
-).innerHTML=
+V90Learning.stats();
+
+
+
+
+
+
+
+
+box.innerHTML=
 
 `
 
@@ -477,9 +494,21 @@ ${result.total}/7
 <br><br>
 
 
-AI已经完成学习
+AI累计学习：
+
+${stats.count}
+
+次
+
+
+<br>
+
+
+权重已经更新
 
 `;
+
+
 
 
 
@@ -492,7 +521,10 @@ AI已经完成学习
 
 
 
+
 };
+
+
 
 
 
@@ -526,7 +558,10 @@ btn.onclick=
 
 ()=>{
 
+
 V90Review.save();
+
+
 
 };
 
