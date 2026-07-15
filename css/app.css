@@ -1,11 +1,3 @@
-*{
-
-box-sizing:border-box;
-
-}
-
-
-
 body{
 
 
@@ -15,29 +7,24 @@ margin:0;
 background:#07111f;
 
 
-color:#fff;
+color:white;
 
 
 font-family:
 
--apple-system,
-BlinkMacSystemFont,
-"Microsoft YaHei",
 Arial,
-sans-serif;
+"Microsoft YaHei";
+
 
 
 }
 
 
 
-.app{
+.container{
 
 
-width:100%;
-
-
-max-width:680px;
+max-width:700px;
 
 
 margin:auto;
@@ -50,104 +37,30 @@ padding:15px;
 
 
 
-
-
-.header{
-
-
-background:
-
-linear-gradient(
-135deg,
-#2563eb,
-#9333ea
-);
-
-
-border-radius:24px;
-
-
-padding:28px 20px;
-
-
-text-align:center;
-
-
-box-shadow:
-
-0 10px 35px rgba(0,0,0,.35);
-
-
-}
-
-
-
-.header h1{
-
-
-margin:0;
-
-
-font-size:30px;
-
-
-letter-spacing:1px;
-
-
-}
-
-
-
-.header p{
-
-
-margin-top:8px;
-
-
-opacity:.8;
-
-
-font-size:16px;
-
-
-}
-
-
-
-
-
-
 .card{
 
 
-background:#142033;
-
-
-margin-top:15px;
+background:#142235;
 
 
 padding:20px;
 
 
-border-radius:22px;
+margin-bottom:15px;
 
 
-box-shadow:
+border-radius:20px;
 
-0 8px 25px rgba(0,0,0,.25);
 
 
 }
 
 
 
-.card h2{
+h1{
 
 
-margin-top:0;
-
-
-font-size:20px;
+text-align:center;
 
 
 color:#60a5fa;
@@ -157,43 +70,13 @@ color:#60a5fa;
 
 
 
+h2{
 
 
-.health{
-
-
-font-size:36px;
-
-
-letter-spacing:8px;
-
-
-color:#facc15;
-
-
-margin:15px 0;
+color:#38bdf8;
 
 
 }
-
-
-
-
-
-
-span{
-
-
-font-weight:bold;
-
-
-color:#22c55e;
-
-
-}
-
-
-
 
 
 
@@ -203,50 +86,28 @@ button{
 width:100%;
 
 
-height:52px;
+height:48px;
 
 
-margin-top:12px;
+margin-top:10px;
 
 
 border:0;
 
 
-border-radius:16px;
+border-radius:15px;
 
 
-font-size:16px;
-
-
-font-weight:bold;
+background:#2563eb;
 
 
 color:white;
 
 
-background:
-
-linear-gradient(
-135deg,
-#2563eb,
-#4f46e5
-);
+font-size:16px;
 
 
 }
-
-
-
-
-button:active{
-
-
-transform:scale(.97);
-
-
-}
-
-
 
 
 
@@ -257,60 +118,39 @@ input{
 width:100%;
 
 
-height:46px;
+height:45px;
 
 
-margin-top:10px;
+margin-top:8px;
+
+
+border-radius:12px;
 
 
 border:0;
 
 
-outline:none;
+padding:10px;
 
 
-border-radius:14px;
-
-
-background:#223047;
+background:#24344d;
 
 
 color:white;
 
 
-padding:12px;
-
-
-font-size:15px;
-
-
-}
-
-
-
-input::placeholder{
-
-
-color:#94a3b8;
-
-
 }
 
 
 
 
-
-
-
-.numberInput{
+.number{
 
 
 display:grid;
 
 
-grid-template-columns:
-
-repeat(2,1fr);
+grid-template-columns:repeat(2,1fr);
 
 
 gap:10px;
@@ -320,28 +160,7 @@ gap:10px;
 
 
 
-
-
-
-ul{
-
-
-padding-left:20px;
-
-
-line-height:30px;
-
-
-color:#e2e8f0;
-
-
-}
-
-
-
-
-
-#conferenceBox{
+.box{
 
 
 background:#0b1628;
@@ -354,128 +173,6 @@ border-radius:15px;
 
 
 line-height:30px;
-
-
-}
-
-
-
-#resultBox{
-
-
-background:#0b1628;
-
-
-padding:15px;
-
-
-border-radius:15px;
-
-
-line-height:32px;
-
-
-}
-
-
-
-
-
-#trainingBox{
-
-
-background:#0b1628;
-
-
-padding:15px;
-
-
-border-radius:15px;
-
-
-line-height:30px;
-
-
-font-size:14px;
-
-
-}
-
-
-
-
-#reportBox{
-
-
-background:#0b1628;
-
-
-padding:15px;
-
-
-border-radius:15px;
-
-
-line-height:30px;
-
-
-}
-
-
-
-
-
-h3{
-
-
-font-size:16px;
-
-
-color:#93c5fd;
-
-
-margin-bottom:5px;
-
-
-}
-
-
-
-
-
-
-
-@media(max-width:400px){
-
-
-.app{
-
-
-padding:10px;
-
-
-}
-
-
-
-.header h1{
-
-
-font-size:24px;
-
-
-}
-
-
-
-.card{
-
-
-padding:15px;
-
-
-}
-
 
 
 }

@@ -8,8 +8,9 @@
 
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
+
 <title>
-大乐透 AI CORE V110 FINAL
+大乐透 AI CORE V1000 FINAL
 </title>
 
 
@@ -23,26 +24,13 @@
 <body>
 
 
+<div class="container">
 
-<div class="app">
-
-
-
-<div class="header">
 
 
 <h1>
-大乐透 AI CORE
+大乐透 AI CORE V1000
 </h1>
-
-
-<p>
-V110 FINAL
-</p>
-
-
-</div>
-
 
 
 
@@ -57,24 +45,20 @@ AI健康度
 </h2>
 
 
-<div class="health">
+<div class="box">
 
 ★★★★★
 
-</div>
-
-
-<p>
+<br>
 
 可信度：
 
-<span id="confidence">
-
+<span id="health">
 等待分析
-
 </span>
 
-</p>
+
+</div>
 
 
 </div>
@@ -95,31 +79,34 @@ AI健康度
 </h2>
 
 
-<p>
+<div class="box">
+
 
 历史数据：
 
-<span id="dataCount">
+<span id="count">
 
-0
+2896
 
 </span>
 
 期
 
-</p>
 
+<br>
 
-<p>
 
 数据文件：
 
 data/dlt.txt
 
-</p>
 
 
 </div>
+
+
+</div>
+
 
 
 
@@ -132,59 +119,34 @@ data/dlt.txt
 
 
 <h2>
-AI模型
+AI模型委员会
 </h2>
 
 
-<ul>
+<div class="box">
 
 
-<li>
-频率模型
-</li>
+频率模型<br>
 
+趋势模型<br>
 
-<li>
-趋势模型
-</li>
+遗漏模型<br>
 
+Bayes<br>
 
-<li>
-遗漏模型
-</li>
+Markov<br>
 
+矩阵分析<br>
 
-<li>
-Bayes
-</li>
+大乐透理论<br>
 
+开奖节奏<br>
 
-<li>
-Markov
-</li>
-
-
-<li>
-矩阵分析
-</li>
-
-
-<li>
-大乐透理论
-</li>
-
-
-<li>
 反人类选号
-</li>
 
 
-<li>
-开奖节奏模型
-</li>
 
-
-</ul>
+</div>
 
 
 </div>
@@ -205,18 +167,28 @@ AI控制中心
 </h2>
 
 
-<button id="analyzeBtn">
+<button id="analyze">
 
 开始 AI 分析
 
 </button>
 
 
-<button id="trainBtn">
+
+<button id="training">
 
 开始滚动训练
 
 </button>
+
+
+
+<button id="backtest">
+
+历史考试回测
+
+</button>
+
 
 
 </div>
@@ -237,7 +209,8 @@ AI会议系统
 </h2>
 
 
-<div id="conferenceBox">
+<div class="box" id="meeting">
+
 
 等待会议
 
@@ -258,14 +231,44 @@ AI会议系统
 
 
 <h2>
-TOP10预测
-
+Monte Carlo TOP20预测
 </h2>
 
 
-<div id="resultBox">
+
+<div class="box" id="result">
+
 
 等待分析
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h2>
+训练中心
+</h2>
+
+
+<div class="box" id="trainbox">
+
+
+等待训练
+
 
 </div>
 
@@ -284,14 +287,15 @@ TOP10预测
 
 
 <h2>
-训练中心
-
+回测中心
 </h2>
 
 
-<div id="trainingBox">
+<div class="box" id="backbox">
 
-等待训练
+
+等待考试
+
 
 </div>
 
@@ -311,16 +315,13 @@ TOP10预测
 
 <h2>
 开奖反馈学习
-
 </h2>
 
 
 
-<input 
-id="period"
-placeholder="输入开奖期号">
+<input id="period"
 
-
+placeholder="开奖期号">
 
 
 
@@ -330,22 +331,21 @@ placeholder="输入开奖期号">
 
 
 
-<div class="numberInput">
+<div class="number">
 
 
-<input id="front1" placeholder="前区1">
+<input id="f1" placeholder="前区1">
 
-<input id="front2" placeholder="前区2">
+<input id="f2" placeholder="前区2">
 
-<input id="front3" placeholder="前区3">
+<input id="f3" placeholder="前区3">
 
-<input id="front4" placeholder="前区4">
+<input id="f4" placeholder="前区4">
 
-<input id="front5" placeholder="前区5">
+<input id="f5" placeholder="前区5">
 
 
 </div>
-
 
 
 
@@ -357,12 +357,13 @@ placeholder="输入开奖期号">
 
 
 
-<div class="numberInput">
+<div class="number">
 
 
-<input id="back1" placeholder="后区1">
+<input id="b1" placeholder="后区1">
 
-<input id="back2" placeholder="后区2">
+
+<input id="b2" placeholder="后区2">
 
 
 </div>
@@ -371,13 +372,11 @@ placeholder="输入开奖期号">
 
 
 
-
-<button onclick="V110_FEEDBACK.save()">
+<button id="save">
 
 保存开奖并学习
 
 </button>
-
 
 
 </div>
@@ -395,23 +394,16 @@ placeholder="输入开奖期号">
 
 <h2>
 AI成长报告
-
 </h2>
 
 
-<div id="reportBox">
+<div class="box" id="report">
+
 
 等待训练
 
-</div>
-
 
 </div>
-
-
-
-
-
 
 
 </div>
@@ -421,33 +413,91 @@ AI成长报告
 
 
 
+</div>
 
-<script src="js/config.js"></script>
 
-<script src="js/seed.js"></script>
 
-<script src="js/database.js"></script>
 
-<script src="js/parser.js"></script>
 
-<script src="js/models.js"></script>
 
-<script src="js/rhythm.js"></script>
+<!-- 基础 -->
 
-<script src="js/conference.js"></script>
+<script src="core/config.js"></script>
 
-<script src="js/predictor.js"></script>
+<script src="core/seed.js"></script>
 
-<script src="js/feedback.js"></script>
 
-<script src="js/training.js"></script>
+<script src="database/storage.js"></script>
 
-<script src="js/engine.js"></script>
 
-<script src="js/ui.js"></script>
+
+
+
+<!-- 模型 -->
+
+
+<script src="models/frequency.js"></script>
+
+<script src="models/trend.js"></script>
+
+<script src="models/missing.js"></script>
+
+<script src="models/bayes.js"></script>
+
+<script src="models/markov.js"></script>
+
+<script src="models/matrix.js"></script>
+
+<script src="models/rhythm.js"></script>
+
+<script src="models/theory.js"></script>
+
+<script src="models/antihuman.js"></script>
+
+
+
+
+
+<!-- 核心 -->
+
+
+<script src="core/optimizer.js"></script>
+
+<script src="core/montecarlo.js"></script>
+
+<script src="core/predictor.js"></script>
+
+<script src="core/engine.js"></script>
+
+
+
+
+
+<!-- 学习 -->
+
+
+<script src="learning/training.js"></script>
+
+<script src="learning/backtest.js"></script>
+
+<script src="learning/weight.js"></script>
+
+<script src="learning/feedback.js"></script>
+
+
+
+
+
+<!-- UI -->
+
+
+<script src="ui/dashboard.js"></script>
+
+
 
 
 
 </body>
+
 
 </html>
