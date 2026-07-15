@@ -8,9 +8,7 @@
 <meta name="viewport"
 content="width=device-width,initial-scale=1.0">
 
-<title>
-大乐透AI V90 CORE
-</title>
+<title>大乐透AI V90</title>
 
 <link rel="stylesheet" href="style.css">
 
@@ -23,42 +21,42 @@ content="width=device-width,initial-scale=1.0">
 <div class="container">
 
 
-<h1>
-大乐透智能分析系统
-</h1>
+<h1>大乐透智能分析系统</h1>
 
+<h3>V90 AI CORE</h3>
 
-<h2>
-V90 AI CORE
-</h2>
 
 
 <div class="panel">
 
-<h3>系统状态</h3>
+系统状态：
 
-<div id="status">
+<span id="status">
 等待加载...
-</div>
+</span>
+
 
 </div>
+
 
 
 
 <div class="panel">
+
 
 <h3>
-历史数据
+历史数据加载
 </h3>
 
-<input
+
+<input 
+id="file"
 type="file"
-id="dataFile"
 accept=".txt">
 
 
 <div id="dataStatus">
-等待加载大乐透历史数据
+未加载数据
 </div>
 
 
@@ -70,46 +68,27 @@ accept=".txt">
 
 <div class="panel">
 
-<h3>
-AI分析进度
-</h3>
+
+<button id="analyze">
+
+开始 V90 AI分析
+
+</button>
+
 
 
 <div class="progress">
 
-<div id="progressBar">
-
-</div>
-
-</div>
-
-
-<div id="progressText">
-等待任务...
-</div>
-
+<div id="progressBar"></div>
 
 </div>
 
 
 
+<pre id="output">
 
-
-<div class="panel">
-
-
-<h3>
-AI智能分析中心
-</h3>
-
-
-<button id="startBtn">
-开始 V90 AI分析
-</button>
-
-
-<pre id="result">
 等待分析...
+
 </pre>
 
 
@@ -119,69 +98,30 @@ AI智能分析中心
 
 
 
-
 <div class="panel">
 
-<h3>
-AI多模型预测报告
-</h3>
-
-
-<pre id="report">
-等待生成...
-</pre>
-
-
-</div>
-
-
-
-
-
-
-<div class="panel">
-
-<h3>
-历史回测系统
-</h3>
-
-
-<button id="backtestBtn">
-开始回测
-</button>
-
-
-<pre id="backtestResult">
-等待测试...
-</pre>
-
-
-</div>
-
-
-
-
-
-
-<div class="panel">
 
 <h3>
 开奖反馈学习
 </h3>
 
 
-<textarea
-id="feedbackInput"
-placeholder="输入开奖反馈">
+<textarea 
+id="feedback"
+placeholder="输入开奖号码，例如：
+01 05 12 23 31 + 03 09">
 </textarea>
 
 
 <button id="saveFeedback">
-保存开奖反馈
+
+保存反馈
+
 </button>
 
 
-<div id="learningStatus">
+
+<div id="learnStatus">
 
 等待反馈...
 
@@ -192,27 +132,13 @@ placeholder="输入开奖反馈">
 
 
 
-
-
-<div class="panel">
-
-<h3>
-V90 AI Agent
-</h3>
-
-
-<pre id="agents">
-加载中...
-</pre>
-
-
 </div>
 
 
 
-</div>
 
 
+<script src="V90.worker.js"></script>
 
 <script src="V90.bundle.js"></script>
 

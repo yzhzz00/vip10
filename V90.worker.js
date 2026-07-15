@@ -1,185 +1,11 @@
-/*
-================================================
+// =====================================
+// 大乐透AI V90 Worker
+// 后台计算引擎
+// =====================================
 
-大乐透AI_V90_Mobile
 
-V90.worker.js
 
-后台计算核心
-
-================================================
-*/
-
-
-"use strict";
-
-
-
-
-// ================================
-// 随机生成前区
-// ================================
-
-
-function randomFront(){
-
-
-
-    let nums=[];
-
-
-
-    while(
-        nums.length<5
-    ){
-
-
-
-        let n=
-
-        Math.floor(
-            Math.random()*35
-        )+1;
-
-
-
-
-        if(
-            !nums.includes(n)
-        ){
-
-            nums.push(n);
-
-        }
-
-
-
-    }
-
-
-
-    nums.sort(
-        (a,b)=>
-        a-b
-    );
-
-
-
-    return nums;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ================================
-// Monte Carlo后台模拟
-// ================================
-
-
-function monteCarlo(
-    times
-){
-
-
-
-    let result={};
-
-
-
-    for(
-        let i=0;
-        i<times;
-        i++
-    ){
-
-
-
-        let front=
-
-        randomFront();
-
-
-
-        let key=
-
-        front.join(",");
-
-
-
-
-        result[key]=
-
-        (
-            result[key]||0
-        )
-        +1;
-
-
-
-
-
-
-        if(
-            i%5000===0
-        ){
-
-
-
-            postMessage({
-
-                type:
-                "progress",
-
-
-                value:
-
-                Math.floor(
-                    i/times*100
-                )
-
-
-            });
-
-
-        }
-
-
-
-    }
-
-
-
-
-    return result;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ================================
-// Worker入口
-// ================================
-
-
-self.onmessage=
-
-function(e){
+self.onmessage=function(e){
 
 
 
@@ -187,32 +13,124 @@ function(e){
 
 
 
-
     if(
-        data.type==="MONTE_CARLO"
+        data.type==="MONTECARLO"
     ){
 
 
 
-        let result=
+        let times =
+        data.times || 10000;
 
-        monteCarlo(
 
-            data.times || 100000
 
+        let result={};
+
+
+
+        for(
+            let i=0;
+            i<times;
+            i++
+        ){
+
+
+
+            let nums=[];
+
+
+
+            while(
+                nums.length<5
+            ){
+
+
+
+                let n =
+                Math.floor(
+                    Math.random()*35
+                )+1;
+
+
+
+                if(
+                    !nums.includes(n)
+                ){
+
+                    nums.push(n);
+
+                }
+
+
+
+            }
+
+
+
+            nums.sort(
+                (a,b)=>a-b
+            );
+
+
+
+            let key =
+            nums.join(",");
+
+
+
+            if(
+                !result[key]
+            ){
+
+                result[key]=0;
+
+            }
+
+
+
+            result[key]++;
+
+
+
+        }
+
+
+
+
+
+
+        let ranking =
+        Object.keys(result)
+
+        .sort(
+            (a,b)=>
+            result[b]-result[a]
+        )
+
+        .slice(0,20)
+
+        .map(
+            x=>({
+
+                numbers:x,
+
+                count:result[x]
+
+            })
         );
 
 
 
 
 
-        postMessage({
+        self.postMessage({
 
             type:
-            "complete",
+            "MONTECARLO_RESULT",
 
 
-            result
+            data:
+            ranking
 
 
         });
