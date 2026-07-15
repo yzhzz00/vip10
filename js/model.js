@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE FINAL R6.1
-// 数字综合评分模型
+// V90 AI CORE FINAL R7.0
+// 综合评分模型
 // ================================================
 
 "use strict";
@@ -10,42 +10,27 @@ window.V90Model={
 
 
 
-// ================================
-// 获取数据
-// ================================
-
-
-history(){
-
-
-return V90Database.get();
-
-
-},
 
 
 
 
+// =================================
+// 初始化数字池
+// =================================
 
 
-
-// ================================
-// 初始化评分
-// ================================
+create(size){
 
 
-create(max){
+let data={};
 
-
-
-let obj={};
 
 
 
 for(
 let i=1;
 
-i<=max;
+i<=size;
 
 i++
 
@@ -53,7 +38,7 @@ i++
 
 
 
-obj[i]={
+data[i]={
 
 
 
@@ -69,10 +54,7 @@ recent:0,
 missing:0,
 
 
-hot:0,
-
-
-cold:0,
+trend:0,
 
 
 score:0
@@ -87,7 +69,7 @@ score:0
 
 
 
-return obj;
+return data;
 
 
 
@@ -99,18 +81,65 @@ return obj;
 
 
 
-// ================================
+// =================================
+// 获取训练权重
+// =================================
+
+
+weight(type,number){
+
+
+
+if(
+window.V90Learning
+){
+
+
+
+let w=
+
+V90Learning.get();
+
+
+
+
+
+if(type==="front"){
+
+
+return w.front[number] || 1;
+
+
+}
+
+
+
+return w.back[number] || 1;
+
+
+
+}
+
+
+
+return 1;
+
+
+
+},
+
+
+
+
+
+
+
+// =================================
 // 前区模型
-// ================================
+// =================================
 
 
-trainFront(){
-
-
-
-let data=
-
-this.history();
+front(data){
 
 
 
@@ -123,13 +152,14 @@ this.create(35);
 
 
 
+
 data.forEach(
 
-(item,index)=>{
+(draw,index)=>{
 
 
 
-item.front.forEach(n=>{
+draw.front.forEach(n=>{
 
 
 
@@ -138,6 +168,7 @@ if(model[n]){
 
 
 model[n].frequency++;
+
 
 
 
@@ -191,7 +222,8 @@ let m=model[n];
 
 
 
-// 遗漏计算
+
+// 计算遗漏
 
 
 let miss=0;
@@ -230,16 +262,19 @@ miss++;
 
 
 
+
+
 m.missing=miss;
 
 
 
 
 
-// 热度
 
 
-m.hot=
+
+
+m.trend=
 
 m.recent/50;
 
@@ -247,66 +282,51 @@ m.recent/50;
 
 
 
-// 冷度
-
-
-m.cold=
-
-miss/(data.length+1);
 
 
 
+let learn=
+
+this.weight(
+"front",
+n
+);
 
 
 
 
-// 综合评分
+
+
 
 
 m.score=
 
 
-m.frequency*0.3
+
+m.frequency*0.35
+
 
 +
 
-m.hot*35
+m.trend*30
+
 
 +
 
-(1-m.cold)*30
+(1/(m.missing+1))*40
+
 
 +
 
-(1/(m.missing+1))*50;
+learn*10;
 
 
 
-
-
-// 冷热反转
-
-if(
-m.missing>30 &&
-m.missing<80
-){
-
-
-
-m.score+=8;
-
-
-
-}
 
 
 
 
 }
-
-
-
-
 
 
 
@@ -322,18 +342,12 @@ return model;
 
 
 
-// ================================
-// 后区强化模型
-// ================================
+// =================================
+// 后区模型
+// =================================
 
 
-trainBack(){
-
-
-
-let data=
-
-this.history();
+back(data){
 
 
 
@@ -346,13 +360,14 @@ this.create(12);
 
 
 
+
 data.forEach(
 
-(item,index)=>{
+(draw,index)=>{
 
 
 
-item.back.forEach(n=>{
+draw.back.forEach(n=>{
 
 
 
@@ -414,8 +429,8 @@ let m=model[n];
 
 
 
-let miss=0;
 
+let miss=0;
 
 
 
@@ -461,7 +476,8 @@ m.missing=miss;
 
 
 
-m.hot=
+
+m.trend=
 
 m.recent/50;
 
@@ -470,63 +486,47 @@ m.recent/50;
 
 
 
-m.cold=
 
-miss/(data.length+1);
+let learn=
+
+this.weight(
+"back",
+n
+);
 
 
 
 
 
 
-
-// 后区加强遗漏
 
 m.score=
 
 
-m.frequency*0.25
+
+m.frequency*0.30
+
 
 +
 
-m.hot*45
+m.trend*40
+
 
 +
 
-(1-m.cold)*35
+(1/(m.missing+1))*60
+
 
 +
 
-(1/(m.missing+1))*70;
+learn*15;
 
 
-
-
-
-
-
-// 后区遗漏反弹
-
-
-if(
-m.missing>=15
-){
-
-
-
-m.score+=10;
-
-
-
-}
 
 
 
 
 }
-
-
-
 
 
 
@@ -542,9 +542,9 @@ return model;
 
 
 
-// ================================
-// 排名
-// ================================
+// =================================
+// 综合排序
+// =================================
 
 
 rank(model){
@@ -564,7 +564,6 @@ b.score-a.score
 
 
 }
-
 
 
 

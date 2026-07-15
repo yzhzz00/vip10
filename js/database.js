@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE FINAL R6.1
-// 历史数据中心
+// V90 AI CORE FINAL R7.0
+// 历史数据库中心
 // ================================================
 
 "use strict";
@@ -9,11 +9,7 @@
 window.V90Database={
 
 
-
-key:"V90_R61_DATABASE",
-
-
-recordKey:"V90_R61_DRAW_RECORD",
+key:"V90_R7_HISTORY",
 
 
 history:[],
@@ -36,7 +32,9 @@ async init(){
 let save=
 
 localStorage.getItem(
+
 this.key
+
 );
 
 
@@ -67,14 +65,17 @@ return this.history;
 
 
 
+
 try{
 
 
 
-let response=
+let res=
 
 await fetch(
+
 "data/dlt.txt"
+
 );
 
 
@@ -84,7 +85,7 @@ await fetch(
 
 let text=
 
-await response.text();
+await res.text();
 
 
 
@@ -94,7 +95,6 @@ await response.text();
 this.history=
 
 this.parse(text);
-
 
 
 
@@ -113,13 +113,15 @@ return this.history;
 
 
 }
+
 catch(e){
 
 
 
 console.log(
-"数据读取失败",
-e
+
+"读取历史失败"
+
 );
 
 
@@ -141,7 +143,7 @@ return [];
 
 
 // =================================
-// 解析txt
+// TXT解析
 // =================================
 
 
@@ -149,7 +151,8 @@ parse(text){
 
 
 
-let result=[];
+let arr=[];
+
 
 
 
@@ -158,8 +161,11 @@ let result=[];
 
 let lines=
 
-text.split(/\r?\n/);
+text.split(
 
+/\r?\n/
+
+);
 
 
 
@@ -183,10 +189,11 @@ line
 
 .filter(
 
-x=>!isNaN(x)
+n=>
+
+!isNaN(n)
 
 );
-
 
 
 
@@ -198,7 +205,7 @@ if(nums.length>=7){
 
 
 
-result.push({
+arr.push({
 
 
 
@@ -230,7 +237,7 @@ nums.slice(5,7)
 
 
 
-return result;
+return arr;
 
 
 
@@ -243,7 +250,7 @@ return result;
 
 
 // =================================
-// 保存数据库
+// 保存
 // =================================
 
 
@@ -274,7 +281,7 @@ this.history
 
 
 // =================================
-// 获取数据
+// 获取
 // =================================
 
 
@@ -303,21 +310,15 @@ add(period,front,back){
 
 
 
-// 防重复
-
-
 let exists=
 
 this.history.some(
 
-item=>
+x=>
 
-
-item.period===period
+x.period===period
 
 );
-
-
 
 
 
@@ -333,7 +334,6 @@ return false;
 
 
 }
-
 
 
 
@@ -382,15 +382,7 @@ this.save();
 
 
 
-this.saveRecord(draw);
-
-
-
-
-
-
-
-return draw;
+return true;
 
 
 
@@ -403,50 +395,15 @@ return draw;
 
 
 // =================================
-// 保存开奖记录
+// 数量
 // =================================
 
 
-saveRecord(draw){
+count(){
 
 
 
-let list=
-
-JSON.parse(
-
-localStorage.getItem(
-
-this.recordKey
-
-)
-
-||
-
-"[]"
-
-);
-
-
-
-
-
-
-list.push(draw);
-
-
-
-
-
-
-
-localStorage.setItem(
-
-this.recordKey,
-
-JSON.stringify(list)
-
-);
+return this.history.length;
 
 
 
@@ -459,7 +416,7 @@ JSON.stringify(list)
 
 
 // =================================
-// 最新一期
+// 最近一期
 // =================================
 
 
@@ -475,28 +432,8 @@ this.history.length-1
 
 
 
-},
-
-
-
-
-
-
-
-// =================================
-// 数据数量
-// =================================
-
-
-count(){
-
-
-
-return this.history.length;
-
-
-
 }
+
 
 
 

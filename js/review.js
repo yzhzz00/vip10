@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE FINAL R6.1
-// 开奖反馈学习中心
+// V90 AI CORE FINAL R7.0
+// 开奖反馈中心
 // ================================================
 
 "use strict";
@@ -15,7 +15,7 @@ window.V90Review={
 
 
 // =================================
-// 获取开奖输入
+// 获取输入
 // =================================
 
 
@@ -26,9 +26,10 @@ getInput(){
 let period=
 
 document.getElementById(
-"period"
-).value;
 
+"period"
+
+).value;
 
 
 
@@ -38,33 +39,24 @@ document.getElementById(
 let front=[
 
 
-Number(
-document.getElementById("f1").value
-),
+
+Number(document.getElementById("f1").value),
 
 
-Number(
-document.getElementById("f2").value
-),
+Number(document.getElementById("f2").value),
 
 
-Number(
-document.getElementById("f3").value
-),
+Number(document.getElementById("f3").value),
 
 
-Number(
-document.getElementById("f4").value
-),
+Number(document.getElementById("f4").value),
 
 
-Number(
-document.getElementById("f5").value
-)
+Number(document.getElementById("f5").value)
+
 
 
 ];
-
 
 
 
@@ -75,14 +67,12 @@ document.getElementById("f5").value
 let back=[
 
 
-Number(
-document.getElementById("b1").value
-),
+
+Number(document.getElementById("b1").value),
 
 
-Number(
-document.getElementById("b2").value
-)
+Number(document.getElementById("b2").value)
+
 
 
 ];
@@ -93,14 +83,13 @@ document.getElementById("b2").value
 
 
 
-
 if(
 
-front.some(n=>!n)
+front.some(x=>!x)
 
 ||
 
-back.some(n=>!n)
+back.some(x=>!x)
 
 ){
 
@@ -111,7 +100,6 @@ return null;
 
 
 }
-
 
 
 
@@ -144,7 +132,7 @@ back
 
 
 // =================================
-// 获取最近预测
+// 获取冻结预测
 // =================================
 
 
@@ -156,7 +144,7 @@ let data=
 
 localStorage.getItem(
 
-"V90_R61_PREDICTION"
+"V90_R7_LAST_PREDICTION"
 
 );
 
@@ -175,30 +163,7 @@ return null;
 
 
 
-let obj=
-
-JSON.parse(data);
-
-
-
-
-
-
-return {
-
-
-front:
-
-obj.final.front,
-
-
-back:
-
-obj.final.back
-
-
-
-};
+return JSON.parse(data);
 
 
 
@@ -211,23 +176,24 @@ obj.final.back
 
 
 // =================================
-// 命中计算
+// 比较
 // =================================
 
 
-check(pred,real){
+compare(pred,real){
 
 
 
 let frontHit=
 
-pred.front.filter(
+pred.final.front.filter(
 
-n=>
+x=>
 
-real.front.includes(n)
+real.front.includes(x)
 
 );
+
 
 
 
@@ -236,14 +202,13 @@ real.front.includes(n)
 
 let backHit=
 
-pred.back.filter(
+pred.final.back.filter(
 
-n=>
+x=>
 
-real.back.includes(n)
+real.back.includes(x)
 
 );
-
 
 
 
@@ -254,26 +219,22 @@ real.back.includes(n)
 return {
 
 
-front:frontHit,
 
-back:backHit,
-
-
-frontCount:
+front:
 
 frontHit.length,
 
 
-backCount:
+
+back:
 
 backHit.length,
 
 
+
 total:
 
-frontHit.length
-
-+
+frontHit.length+
 
 backHit.length
 
@@ -292,7 +253,7 @@ backHit.length
 
 
 // =================================
-// 保存开奖学习
+// 保存反馈
 // =================================
 
 
@@ -312,9 +273,10 @@ this.getInput();
 let box=
 
 document.getElementById(
-"review"
-);
 
+"review"
+
+);
 
 
 
@@ -327,7 +289,7 @@ if(!real){
 
 box.innerHTML=
 
-"请输入完整开奖号码";
+"请输入完整开奖";
 
 
 
@@ -343,8 +305,7 @@ return;
 
 
 
-
-let pred=
+let prediction=
 
 this.getPrediction();
 
@@ -354,7 +315,7 @@ this.getPrediction();
 
 
 
-if(!pred){
+if(!prediction){
 
 
 
@@ -376,11 +337,12 @@ return;
 
 
 
+
 let result=
 
-this.check(
+this.compare(
 
-pred,
+prediction,
 
 real
 
@@ -392,7 +354,7 @@ real
 
 
 
-// 保存新开奖
+// 保存开奖
 
 
 V90Database.add(
@@ -411,17 +373,22 @@ real.back
 
 
 
+// 保存反馈记录
 
-// AI学习
 
+let records=
 
-let learn=
+JSON.parse(
 
-V90Learning.learn(
+localStorage.getItem(
 
-pred,
+"V90_R7_FEEDBACK"
 
-real
+)
+
+||
+
+"[]"
 
 );
 
@@ -431,10 +398,43 @@ real
 
 
 
-let stats=
+records.push({
 
-V90Learning.stats();
 
+
+period:real.period,
+
+
+prediction,
+
+
+real,
+
+
+result,
+
+
+time:
+
+Date.now()
+
+
+
+});
+
+
+
+
+
+
+
+localStorage.setItem(
+
+"V90_R7_FEEDBACK",
+
+JSON.stringify(records)
+
+);
 
 
 
@@ -460,11 +460,11 @@ ${real.back.join(" ")}
 
 预测：
 
-${pred.front.join(" ")}
+${prediction.final.front.join(" ")}
 
 +
 
-${pred.back.join(" ")}
+${prediction.final.back.join(" ")}
 
 
 <br><br>
@@ -472,7 +472,7 @@ ${pred.back.join(" ")}
 
 前区命中：
 
-${result.frontCount}/5
+${result.front}/5
 
 
 <br>
@@ -480,7 +480,7 @@ ${result.frontCount}/5
 
 后区命中：
 
-${result.backCount}/2
+${result.back}/2
 
 
 <br>
@@ -494,20 +494,11 @@ ${result.total}/7
 <br><br>
 
 
-AI累计学习：
+反馈已保存
 
-${stats.count}
-
-次
-
-
-<br>
-
-
-权重已经更新
+下一轮训练生效
 
 `;
-
 
 
 
@@ -531,7 +522,6 @@ ${stats.count}
 
 
 
-
 document.addEventListener(
 
 "DOMContentLoaded",
@@ -539,12 +529,14 @@ document.addEventListener(
 ()=>{
 
 
-
 let btn=
 
 document.getElementById(
+
 "saveDraw"
+
 );
+
 
 
 

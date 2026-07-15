@@ -1,44 +1,24 @@
 // ================================================
-// V90 AI CORE FINAL R6.1
-// 系统主控制中心
+// V90 AI CORE FINAL R7.0
+// 系统启动入口
 // ================================================
-
 
 "use strict";
 
 
 
-let analyzing=false;
 
 
-
-
-
-// =================================
-// 进度显示
-// =================================
-
-
-window.V90Progress=function(
-percent,
-current,
-total
-){
+window.V90Progress=function(percent,current,total){
 
 
 
 let bar=
 
 document.getElementById(
+
 "progressBar"
-);
 
-
-
-let number=
-
-document.getElementById(
-"progressNumber"
 );
 
 
@@ -46,7 +26,19 @@ document.getElementById(
 let text=
 
 document.getElementById(
+
 "progressText"
+
+);
+
+
+
+let num=
+
+document.getElementById(
+
+"progressNumber"
+
 );
 
 
@@ -57,11 +49,13 @@ document.getElementById(
 if(bar){
 
 
+
 bar.style.width=
 
 percent+"%";
 
 
+
 }
 
 
@@ -69,16 +63,18 @@ percent+"%";
 
 
 
+if(num){
 
-if(number){
 
 
-number.innerHTML=
+num.innerHTML=
 
 percent+"%";
 
 
+
 }
+
 
 
 
@@ -93,21 +89,17 @@ text.innerHTML=
 
 `
 
-蒙特卡罗模拟中...
+模拟计算：
 
-<br>
-
-已计算：
-
-${current.toLocaleString()}
+${current || 0}
 
 /
 
-${total.toLocaleString()}
+${total || 0}
 
-组
+`
 
-`;
+;
 
 
 
@@ -125,19 +117,14 @@ ${total.toLocaleString()}
 
 
 
-// =================================
-// 模型显示
-// =================================
-
-
-function showModels(){
+async function startSystem(){
 
 
 
-let box=
+console.log(
 
-document.getElementById(
-"models"
+"V90 R7.0启动"
+
 );
 
 
@@ -145,54 +132,27 @@ document.getElementById(
 
 
 
-if(!box)
 
-return;
-
+await V90Database.init();
 
 
 
 
 
-box.innerHTML=
 
-`
 
-频率模型 ✓
+console.log(
 
-<br>
+"历史数据:",
 
-冷热分析 ✓
+V90Database.count()
 
-<br>
+);
 
-遗漏周期 ✓
 
-<br>
 
-Bayes评分 ✓
 
-<br>
 
-Markov转移 ✓
-
-<br>
-
-蒙特卡罗模拟 ✓
-
-<br>
-
-AI CORE裁决 ✓
-
-<br>
-
-自动学习 ✓
-
-<br>
-
-滚动回测 ✓
-
-`;
 
 
 
@@ -205,18 +165,41 @@ AI CORE裁决 ✓
 
 
 
-// =================================
-// 显示结果
-// =================================
 
-
-function showResult(data){
+async function startAI(){
 
 
 
-let final=
+let btn=
 
-data.final;
+document.getElementById(
+
+"startBtn"
+
+);
+
+
+
+
+
+
+
+if(btn){
+
+
+
+btn.disabled=true;
+
+
+btn.innerHTML=
+
+"AI计算中...";
+
+
+
+}
+
+
 
 
 
@@ -224,228 +207,8 @@ data.final;
 
 let result=
 
-document.getElementById(
-"finalResult"
-);
+await V90Core.analyze();
 
-
-
-
-
-
-result.innerHTML=
-
-`
-
-预测编号：
-
-${data.id}
-
-<br><br>
-
-
-前区：
-
-${final.front.join(" ")}
-
-
-<br><br>
-
-
-后区：
-
-${final.back.join(" ")}
-
-
-<br><br>
-
-
-综合评分：
-
-${final.score}
-
-`;
-
-
-
-
-
-
-
-
-let top=
-
-document.getElementById(
-"topList"
-);
-
-
-
-
-
-
-top.innerHTML=
-
-data.top10.map(
-
-(item,index)=>{
-
-
-return `
-
-
-第${index+1}组：
-
-${item.front.join("-")}
-
-+
-
-${item.back.join("-")}
-
-
-<br>
-
-评分：
-
-${item.score}
-
-<br><br>
-
-
-`;
-
-
-
-}
-
-).join("");
-
-
-
-
-
-
-
-document.getElementById(
-"meeting"
-).innerHTML=
-
-data.meeting.join(
-"<br>"
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// =================================
-// 开始分析
-// =================================
-
-
-async function startAnalyze(){
-
-
-
-if(analyzing)
-
-return;
-
-
-
-analyzing=true;
-
-
-
-
-
-
-let text=
-
-document.getElementById(
-"progressText"
-);
-
-
-
-
-
-
-text.innerHTML=
-
-"正在读取历史数据...";
-
-
-
-
-
-
-
-
-let history=
-
-V90Database.get();
-
-
-
-
-
-
-
-if(
-history.length===0
-){
-
-
-
-text.innerHTML=
-
-"历史数据为空";
-
-
-analyzing=false;
-
-
-return;
-
-
-
-}
-
-
-
-
-
-
-
-text.innerHTML=
-
-"AI模型初始化...";
-
-
-
-
-
-
-
-
-try{
-
-
-
-let result=
-
-await V90Core.analyze(
-true
-);
 
 
 
@@ -460,40 +223,23 @@ showResult(result);
 
 
 
-text.innerHTML=
 
-"分析完成";
-
+if(btn){
 
 
 
+btn.disabled=false;
 
 
+btn.innerHTML=
 
-}
-catch(e){
-
-
-
-console.log(e);
-
-
-
-text.innerHTML=
-
-"分析失败";
+"开始 V90 AI分析";
 
 
 
 }
 
 
-
-
-
-
-
-analyzing=false;
 
 
 
@@ -507,20 +253,13 @@ analyzing=false;
 
 
 
-// =================================
-// 初始化
-// =================================
-
-
-async function initSystem(){
+function showResult(data){
 
 
 
-document.getElementById(
-"status"
-).innerHTML=
+if(!data)
 
-"V90 AI CORE R6.1启动完成";
+return;
 
 
 
@@ -528,50 +267,12 @@ document.getElementById(
 
 
 
-
-let data=
-
-await V90Database.init();
-
-
-
-
-
-
+let resultBox=
 
 document.getElementById(
-"dataStatus"
-).innerHTML=
 
-`
+"finalResult"
 
-历史数据：
-
-${data.length}
-
-期
-
-`;
-
-
-
-
-
-
-
-
-showModels();
-
-
-
-
-
-
-
-let btn=
-
-document.getElementById(
-"startBtn"
 );
 
 
@@ -581,13 +282,158 @@ document.getElementById(
 
 
 
-if(btn){
+if(resultBox){
 
 
 
-btn.onclick=
+resultBox.innerHTML=
 
-startAnalyze;
+`
+
+最终预测结果
+
+
+<br><br>
+
+
+前区：
+
+${data.final.front.join(" ")}
+
+
+<br>
+
+
+后区：
+
+${data.final.back.join(" ")}
+
+
+<br><br>
+
+
+综合评分：
+
+${data.final.score}
+
+`;
+
+
+
+}
+
+
+
+
+
+
+
+
+let top=
+
+document.getElementById(
+
+"topList"
+
+);
+
+
+
+
+
+
+
+if(top){
+
+
+
+let html="TOP10预测池<br><br>";
+
+
+
+
+
+
+data.top10.forEach(
+
+(item,index)=>{
+
+
+
+html+=
+
+
+`
+
+第${index+1}组：
+
+${item.front.join("-")}
+
++
+
+${item.back.join("-")}
+
+
+<br>
+
+
+评分：
+
+${item.score}
+
+
+<br><br>
+
+
+`;
+
+
+
+});
+
+
+
+
+
+
+
+top.innerHTML=html;
+
+
+
+}
+
+
+
+
+
+
+
+
+let meeting=
+
+document.getElementById(
+
+"meeting"
+
+);
+
+
+
+
+
+
+if(meeting){
+
+
+
+meeting.innerHTML=
+
+data.meeting.join(
+
+"<br>"
+
+);
 
 
 
@@ -596,6 +442,9 @@ startAnalyze;
 
 
 }
+
+
+
 
 
 
@@ -610,7 +459,39 @@ document.addEventListener(
 ()=>{
 
 
-initSystem();
+
+startSystem();
+
+
+
+
+
+
+let btn=
+
+document.getElementById(
+
+"startBtn"
+
+);
+
+
+
+
+
+
+if(btn){
+
+
+
+btn.onclick=
+
+startAI;
+
+
+
+}
+
 
 
 });

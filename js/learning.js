@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE FINAL R6.1
-// AI成长学习系统
+// V90 AI CORE FINAL R7.0
+// AI训练学习权重中心
 // ================================================
 
 "use strict";
@@ -9,11 +9,7 @@
 window.V90Learning={
 
 
-
-weightKey:"V90_R61_WEIGHTS",
-
-
-recordKey:"V90_R61_LEARNING_RECORD",
+key:"V90_R7_MODEL_WEIGHT",
 
 
 
@@ -22,7 +18,7 @@ recordKey:"V90_R61_LEARNING_RECORD",
 
 
 // =================================
-// 初始化权重
+// 初始化
 // =================================
 
 
@@ -33,7 +29,7 @@ init(){
 let data=
 
 localStorage.getItem(
-this.weightKey
+this.key
 );
 
 
@@ -121,6 +117,7 @@ obj.back[i]=1;
 
 
 
+
 this.save(obj);
 
 
@@ -141,7 +138,7 @@ return obj;
 
 
 // =================================
-// 保存权重
+// 保存
 // =================================
 
 
@@ -151,7 +148,7 @@ save(data){
 
 localStorage.setItem(
 
-this.weightKey,
+this.key,
 
 JSON.stringify(data)
 
@@ -168,123 +165,33 @@ JSON.stringify(data)
 
 
 // =================================
-// 学习记录
+// 限制范围
 // =================================
 
 
-getRecords(){
+limit(v){
 
 
 
-return JSON.parse(
+if(v<0.5)
 
-localStorage.getItem(
+return 0.5;
 
-this.recordKey
 
-)
 
-||
 
-"[]"
+if(v>3)
 
-);
+return 3;
 
 
 
-},
-
-
-
-
-
-
-
-saveRecord(data){
-
-
-
-let list=
-
-this.getRecords();
-
-
-
-
-
-
-list.push(data);
-
-
-
-
-
-
-// 只保存最近500次
-
-
-if(
-list.length>500
-){
-
-
-
-list=list.slice(
--500
-);
-
-
-
-}
-
-
-
-
-
-
-
-localStorage.setItem(
-
-this.recordKey,
-
-JSON.stringify(list)
-
-);
-
-
-
-},
-
-
-
-
-
-
-
-// =================================
-// 限制权重范围
-// =================================
-
-
-limit(value){
-
-
-
-if(value<0.2)
-
-return 0.2;
-
-
-
-if(value>5)
-
-return 5;
 
 
 
 return Number(
 
-value.toFixed(3)
+v.toFixed(3)
 
 );
 
@@ -299,11 +206,11 @@ value.toFixed(3)
 
 
 // =================================
-// 开奖学习
+// 根据训练结果学习
 // =================================
 
 
-learn(pred,real){
+train(records){
 
 
 
@@ -316,17 +223,28 @@ this.init();
 
 
 
-let frontHit=[];
 
-let backHit=[];
-
+records.forEach(item=>{
 
 
 
+let pred=
+
+item.predict;
 
 
 
-// 前区
+let real=
+
+item.real;
+
+
+
+
+
+
+
+// 前区学习
 
 
 pred.front.forEach(n=>{
@@ -343,13 +261,9 @@ weight.front[n]=
 
 this.limit(
 
-weight.front[n]+0.05
+weight.front[n]+0.01
 
 );
-
-
-
-frontHit.push(n);
 
 
 
@@ -361,7 +275,7 @@ weight.front[n]=
 
 this.limit(
 
-weight.front[n]-0.015
+weight.front[n]-0.003
 
 );
 
@@ -380,8 +294,7 @@ weight.front[n]-0.015
 
 
 
-
-// 后区加强
+// 后区学习
 
 
 pred.back.forEach(n=>{
@@ -398,13 +311,9 @@ weight.back[n]=
 
 this.limit(
 
-weight.back[n]+0.08
+weight.back[n]+0.015
 
 );
-
-
-
-backHit.push(n);
 
 
 
@@ -416,13 +325,22 @@ weight.back[n]=
 
 this.limit(
 
-weight.back[n]-0.02
+weight.back[n]-0.005
 
 );
 
 
 
 }
+
+
+
+});
+
+
+
+
+
 
 
 
@@ -442,62 +360,7 @@ this.save(weight);
 
 
 
-
-
-this.saveRecord({
-
-
-
-time:
-
-new Date()
-.toLocaleString(),
-
-
-
-prediction:pred,
-
-
-
-result:real,
-
-
-
-hit:{
-
-
-
-front:frontHit,
-
-
-back:backHit
-
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-
-
-return {
-
-
-frontHit,
-
-
-backHit
-
-
-
-};
+return weight;
 
 
 
@@ -510,38 +373,15 @@ backHit
 
 
 // =================================
-// 成长统计
+// 获取权重
 // =================================
 
 
-stats(){
+get(){
 
 
 
-let list=
-
-this.getRecords();
-
-
-
-
-
-
-return {
-
-
-
-count:list.length,
-
-
-
-last:
-
-list[list.length-1]
-
-
-
-};
+return this.init();
 
 
 
@@ -554,11 +394,19 @@ list[list.length-1]
 
 
 // =================================
-// 查看数字权重
+// 重置学习
 // =================================
 
 
-getWeight(){
+reset(){
+
+
+
+localStorage.removeItem(
+
+this.key
+
+);
 
 
 
@@ -567,6 +415,7 @@ return this.init();
 
 
 }
+
 
 
 

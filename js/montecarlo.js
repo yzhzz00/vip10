@@ -1,9 +1,7 @@
 // ================================================
-// V90 AI CORE FINAL R6.1
-// 异步蒙特卡罗引擎
-// 防卡死 + 实时进度
+// V90 AI CORE FINAL R7.0
+// 蒙特卡罗模拟中心
 // ================================================
-
 
 "use strict";
 
@@ -13,32 +11,49 @@ window.V90MonteCarlo={
 
 
 
-// ================================
-// 加权随机
-// ================================
 
 
-pickWeighted(list,count){
+
+// =================================
+// 加权随机选择
+// =================================
+
+
+randomPick(list,count){
+
 
 
 let result=[];
+
+
+
+
+
 
 
 let pool=[...list];
 
 
 
+
+
+
+
 while(
-result.length<count &&
+result.length<count
+&&
 pool.length>0
 ){
+
 
 
 let total=
 
 pool.reduce(
 
-(a,b)=>a+b.weight,
+(a,b)=>
+
+a+b.value,
 
 0
 
@@ -46,13 +61,29 @@ pool.reduce(
 
 
 
+
+
+
+
 let random=
 
-Math.random()*total;
+Math.random()
+
+*
+
+total;
+
+
+
+
 
 
 
 let sum=0;
+
+
+
+
 
 
 
@@ -66,15 +97,22 @@ i++
 ){
 
 
-sum+=pool[i].weight;
+
+sum+=pool[i].value;
+
+
+
 
 
 
 if(sum>=random){
 
 
+
 result.push(
+
 pool[i].number
+
 );
 
 
@@ -99,8 +137,16 @@ break;
 
 
 
+
+
+
+
 return result.sort(
-(a,b)=>a-b
+
+(a,b)=>
+
+a-b
+
 );
 
 
@@ -113,387 +159,40 @@ return result.sort(
 
 
 
-// ================================
-// 前区池
-// ================================
+// =================================
+// 生成单组号码
+// =================================
 
 
-frontPool(){
+generate(frontPool,backPool){
 
 
 
-let model=
+return {
 
-V90Model.trainFront();
 
 
+front:
 
-let bayes=
+this.randomPick(
 
-V90Bayes.final(model);
-
-
-
-
-
-
-return Object.values(bayes)
-
-.map(x=>({
-
-
-number:x.number,
-
-
-weight:
-
-x.bayesScore+1
-
-
-}));
-
-
-
-},
-
-
-
-
-
-
-
-// ================================
-// 后区池
-// ================================
-
-
-backPool(){
-
-
-let model=
-
-V90Model.trainBack();
-
-
-
-let bayes=
-
-V90Bayes.final(model);
-
-
-
-
-return Object.values(bayes)
-
-.map(x=>({
-
-
-number:x.number,
-
-
-weight:
-
-x.bayesScore+1
-
-
-}));
-
-
-
-},
-
-
-
-
-
-
-
-// ================================
-// 结构评分
-// ================================
-
-
-structure(front){
-
-
-let score=0;
-
-
-
-let odd=
-
-front.filter(
-n=>n%2===1
-).length;
-
-
-
-let big=
-
-front.filter(
-n=>n>=18
-).length;
-
-
-
-let sum=
-
-front.reduce(
-(a,b)=>a+b,
-0
-);
-
-
-
-
-
-if(
-odd>=2 &&
-odd<=3
-)
-
-score+=20;
-
-
-
-
-if(
-big>=2 &&
-big<=4
-)
-
-score+=20;
-
-
-
-
-if(
-sum>=90 &&
-sum<=140
-)
-
-score+=20;
-
-
-
-return score;
-
-
-
-},
-
-
-
-
-
-
-
-// ================================
-// 单组评分
-// ================================
-
-
-score(front,back){
-
-
-
-let score=
-
-this.structure(front);
-
-
-
-
-
-let last=
-
-V90Database.last();
-
-
-
-
-
-if(last){
-
-
-score+=
-
-V90Markov.adjust(
-
-front,
-
-last
-
-)
-
-*0.05;
-
-
-
-}
-
-
-
-
-return Number(
-score.toFixed(2)
-);
-
-
-
-},
-
-
-
-
-
-
-
-// ================================
-// 异步百万模拟
-// ================================
-
-
-run(total=1000000){
-
-
-
-return new Promise(resolve=>{
-
-
-
-
-
-let results={};
-
-
-
-let current=0;
-
-
-
-let batch=5000;
-
-
-
-let front=
-
-this.frontPool();
-
-
-
-let back=
-
-this.backPool();
-
-
-
-
-
-
-
-function loop(){
-
-
-
-for(
-let i=0;
-
-i<batch;
-
-i++
-
-){
-
-
-
-if(
-current>=total
-)
-
-break;
-
-
-
-
-let f=
-
-V90MonteCarlo.pickWeighted(
-
-front,
+frontPool,
 
 5
 
-);
+),
 
 
 
-let b=
+back:
 
-V90MonteCarlo.pickWeighted(
+this.randomPick(
 
-back,
+backPool,
 
 2
 
-);
-
-
-
-
-
-
-let key=
-
-f.join("-")
-
-+
-
-"+"
-
-+
-
-b.join("-");
-
-
-
-
-
-
-let score=
-
-V90MonteCarlo.score(
-
-f,
-
-b
-
-);
-
-
-
-
-
-
-if(
-!results[key]
-){
-
-
-results[key]={
-
-
-
-front:f,
-
-
-back:b,
-
-
-count:0,
-
-
-score:0
+)
 
 
 
@@ -501,26 +200,252 @@ score:0
 
 
 
-}
+},
 
 
 
 
 
-results[key].count++;
+
+
+// =================================
+// 模拟入口
+// =================================
+
+
+async run(times=100000){
 
 
 
-results[key].score+=score;
+let data=
+
+V90Database.get();
 
 
 
 
-current++;
 
 
 
-}
+let train=data.slice(
+
+Math.max(
+
+0,
+
+data.length-500
+
+)
+
+);
+
+
+
+
+
+
+
+
+let frontModel=
+
+V90Model.front(
+
+train
+
+);
+
+
+
+
+
+
+let backModel=
+
+V90Model.back(
+
+train
+
+);
+
+
+
+
+
+
+
+let frontBayes=
+
+V90Bayes.final(
+
+frontModel,
+
+"front"
+
+);
+
+
+
+
+
+
+
+let backBayes=
+
+V90Bayes.final(
+
+backModel,
+
+"back"
+
+);
+
+
+
+
+
+
+
+// 转换权重
+
+
+let frontPool=
+
+frontBayes.map(x=>({
+
+
+
+number:x.number,
+
+
+value:x.probability*1000
+
+
+
+}));
+
+
+
+
+
+
+
+let backPool=
+
+backBayes.map(x=>({
+
+
+
+number:x.number,
+
+
+value:x.probability*1000
+
+
+
+}));
+
+
+
+
+
+
+
+let result=[];
+
+
+
+
+
+
+
+for(
+let i=0;
+
+i<times;
+
+i++
+
+){
+
+
+
+let item=
+
+this.generate(
+
+frontPool,
+
+backPool
+
+);
+
+
+
+
+
+
+
+// Markov修正
+
+
+let markovScore=
+
+V90Markov.score(
+
+item.front,
+
+train,
+
+"front"
+
+)
+
++
+
+V90Markov.score(
+
+item.back,
+
+train,
+
+"back"
+
+);
+
+
+
+
+
+
+
+item.score=
+
+Number(
+
+(
+
+Math.random()*100
+
++
+
+markovScore
+
+)
+
+.toFixed(3)
+
+);
+
+
+
+
+
+
+
+result.push(item);
+
+
+
 
 
 
@@ -529,11 +454,19 @@ current++;
 // 更新进度
 
 
+if(
+
+i%1000===0
+
+){
+
+
+
 let percent=
 
 Math.floor(
 
-current/total*100
+i/times*100
 
 );
 
@@ -544,18 +477,38 @@ current/total*100
 
 if(
 window.V90Progress
+
 ){
 
 
-window.V90Progress(
+
+V90Progress(
 
 percent,
 
-current,
+i,
 
-total
+times
 
 );
+
+
+
+}
+
+
+
+await new Promise(
+
+r=>
+
+setTimeout(r,0)
+
+);
+
+
+
+}
 
 
 
@@ -567,79 +520,17 @@ total
 
 
 
-if(
-current<total
-){
+
+// 排序
 
 
-
-setTimeout(
-loop,
-10
-);
-
-
-
-}else{
-
-
-
-
-
-let list=
-
-Object.values(results)
-
-.map(x=>({
-
-
-
-front:x.front,
-
-
-back:x.back,
-
-
-
-count:x.count,
-
-
-
-score:
-
-Number(
-
-(
-
-x.score/x.count
-
-+
-
-x.count*0.01
-
-)
-
-.toFixed(2)
-
-)
-
-
-
-}))
-
-
-
-
-
-.sort(
+result.sort(
 
 (a,b)=>
 
 b.score-a.score
 
-)
-
-.slice(0,50);
+);
 
 
 
@@ -647,27 +538,13 @@ b.score-a.score
 
 
 
-resolve(list);
+return result.slice(
 
+0,
 
+50
 
-}
-
-
-
-
-
-}
-
-
-
-
-
-loop();
-
-
-
-});
+);
 
 
 

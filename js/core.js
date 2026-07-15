@@ -1,5 +1,5 @@
 // ================================================
-// V90 AI CORE FINAL R6.1
+// V90 AI CORE FINAL R7.0
 // AI最终裁决中心
 // ================================================
 
@@ -9,45 +9,7 @@
 window.V90Core={
 
 
-cacheKey:"V90_R61_PREDICTION",
-
-
-
-
-
-
-
-// =================================
-// 读取缓存预测
-// =================================
-
-
-getCache(){
-
-
-let data=
-
-localStorage.getItem(
-this.cacheKey
-);
-
-
-
-if(data){
-
-
-return JSON.parse(data);
-
-
-}
-
-
-
-return null;
-
-
-
-},
+key:"V90_R7_LAST_PREDICTION",
 
 
 
@@ -66,7 +28,7 @@ save(data){
 
 localStorage.setItem(
 
-this.cacheKey,
+this.key,
 
 JSON.stringify(data)
 
@@ -83,113 +45,36 @@ JSON.stringify(data)
 
 
 // =================================
-// 学习权重融合
+// 获取预测
 // =================================
 
 
-learningWeight(number,type){
+get(){
 
 
 
 let data=
 
-V90Learning.init();
+localStorage.getItem(
 
-
-
-
-
-
-
-if(type==="front"){
-
-
-
-return data.front[number] || 1;
-
-
-
-}
-
-
-
-return data.back[number] || 1;
-
-
-
-},
-
-
-
-
-
-
-
-// =================================
-// 最终评分
-// =================================
-
-
-finalScore(item){
-
-
-
-let score=item.score;
-
-
-
-
-
-
-
-item.front.forEach(n=>{
-
-
-score+=
-
-this.learningWeight(
-n,
-"front"
-)
-*2;
-
-
-
-});
-
-
-
-
-
-
-
-item.back.forEach(n=>{
-
-
-score+=
-
-this.learningWeight(
-n,
-"back"
-)
-*3;
-
-
-
-});
-
-
-
-
-
-
-
-
-return Number(
-
-score.toFixed(2)
+this.key
 
 );
+
+
+
+
+
+
+return data
+
+?
+
+JSON.parse(data)
+
+:
+
+null;
 
 
 
@@ -212,24 +97,19 @@ meeting(result){
 
 return [
 
-
-"趋势AI：历史频率与冷热趋势完成",
-
+"频率AI：500期滚动数据分析完成",
 
 
-"概率AI：Bayes概率更新完成",
+"Bayes AI：后验概率计算完成",
 
 
-
-"结构AI：奇偶/大小/和值检测完成",
-
+"Markov AI：历史转移趋势完成",
 
 
-"Markov AI：一阶转移完成",
+"蒙特卡罗AI：候选池模拟完成",
 
 
-
-"学习AI：历史反馈权重融合完成"
+"学习AI：读取历史训练权重完成"
 
 
 
@@ -250,33 +130,7 @@ return [
 // =================================
 
 
-async analyze(force=false){
-
-
-
-// 已有预测直接返回
-
-
-let cache=
-
-this.getCache();
-
-
-
-
-
-if(cache && !force){
-
-
-
-return cache;
-
-
-
-}
-
-
-
+async analyze(){
 
 
 
@@ -286,7 +140,7 @@ let pool=
 
 await V90MonteCarlo.run(
 
-1000000
+100000
 
 );
 
@@ -297,36 +151,12 @@ await V90MonteCarlo.run(
 
 
 
-let list=
+if(
+pool.length===0
 
+)
 
-
-pool.map(item=>{
-
-
-
-return {
-
-
-
-front:item.front,
-
-
-back:item.back,
-
-
-
-score:
-
-this.finalScore(item)
-
-
-
-};
-
-
-
-});
+return null;
 
 
 
@@ -334,11 +164,18 @@ this.finalScore(item)
 
 
 
-list.sort(
 
-(a,b)=>
 
-b.score-a.score
+// TOP10
+
+
+let top10=
+
+pool.slice(
+
+0,
+
+10
 
 );
 
@@ -351,7 +188,7 @@ b.score-a.score
 
 let best=
 
-list[0];
+top10[0];
 
 
 
@@ -364,19 +201,14 @@ let result={
 
 
 
-id:
-
-"R6.1-"
-
-+
-
-Date.now(),
+version:"R7.0",
 
 
 
 time:
 
 new Date()
+
 .toLocaleString(),
 
 
@@ -398,6 +230,7 @@ back:
 best.back,
 
 
+
 score:
 
 best.score
@@ -411,9 +244,7 @@ best.score
 
 
 
-top10:
-
-list.slice(0,10),
+top10,
 
 
 
@@ -425,8 +256,10 @@ this.meeting(best)
 
 
 
-};
 
+
+
+};
 
 
 

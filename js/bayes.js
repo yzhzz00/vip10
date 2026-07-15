@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE FINAL R6.1
-// Bayes概率评分中心
+// V90 AI CORE FINAL R7.0
+// Bayes概率融合模块
 // ================================================
 
 "use strict";
@@ -15,7 +15,7 @@ window.V90Bayes={
 
 
 // =================================
-// 归一化
+// 概率归一化
 // =================================
 
 
@@ -40,6 +40,16 @@ a+b.value,
 
 
 
+if(total===0)
+
+return list;
+
+
+
+
+
+
+
 return list.map(x=>({
 
 
@@ -47,8 +57,7 @@ return list.map(x=>({
 number:x.number,
 
 
-
-value:
+probability:
 
 Number(
 
@@ -59,6 +68,16 @@ x.value/total
 )
 
 .toFixed(6)
+
+),
+
+
+
+bayesScore:
+
+Number(
+
+x.value.toFixed(3)
 
 )
 
@@ -77,7 +96,7 @@ x.value/total
 
 
 // =================================
-// Bayes计算
+// Bayes后验计算
 // =================================
 
 
@@ -87,6 +106,23 @@ calculate(model,type){
 
 let result=[];
 
+
+
+
+
+
+
+let learning=
+
+window.V90Learning
+
+?
+
+V90Learning.get()
+
+:
+
+null;
 
 
 
@@ -104,7 +140,11 @@ Object.values(model)
 
 let prior=
 
+
+
 item.frequency+1;
+
+
 
 
 
@@ -114,6 +154,8 @@ item.frequency+1;
 
 let trend=
 
+
+
 item.recent+1;
 
 
@@ -122,7 +164,11 @@ item.recent+1;
 
 
 
-let miss=
+
+
+let missing=
+
+
 
 1/(item.missing+1);
 
@@ -133,14 +179,12 @@ let miss=
 
 
 
-let coldHot=
 
-item.hot
+let modelScore=
 
-+
 
-(1-item.cold);
 
+item.score+1;
 
 
 
@@ -148,24 +192,18 @@ item.hot
 
 
 
-let learning=1;
+
+
+let learn=1;
 
 
 
 
 
 
-if(
-window.V90Learning
-){
 
 
-
-let w=
-
-V90Learning.getWeight();
-
-
+if(learning){
 
 
 
@@ -173,9 +211,9 @@ if(type==="front"){
 
 
 
-learning=
+learn=
 
-w.front[item.number]
+learning.front[item.number]
 
 ||1;
 
@@ -185,9 +223,9 @@ w.front[item.number]
 
 
 
-learning=
+learn=
 
-w.back[item.number]
+learning.back[item.number]
 
 ||1;
 
@@ -206,62 +244,36 @@ w.back[item.number]
 
 
 
-// Bayes后验近似
+
+
+// Bayes融合
 
 
 let posterior=
 
 
-prior
 
-*
-
-0.35
+prior*0.30
 
 
 +
 
-trend
-
-*
-
-0.25
+trend*0.20
 
 
 +
 
-miss
-
-*
-
-0.15
+missing*80*0.15
 
 
 +
 
-coldHot
-
-*
-
-20
-
-*
-
-0.15
+modelScore*0.20
 
 
 +
 
-learning
-
-*
-
-10
-
-*
-
-0.10;
-
+learn*20*0.15;
 
 
 
@@ -278,17 +290,7 @@ number:item.number,
 
 
 
-value:posterior,
-
-
-
-bayesScore:
-
-Number(
-
-posterior.toFixed(3)
-
-)
+value:posterior
 
 
 
@@ -299,8 +301,8 @@ posterior.toFixed(3)
 
 
 
-
 });
+
 
 
 
@@ -321,7 +323,7 @@ return this.normalize(result);
 
 
 // =================================
-// 最终接口
+// 对外接口
 // =================================
 
 

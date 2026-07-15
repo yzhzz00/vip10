@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 
 <head>
@@ -8,7 +9,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>
-大乐透智能分析系统 V90 AI CORE FINAL R6.1
+大乐透智能分析系统 V90 AI CORE R7.0
 </title>
 
 
@@ -16,7 +17,6 @@
 
 
 </head>
-
 
 
 <body>
@@ -32,44 +32,30 @@
 
 
 <h2>
-V90 AI CORE FINAL R6.1
+V90 AI CORE FINAL R7.0
 </h2>
-
-
-
-
 
 
 
 <div class="card">
 
-<h3>
-系统状态
-</h3>
+<h3>系统状态</h3>
 
 
-系统状态：
+<p>
+V90 AI CORE R7.0 启动完成
+</p>
 
-<span id="status">
-启动中
+
+<p>
+历史数据：
+<span id="dataCount">
+等待加载
 </span>
-
-
-<br><br>
-
-
-数据状态：
-
-<span id="dataStatus">
-读取中
-</span>
+</p>
 
 
 </div>
-
-
-
-
 
 
 
@@ -83,16 +69,73 @@ AI模型中心
 </h3>
 
 
+<p>
+频率模型 ✓
+</p>
 
-<div id="models">
+
+<p>
+冷热分析 ✓
+</p>
+
+
+<p>
+遗漏周期 ✓
+</p>
+
+
+<p>
+Bayes评分 ✓
+</p>
+
+
+<p>
+Markov转移 ✓
+</p>
+
+
+<p>
+蒙特卡罗模拟 ✓
+</p>
+
+
+<p>
+AI历史训练 ✓
+</p>
+
+
 
 </div>
 
 
 
+
+
+
+<div class="card">
+
+
+<h3>
+AI训练中心
+</h3>
+
+
+<button id="trainBtn">
+
+开始历史滚动训练
+
+</button>
+
+
+
+<div id="trainResult">
+
+等待训练
+
 </div>
 
 
+</div>
 
 
 
@@ -117,27 +160,13 @@ AI分析中心
 
 
 
-
-<div id="progressText">
-
-等待分析
-
-</div>
+<div class="progress">
 
 
-
-
-
-<div class="progressBox">
-
-
-<div id="progressBar">
-
-</div>
+<div id="progressBar"></div>
 
 
 </div>
-
 
 
 
@@ -147,6 +176,13 @@ AI分析中心
 
 </div>
 
+
+
+<div id="progressText">
+
+等待计算
+
+</div>
 
 
 
@@ -190,7 +226,7 @@ AI分析中心
 
 
 <h3>
-TOP候选池
+TOP10预测池
 </h3>
 
 
@@ -201,9 +237,7 @@ TOP候选池
 </div>
 
 
-
 </div>
-
 
 
 
@@ -216,8 +250,9 @@ TOP候选池
 
 
 <h3>
-AI会议 / 自我反驳
+AI会议 / 自我分析
 </h3>
+
 
 
 <div id="meeting">
@@ -252,50 +287,40 @@ AI会议 / 自我反驳
 <input id="period">
 
 
+<br><br>
 
 
+前区：
 
-
-<h4>
-前区
-</h4>
-
-
-<div class="nums">
+<br>
 
 
 <input id="f1">
+
 <input id="f2">
+
 <input id="f3">
+
 <input id="f4">
+
 <input id="f5">
 
 
-</div>
+<br><br>
 
 
+后区：
 
-
-
-
-<h4>
-后区
-</h4>
-
-
-
-<div class="nums">
+<br>
 
 
 <input id="b1">
+
 <input id="b2">
 
 
-</div>
 
-
-
-
+<br><br>
 
 
 <button id="saveDraw">
@@ -306,50 +331,11 @@ AI会议 / 自我反驳
 
 
 
-
-
 <div id="review">
 
 等待反馈
 
 </div>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-回测中心
-</h3>
-
-
-
-<button id="backtestBtn">
-
-执行最近100期回测
-
-</button>
-
-
-
-<div id="backtest">
-
-等待回测
-
-</div>
-
 
 
 
@@ -374,20 +360,21 @@ AI成长记录
 
 <div id="growth">
 
-暂无学习
+暂无训练记录
+
+</div>
+
 
 </div>
 
 
 
-</div>
-
-
 
 
 
 
 </div>
+
 
 
 
@@ -397,6 +384,8 @@ AI成长记录
 
 
 <script src="js/database.js"></script>
+
+<script src="js/learning.js"></script>
 
 <script src="js/model.js"></script>
 
@@ -410,11 +399,109 @@ AI成长记录
 
 <script src="js/review.js"></script>
 
-<script src="js/learning.js"></script>
+<script src="js/training.js"></script>
 
-<script src="js/backtest.js"></script>
+<script src="js/trainer.js"></script>
+
+<script src="js/report.js"></script>
 
 <script src="js/app.js"></script>
+
+
+
+<script>
+
+
+// 显示数据数量
+
+setInterval(()=>{
+
+
+if(window.V90Database){
+
+
+document.getElementById(
+"dataCount"
+).innerHTML=
+
+V90Database.count()+"期";
+
+
+}
+
+
+},1000);
+
+
+
+// 历史训练按钮
+
+document.getElementById(
+"trainBtn"
+).onclick=
+
+async()=>{
+
+
+let result=
+
+await V90Training.run(500);
+
+
+
+let box=
+
+document.getElementById(
+"trainResult"
+);
+
+
+
+box.innerHTML=
+
+`
+
+训练完成
+
+<br>
+
+次数：
+
+${result.total}
+
+<br>
+
+前区3+：
+
+${result.front3}
+
+<br>
+
+后区命中：
+
+${result.back1}
+
+`;
+
+
+
+V90Learning.train(
+
+V90Training.records()
+
+);
+
+
+
+V90Report.show();
+
+
+
+};
+
+
+
+</script>
 
 
 

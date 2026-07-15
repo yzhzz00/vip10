@@ -1,6 +1,6 @@
 // ================================================
-// V90 AI CORE FINAL R6.1
-// 一阶Markov转移模型
+// V90 AI CORE FINAL R7.0
+// Markov一阶转移模型
 // ================================================
 
 "use strict";
@@ -15,7 +15,7 @@ window.V90Markov={
 
 
 // =================================
-// 初始化矩阵
+// 创建矩阵
 // =================================
 
 
@@ -24,7 +24,6 @@ create(size){
 
 
 let matrix={};
-
 
 
 
@@ -82,21 +81,11 @@ return matrix;
 
 
 // =================================
-// 生成转移矩阵
+// 构建转移矩阵
 // =================================
 
 
-build(type="front"){
-
-
-
-let data=
-
-V90Database.get();
-
-
-
-
+build(data,type="front"){
 
 
 
@@ -111,7 +100,6 @@ type==="front"
 :
 
 12;
-
 
 
 
@@ -140,7 +128,7 @@ i++
 
 
 
-let prev=
+let before=
 
 type==="front"
 
@@ -157,8 +145,7 @@ data[i-1].back;
 
 
 
-
-let next=
+let after=
 
 type==="front"
 
@@ -176,11 +163,13 @@ data[i].back;
 
 
 
-prev.forEach(a=>{
+
+
+before.forEach(a=>{
 
 
 
-next.forEach(b=>{
+after.forEach(b=>{
 
 
 
@@ -220,6 +209,8 @@ matrix[a][b]++;
 
 
 
+
+
 // 转概率
 
 
@@ -239,11 +230,14 @@ matrix[a]
 
 .reduce(
 
-(x,y)=>x+y,
+(x,y)=>
+
+x+y,
 
 0
 
 );
+
 
 
 
@@ -261,6 +255,8 @@ Object.keys(matrix[a])
 
 
 matrix[a][b]=
+
+
 
 matrix[a][b]/total;
 
@@ -282,7 +278,6 @@ matrix[a][b]/total;
 
 
 
-
 return matrix;
 
 
@@ -296,15 +291,17 @@ return matrix;
 
 
 // =================================
-// 当前期预测影响
+// 当前趋势评分
 // =================================
 
 
-adjust(numbers,last,type="front"){
+score(numbers,data,type="front"){
 
 
 
-if(!last)
+if(
+data.length===0
+)
 
 return 0;
 
@@ -314,9 +311,34 @@ return 0;
 
 
 
+let last=
+
+type==="front"
+
+?
+
+data[data.length-1].front
+
+:
+
+data[data.length-1].back;
+
+
+
+
+
+
+
+
 let matrix=
 
-this.build(type);
+this.build(
+
+data,
+
+type
+
+);
 
 
 
@@ -324,7 +346,7 @@ this.build(type);
 
 
 
-let score=0;
+let value=0;
 
 
 
@@ -333,25 +355,25 @@ let score=0;
 
 
 
-numbers.forEach(n=>{
+last.forEach(old=>{
 
 
 
-last.forEach(p=>{
+numbers.forEach(next=>{
 
 
 
 if(
-matrix[p]
+matrix[old]
 &&
-matrix[p][n]
+matrix[old][next]
 ){
 
 
 
-score+=
+value+=
 
-matrix[p][n];
+matrix[old][next];
 
 
 
@@ -373,7 +395,7 @@ matrix[p][n];
 
 return Number(
 
-(score*100)
+(value*100)
 
 .toFixed(3)
 
@@ -390,31 +412,23 @@ return Number(
 
 
 // =================================
-// 获取转移热门数字
+// 推荐转移数字
 // =================================
 
 
-nextNumbers(type="front"){
+recommend(data,type="front"){
 
 
 
-let data=
+let matrix=
 
-V90Database.get();
+this.build(
 
+data,
 
+type
 
-
-
-
-
-if(
-data.length===0
-)
-
-return [];
-
-
+);
 
 
 
@@ -422,8 +436,6 @@ return [];
 
 
 let last=
-
-
 
 type==="front"
 
@@ -441,20 +453,7 @@ data[data.length-1].back;
 
 
 
-
-let matrix=
-
-this.build(type);
-
-
-
-
-
-
-
-
 let result={};
-
 
 
 
@@ -472,17 +471,17 @@ matrix[n]
 
 )
 
-.forEach(next=>{
+.forEach(x=>{
 
 
 
-result[next]=
+result[x]=
 
-(result[next]||0)
+(result[x]||0)
 
 +
 
-matrix[n][next];
+matrix[n][x];
 
 
 
@@ -511,7 +510,6 @@ score:result[n]
 
 }))
 
-
 .sort(
 
 (a,b)=>
@@ -523,7 +521,6 @@ b.score-a.score
 
 
 }
-
 
 
 
