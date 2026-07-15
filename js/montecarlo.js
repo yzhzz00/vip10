@@ -1,229 +1,355 @@
 window.DLT_MONTECARLO = {
 
 
+    running:false,
 
-/*
-==========================
-组合模拟评分
-==========================
-*/
 
+    /*
+    ==========================
+    分批模拟
+    ==========================
+    */
 
-simulate(combination, history){
 
+    async run(results, history, deep=false, progress){
 
-let score=0;
 
+        if(this.running){
 
+            return [];
 
-for(
-let i=0;
-i<combination.length;
-i++
-){
+        }
 
 
+        this.running=true;
 
-let number=combination[i];
 
 
+        let output=[];
 
-let modelScore=
 
-DLT_PREDICTOR.numberScore(
 
-number,
+        // 手机优化参数
 
-history
+        let times = deep
 
-);
+        ?
 
+        100000
 
+        :
 
-score += modelScore.score;
+        10000;
 
 
 
-}
+        let batch = 500;
 
 
 
+        let totalTask = results.length;
 
-return score;
 
 
+        let finished=0;
 
-},
 
 
+        for(let item of results){
 
 
 
+            let totalScore=0;
 
 
-/*
-==========================
-执行模拟
-==========================
-*/
 
+            let stable=0;
 
-run(results,history,deep=false){
 
 
+            let completed=0;
 
-let times = deep
 
-?
 
-DLT_CONFIG.monteCarlo.deepSimulation
+            while(completed < times){
 
-:
 
-DLT_CONFIG.monteCarlo.normalSimulation;
 
+                let currentBatch = Math.min(
 
+                    batch,
 
-let output=[];
+                    times-completed
 
+                );
 
 
-results.forEach(item=>{
 
+                for(
+                    let i=0;
+                    i<currentBatch;
+                    i++
+                ){
 
 
-let total=0;
 
+                    let score =
 
+                    this.simulate(
 
-let winCount=0;
+                        item.front,
 
+                        history
 
+                    );
 
-for(
-let i=0;
-i<times;
-i++
-){
 
 
+                    totalScore += score;
 
-let score=
 
-this.simulate(
 
-item.front,
+                    if(score > 300){
 
-history
 
-);
+                        stable++;
 
 
+                    }
 
-total+=score;
 
 
+                }
 
-if(
-score>300
-){
 
 
-winCount++;
+                completed += currentBatch;
 
 
-}
 
+                // 释放手机线程
 
+                await this.sleep(10);
 
-}
 
 
+            }
 
 
 
-output.push({
 
 
+            output.push({
 
-front:item.front,
 
 
+                front:item.front,
 
-score:
 
-total/times,
 
+                score:
 
+                totalScore/times,
 
-stability:
 
-winCount/times*100
 
+                stability:
 
+                stable/times*100
 
-});
 
 
+            });
 
-});
 
 
+            finished++;
 
 
 
-output.sort(
+            if(progress){
 
-(a,b)=>
 
-{
 
+                progress(
 
-let sa=
+                    Math.floor(
 
-a.score*0.7
+                        finished/
 
-+
+                        totalTask*
 
-a.stability*0.3;
+                        100
 
+                    )
 
+                );
 
-let sb=
 
-b.score*0.7
 
-+
+            }
 
-b.stability*0.3;
 
 
+        }
 
-return sb-sa;
 
 
 
-}
 
-);
 
 
+        output.sort((a,b)=>{
 
-return output.slice(
 
-0,
 
-DLT_CONFIG.candidate.outputTop
+            let sa =
 
-);
+            a.score*0.7
 
+            +
 
+            a.stability*0.3;
 
-}
 
 
+            let sb =
 
+            b.score*0.7
 
+            +
+
+            b.stability*0.3;
+
+
+
+            return sb-sa;
+
+
+
+        });
+
+
+
+
+
+        this.running=false;
+
+
+
+        return output.slice(
+
+            0,
+
+            DLT_CONFIG.candidate.outputTop
+
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    /*
+    ==========================
+    单次模拟评分
+    ==========================
+    */
+
+
+    simulate(combination,history){
+
+
+
+        let score=0;
+
+
+
+        for(let n of combination){
+
+
+
+            let result =
+
+            DLT_PREDICTOR.numberScore(
+
+                n,
+
+                history
+
+            );
+
+
+
+            score += result.score;
+
+
+
+        }
+
+
+
+        return score;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    /*
+    ==========================
+    延迟释放
+    ==========================
+    */
+
+
+    sleep(ms){
+
+
+
+        return new Promise(
+
+            resolve =>
+
+            setTimeout(resolve,ms)
+
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    stop(){
+
+
+
+        this.running=false;
+
+
+
+    }
 
 
 
