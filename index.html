@@ -8,9 +8,14 @@
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0">
 
-<title>大乐透AI V90 CORE</title>
+
+<title>
+大乐透AI V90 CORE
+</title>
+
 
 <link rel="stylesheet" href="style.css">
+
 
 </head>
 
@@ -21,27 +26,49 @@ content="width=device-width, initial-scale=1.0">
 <div class="app">
 
 
-<h1>大乐透智能分析系统</h1>
+<h1>
+大乐透智能分析系统
+</h1>
 
-<h2>V90 AI CORE</h2>
+
+<h2>
+V90 AI CORE
+</h2>
+
+
 
 
 
 <div class="panel">
 
+
+<div>
+
 状态：
 
 <span id="status">
-等待加载...
+等待启动...
 </span>
+
+
+</div>
+
 
 </div>
 
 
 
+
+
+
+
 <div class="panel">
 
-<h3>历史数据</h3>
+
+<h3>
+历史数据
+</h3>
+
 
 
 <input
@@ -50,12 +77,20 @@ id="dataFile"
 accept=".txt">
 
 
+
 <div id="dataInfo">
+
 未加载
+
 </div>
 
 
+
 </div>
+
+
+
+
 
 
 
@@ -63,28 +98,42 @@ accept=".txt">
 <div class="panel">
 
 
-<h3>AI分析中心</h3>
+<h3>
+AI分析中心
+</h3>
+
 
 
 <button id="startBtn">
+
 开始 V90 AI分析
+
 </button>
+
+
 
 
 
 <div class="progress">
 
+
 <div id="progressBar">
 
 </div>
 
+
 </div>
+
 
 
 
 <div id="progressText">
+
 0%
+
 </div>
+
+
 
 
 
@@ -96,7 +145,11 @@ accept=".txt">
 
 
 
+
 </div>
+
+
+
 
 
 
@@ -107,26 +160,36 @@ accept=".txt">
 
 
 <h3>
+
 开奖反馈学习
+
 </h3>
+
 
 
 <textarea
 id="feedback"
-placeholder="输入实际开奖结果">
+placeholder="输入开奖号码，例如：
+03 08 17 26 33 05 11">
+
 </textarea>
 
 
+
+
 <button id="feedbackBtn">
+
 保存开奖反馈
+
 </button>
 
 
 
+
+
 <div id="learnStatus">
+
 等待反馈...
-</div>
-
 
 </div>
 
@@ -138,11 +201,20 @@ placeholder="输入实际开奖结果">
 
 
 
-<script src="V90.worker.js"></script>
+
+
+</div>
+
+
+
+
+
 
 <script src="V90.bundle.js"></script>
 
 
+
 </body>
+
 
 </html>

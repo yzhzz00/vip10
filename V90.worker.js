@@ -1,117 +1,86 @@
-// =====================================
+// ==================================================
 // 大乐透AI V90 Worker
-// 后台计算核心
-// =====================================
+// Monte Carlo 后台计算
+// ==================================================
 
 
-self.onmessage = function(e){
+"use strict";
 
 
-    const msg = e.data;
 
+self.onmessage=function(e){
 
 
-    // ===============================
-    // 100万次蒙特卡罗模拟
-    // ===============================
 
+    let msg=e.data;
 
-    if(msg.type === "MONTE_CARLO"){
 
 
+    if(
+        msg.type!=="MONTE_CARLO"
+    ){
 
-        const times =
-        msg.times || 1000000;
+        return;
 
+    }
 
 
-        let result = {};
 
 
 
-        for(let i = 0; i < times; i++){
+    let times =
+    msg.times || 1000000;
 
 
 
-            let front=[];
 
 
+    let result={};
 
-            while(front.length < 5){
 
 
-                let n =
-                Math.floor(
-                    Math.random()*35
-                )+1;
 
 
 
-                if(!front.includes(n)){
+    for(
+        let i=0;
+        i<times;
+        i++
+    ){
 
 
-                    front.push(n);
 
 
-                }
 
+        let nums=[];
 
 
-            }
 
 
 
-            front.sort(
-                (a,b)=>a-b
-            );
+        while(
+            nums.length<5
+        ){
 
 
 
-            let key =
-            front.join("-");
+            let n =
 
+            Math.floor(
+                Math.random()*35
+            )+1;
 
 
-            if(!result[key]){
 
 
-                result[key]=0;
 
+            if(
+                !nums.includes(n)
+            ){
 
-            }
 
 
-            result[key]++;
-
-
-
-
-            // 每5万次回传一次进度
-
-            if(i % 50000 === 0){
-
-
-
-                self.postMessage({
-
-
-                    type:"PROGRESS",
-
-
-                    value:
-                    Math.floor(
-                    i/times*100
-                    ),
-
-
-                    current:i,
-
-
-                    total:times
-
-
-
-                });
+                nums.push(n);
 
 
 
@@ -125,49 +94,147 @@ self.onmessage = function(e){
 
 
 
-        let ranking =
 
-        Object.keys(result)
-
-        .sort(
-            (a,b)=>
-            result[b]-result[a]
-        )
-
-
-        .slice(0,20)
-
-        .map(x=>({
-
-
-            numbers:x,
-
-
-            count:
-            result[x]
-
-
-        }));
+        nums.sort(
+            (a,b)=>a-b
+        );
 
 
 
 
 
-        self.postMessage({
 
-
-            type:"MONTE_CARLO_RESULT",
-
-
-            data:ranking
+        let key =
+        nums.join(",");
 
 
 
-        });
+
+
+        if(
+            !result[key]
+        ){
+
+
+            result[key]=0;
+
+
+        }
+
+
+
+
+        result[key]++;
+
+
+
+
+
+
+
+
+        // 每5万次返回进度
+
+        if(
+            i%50000===0
+        ){
+
+
+
+            self.postMessage({
+
+
+
+                type:
+                "PROGRESS",
+
+
+
+                value:
+                Math.floor(
+                    i/times*100
+                ),
+
+
+
+                current:i,
+
+
+
+                total:times
+
+
+
+            });
+
+
+
+        }
+
+
 
 
 
     }
+
+
+
+
+
+
+
+    let ranking =
+
+    Object.keys(result)
+
+    .sort(
+
+        (a,b)=>
+
+        result[b]-result[a]
+
+    )
+
+    .slice(0,20)
+
+    .map(x=>({
+
+
+
+        numbers:x,
+
+
+
+        count:
+        result[x]
+
+
+
+    }));
+
+
+
+
+
+
+
+    self.postMessage({
+
+
+
+        type:
+        "RESULT",
+
+
+
+        data:
+        ranking
+
+
+
+    });
+
+
 
 
 
