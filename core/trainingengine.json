@@ -1,0 +1,336 @@
+/*
+================================
+大乐透AI_V90 CORE
+
+trainingengine.js
+
+训练调度引擎
+================================
+*/
+
+
+class TrainingEngine{
+
+
+    constructor(){
+
+
+        this.name="training";
+
+
+        this.statusValue="idle";
+
+
+        this.report={};
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 开始训练
+    // ==========================
+
+
+    async train(){
+
+
+
+        this.statusValue="running";
+
+
+
+
+
+
+        if(window.loadingengine){
+
+
+
+            window.loadingengine.update(
+
+                5,
+
+                "开始训练"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+        let data=
+
+        window.dataengine.get();
+
+
+
+
+
+
+
+        if(
+
+        !data ||
+
+        data.length===0
+
+        ){
+
+
+
+            throw new Error(
+
+            "没有训练数据"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+        if(window.loadingengine){
+
+
+
+            window.loadingengine.update(
+
+                25,
+
+                "计算历史特征"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+
+        let feature=
+
+        window.featureengine.build(
+
+            data
+
+        );
+
+
+
+
+
+
+
+        if(window.loadingengine){
+
+
+
+            window.loadingengine.update(
+
+                50,
+
+                "更新模型参数"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+
+        let result={
+
+
+
+            samples:
+
+            data.length,
+
+
+
+            feature:
+
+            feature,
+
+
+
+            time:
+
+            new Date()
+
+            .toISOString()
+
+
+
+        };
+
+
+
+
+
+
+
+        this.report=result;
+
+
+
+
+
+
+
+
+        // 调用学习模块
+
+
+        if(window.learningengine){
+
+
+
+            window.learningengine.learn(
+
+                result
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+
+        if(window.loadingengine){
+
+
+
+            window.loadingengine.update(
+
+                100,
+
+                "训练完成"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+
+        this.statusValue="complete";
+
+
+
+
+
+
+
+        return result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 获取报告
+    // ==========================
+
+
+    getReport(){
+
+
+
+        return this.report;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    status(){
+
+
+
+        return {
+
+
+
+            engine:
+
+            this.name,
+
+
+
+            status:
+
+            this.statusValue
+
+
+
+        };
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+window.trainingengine=
+
+new TrainingEngine();

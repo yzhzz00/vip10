@@ -1,0 +1,625 @@
+/*
+================================
+大乐透AI_V90 CORE
+
+featureengine.js
+
+历史特征计算引擎
+================================
+*/
+
+
+class FeatureEngine{
+
+
+    constructor(){
+
+
+        this.name="feature";
+
+
+        this.result=null;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 构建全部特征
+    // ==========================
+
+
+    build(data){
+
+
+
+        if(!data || data.length===0){
+
+
+
+            throw new Error(
+
+            "没有历史数据"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+        this.result={
+
+
+
+            frontFrequency:
+
+            this.frequency(
+
+                data,
+
+                "front"
+
+            ),
+
+
+
+            backFrequency:
+
+            this.frequency(
+
+                data,
+
+                "back"
+
+            ),
+
+
+
+            omission:
+
+            this.omission(data),
+
+
+
+            oddEven:
+
+            this.oddEven(data),
+
+
+
+            area:
+
+            this.area(data),
+
+
+
+            sum:
+
+            this.sum(data),
+
+
+
+            continuous:
+
+            this.continuous(data)
+
+
+
+        };
+
+
+
+
+
+
+
+
+        return this.result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 频率
+    // ==========================
+
+
+    frequency(data,type){
+
+
+
+        let max=
+
+        type==="front"
+
+        ?
+
+        35
+
+        :
+
+        12;
+
+
+
+
+
+
+        let map={};
+
+
+
+
+
+
+        for(let i=1;i<=max;i++){
+
+
+
+            map[i]=0;
+
+
+
+        }
+
+
+
+
+
+
+
+        data.forEach(item=>{
+
+
+
+            item[type]
+
+            .forEach(n=>{
+
+
+
+                map[n]++;
+
+
+
+            });
+
+
+
+        });
+
+
+
+
+
+
+
+        return map;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 遗漏
+    // ==========================
+
+
+    omission(data){
+
+
+
+        let result={};
+
+
+
+
+
+
+        for(let i=1;i<=35;i++){
+
+
+
+            result[i]=999;
+
+
+
+        }
+
+
+
+
+
+
+
+        for(
+
+        let i=data.length-1;
+
+        i>=0;
+
+        i--
+
+        ){
+
+
+
+            data[i].front
+
+            .forEach(n=>{
+
+
+
+                if(result[n]===999){
+
+
+
+                    result[n]=
+
+                    data.length-i-1;
+
+
+
+                }
+
+
+
+            });
+
+
+
+        }
+
+
+
+
+
+
+
+        return result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 奇偶
+    // ==========================
+
+
+    oddEven(data){
+
+
+
+        let result=[];
+
+
+
+
+
+
+
+        data.forEach(item=>{
+
+
+
+            let odd=
+
+            item.front.filter(
+
+                n=>n%2!==0
+
+            ).length;
+
+
+
+
+
+
+
+            result.push({
+
+
+
+                odd,
+
+
+                even:
+
+                5-odd
+
+
+
+            });
+
+
+
+        });
+
+
+
+
+
+
+
+        return result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 区间分布
+    // ==========================
+
+
+    area(data){
+
+
+
+        return data.map(item=>{
+
+
+
+            return {
+
+
+
+                low:
+
+                item.front.filter(
+
+                    n=>n<=12
+
+                ).length,
+
+
+
+                mid:
+
+                item.front.filter(
+
+                    n=>n>12&&n<=24
+
+                ).length,
+
+
+
+                high:
+
+                item.front.filter(
+
+                    n=>n>24
+
+                ).length
+
+
+
+            };
+
+
+
+        });
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 和值
+    // ==========================
+
+
+    sum(data){
+
+
+
+        return data.map(item=>{
+
+
+
+            return item.front.reduce(
+
+                (a,b)=>a+b,
+
+                0
+
+            );
+
+
+
+        });
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 连号
+    // ==========================
+
+
+    continuous(data){
+
+
+
+        return data.map(item=>{
+
+
+
+            let nums=
+
+            [...item.front]
+
+            .sort(
+
+            (a,b)=>a-b
+
+            );
+
+
+
+
+
+
+
+            let count=0;
+
+
+
+
+
+
+
+            for(
+
+            let i=1;
+
+            i<nums.length;
+
+            i++
+
+            ){
+
+
+
+                if(
+
+                nums[i]-nums[i-1]===1
+
+                ){
+
+
+
+                    count++;
+
+
+
+                }
+
+
+
+            }
+
+
+
+
+
+
+
+
+            return count;
+
+
+
+        });
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    status(){
+
+
+
+        return {
+
+
+
+            engine:this.name,
+
+
+            ready:
+
+            this.result!==null
+
+
+
+        };
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+window.featureengine=
+
+new FeatureEngine();

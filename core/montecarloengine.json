@@ -1,0 +1,466 @@
+/*
+================================
+大乐透AI_V90 CORE
+
+montecarloengine.js
+
+蒙特卡罗模拟引擎
+================================
+*/
+
+
+class MonteCarloEngine{
+
+
+    constructor(){
+
+
+        this.name="montecarlo";
+
+
+        this.result=[];
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 执行模拟
+    // ==========================
+
+
+    run(data, times=100000){
+
+
+
+        let counter={};
+
+
+
+
+
+
+
+        for(
+
+        let i=0;
+
+        i<times;
+
+        i++
+
+        ){
+
+
+
+            let candidate=
+
+            this.randomCandidate();
+
+
+
+
+
+
+
+            let key=
+
+            candidate.front.join(",")
+
+            +
+
+            "|"
+
+            +
+
+            candidate.back.join(",");
+
+
+
+
+
+
+
+
+            if(!counter[key]){
+
+
+
+                counter[key]={
+
+
+
+                    candidate,
+
+
+                    count:0
+
+
+
+                };
+
+
+
+            }
+
+
+
+
+
+
+
+
+            counter[key].count++;
+
+
+
+        }
+
+
+
+
+
+
+
+        this.result=
+
+        Object.values(counter)
+
+        .sort(
+
+            (a,b)=>
+
+            b.count-a.count
+
+        );
+
+
+
+
+
+
+
+
+        return this.result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 随机生成大乐透号码
+    // ==========================
+
+
+    randomCandidate(){
+
+
+
+        return {
+
+
+
+            front:
+
+            this.randomNumbers(
+
+                1,
+
+                35,
+
+                5
+
+            ),
+
+
+
+            back:
+
+            this.randomNumbers(
+
+                1,
+
+                12,
+
+                2
+
+            )
+
+
+
+        };
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 不重复随机数
+    // ==========================
+
+
+    randomNumbers(min,max,count){
+
+
+
+        let arr=[];
+
+
+
+
+
+
+
+        while(
+
+        arr.length<count
+
+        ){
+
+
+
+            let n=
+
+            Math.floor(
+
+                Math.random()
+
+                *
+
+                (max-min+1)
+
+            )
+
+            +
+
+            min;
+
+
+
+
+
+
+
+            if(
+
+            !arr.includes(n)
+
+            ){
+
+
+
+                arr.push(n);
+
+
+
+            }
+
+
+
+        }
+
+
+
+
+
+
+
+        return arr.sort(
+
+            (a,b)=>a-b
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 根据历史数据修正
+    // ==========================
+
+
+    weightedRun(feature,times=10000){
+
+
+
+        let result=[];
+
+
+
+
+
+
+
+        for(
+
+        let i=0;
+
+        i<times;
+
+        i++
+
+        ){
+
+
+
+            let candidate=
+
+            this.randomCandidate();
+
+
+
+
+
+
+
+            let score=0;
+
+
+
+
+
+
+
+            candidate.front
+
+            .forEach(n=>{
+
+
+
+                if(
+
+                feature.frontFrequency[n]
+
+                ){
+
+
+
+                    score+=
+
+                    feature.frontFrequency[n];
+
+
+
+                }
+
+
+
+            });
+
+
+
+
+
+
+
+            result.push({
+
+
+
+                candidate,
+
+
+                score
+
+
+
+            });
+
+
+
+        }
+
+
+
+
+
+
+
+        return result.sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    status(){
+
+
+
+        return {
+
+
+
+            engine:this.name,
+
+
+            result:
+
+            this.result.length
+
+
+
+        };
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+window.montecarloengine=
+
+new MonteCarloEngine();

@@ -1,0 +1,496 @@
+/*
+================================
+大乐透AI_V90 CORE
+
+markovengine.js
+
+一阶马尔可夫转移引擎
+================================
+*/
+
+
+class MarkovEngine{
+
+
+    constructor(){
+
+
+        this.name="markov";
+
+
+        this.matrix={};
+
+
+        this.ready=false;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 建立转移矩阵
+    // ==========================
+
+
+    build(data){
+
+
+
+        if(!data || data.length<2){
+
+
+
+            throw new Error(
+
+            "马尔可夫数据不足"
+
+            );
+
+
+
+        }
+
+
+
+
+
+
+
+
+        let matrix={};
+
+
+
+
+
+
+        for(
+
+        let i=0;
+
+        i<data.length-1;
+
+        i++
+
+        ){
+
+
+
+            let current=
+
+            data[i].front;
+
+
+
+
+
+
+            let next=
+
+            data[i+1].front;
+
+
+
+
+
+
+
+
+            current.forEach(a=>{
+
+
+
+                if(!matrix[a]){
+
+
+
+                    matrix[a]={};
+
+
+
+                }
+
+
+
+
+
+
+
+                next.forEach(b=>{
+
+
+
+                    if(!matrix[a][b]){
+
+
+
+                        matrix[a][b]=0;
+
+
+
+                    }
+
+
+
+
+
+
+
+                    matrix[a][b]++;
+
+
+
+                });
+
+
+
+            });
+
+
+
+        }
+
+
+
+
+
+
+
+
+        this.matrix=
+
+        this.normalize(matrix);
+
+
+
+
+
+
+
+        this.ready=true;
+
+
+
+
+
+
+
+        return this.matrix;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 概率归一化
+    // ==========================
+
+
+    normalize(matrix){
+
+
+
+        let result={};
+
+
+
+
+
+
+
+        Object.keys(matrix)
+
+        .forEach(a=>{
+
+
+
+            let total=0;
+
+
+
+
+
+
+
+            Object.values(
+
+                matrix[a]
+
+            )
+
+            .forEach(v=>{
+
+
+
+                total+=v;
+
+
+
+            });
+
+
+
+
+
+
+
+
+            result[a]={};
+
+
+
+
+
+
+
+            Object.keys(
+
+                matrix[a]
+
+            )
+
+            .forEach(b=>{
+
+
+
+                result[a][b]=
+
+                Number(
+
+                (
+
+                matrix[a][b]
+
+                /
+
+                total
+
+                )
+
+                .toFixed(4)
+
+                );
+
+
+
+            });
+
+
+
+        });
+
+
+
+
+
+
+
+        return result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 查询下一期概率
+    // ==========================
+
+
+    predict(number){
+
+
+
+        if(
+
+        !this.matrix[number]
+
+        ){
+
+
+
+            return {};
+
+
+
+        }
+
+
+
+
+
+
+
+        return this.matrix[number];
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 计算候选号码马尔可夫分
+    // ==========================
+
+
+    score(candidate,last){
+
+
+
+        let score=0;
+
+
+
+
+
+
+
+        if(!last){
+
+
+
+            return score;
+
+
+
+        }
+
+
+
+
+
+
+
+        last.forEach(old=>{
+
+
+
+            if(
+
+            this.matrix[old]
+
+            ){
+
+
+
+                candidate.front
+
+                .forEach(n=>{
+
+
+
+                    if(
+
+                    this.matrix[old][n]
+
+                    ){
+
+
+
+                        score+=
+
+                        this.matrix[old][n];
+
+
+
+                    }
+
+
+
+                });
+
+
+
+            }
+
+
+
+        });
+
+
+
+
+
+
+
+        return Number(
+
+        score.toFixed(4)
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    status(){
+
+
+
+        return {
+
+
+
+            engine:this.name,
+
+
+            ready:this.ready
+
+
+
+        };
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+window.markovengine=
+
+new MarkovEngine();

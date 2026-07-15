@@ -1,0 +1,450 @@
+/*
+================================
+大乐透AI_V90 CORE
+
+taskengine.js
+
+分段任务调度引擎
+================================
+*/
+
+
+class TaskEngine{
+
+
+    constructor(){
+
+
+        this.name="task";
+
+
+        this.running=false;
+
+
+        this.tasks=[];
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 执行任务
+    // ==========================
+
+
+    async run(options){
+
+
+
+        if(this.running){
+
+
+
+            throw new Error(
+
+            "已有任务运行"
+
+            );
+
+
+        }
+
+
+
+
+
+
+        this.running=true;
+
+
+
+
+
+
+
+        let total=
+
+        options.total || 1000000;
+
+
+
+
+
+
+
+        let batch=
+
+        options.batch || 50000;
+
+
+
+
+
+
+
+        let result=[];
+
+
+
+
+
+
+
+        let completed=0;
+
+
+
+
+
+
+
+
+        while(
+
+        completed < total
+
+        ){
+
+
+
+            let current=
+
+            Math.min(
+
+                batch,
+
+                total-completed
+
+            );
+
+
+
+
+
+
+
+            let data=
+
+            await this.executeBatch(
+
+                current,
+
+                options
+
+            );
+
+
+
+
+
+
+
+
+            result=
+
+            result.concat(data);
+
+
+
+
+
+
+
+            completed+=current;
+
+
+
+
+
+
+
+            let progress=
+
+            Math.floor(
+
+                completed
+
+                /
+
+                total
+
+                *
+
+                100
+
+            );
+
+
+
+
+
+
+
+
+            if(window.loadingengine){
+
+
+
+                window.loadingengine.update(
+
+                    progress,
+
+                    "计算中 "+
+
+                    completed+
+
+                    "/"+
+
+                    total
+
+                );
+
+
+            }
+
+
+
+
+
+
+
+            await this.sleep(10);
+
+
+
+        }
+
+
+
+
+
+
+
+
+        this.running=false;
+
+
+
+
+
+
+
+        return result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 执行单批任务
+    // ==========================
+
+
+    executeBatch(size,options){
+
+
+
+        return new Promise(
+
+            resolve=>{
+
+
+
+
+
+
+                let worker=
+
+                new Worker(
+
+                    "worker.js"
+
+                );
+
+
+
+
+
+
+
+                worker.postMessage({
+
+
+
+                    type:
+
+                    options.type || 
+
+                    "MONTE_CARLO",
+
+
+
+                    data:
+
+                    options.data || [],
+
+
+
+                    times:
+
+                    size
+
+
+
+                });
+
+
+
+
+
+
+
+
+                worker.onmessage=
+
+                function(event){
+
+
+
+                    worker.terminate();
+
+
+
+                    resolve(
+
+                        event.data.result || []
+
+                    );
+
+
+
+                };
+
+
+
+
+
+
+
+            }
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 停止任务
+    // ==========================
+
+
+    stop(){
+
+
+
+        this.running=false;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    sleep(ms){
+
+
+
+        return new Promise(
+
+            resolve=>
+
+            setTimeout(
+
+                resolve,
+
+                ms
+
+            )
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    status(){
+
+
+
+        return {
+
+
+
+            engine:
+
+            this.name,
+
+
+
+            running:
+
+            this.running
+
+
+
+        };
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+window.taskengine=
+
+new TaskEngine();

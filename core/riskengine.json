@@ -1,0 +1,346 @@
+/*
+================================
+大乐透AI_V90 CORE
+
+riskengine.js
+
+风险控制引擎
+================================
+*/
+
+
+class RiskEngine{
+
+
+    constructor(){
+
+
+        this.name="risk";
+
+
+        this.threshold={
+
+
+            sameLimit:3,
+
+
+            sumMin:60,
+
+
+            sumMax:160
+
+
+        };
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 风险评分
+    // ==========================
+
+
+    score(candidate){
+
+
+
+        let risk=0;
+
+
+
+
+
+
+
+        let front=
+
+        [...candidate.front]
+
+        .sort(
+
+        (a,b)=>a-b
+
+        );
+
+
+
+
+
+
+
+        // ==================
+        // 和值风险
+        // ==================
+
+
+        let sum=
+
+        front.reduce(
+
+            (a,b)=>a+b,
+
+            0
+
+        );
+
+
+
+
+
+
+
+        if(
+
+        sum<this.threshold.sumMin
+
+        ||
+
+        sum>this.threshold.sumMax
+
+        ){
+
+
+
+            risk+=2;
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        // ==================
+        // 连号风险
+        // ==================
+
+
+        let link=0;
+
+
+
+
+
+
+
+        for(
+
+        let i=1;
+
+        i<front.length;
+
+        i++
+
+        ){
+
+
+
+            if(
+
+            front[i]-front[i-1]===1
+
+            ){
+
+
+
+                link++;
+
+
+
+            }
+
+
+
+        }
+
+
+
+
+
+
+
+        if(link>=3){
+
+
+
+            risk+=2;
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        // ==================
+        // 重复结构风险
+        // ==================
+
+
+        let odd=
+
+        front.filter(
+
+            n=>n%2!==0
+
+        ).length;
+
+
+
+
+
+
+
+        if(
+
+        odd===0
+
+        ||
+
+        odd===5
+
+        ){
+
+
+
+            risk+=2;
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        return Number(
+
+        risk.toFixed(4)
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 是否通过
+    // ==========================
+
+
+    check(candidate){
+
+
+
+        let risk=
+
+        this.score(
+
+            candidate
+
+        );
+
+
+
+
+
+
+
+        return {
+
+
+
+            risk,
+
+
+
+            pass:
+
+            risk<=3
+
+
+
+        };
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 状态
+    // ==========================
+
+
+    status(){
+
+
+
+        return {
+
+
+
+            engine:this.name,
+
+
+            ready:true
+
+
+
+        };
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+window.riskengine=
+
+new RiskEngine();

@@ -1,0 +1,488 @@
+/*
+================================
+大乐透AI_V90 CORE
+
+matrixengine.js
+
+矩阵计算引擎
+================================
+*/
+
+
+class MatrixEngine{
+
+
+    constructor(){
+
+
+        this.name="matrix";
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 矩阵乘法
+    // ==========================
+
+
+    multiply(A,B){
+
+
+
+        let result=[];
+
+
+
+
+
+
+
+        let rows=A.length;
+
+
+        let cols=B[0].length;
+
+
+        let common=B.length;
+
+
+
+
+
+
+
+
+        for(
+
+        let i=0;
+
+        i<rows;
+
+        i++
+
+        ){
+
+
+
+            result[i]=[];
+
+
+
+
+
+
+
+            for(
+
+            let j=0;
+
+            j<cols;
+
+            j++
+
+            ){
+
+
+
+                let sum=0;
+
+
+
+
+
+
+
+                for(
+
+                let k=0;
+
+                k<common;
+
+                k++
+
+                ){
+
+
+
+                    sum+=
+
+                    A[i][k]
+
+                    *
+
+                    B[k][j];
+
+
+
+                }
+
+
+
+
+
+
+
+                result[i][j]=sum;
+
+
+
+            }
+
+
+
+        }
+
+
+
+
+
+
+
+        return result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 矩阵加法
+    // ==========================
+
+
+    add(A,B){
+
+
+
+        let result=[];
+
+
+
+
+
+
+
+        for(
+
+        let i=0;
+
+        i<A.length;
+
+        i++
+
+        ){
+
+
+
+            result[i]=[];
+
+
+
+
+
+
+
+            for(
+
+            let j=0;
+
+            j<A[i].length;
+
+            j++
+
+            ){
+
+
+
+                result[i][j]=
+
+                A[i][j]
+
+                +
+
+                B[i][j];
+
+
+
+            }
+
+
+
+        }
+
+
+
+
+
+
+
+        return result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 权重矩阵
+    // ==========================
+
+
+    weight(matrix,weight){
+
+
+
+        return matrix.map(
+
+            row=>
+
+            row.map(
+
+                value=>
+
+                Number(
+
+                (
+
+                value*
+
+                weight
+
+                )
+
+                .toFixed(6)
+
+                )
+
+            )
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 向量归一化
+    // ==========================
+
+
+    normalize(vector){
+
+
+
+        let total=
+
+        vector.reduce(
+
+            (a,b)=>a+b,
+
+            0
+
+        );
+
+
+
+
+
+
+
+        if(total===0){
+
+
+
+            return vector;
+
+
+
+        }
+
+
+
+
+
+
+
+        return vector.map(
+
+            n=>
+
+            Number(
+
+            (
+
+            n/total
+
+            )
+
+            .toFixed(6)
+
+            )
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 生成单位矩阵
+    // ==========================
+
+
+    identity(size){
+
+
+
+        let result=[];
+
+
+
+
+
+
+
+        for(
+
+        let i=0;
+
+        i<size;
+
+        i++
+
+        ){
+
+
+
+            result[i]=[];
+
+
+
+
+
+
+
+            for(
+
+            let j=0;
+
+            j<size;
+
+            j++
+
+            ){
+
+
+
+                result[i][j]=
+
+                i===j
+
+                ?
+
+                1
+
+                :
+
+                0;
+
+
+
+            }
+
+
+
+        }
+
+
+
+
+
+
+
+        return result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    status(){
+
+
+
+        return {
+
+
+
+            engine:this.name,
+
+
+            ready:true
+
+
+
+        };
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+window.matrixengine=
+
+new MatrixEngine();

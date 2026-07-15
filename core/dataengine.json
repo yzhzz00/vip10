@@ -1,0 +1,368 @@
+/*
+================================
+大乐透AI_V90 CORE
+
+dataengine.js
+
+大乐透TXT数据读取引擎
+================================
+*/
+
+
+class DataEngine{
+
+
+    constructor(){
+
+
+        this.name="data";
+
+
+        this.data=[];
+
+
+        this.loaded=false;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 加载TXT文件
+    // ==========================
+
+
+    async load(){
+
+
+
+        let response=
+
+        await fetch(
+
+            "data/dlt.txt"
+
+        );
+
+
+
+
+
+        let text=
+
+        await response.text();
+
+
+
+
+
+
+        this.data=
+
+        this.parse(text);
+
+
+
+
+
+
+        this.loaded=true;
+
+
+
+
+
+
+
+        return this.data;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // TXT解析
+    // ==========================
+
+
+    parse(text){
+
+
+
+        let lines=
+
+        text.split("\n");
+
+
+
+
+
+        let result=[];
+
+
+
+
+
+
+
+        lines.forEach(line=>{
+
+
+
+            line=line.trim();
+
+
+
+
+
+
+
+            if(!line){
+
+
+
+                return;
+
+
+
+            }
+
+
+
+
+
+
+
+            let parts=
+
+            line.split(/\s+/);
+
+
+
+
+
+
+
+            if(parts.length<8){
+
+
+
+                return;
+
+
+
+            }
+
+
+
+
+
+
+
+
+            let period=
+
+            parts[0];
+
+
+
+
+
+
+
+            let date=
+
+            parts[1];
+
+
+
+
+
+
+
+
+            let numbers=
+
+            parts
+
+            .slice(2)
+
+            .map(Number);
+
+
+
+
+
+
+
+            let front=
+
+            numbers.slice(0,5);
+
+
+
+
+
+
+
+            let back=
+
+            numbers.slice(5,7);
+
+
+
+
+
+
+
+
+            result.push({
+
+
+
+                period,
+
+
+                date,
+
+
+                front,
+
+
+                back
+
+
+
+            });
+
+
+
+        });
+
+
+
+
+
+
+
+        return result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 获取数据
+    // ==========================
+
+
+    get(){
+
+
+
+        return this.data;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 最近多少期
+    // ==========================
+
+
+    recent(count=50){
+
+
+
+        return this.data.slice(
+
+            -count
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 状态
+    // ==========================
+
+
+    status(){
+
+
+
+        return {
+
+
+
+            engine:this.name,
+
+
+            loaded:this.loaded,
+
+
+            total:this.data.length
+
+
+
+        };
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+window.dataengine=
+
+new DataEngine();

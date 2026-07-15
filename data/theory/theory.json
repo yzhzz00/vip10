@@ -1,0 +1,107 @@
+{
+    "name": "大乐透基础理论库",
+    "version": "V90.0",
+
+    "front": {
+
+        "count": 5,
+
+        "range": {
+            "min": 1,
+            "max": 35
+        },
+
+        "sum": {
+
+            "min": 80,
+            "max": 130
+
+        },
+
+        "oddEven": {
+
+            "minOdd": 2,
+            "maxOdd": 3
+
+        },
+
+        "area": {
+
+            "low": {
+                "min": 1,
+                "max": 12
+            },
+
+            "middle": {
+                "min": 13,
+                "max": 24
+            },
+
+            "high": {
+                "min": 25,
+                "max": 35
+            }
+
+        }
+
+    },
+
+
+    "back": {
+
+        "count": 2,
+
+        "range": {
+
+            "min": 1,
+            "max": 12
+
+        }
+
+    },
+
+
+    "structure": {
+
+
+        "continuous": {
+
+
+            "max": 2
+
+        },
+
+
+        "sameTail": {
+
+
+            "max": 2
+
+        },
+
+
+        "span": {
+
+
+            "min": 15,
+            "max": 34
+
+        }
+
+    },
+
+
+    "score": {
+
+
+        "sum": 2,
+
+        "oddEven": 2,
+
+        "area": 2,
+
+        "continuous": 1
+
+    }
+
+}

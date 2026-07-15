@@ -1,0 +1,446 @@
+/*
+================================
+大乐透AI_V90 CORE
+
+scoringengine.js
+
+综合评分引擎
+================================
+*/
+
+
+class ScoringEngine{
+
+
+    constructor(){
+
+
+        this.name="scoring";
+
+
+        this.weights={
+
+
+
+            theory:0.20,
+
+
+            bayes:0.20,
+
+
+            markov:0.20,
+
+
+            trend:0.20,
+
+
+            risk:0.20
+
+
+
+        };
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 综合评分
+    // ==========================
+
+
+    score(candidate,context={}){
+
+
+
+        let result={
+
+
+
+            candidate,
+
+
+
+            scores:{},
+
+
+
+            finalScore:0
+
+
+
+        };
+
+
+
+
+
+
+
+        // 理论
+
+
+        if(window.theoryengine){
+
+
+
+            result.scores.theory=
+
+            window.theoryengine.score(
+
+                candidate
+
+            );
+
+
+
+        }
+
+        else{
+
+
+
+            result.scores.theory=0;
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        // 贝叶斯
+
+
+        if(window.bayesengine){
+
+
+
+            result.scores.bayes=
+
+            window.bayesengine.score(
+
+                candidate
+
+            );
+
+
+
+        }
+
+        else{
+
+
+
+            result.scores.bayes=0;
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        // 马尔可夫
+
+
+        if(
+
+        window.markovengine
+
+        &&
+
+        context.last
+
+        ){
+
+
+
+            result.scores.markov=
+
+            window.markovengine.score(
+
+                candidate,
+
+                context.last
+
+            );
+
+
+
+        }
+
+        else{
+
+
+
+            result.scores.markov=0;
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        // 趋势
+
+
+        if(
+
+        context.trendScore
+
+        ){
+
+
+
+            result.scores.trend=
+
+            context.trendScore;
+
+
+
+        }
+
+        else{
+
+
+
+            result.scores.trend=0;
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        // 风险
+
+
+        if(window.riskengine){
+
+
+
+            result.scores.risk=
+
+            window.riskengine.score(
+
+                candidate
+
+            );
+
+
+
+        }
+
+        else{
+
+
+
+            result.scores.risk=0;
+
+
+
+        }
+
+
+
+
+
+
+
+
+        result.finalScore=
+
+        this.calculate(
+
+            result.scores
+
+        );
+
+
+
+
+
+
+
+        return result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 权重计算
+    // ==========================
+
+
+    calculate(scores){
+
+
+
+        let total=0;
+
+
+
+
+
+
+        Object.keys(
+
+            this.weights
+
+        )
+
+        .forEach(key=>{
+
+
+
+            total+=
+
+            (
+
+            scores[key] || 0
+
+            )
+
+            *
+
+            this.weights[key];
+
+
+
+        });
+
+
+
+
+
+
+
+        return Number(
+
+        total.toFixed(6)
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 更新权重
+    // ==========================
+
+
+    updateWeight(name,value){
+
+
+
+        if(
+
+        this.weights[name]
+
+        !==undefined
+
+        ){
+
+
+
+            this.weights[name]=value;
+
+
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    status(){
+
+
+
+        return {
+
+
+
+            engine:this.name,
+
+
+            weights:this.weights
+
+
+
+        };
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+window.scoringengine=
+
+new ScoringEngine();

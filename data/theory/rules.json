@@ -1,0 +1,100 @@
+{
+    "name": "大乐透AI规则配置",
+    "version": "V90.0",
+
+    "switch": {
+
+        "sumCheck": true,
+
+        "oddEvenCheck": true,
+
+        "areaCheck": true,
+
+        "continuousCheck": true,
+
+        "tailCheck": true,
+
+        "spanCheck": true
+
+    },
+
+
+    "filter": {
+
+
+        "sum": {
+
+            "enable": true,
+
+            "min": 60,
+
+            "max": 160
+
+        },
+
+
+        "oddEven": {
+
+            "enable": true,
+
+            "allow": [
+
+                "2:3",
+                "3:2"
+
+            ]
+
+        },
+
+
+        "continuous": {
+
+            "enable": true,
+
+            "maxCount": 2
+
+        },
+
+
+        "sameTail": {
+
+            "enable": true,
+
+            "maxCount": 2
+
+        },
+
+
+        "duplicate": {
+
+            "enable": true,
+
+            "maxNumber": 3
+
+        }
+
+
+    },
+
+
+    "scoreWeight": {
+
+
+        "structure": 0.25,
+
+
+        "frequency": 0.20,
+
+
+        "markov": 0.20,
+
+
+        "bayes": 0.20,
+
+
+        "risk": 0.15
+
+
+    }
+
+}

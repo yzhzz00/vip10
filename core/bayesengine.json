@@ -1,0 +1,359 @@
+/*
+================================
+大乐透AI_V90 CORE
+
+bayesengine.js
+
+贝叶斯概率修正引擎
+================================
+*/
+
+
+class BayesEngine{
+
+
+    constructor(){
+
+
+        this.name="bayes";
+
+
+        this.probability={};
+
+
+        this.ready=false;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 初始化先验概率
+    // ==========================
+
+
+    init(frequency){
+
+
+
+        let total=0;
+
+
+
+
+
+
+
+        Object.values(frequency)
+
+        .forEach(v=>{
+
+
+            total+=v;
+
+
+        });
+
+
+
+
+
+
+
+        Object.keys(frequency)
+
+        .forEach(n=>{
+
+
+
+            this.probability[n]=
+
+            Number(
+
+            (
+
+            frequency[n]
+
+            /
+
+            total
+
+            )
+
+            .toFixed(6)
+
+            );
+
+
+
+        });
+
+
+
+
+
+
+
+        this.ready=true;
+
+
+
+
+
+
+        return this.probability;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 贝叶斯更新
+    // ==========================
+
+
+    update(number,likelihood){
+
+
+
+        if(
+
+        !this.probability[number]
+
+        ){
+
+
+
+            return 0;
+
+
+
+        }
+
+
+
+
+
+
+
+        let prior=
+
+        this.probability[number];
+
+
+
+
+
+
+
+        let posterior=
+
+        prior*
+
+        likelihood;
+
+
+
+
+
+
+
+        this.probability[number]=
+
+        Number(
+
+        posterior.toFixed(6)
+
+        );
+
+
+
+
+
+
+
+        return this.probability[number];
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 候选评分
+    // ==========================
+
+
+    score(candidate){
+
+
+
+        let score=0;
+
+
+
+
+
+
+
+        candidate.front
+
+        .forEach(n=>{
+
+
+
+            if(
+
+            this.probability[n]
+
+            ){
+
+
+
+                score+=
+
+                this.probability[n];
+
+
+
+            }
+
+
+
+        });
+
+
+
+
+
+
+
+        candidate.back
+
+        .forEach(n=>{
+
+
+
+            if(
+
+            this.probability[n]
+
+            ){
+
+
+
+                score+=
+
+                this.probability[n];
+
+
+
+            }
+
+
+
+        });
+
+
+
+
+
+
+
+        return Number(
+
+        score.toFixed(6)
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 获取概率
+    // ==========================
+
+
+    get(number){
+
+
+
+        return this.probability[number] || 0;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    status(){
+
+
+
+        return {
+
+
+
+            engine:this.name,
+
+
+            ready:this.ready
+
+
+
+        };
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+window.bayesengine=
+
+new BayesEngine();

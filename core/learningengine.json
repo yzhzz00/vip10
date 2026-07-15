@@ -1,0 +1,382 @@
+/*
+================================
+大乐透AI_V90 CORE
+
+learningengine.js
+
+学习反馈引擎
+================================
+*/
+
+
+class LearningEngine{
+
+
+    constructor(){
+
+
+        this.name="learning";
+
+
+        this.weights={
+
+
+            trend:0.2,
+
+
+            structure:0.2,
+
+
+            markov:0.2,
+
+
+            theory:0.2,
+
+
+            risk:0.2
+
+
+        };
+
+
+
+        this.history=[];
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 学习反馈
+    // ==========================
+
+
+    learn(result){
+
+
+
+        let score=
+
+        this.evaluate(result);
+
+
+
+
+
+
+
+        this.history.push({
+
+
+
+            result,
+
+
+            score,
+
+
+            time:
+
+            Date.now()
+
+
+
+        });
+
+
+
+
+
+
+
+        this.adjust(score);
+
+
+
+
+
+
+
+        return this.weights;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 评估效果
+    // ==========================
+
+
+    evaluate(result){
+
+
+
+        if(!result){
+
+
+
+            return 0;
+
+
+
+        }
+
+
+
+
+
+
+
+        let hit=
+
+        (
+
+        result.hitFront || 0
+
+        )
+
+        +
+
+        (
+
+        result.hitBack || 0
+
+        );
+
+
+
+
+
+
+
+        return hit;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 调整权重
+    // ==========================
+
+
+    adjust(score){
+
+
+
+        let step=0.01;
+
+
+
+
+
+
+
+        if(score>2){
+
+
+
+            this.weights.markov+=step;
+
+
+            this.weights.theory+=step;
+
+
+
+        }
+
+        else{
+
+
+
+            this.weights.risk+=step;
+
+
+        }
+
+
+
+
+
+
+
+        this.normalize();
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 权重归一化
+    // ==========================
+
+
+    normalize(){
+
+
+
+        let total=0;
+
+
+
+
+
+
+
+        Object.values(
+
+            this.weights
+
+        )
+
+        .forEach(v=>{
+
+
+
+            total+=v;
+
+
+
+        });
+
+
+
+
+
+
+
+        Object.keys(
+
+            this.weights
+
+        )
+
+        .forEach(k=>{
+
+
+
+            this.weights[k]=
+
+            Number(
+
+            (
+
+            this.weights[k]
+
+            /
+
+            total
+
+            )
+
+            .toFixed(4)
+
+            );
+
+
+
+        });
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 获取权重
+    // ==========================
+
+
+    getWeights(){
+
+
+
+        return this.weights;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    status(){
+
+
+
+        return {
+
+
+
+            engine:this.name,
+
+
+            records:
+
+            this.history.length
+
+
+
+        };
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+window.learningengine=
+
+new LearningEngine();

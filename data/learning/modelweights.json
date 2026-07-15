@@ -1,0 +1,86 @@
+{
+    "name": "大乐透AI模型权重",
+    "version": "V90.0",
+
+
+    "coreWeight": {
+
+
+        "frequency": 0.20,
+
+
+        "markov": 0.20,
+
+
+        "bayes": 0.20,
+
+
+        "theory": 0.20,
+
+
+        "risk": 0.20
+
+
+    },
+
+
+    "agentWeight": {
+
+
+        "trendagent": 0.15,
+
+
+        "structureagent": 0.15,
+
+
+        "markovagent": 0.15,
+
+
+        "riskagent": 0.10,
+
+
+        "theoryagent": 0.15,
+
+
+        "criticagent": 0.10,
+
+
+        "antihumanagent": 0.10,
+
+
+        "learningagent": 0.10
+
+
+    },
+
+
+    "adjust": {
+
+
+        "enable": true,
+
+
+        "step": 0.01,
+
+
+        "maxChange": 0.05
+
+
+    },
+
+
+    "training": {
+
+
+        "lastUpdate": "",
+
+
+        "round": 0,
+
+
+        "accuracy": 0
+
+
+    }
+
+}

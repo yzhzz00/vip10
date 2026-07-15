@@ -1,0 +1,443 @@
+/*
+================================
+大乐透AI_V90 CORE
+
+theoryengine.js
+
+理论规则引擎
+================================
+*/
+
+
+class TheoryEngine{
+
+
+    constructor(){
+
+
+        this.name="theory";
+
+
+        this.rules={};
+
+
+        this.loaded=false;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 加载理论数据
+    // ==========================
+
+
+    async load(){
+
+
+
+        try{
+
+
+
+            let theory=
+
+            await fetch(
+
+            "data/theory/theory.json"
+
+            );
+
+
+
+            let rules=
+
+            await fetch(
+
+            "data/theory/rules.json"
+
+            );
+
+
+
+            let structure=
+
+            await fetch(
+
+            "data/theory/structure.json"
+
+            );
+
+
+
+
+
+
+
+
+            this.rules={
+
+
+
+                theory:
+
+                await theory.json(),
+
+
+
+                rules:
+
+                await rules.json(),
+
+
+
+                structure:
+
+                await structure.json()
+
+
+
+            };
+
+
+
+
+
+
+
+            this.loaded=true;
+
+
+
+
+
+
+        }catch(e){
+
+
+
+            console.error(
+
+            "理论数据加载失败",
+
+            e
+
+            );
+
+
+
+        }
+
+
+
+
+
+
+
+        return this.rules;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 候选号码理论评分
+    // ==========================
+
+
+    score(candidate){
+
+
+
+        let score=0;
+
+
+
+
+
+
+        let front=
+
+        candidate.front;
+
+
+
+
+
+
+
+        // 奇偶
+
+
+        let odd=
+
+        front.filter(
+
+            n=>n%2!==0
+
+        ).length;
+
+
+
+
+
+
+
+        if(
+
+        odd>=2
+
+        &&
+
+        odd<=3
+
+        ){
+
+
+
+            score+=2;
+
+
+
+        }
+
+
+
+
+
+
+
+
+        // 和值
+
+
+        let sum=
+
+        front.reduce(
+
+            (a,b)=>a+b,
+
+            0
+
+        );
+
+
+
+
+
+
+
+
+        if(
+
+        sum>=80
+
+        &&
+
+        sum<=130
+
+        ){
+
+
+
+            score+=2;
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        // 连号
+
+
+        let sorted=
+
+        [...front]
+
+        .sort(
+
+            (a,b)=>a-b
+
+        );
+
+
+
+
+
+
+        let link=0;
+
+
+
+
+
+
+
+        for(
+
+        let i=1;
+
+        i<sorted.length;
+
+        i++
+
+        ){
+
+
+
+            if(
+
+            sorted[i]-sorted[i-1]===1
+
+            ){
+
+
+
+                link++;
+
+
+
+            }
+
+
+
+        }
+
+
+
+
+
+
+
+
+        if(link<=2){
+
+
+
+            score+=1;
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        return score;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 规则检查
+    // ==========================
+
+
+    check(candidate){
+
+
+
+        return {
+
+
+
+            score:
+
+            this.score(candidate),
+
+
+
+            valid:
+
+            candidate.front.length===5
+
+            &&
+
+            candidate.back.length===2
+
+
+
+        };
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    status(){
+
+
+
+        return {
+
+
+
+            engine:this.name,
+
+
+            loaded:this.loaded
+
+
+
+        };
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+window.theoryengine=
+
+new TheoryEngine();

@@ -1,0 +1,543 @@
+/*
+================================
+大乐透AI_V90 CORE
+
+masterengine.js
+
+核心调度引擎
+================================
+*/
+
+
+class MasterEngine{
+
+
+    constructor(){
+
+
+        this.name="master";
+
+
+        this.statusValue="idle";
+
+
+        this.result=[];
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 初始化
+    // ==========================
+
+
+    async init(){
+
+
+
+        this.statusValue="loading";
+
+
+
+
+
+
+
+        if(window.loadingengine){
+
+
+
+            window.loadingengine.update(
+
+                5,
+
+                "系统初始化"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+
+        if(window.theoryengine){
+
+
+
+            await window.theoryengine.load();
+
+
+
+        }
+
+
+
+
+
+
+
+        this.statusValue="ready";
+
+
+
+
+
+
+
+        return true;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 完整分析
+    // ==========================
+
+
+    async analyze(){
+
+
+
+        this.statusValue="running";
+
+
+
+
+
+
+
+        // 读取数据
+
+
+        if(window.loadingengine){
+
+
+
+            window.loadingengine.update(
+
+                10,
+
+                "读取历史数据"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+        let data=
+
+        window.dataengine.get();
+
+
+
+
+
+
+
+
+        // 特征
+
+
+        if(window.loadingengine){
+
+
+
+            window.loadingengine.update(
+
+                25,
+
+                "生成历史特征"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+        let feature=
+
+        window.featureengine.build(
+
+            data
+
+        );
+
+
+
+
+
+
+
+
+        // 马尔可夫
+
+
+        if(window.markovengine){
+
+
+
+            window.markovengine.build(
+
+                data
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+
+        // 贝叶斯
+
+
+        if(window.bayesengine){
+
+
+
+            window.bayesengine.init(
+
+                feature.frontFrequency
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+
+        // 模拟
+
+
+        if(window.loadingengine){
+
+
+
+            window.loadingengine.update(
+
+                50,
+
+                "蒙特卡罗模拟"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+        let simulation=
+
+        window.montecarloengine.run(
+
+            data,
+
+            5000
+
+        );
+
+
+
+
+
+
+
+
+        // 生成候选
+
+
+        if(window.loadingengine){
+
+
+
+            window.loadingengine.update(
+
+                70,
+
+                "生成候选号码"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+        let candidates=
+
+        window.predictionengine.generate({
+
+            data,
+
+            feature,
+
+            simulation
+
+        });
+
+
+
+
+
+
+
+
+        // 评分
+
+
+        let scored=[];
+
+
+
+
+
+
+
+        if(window.loadingengine){
+
+
+
+            window.loadingengine.update(
+
+                85,
+
+                "综合评分"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+
+        candidates.forEach(candidate=>{
+
+
+
+            let score=
+
+            window.scoringengine.score(
+
+                candidate,
+
+                {
+
+                    last:
+
+                    data[data.length-1].front,
+
+
+
+                    feature
+
+                }
+
+            );
+
+
+
+
+
+
+
+
+            scored.push(score);
+
+
+
+        });
+
+
+
+
+
+
+
+
+        scored.sort(
+
+            (a,b)=>
+
+            b.finalScore
+
+            -
+
+            a.finalScore
+
+        );
+
+
+
+
+
+
+
+
+        this.result=
+
+        scored.slice(
+
+            0,
+
+            10
+
+        );
+
+
+
+
+
+
+
+
+        if(window.loadingengine){
+
+
+
+            window.loadingengine.update(
+
+                100,
+
+                "分析完成"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+
+        this.statusValue="complete";
+
+
+
+
+
+
+
+        return this.result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    getResult(){
+
+
+
+        return this.result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    status(){
+
+
+
+        return {
+
+
+
+            engine:this.name,
+
+
+            status:this.statusValue
+
+
+
+        };
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+window.masterengine=
+
+new MasterEngine();

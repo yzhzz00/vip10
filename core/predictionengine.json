@@ -1,0 +1,420 @@
+/*
+================================
+大乐透AI_V90 CORE
+
+predictionengine.js
+
+预测生成引擎
+================================
+*/
+
+
+class PredictionEngine{
+
+
+    constructor(){
+
+
+        this.name="prediction";
+
+
+        this.candidates=[];
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 生成候选
+    // ==========================
+
+
+    generate(context){
+
+
+
+        let pool=[];
+
+
+
+
+
+
+        // 蒙特卡罗候选
+
+
+        if(
+
+        window.montecarloengine
+
+        ){
+
+
+
+            let monte=
+
+            window.montecarloengine.run(
+
+                context.data || [],
+
+                5000
+
+            );
+
+
+
+
+
+            monte.slice(0,100)
+
+            .forEach(item=>{
+
+
+
+                pool.push(
+
+                    item.candidate
+
+                );
+
+
+
+            });
+
+
+
+        }
+
+
+
+
+
+
+
+        // 随机补充
+
+
+        while(
+
+        pool.length<200
+
+        ){
+
+
+
+            pool.push(
+
+                this.randomCandidate()
+
+            );
+
+
+
+        }
+
+
+
+
+
+
+
+        this.candidates=
+
+        this.removeDuplicate(
+
+            pool
+
+        );
+
+
+
+
+
+
+
+        return this.candidates;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 随机号码
+    // ==========================
+
+
+    randomCandidate(){
+
+
+
+        return {
+
+
+
+            front:
+
+            this.randomNumbers(
+
+                1,
+
+                35,
+
+                5
+
+            ),
+
+
+
+            back:
+
+            this.randomNumbers(
+
+                1,
+
+                12,
+
+                2
+
+            )
+
+
+
+        };
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    randomNumbers(min,max,count){
+
+
+
+        let result=[];
+
+
+
+
+
+
+
+        while(
+
+        result.length<count
+
+        ){
+
+
+
+            let n=
+
+            Math.floor(
+
+                Math.random()
+
+                *
+
+                (max-min+1)
+
+            )
+
+            +
+
+            min;
+
+
+
+
+
+
+
+            if(
+
+            !result.includes(n)
+
+            ){
+
+
+
+                result.push(n);
+
+
+
+            }
+
+
+
+        }
+
+
+
+
+
+
+
+        return result.sort(
+
+            (a,b)=>
+
+            a-b
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 去重
+    // ==========================
+
+
+    removeDuplicate(list){
+
+
+
+        let map={};
+
+
+
+        let result=[];
+
+
+
+
+
+
+
+
+        list.forEach(item=>{
+
+
+
+            let key=
+
+            item.front.join("-")
+
+            +
+
+            "|"
+
+            +
+
+            item.back.join("-");
+
+
+
+
+
+
+
+
+            if(!map[key]){
+
+
+
+                map[key]=true;
+
+
+                result.push(item);
+
+
+
+            }
+
+
+
+        });
+
+
+
+
+
+
+
+
+        return result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 状态
+    // ==========================
+
+
+    status(){
+
+
+
+        return {
+
+
+
+            engine:this.name,
+
+
+            count:
+
+            this.candidates.length
+
+
+
+        };
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+window.predictionengine=
+
+new PredictionEngine();

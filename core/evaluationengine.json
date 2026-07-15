@@ -1,0 +1,340 @@
+/*
+================================
+大乐透AI_V90 CORE
+
+evaluationengine.js
+
+模型评估引擎
+================================
+*/
+
+
+class EvaluationEngine{
+
+
+    constructor(){
+
+
+        this.name="evaluation";
+
+
+        this.history=[];
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 评估预测结果
+    // ==========================
+
+
+    evaluate(predict,real){
+
+
+
+        let result={
+
+
+
+            hitFront:0,
+
+
+            hitBack:0,
+
+
+            total:0
+
+
+
+        };
+
+
+
+
+
+
+
+
+        // 前区命中
+
+
+        predict.front.forEach(n=>{
+
+
+
+            if(
+
+            real.front.includes(n)
+
+            ){
+
+
+
+                result.hitFront++;
+
+
+
+            }
+
+
+
+        });
+
+
+
+
+
+
+
+
+
+        // 后区命中
+
+
+        predict.back.forEach(n=>{
+
+
+
+            if(
+
+            real.back.includes(n)
+
+            ){
+
+
+
+                result.hitBack++;
+
+
+
+            }
+
+
+
+        });
+
+
+
+
+
+
+
+
+        result.total=
+
+        result.hitFront
+
+        +
+
+        result.hitBack;
+
+
+
+
+
+
+
+
+        this.history.push({
+
+
+
+            predict,
+
+
+            real,
+
+
+            result,
+
+
+            time:
+
+            Date.now()
+
+
+
+        });
+
+
+
+
+
+
+
+
+        return result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 批量回测
+    // ==========================
+
+
+    backtest(list){
+
+
+
+        let report={
+
+
+
+            total:0,
+
+
+            frontHits:0,
+
+
+            backHits:0
+
+
+
+        };
+
+
+
+
+
+
+
+        list.forEach(item=>{
+
+
+
+            let r=
+
+            this.evaluate(
+
+                item.predict,
+
+                item.real
+
+            );
+
+
+
+
+
+
+
+
+            report.total++;
+
+
+            report.frontHits
+
+            +=
+
+            r.hitFront;
+
+
+
+            report.backHits
+
+            +=
+
+            r.hitBack;
+
+
+
+        });
+
+
+
+
+
+
+
+
+        return report;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ==========================
+    // 获取历史记录
+    // ==========================
+
+
+    getHistory(){
+
+
+
+        return this.history;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    status(){
+
+
+
+        return {
+
+
+
+            engine:this.name,
+
+
+            count:
+
+            this.history.length
+
+
+
+        };
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+window.evaluationengine=
+
+new EvaluationEngine();
