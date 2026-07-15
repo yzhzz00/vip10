@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>
-大乐透AI V90 CORE
+大乐透AI V90 FINAL
 </title>
 
 <link rel="stylesheet" href="style.css">
@@ -29,7 +29,7 @@
 </h1>
 
 <h2>
-V90 AI CORE
+V90 AI CORE FINAL
 </h2>
 
 
@@ -40,7 +40,6 @@ V90 AI CORE
 <span id="status">
 等待启动
 </span>
-
 
 </div>
 
@@ -53,25 +52,20 @@ V90 AI CORE
 
 <section class="card">
 
-
 <h3>
 数据中心
 </h3>
 
 
-<input
-type="file"
-id="dataFile"
-accept=".txt">
+<div id="dataInfo">
 
+历史数据：
+未加载
 
-<p id="dataInfo">
-历史数据未加载
-</p>
+</div>
 
 
 </section>
-
 
 
 
@@ -102,11 +96,12 @@ AI分析中心
 </div>
 
 
-<p id="progressText">
+<div id="progressText">
 
 等待分析...
 
-</p>
+</div>
+
 
 
 </section>
@@ -129,8 +124,7 @@ AI分析中心
 
 <div id="prediction">
 
-
-等待预测
+等待分析
 
 </div>
 
@@ -145,21 +139,73 @@ AI分析中心
 
 
 
+
 <section class="card">
 
 
 <h3>
-TOP候选方案
-
+TOP10候选方案
 </h3>
 
 
 <div id="ranking">
 
-
 等待生成
 
 </div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<section class="card">
+
+
+<h3>
+AI会议中心
+</h3>
+
+
+<div id="meeting">
+
+等待AI会议
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<section class="card">
+
+
+<h3>
+预测记录
+
+</h3>
+
+
+<div id="records">
+
+暂无记录
+
+</div>
+
 
 
 </section>
@@ -183,15 +229,13 @@ TOP候选方案
 
 <input
 id="period"
-placeholder="开奖期号">
+placeholder="输入开奖期号">
 
 
 <textarea
 id="realNumber"
 placeholder="
-输入开奖号码:
-
-前区5个 后区2个
+输入7个号码
 
 例如:
 03 12 18 26 34 04 09
@@ -208,14 +252,17 @@ placeholder="
 
 
 
+
 <div id="review">
 
-等待反馈
+等待开奖反馈
 
 </div>
 
 
+
 </section>
+
 
 
 
@@ -229,8 +276,8 @@ placeholder="
 
 <h3>
 AI成长记录
-</h3>
 
+</h3>
 
 
 <div id="learning">
@@ -238,6 +285,7 @@ AI成长记录
 暂无学习数据
 
 </div>
+
 
 
 </section>
@@ -248,17 +296,24 @@ AI成长记录
 
 
 
+
+
 </div>
 
 
 
 
 
+<script src="V90.model.js"></script>
+
+<script src="V90.record.js"></script>
+
 <script src="V90.ai.js"></script>
 
 <script src="V90.review.js"></script>
 
 <script src="V90.bundle.js"></script>
+
 
 
 </body>

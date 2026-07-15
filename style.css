@@ -12,9 +12,9 @@ margin:0;
 
 padding:15px;
 
-background:#070b14;
+background:#050914;
 
-color:#ffffff;
+color:#fff;
 
 font-family:
 "Microsoft YaHei",
@@ -26,9 +26,10 @@ sans-serif;
 
 
 
+
 .app{
 
-max-width:760px;
+max-width:820px;
 
 margin:auto;
 
@@ -52,11 +53,11 @@ padding:20px 0;
 
 h1{
 
+margin:0;
+
 font-size:28px;
 
 color:#00e5ff;
-
-margin-bottom:10px;
 
 
 }
@@ -64,6 +65,8 @@ margin-bottom:10px;
 
 
 h2{
+
+margin-top:10px;
 
 font-size:20px;
 
@@ -75,22 +78,25 @@ color:#76ff03;
 
 
 
-
 .status{
 
 
-margin-top:15px;
+margin-top:20px;
 
 padding:12px;
 
+
 background:#111827;
 
+
 border-radius:12px;
+
 
 color:#ffd740;
 
 
 }
+
 
 
 
@@ -108,17 +114,19 @@ font-weight:bold;
 
 
 
-
 .card{
+
+
+margin-top:18px;
+
+
+padding:20px;
 
 
 background:#111827;
 
+
 border-radius:18px;
-
-padding:18px;
-
-margin-top:18px;
 
 
 border:
@@ -128,7 +136,7 @@ border:
 
 box-shadow:
 
-0 5px 20px rgba(0,0,0,.4);
+0 8px 25px rgba(0,0,0,.45);
 
 
 
@@ -142,58 +150,24 @@ h3{
 
 margin-top:0;
 
+
 color:#ffd740;
 
-font-size:18px;
+
+font-size:19px;
 
 
-}
-
-
-
-
-
-input,
-textarea{
-
-
-width:100%;
-
-padding:13px;
-
-margin-top:10px;
-
-
-background:#050a12;
-
-border:
+border-bottom:
 
 1px solid #37474f;
 
 
-border-radius:10px;
-
-
-color:white;
-
-
-font-size:15px;
+padding-bottom:10px;
 
 
 }
 
 
-
-
-
-textarea{
-
-height:110px;
-
-resize:none;
-
-
-}
 
 
 
@@ -203,12 +177,15 @@ button{
 
 width:100%;
 
-margin-top:15px;
 
 padding:15px;
 
 
+margin-top:15px;
+
+
 border:none;
+
 
 border-radius:12px;
 
@@ -224,19 +201,76 @@ linear-gradient(
 
 color:white;
 
+
 font-size:17px;
 
+
 font-weight:bold;
+
+
+cursor:pointer;
 
 
 }
 
 
 
-button:active{
 
 
-transform:scale(.98);
+button:hover{
+
+
+opacity:.85;
+
+
+}
+
+
+
+
+
+input,
+textarea{
+
+
+width:100%;
+
+
+margin-top:12px;
+
+
+padding:13px;
+
+
+border-radius:10px;
+
+
+border:
+
+1px solid #455a64;
+
+
+
+background:#050914;
+
+
+color:white;
+
+
+font-size:15px;
+
+
+}
+
+
+
+textarea{
+
+
+height:120px;
+
+
+resize:none;
 
 
 }
@@ -248,18 +282,24 @@ transform:scale(.98);
 .progress{
 
 
-height:16px;
-
-background:#263238;
-
-border-radius:20px;
-
-overflow:hidden;
-
 margin-top:20px;
 
 
+height:18px;
+
+
+background:#263238;
+
+
+border-radius:20px;
+
+
+overflow:hidden;
+
+
 }
+
+
 
 
 
@@ -268,10 +308,18 @@ margin-top:20px;
 
 height:100%;
 
+
 width:0%;
 
 
-background:#00e5ff;
+background:
+
+linear-gradient(
+90deg,
+#00e5ff,
+#76ff03
+);
+
 
 
 transition:.3s;
@@ -282,11 +330,14 @@ transition:.3s;
 
 
 
-
 #progressText{
 
 
 text-align:center;
+
+
+margin-top:12px;
+
 
 color:#00e5ff;
 
@@ -296,17 +347,22 @@ color:#00e5ff;
 
 
 
+
+
+
 #prediction{
 
 
-background:#050a12;
+padding:20px;
 
-padding:18px;
+
+background:#050914;
+
 
 border-radius:12px;
 
 
-font-size:18px;
+font-size:20px;
 
 
 line-height:2;
@@ -323,14 +379,59 @@ color:#00ff99;
 #ranking{
 
 
-background:#050a12;
-
 padding:15px;
+
+
+background:#050914;
+
 
 border-radius:12px;
 
 
-line-height:1.8;
+line-height:2;
+
+
+}
+
+
+
+
+#meeting{
+
+
+padding:15px;
+
+
+background:#050914;
+
+
+border-radius:12px;
+
+
+line-height:2;
+
+
+color:#81d4fa;
+
+
+}
+
+
+
+
+#records{
+
+
+padding:15px;
+
+
+background:#050914;
+
+
+border-radius:12px;
+
+
+line-height:2;
 
 
 }
@@ -341,14 +442,16 @@ line-height:1.8;
 #review{
 
 
-background:#050a12;
-
 padding:15px;
+
+
+background:#050914;
+
 
 border-radius:12px;
 
 
-line-height:1.8;
+line-height:2;
 
 
 color:#ffeb3b;
@@ -362,17 +465,19 @@ color:#ffeb3b;
 #learning{
 
 
-background:#050a12;
-
 padding:15px;
+
+
+background:#050914;
+
 
 border-radius:12px;
 
 
-line-height:1.8;
+line-height:2;
 
 
-color:#81d4fa;
+color:#80cbc4;
 
 
 }
@@ -381,14 +486,21 @@ color:#81d4fa;
 
 
 
-@media(max-width:480px){
+
+@media(max-width:600px){
+
+
+body{
+
+padding:10px;
+
+}
 
 
 
 h1{
 
 font-size:24px;
-
 
 }
 
@@ -397,6 +509,14 @@ font-size:24px;
 .card{
 
 padding:15px;
+
+}
+
+
+
+#prediction{
+
+font-size:18px;
 
 }
 
