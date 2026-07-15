@@ -1,12 +1,13 @@
-/* ===================================
- V90 AI CORE FINAL R7.0
- 页面样式
-=================================== */
+/* ======================================
+大乐透 AI V100 CORE FINAL
+style.css
+手机端界面
+====================================== */
 
 
 *{
 
-box-sizing:border-box;
+    box-sizing:border-box;
 
 }
 
@@ -15,24 +16,23 @@ box-sizing:border-box;
 body{
 
 
-margin:0;
+    margin:0;
 
-padding:0;
+    padding:0;
 
-background:#10131a;
+    background:#f2f4f8;
 
-font-family:
+    font-family:
 
-"Microsoft YaHei",
-Arial,
-sans-serif;
+    "Microsoft YaHei",
+    Arial,
+    sans-serif;
 
-color:#eee;
+
+    color:#222;
 
 
 }
-
-
 
 
 
@@ -40,14 +40,17 @@ color:#eee;
 .container{
 
 
-width:95%;
+    width:100%;
 
-max-width:900px;
+    max-width:700px;
 
-margin:20px auto;
+    margin:auto;
+
+    padding:15px;
 
 
 }
+
 
 
 
@@ -57,14 +60,42 @@ margin:20px auto;
 h1{
 
 
-text-align:center;
+    text-align:center;
 
-color:#00e5ff;
+    color:#1a237e;
 
-font-size:28px;
+    font-size:24px;
 
 
 }
+
+
+
+
+
+
+.card{
+
+
+    background:white;
+
+    border-radius:15px;
+
+    padding:18px;
+
+    margin-bottom:15px;
+
+    box-shadow:
+
+    0 3px 10px
+
+    rgba(0,0,0,0.08);
+
+
+}
+
+
+
 
 
 
@@ -72,56 +103,12 @@ font-size:28px;
 h2{
 
 
-text-align:center;
+    font-size:20px;
 
-color:#aaa;
-
-font-size:18px;
+    color:#1565c0;
 
 
 }
-
-
-
-
-
-
-
-.card{
-
-
-background:#1b2230;
-
-border-radius:15px;
-
-padding:20px;
-
-margin-bottom:20px;
-
-box-shadow:
-
-0 0 15px rgba(0,0,0,.4);
-
-
-}
-
-
-
-
-
-
-
-.card h3{
-
-
-margin-top:0;
-
-color:#00ff99;
-
-
-}
-
-
 
 
 
@@ -131,48 +118,31 @@ color:#00ff99;
 button{
 
 
-background:#008cff;
+    width:100%;
 
-border:none;
+    height:45px;
 
-color:white;
+    border:none;
 
-padding:12px 25px;
+    border-radius:10px;
 
-border-radius:10px;
+    background:#1976d2;
 
-font-size:16px;
+    color:white;
 
-cursor:pointer;
+    font-size:16px;
 
-
-}
-
-
-
-
-
-
-button:hover{
-
-
-background:#00aaff;
+    margin-top:10px;
 
 
 }
 
 
 
+button:active{
 
 
-
-
-button:disabled{
-
-
-background:#555;
-
-cursor:not-allowed;
+    background:#0d47a1;
 
 
 }
@@ -183,48 +153,51 @@ cursor:not-allowed;
 
 
 
+input{
+
+
+    width:45px;
+
+    height:45px;
+
+    text-align:center;
+
+    font-size:20px;
+
+    border-radius:8px;
+
+    border:
+
+    1px solid #ccc;
+
+    margin:5px;
+
+
+}
+
+
+
+
+
+
+
+/* =========================
+全局进度条
+========================= */
 
 
 .progress{
 
 
-height:25px;
+    width:100%;
 
-background:#333;
+    height:25px;
 
-border-radius:20px;
+    background:#ddd;
 
-overflow:hidden;
+    border-radius:20px;
 
-margin-top:20px;
-
-
-}
-
-
-
-
-
-
-#progressBar{
-
-
-height:100%;
-
-width:0%;
-
-background:
-
-linear-gradient(
-90deg,
-#00ff99,
-#00ccff
-);
-
-
-transition:
-
-width .3s;
+    overflow:hidden;
 
 
 }
@@ -232,19 +205,32 @@ width .3s;
 
 
 
+#globalProgressBar,
 
 
+#trainProgressBar{
 
-#progressNumber{
+
+    height:100%;
+
+    width:0%;
+
+    background:
+
+    linear-gradient(
+
+    90deg,
+
+    #00c853,
+
+    #64dd17
+
+    );
 
 
-text-align:center;
+    transition:
 
-font-size:20px;
-
-margin-top:10px;
-
-color:#00ff99;
+    width 0.3s;
 
 
 }
@@ -255,28 +241,17 @@ color:#00ff99;
 
 
 
-input{
+#globalProgressText,
 
 
-width:55px;
+#trainProgressNumber{
 
-height:40px;
 
-margin:5px;
+    text-align:center;
 
-border-radius:8px;
+    font-size:18px;
 
-border:
-
-1px solid #555;
-
-background:#111;
-
-color:white;
-
-text-align:center;
-
-font-size:18px;
+    margin-top:8px;
 
 
 }
@@ -287,15 +262,36 @@ font-size:18px;
 
 
 
+/* =========================
+训练进度
+========================= */
 
-#finalResult{
+
+#trainProgressBarBox{
 
 
-font-size:22px;
+    width:100%;
 
-color:#ffcc00;
+    height:25px;
 
-line-height:2;
+    background:#eee;
+
+    border-radius:20px;
+
+    margin-top:15px;
+
+
+}
+
+
+
+
+
+
+#trainProgressBar{
+
+
+    border-radius:20px;
 
 
 }
@@ -306,28 +302,17 @@ line-height:2;
 
 
 
-#topList{
+/* =========================
+预测结果
+========================= */
 
 
-line-height:1.8;
-
-color:#ddd;
+#predictionResult{
 
 
-}
+    line-height:1.8;
 
-
-
-
-
-
-
-#meeting{
-
-
-line-height:2;
-
-color:#66ccff;
+    font-size:16px;
 
 
 }
@@ -338,32 +323,17 @@ color:#66ccff;
 
 
 
-
-#review{
-
-
-margin-top:15px;
-
-line-height:2;
-
-color:#00ff99;
+/* =========================
+AI报告
+========================= */
 
 
-}
+#aiReport{
 
 
+    line-height:2;
 
-
-
-
-
-
-#growth{
-
-
-line-height:2;
-
-color:white;
+    font-size:15px;
 
 
 }
@@ -374,60 +344,55 @@ color:white;
 
 
 
-
-@media(max-width:600px){
-
-
-
-.container{
+/* =========================
+开奖输入
+========================= */
 
 
-width:96%;
+.feedback input{
 
 
-}
-
-
-
-h1{
-
-
-font-size:22px;
+    margin-right:8px;
 
 
 }
 
 
 
-.card{
-
-
-padding:15px;
-
-
-}
 
 
 
-input{
-
-
-width:42px;
-
-height:35px;
-
-
-}
+@media(max-width:480px){
 
 
 
-button{
+    h1{
+
+        font-size:20px;
+
+    }
 
 
-width:100%;
+
+    .card{
+
+        padding:14px;
+
+    }
 
 
-}
+
+
+    input{
+
+        width:38px;
+
+        height:38px;
+
+        font-size:16px;
+
+
+    }
 
 
 }

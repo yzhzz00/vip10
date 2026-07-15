@@ -2,14 +2,17 @@
 
 <html lang="zh-CN">
 
+
 <head>
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
+
 
 <title>
-大乐透智能分析系统 V90 AI CORE R7.0
+大乐透 AI V100 CORE FINAL
 </title>
 
 
@@ -17,6 +20,8 @@
 
 
 </head>
+
+
 
 
 <body>
@@ -28,149 +33,112 @@
 
 <h1>
 大乐透智能分析系统
+
+<br>
+
+V100 AI CORE FINAL
+
 </h1>
 
 
+
+
+
+<!-- 系统状态 -->
+
+
+<div class="card">
+
+
 <h2>
-V90 AI CORE FINAL R7.0
+系统状态
+</h2>
+
+
+<div id="systemStatus">
+
+启动中...
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<!-- AI分析 -->
+
+
+<div class="card">
+
+
+<h2>
+AI分析中心
 </h2>
 
 
 
-<div class="card">
+<button onclick="V100App.startAnalysis()">
 
-<h3>系统状态</h3>
-
-
-<p>
-V90 AI CORE R7.0 启动完成
-</p>
-
-
-<p>
-历史数据：
-<span id="dataCount">
-等待加载
-</span>
-</p>
-
-
-</div>
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-AI模型中心
-</h3>
-
-
-<p>
-频率模型 ✓
-</p>
-
-
-<p>
-冷热分析 ✓
-</p>
-
-
-<p>
-遗漏周期 ✓
-</p>
-
-
-<p>
-Bayes评分 ✓
-</p>
-
-
-<p>
-Markov转移 ✓
-</p>
-
-
-<p>
-蒙特卡罗模拟 ✓
-</p>
-
-
-<p>
-AI历史训练 ✓
-</p>
-
-
-
-</div>
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-AI训练中心
-</h3>
-
-
-<button id="trainBtn">
-
-开始历史滚动训练
+开始 V100 AI分析
 
 </button>
 
 
 
-<div id="trainResult">
+<div id="analysisStatus">
 
-等待训练
-
-</div>
-
+等待分析
 
 </div>
 
 
+</div>
 
 
 
+
+
+
+
+
+
+<!-- 全局进度 -->
 
 
 <div class="card">
 
 
-<h3>
-AI分析中心
+<h2>
+运行进度
+</h2>
+
+
+
+<h3 id="globalProgressTitle">
+
+等待任务
+
 </h3>
-
-
-
-<button id="startBtn">
-
-开始 V90 AI分析
-
-</button>
 
 
 
 <div class="progress">
 
 
-<div id="progressBar"></div>
+<div id="globalProgressBar">
+
+</div>
 
 
 </div>
 
 
-
-<div id="progressNumber">
+<div id="globalProgressText">
 
 0%
 
@@ -178,14 +146,6 @@ AI分析中心
 
 
 
-<div id="progressText">
-
-等待计算
-
-</div>
-
-
-
 </div>
 
 
@@ -194,49 +154,28 @@ AI分析中心
 
 
 
+
+
+<!-- 预测结果 -->
 
 
 <div class="card">
 
 
-<h3>
+<h2>
 最终预测结果
-</h3>
+</h2>
 
 
 
-<div id="finalResult">
-
-等待生成
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-TOP10预测池
-</h3>
-
-
-<div id="topList">
+<div id="predictionResult">
 
 等待生成
 
 </div>
 
 
+
 </div>
 
 
@@ -246,84 +185,161 @@ TOP10预测池
 
 
 
+
+<!-- 历史训练 -->
+
+
 <div class="card">
 
 
+<h2>
+AI历史滚动训练
+</h2>
+
+
+
+<button onclick="V100App.startTraining()">
+
+开始500期滚动考试
+
+</button>
+
+
+
+<div id="trainProgressBarBox">
+
+
+<div id="trainProgressBar">
+
+</div>
+
+
+</div>
+
+
+<div id="trainProgressNumber">
+
+0%
+
+</div>
+
+
+
+<div id="trainStatus">
+
+等待训练
+
+</div>
+
+
+
+<div id="trainDetail">
+
+</div>
+
+
+
 <h3>
-AI会议 / 自我分析
+
+训练统计
+
 </h3>
 
 
 
-<div id="meeting">
+<div id="trainSummary">
 
-等待分析
-
-</div>
-
-
+暂无
 
 </div>
 
 
 
+</div>
 
 
 
 
+
+
+
+
+
+<!-- AI报告 -->
 
 
 <div class="card">
 
 
-<h3>
+<h2>
+AI报告中心
+</h2>
+
+
+<div id="aiReport">
+
+等待
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- 开奖反馈 -->
+
+
+<div class="card">
+
+
+<h2>
 开奖反馈学习
+</h2>
+
+
+
+<h3>
+前区
 </h3>
 
 
 
-期号：
+<input id="front1">
 
-<input id="period">
+<input id="front2">
 
+<input id="front3">
 
-<br><br>
+<input id="front4">
 
-
-前区：
-
-<br>
+<input id="front5">
 
 
-<input id="f1">
-
-<input id="f2">
-
-<input id="f3">
-
-<input id="f4">
-
-<input id="f5">
 
 
-<br><br>
+<h3>
+后区
+</h3>
 
 
-后区：
+<input id="back1">
 
-<br>
-
-
-<input id="b1">
-
-<input id="b2">
+<input id="back2">
 
 
 
 <br><br>
 
 
-<button id="saveDraw">
+
+<button onclick="V100Feedback.save()">
 
 保存开奖并学习
 
@@ -331,42 +347,7 @@ AI会议 / 自我分析
 
 
 
-<div id="review">
-
-等待反馈
-
 </div>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-AI成长记录
-</h3>
-
-
-
-<div id="growth">
-
-暂无训练记录
-
-</div>
-
-
-</div>
-
 
 
 
@@ -385,9 +366,11 @@ AI成长记录
 
 <script src="js/database.js"></script>
 
-<script src="js/learning.js"></script>
+<script src="js/trend.js"></script>
 
-<script src="js/model.js"></script>
+<script src="js/structure.js"></script>
+
+<script src="js/probability.js"></script>
 
 <script src="js/bayes.js"></script>
 
@@ -395,113 +378,27 @@ AI成长记录
 
 <script src="js/montecarlo.js"></script>
 
-<script src="js/core.js"></script>
+<script src="js/predictor.js"></script>
 
-<script src="js/review.js"></script>
 
-<script src="js/training.js"></script>
+<script src="js/training_engine.js"></script>
 
-<script src="js/trainer.js"></script>
+<script src="js/training_ui.js"></script>
+
+
+<script src="js/feedback.js"></script>
+
+<script src="js/learning.js"></script>
+
+<script src="js/model_version.js"></script>
+
+
+<script src="js/progress.js"></script>
 
 <script src="js/report.js"></script>
 
+
 <script src="js/app.js"></script>
-
-
-
-<script>
-
-
-// 显示数据数量
-
-setInterval(()=>{
-
-
-if(window.V90Database){
-
-
-document.getElementById(
-"dataCount"
-).innerHTML=
-
-V90Database.count()+"期";
-
-
-}
-
-
-},1000);
-
-
-
-// 历史训练按钮
-
-document.getElementById(
-"trainBtn"
-).onclick=
-
-async()=>{
-
-
-let result=
-
-await V90Training.run(500);
-
-
-
-let box=
-
-document.getElementById(
-"trainResult"
-);
-
-
-
-box.innerHTML=
-
-`
-
-训练完成
-
-<br>
-
-次数：
-
-${result.total}
-
-<br>
-
-前区3+：
-
-${result.front3}
-
-<br>
-
-后区命中：
-
-${result.back1}
-
-`;
-
-
-
-V90Learning.train(
-
-V90Training.records()
-
-);
-
-
-
-V90Report.show();
-
-
-
-};
-
-
-
-</script>
 
 
 
