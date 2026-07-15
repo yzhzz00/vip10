@@ -2,15 +2,20 @@
 
 <html lang="zh-CN">
 
+
 <head>
 
+
 <meta charset="UTF-8">
+
 
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 
 <title>
-大乐透 AI CORE V1000 FINAL
+
+大乐透 AI CORE V1
+
 </title>
 
 
@@ -21,7 +26,10 @@
 
 
 
+
+
 <body>
+
 
 
 <div class="container">
@@ -29,41 +37,27 @@
 
 
 <h1>
-大乐透 AI CORE V1000
+
+大乐透 AI CORE V1
+
 </h1>
 
 
 
-
-
-
 <div class="card">
 
 
-<h2>
-AI健康度
-</h2>
+<h2>数据状态</h2>
 
 
-<div class="box">
+<div id="dataStatus">
 
-★★★★★
-
-<br>
-
-可信度：
-
-<span id="health">
-等待分析
-</span>
-
+等待加载...
 
 </div>
 
 
 </div>
-
-
 
 
 
@@ -74,100 +68,11 @@ AI健康度
 <div class="card">
 
 
-<h2>
-数据中心
-</h2>
-
-
-<div class="box">
-
-
-历史数据：
-
-<span id="count">
-
-2896
-
-</span>
-
-期
-
-
-<br>
-
-
-数据文件：
-
-data/dlt.txt
+<h2>AI分析中心</h2>
 
 
 
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h2>
-AI模型委员会
-</h2>
-
-
-<div class="box">
-
-
-频率模型<br>
-
-趋势模型<br>
-
-遗漏模型<br>
-
-Bayes<br>
-
-Markov<br>
-
-矩阵分析<br>
-
-大乐透理论<br>
-
-开奖节奏<br>
-
-反人类选号
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h2>
-AI控制中心
-</h2>
-
-
-<button id="analyze">
+<button id="analyzeBtn">
 
 开始 AI 分析
 
@@ -175,72 +80,17 @@ AI控制中心
 
 
 
-<button id="training">
+<button id="trainBtn">
 
-开始滚动训练
-
-</button>
-
-
-
-<button id="backtest">
-
-历史考试回测
+滚动训练
 
 </button>
 
 
 
-</div>
+<div id="trainStatus">
 
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h2>
-AI会议系统
-</h2>
-
-
-<div class="box" id="meeting">
-
-
-等待会议
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h2>
-Monte Carlo TOP20预测
-</h2>
-
-
-
-<div class="box" id="result">
-
-
-等待分析
-
+等待训练...
 
 </div>
 
@@ -260,17 +110,20 @@ Monte Carlo TOP20预测
 
 
 <h2>
-训练中心
+
+预测结果
+
 </h2>
 
 
-<div class="box" id="trainbox">
+
+<div id="prediction">
 
 
-等待训练
-
+等待分析...
 
 </div>
+
 
 
 </div>
@@ -287,98 +140,29 @@ Monte Carlo TOP20预测
 
 
 <h2>
-回测中心
-</h2>
 
+开奖反馈
 
-<div class="box" id="backbox">
-
-
-等待考试
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h2>
-开奖反馈学习
 </h2>
 
 
 
-<input id="period"
+<textarea id="feedbackInput"
 
-placeholder="开奖期号">
+placeholder="输入开奖数据">
 
-
-
-<h3>
-前区
-</h3>
+</textarea>
 
 
 
-<div class="number">
+<button id="feedbackBtn">
 
-
-<input id="f1" placeholder="前区1">
-
-<input id="f2" placeholder="前区2">
-
-<input id="f3" placeholder="前区3">
-
-<input id="f4" placeholder="前区4">
-
-<input id="f5" placeholder="前区5">
-
-
-</div>
-
-
-
-
-
-<h3>
-后区
-</h3>
-
-
-
-<div class="number">
-
-
-<input id="b1" placeholder="后区1">
-
-
-<input id="b2" placeholder="后区2">
-
-
-</div>
-
-
-
-
-
-<button id="save">
-
-保存开奖并学习
+提交反馈
 
 </button>
 
 
+
 </div>
 
 
@@ -393,23 +177,19 @@ placeholder="开奖期号">
 
 
 <h2>
+
 AI成长报告
+
 </h2>
 
 
-<div class="box" id="report">
+
+<div id="report">
 
 
-等待训练
-
-
-</div>
-
+暂无报告
 
 </div>
-
-
-
 
 
 
@@ -419,81 +199,237 @@ AI成长报告
 
 
 
-
-<!-- 基础 -->
-
-<script src="core/config.js"></script>
-
-<script src="core/seed.js"></script>
-
-
-<script src="database/storage.js"></script>
+</div>
 
 
 
 
 
-<!-- 模型 -->
-
-
-<script src="models/frequency.js"></script>
-
-<script src="models/trend.js"></script>
-
-<script src="models/missing.js"></script>
-
-<script src="models/bayes.js"></script>
-
-<script src="models/markov.js"></script>
-
-<script src="models/matrix.js"></script>
-
-<script src="models/rhythm.js"></script>
-
-<script src="models/theory.js"></script>
-
-<script src="models/antihuman.js"></script>
 
 
 
 
-
-<!-- 核心 -->
-
-
-<script src="core/optimizer.js"></script>
-
-<script src="core/montecarlo.js"></script>
-
-<script src="core/predictor.js"></script>
-
-<script src="core/engine.js"></script>
+<script src="js/config.js"></script>
 
 
+<script src="js/database.js"></script>
 
 
+<script src="js/parser.js"></script>
 
-<!-- 学习 -->
+
+<script src="js/models.js"></script>
 
 
-<script src="learning/training.js"></script>
+<script src="js/predictor.js"></script>
 
-<script src="learning/backtest.js"></script>
 
-<script src="learning/weight.js"></script>
+<script src="js/montecarlo.js"></script>
 
-<script src="learning/feedback.js"></script>
+
+<script src="js/training.js"></script>
+
+
+<script src="js/feedback.js"></script>
+
+
+<script src="js/report.js"></script>
+
+
+<script src="js/engine.js"></script>
+
+
+<script src="js/ui.js"></script>
 
 
 
 
 
-<!-- UI -->
 
 
-<script src="ui/dashboard.js"></script>
+<script>
 
 
+
+let demoData="";
+
+
+
+
+
+// 加载数据
+
+fetch(
+
+"data/dlt.txt"
+
+)
+
+.then(res=>res.text())
+
+.then(text=>{
+
+
+demoData=text;
+
+
+
+let info=
+
+DLT_ENGINE.init(text);
+
+
+
+DLT_UI.showData(
+
+info.dataCount
+
+);
+
+
+
+});
+
+
+
+
+
+
+
+
+
+// 分析按钮
+
+
+document.getElementById(
+
+"analyzeBtn"
+
+)
+
+.onclick=function(){
+
+
+
+let result=
+
+DLT_ENGINE.analyze();
+
+
+
+DLT_UI.showPrediction(
+
+result
+
+);
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// 训练按钮
+
+
+document.getElementById(
+
+"trainBtn"
+
+)
+
+.onclick=function(){
+
+
+
+DLT_UI.trainingStatus(
+
+"训练开始..."
+
+);
+
+
+
+DLT_ENGINE.train();
+
+
+
+DLT_UI.trainingStatus(
+
+"训练完成"
+
+);
+
+
+
+let report=
+
+DLT_ENGINE.report();
+
+
+
+DLT_UI.showReport(
+
+report
+
+);
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// 反馈按钮
+
+
+document.getElementById(
+
+"feedbackBtn"
+
+)
+
+.onclick=function(){
+
+
+
+let text=
+
+document.getElementById(
+
+"feedbackInput"
+
+).value;
+
+
+
+alert(
+
+"反馈已保存"
+
+);
+
+
+
+};
+
+
+
+
+
+</script>
 
 
 
