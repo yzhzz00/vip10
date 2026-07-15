@@ -1,40 +1,60 @@
-/*
-================================
-大乐透AI_V90 CORE
-
-riskengine.js
-
-风险控制引擎
-================================
-*/
+// 大乐透AI_V90
+// Risk Engine
+// 风险控制引擎
 
 
-class RiskEngine{
+window.RiskEngine = {
 
 
-    constructor(){
+    config:{},
 
 
-        this.name="risk";
+    initialized:false,
 
 
-        this.threshold={
 
 
-            sameLimit:3,
 
 
-            sumMin:60,
+    init(){
 
 
-            sumMax:160
+
+        this.config={
+
+
+
+            maxSameNumber:3,
+
+
+            minSum:50,
+
+
+            maxSum:170,
+
+
+            maxConsecutive:3,
+
+
+            maxSameTail:3
+
 
 
         };
 
 
 
-    }
+        this.initialized=true;
+
+
+
+        console.log(
+            "RiskEngine初始化完成"
+        );
+
+
+
+    },
 
 
 
@@ -44,12 +64,12 @@ class RiskEngine{
 
 
 
-    // ==========================
-    // 风险评分
-    // ==========================
+    // 总风险评估
 
 
-    score(candidate){
+    evaluate(
+        candidate
+    ){
 
 
 
@@ -57,61 +77,40 @@ class RiskEngine{
 
 
 
+        let reasons=[];
 
 
 
 
-        let front=
+        let sum =
 
-        [...candidate.front]
-
-        .sort(
-
-        (a,b)=>a-b
-
-        );
-
-
-
-
-
-
-
-        // ==================
-        // 和值风险
-        // ==================
-
-
-        let sum=
-
-        front.reduce(
-
-            (a,b)=>a+b,
-
+        candidate.front.reduce(
+            (
+                a,b
+            )=>a+b,
             0
-
         );
 
 
 
 
 
+        // 和值风险
 
 
         if(
-
-        sum<this.threshold.sumMin
-
-        ||
-
-        sum>this.threshold.sumMax
-
+            sum<this.config.minSum
+            ||
+            sum>this.config.maxSum
         ){
 
 
+            risk+=20;
 
-            risk+=2;
 
+            reasons.push(
+                "和值异常"
+            );
 
 
         }
@@ -124,106 +123,30 @@ class RiskEngine{
 
 
 
-        // ==================
         // 连号风险
-        // ==================
 
 
-        let link=0;
+        let consecutive =
 
-
-
-
-
-
-
-        for(
-
-        let i=1;
-
-        i<front.length;
-
-        i++
-
-        ){
-
-
-
-            if(
-
-            front[i]-front[i-1]===1
-
-            ){
-
-
-
-                link++;
-
-
-
-            }
-
-
-
-        }
-
-
-
-
-
-
-
-        if(link>=3){
-
-
-
-            risk+=2;
-
-
-
-        }
-
-
-
-
-
-
-
-
-
-        // ==================
-        // 重复结构风险
-        // ==================
-
-
-        let odd=
-
-        front.filter(
-
-            n=>n%2!==0
-
-        ).length;
-
-
-
-
+        this.checkConsecutive(
+            candidate.front
+        );
 
 
 
         if(
-
-        odd===0
-
-        ||
-
-        odd===5
-
+            consecutive >
+            this.config.maxConsecutive
         ){
 
 
+            risk+=15;
 
-            risk+=2;
 
+
+            reasons.push(
+                "连续号码过多"
+            );
 
 
         }
@@ -236,40 +159,35 @@ class RiskEngine{
 
 
 
-        return Number(
+        // 尾数风险
 
-        risk.toFixed(4)
 
+        let tail =
+
+        this.checkTail(
+            candidate.front
         );
 
 
 
-    }
+        if(
+            tail >
+            this.config.maxSameTail
+        ){
+
+
+            risk+=15;
 
 
 
+            reasons.push(
+                "尾数重复过高"
+            );
 
 
+        }
 
 
-
-
-    // ==========================
-    // 是否通过
-    // ==========================
-
-
-    check(candidate){
-
-
-
-        let risk=
-
-        this.score(
-
-            candidate
-
-        );
 
 
 
@@ -278,20 +196,230 @@ class RiskEngine{
 
 
         return {
-
 
 
             risk,
 
 
+            level:
 
-            pass:
+            this.level(
+                risk
+            ),
 
-            risk<=3
+
+
+            reasons
 
 
 
         };
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 连号检测
+
+
+    checkConsecutive(
+        numbers
+    ){
+
+
+
+        let max=1;
+
+        let current=1;
+
+
+
+        for(
+            let i=1;
+            i<numbers.length;
+            i++
+        ){
+
+
+
+            if(
+                numbers[i]
+                -
+                numbers[i-1]
+                ===1
+            ){
+
+
+                current++;
+
+
+                if(
+                    current>max
+                ){
+
+                    max=current;
+
+                }
+
+
+
+            }else{
+
+
+                current=1;
+
+
+            }
+
+
+        }
+
+
+
+        return max;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 尾数检测
+
+
+    checkTail(
+        numbers
+    ){
+
+
+
+        let map={};
+
+
+
+        numbers.forEach(
+            n=>{
+
+
+                let t=n%10;
+
+
+
+                map[t]=
+
+                (
+                    map[t]||0
+                )
+
+                +1;
+
+
+
+            }
+        );
+
+
+
+        return Math.max(
+            ...Object.values(map)
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 风险等级
+
+
+    level(
+        score
+    ){
+
+
+        if(
+            score<20
+        ){
+
+            return "低风险";
+
+
+        }
+
+
+
+        if(
+            score<50
+        ){
+
+            return "中风险";
+
+
+        }
+
+
+
+        return "高风险";
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 过滤候选
+
+
+    filter(
+        candidates
+    ){
+
+
+
+        return candidates.filter(
+            item=>{
+
+
+                let result =
+                this.evaluate(
+                    item
+                );
+
+
+
+                return result.risk < 50;
+
+
+
+            }
+        );
 
 
 
@@ -300,47 +428,4 @@ class RiskEngine{
 
 
 
-
-
-
-
-
-    // ==========================
-    // 状态
-    // ==========================
-
-
-    status(){
-
-
-
-        return {
-
-
-
-            engine:this.name,
-
-
-            ready:true
-
-
-
-        };
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-window.riskengine=
-
-new RiskEngine();
+};

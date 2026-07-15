@@ -1,58 +1,41 @@
-/*
-================================
-大乐透AI_V90 AGENTS
-
-markovagent.js
-
-马尔可夫分析智能体
-================================
-*/
+// 大乐透AI_V90
+// Markov Agent
+// 马尔可夫分析智能体
 
 
-class MarkovAgent{
+window.MarkovAgent = {
 
 
-    constructor(){
-
-
-        this.name="markovagent";
-
-
-    }
+    name:
+    "马尔可夫分析Agent",
 
 
 
 
+    analyze(
+        data
+    ){
 
 
 
+        let result={
 
 
-    // ==========================
-    // 马尔可夫分析
-    // ==========================
+            score:0,
 
 
-    analyze(candidate,last){
+            message:""
 
 
 
-        let score=0;
-
-
+        };
 
 
 
 
 
         if(
-
-        !last
-
-        ||
-
-        !window.markovengine
-
+            !data.markov
         ){
 
 
@@ -60,19 +43,15 @@ class MarkovAgent{
             return {
 
 
-
-                agent:this.name,
-
-
                 score:0,
 
 
-                detail:"无转移数据"
+                message:
+                "马尔可夫模型未加载"
 
 
 
             };
-
 
 
         }
@@ -82,89 +61,88 @@ class MarkovAgent{
 
 
 
-
-
-        last.forEach(old=>{
-
-
-
-            let probability=
-
-            window.markovengine.predict(
-
-                old
-
-            );
+        let markov =
+        data.markov;
 
 
 
 
 
+        /*
+        
+        判断转移模型是否存在
+        
+        */
 
 
 
-            candidate.front
-
-            .forEach(next=>{
-
-
-
-                if(
-
-                probability[next]
-
-                ){
+        if(
+            markov.front
+        ){
 
 
 
-                    score+=
-
-                    probability[next];
+            result.score +=30;
 
 
 
-                }
+            result.message +=
+
+            "前区转移关系已分析";
 
 
 
-            });
-
-
-
-        });
+        }
 
 
 
 
 
+        if(
+            markov.back
+        ){
 
 
 
-        return {
+            result.score +=20;
 
 
 
-            agent:this.name,
+            result.message +=
+
+            "，后区转移参与";
 
 
 
-            score:
-
-            Number(
-
-            score.toFixed(6)
-
-            ),
+        }
 
 
 
-            detail:
-
-            "一阶转移分析完成"
 
 
+        /*
+        
+        马尔可夫不是决定因素
 
-        };
+        只提供趋势参考
+        
+        */
+
+
+
+        result.score =
+
+        Math.min(
+            result.score,
+            100
+        );
+
+
+
+
+
+
+        return result;
 
 
 
@@ -173,42 +151,4 @@ class MarkovAgent{
 
 
 
-
-
-
-
-
-    status(){
-
-
-
-        return {
-
-
-
-            agent:this.name,
-
-
-            ready:true
-
-
-
-        };
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-window.markovagent=
-
-new MarkovAgent();
+};

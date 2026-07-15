@@ -1,224 +1,143 @@
-/*
-================================
-大乐透AI_V90
-
-engine.js
-
-系统启动入口
-================================
-*/
-
-
-class V90Engine{
-
-
-    constructor(){
-
-
-        this.status="idle";
-
-
-        this.modules=[];
-
-
-    }
+// 大乐透AI_V90
+// Engine Loader
+// 系统核心启动入口
 
 
 
+window.V90Engine = {
+
+
+
+    modules:[
+
+        "DataEngine",
+
+        "FeatureEngine",
+
+        "TheoryEngine",
+
+        "MarkovEngine",
+
+        "MatrixEngine",
+
+        "BayesEngine",
+
+        "MonteCarloEngine",
+
+        "TrainingEngine",
+
+        "PredictionEngine",
+
+        "ScoringEngine",
+
+        "RiskEngine",
+
+        "EvaluationEngine",
+
+        "LearningEngine",
+
+        "TaskEngine",
+
+        "MasterEngine",
+
+        "TrendAgent",
+
+        "StructureAgent",
+
+        "MarkovAgent",
+
+        "RiskAgent",
+
+        "ReviewAgent",
+
+        "TheoryAgent",
+
+        "CriticAgent",
+
+        "LearningAgent",
+
+        "AntiHumanAgent",
+
+        "MasterAgent"
+
+
+    ],
 
 
 
 
-    // ==========================
-    // 启动系统
-    // ==========================
-
-    async start(){
 
 
+    check(){
 
-        console.log(
 
-        "V90 AI CORE START"
+        let missing=[];
 
+
+
+        this.modules.forEach(
+            name=>{
+
+
+                if(
+                    !window[name]
+                ){
+
+
+                    missing.push(
+                        name
+                    );
+
+
+                }
+
+
+            }
         );
 
 
 
-        this.status="loading";
+        return missing;
 
 
 
+    },
 
 
 
-        await this.loadModules();
 
 
 
 
 
 
+    start(){
 
-        this.init();
 
 
+        let missing =
+        this.check();
 
-
-
-
-
-        this.status="ready";
-
-
-
-
-
-
-        console.log(
-
-        "V90 SYSTEM READY"
-
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 注册模块
-    // ==========================
-
-
-    async loadModules(){
-
-
-
-        this.modules=[
-
-
-            "core/dataengine.js",
-
-
-            "core/featureengine.js",
-
-
-            "core/theoryengine.js",
-
-
-            "core/markovengine.js",
-
-
-            "core/matrixengine.js",
-
-
-            "core/bayesengine.js",
-
-
-            "core/montecarloengine.js",
-
-
-            "core/trainingengine.js",
-
-
-            "core/predictionengine.js",
-
-
-            "core/scoringengine.js",
-
-
-            "core/riskengine.js",
-
-
-            "core/evaluationengine.js",
-
-
-            "core/learningengine.js",
-
-
-            "core/loadingengine.js",
-
-
-            "core/taskengine.js",
-
-
-            "core/masterengine.js",
-
-
-            "agents/trendagent.js",
-
-
-            "agents/structureagent.js",
-
-
-            "agents/markovagent.js",
-
-
-            "agents/riskagent.js",
-
-
-            "agents/reviewagent.js",
-
-
-            "agents/theoryagent.js",
-
-
-            "agents/criticagent.js",
-
-
-            "agents/learningagent.js",
-
-
-            "agents/antihumanagent.js",
-
-
-            "agents/masteragent.js"
-
-
-
-        ];
-
-
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 初始化
-    // ==========================
-
-
-    init(){
 
 
 
         if(
-
-        window.masterengine
-
+            missing.length>0
         ){
 
 
 
-            window.masterengine.init();
+            console.error(
 
+                "V90模块缺失:",
+
+                missing
+
+            );
+
+
+
+            return false;
 
 
         }
@@ -227,6 +146,19 @@ class V90Engine{
 
 
 
+        console.log(
+
+            "V90所有模块加载完成"
+
+        );
+
+
+
+
+        return true;
+
+
+
     }
 
 
@@ -234,36 +166,7 @@ class V90Engine{
 
 
 
-
-
-
-    // ==========================
-    // 获取状态
-    // ==========================
-
-
-    getStatus(){
-
-
-
-        return {
-
-
-            status:this.status,
-
-
-            modules:this.modules.length
-
-
-
-        };
-
-
-    }
-
-
-
-}
+};
 
 
 
@@ -272,27 +175,34 @@ class V90Engine{
 
 
 
-window.v90engine=
-
-new V90Engine();
-
-
-
-
-
-
+// 自动检查
 
 
 window.addEventListener(
 
-"load",
+    "load",
 
-()=>{
-
-
-    window.v90engine.start();
+    ()=>{
 
 
-}
+        setTimeout(
+
+            ()=>{
+
+
+                V90Engine.start();
+
+
+
+            },
+
+            500
+
+        );
+
+
+
+    }
+
 
 );

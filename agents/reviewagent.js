@@ -1,62 +1,32 @@
-/*
-================================
-大乐透AI_V90 AGENTS
-
-reviewagent.js
-
-开奖复盘智能体
-================================
-*/
+// 大乐透AI_V90
+// Review Agent
+// 历史复盘智能体
 
 
-class ReviewAgent{
+window.ReviewAgent = {
 
 
-    constructor(){
-
-
-        this.name="reviewagent";
-
-
-        this.records=[];
-
-
-    }
+    name:
+    "历史复盘Agent",
 
 
 
 
 
 
-
-
-
-    // ==========================
-    // 复盘分析
-    // ==========================
-
-
-    review(predict,real){
+    analyze(
+        data
+    ){
 
 
 
         let result={
 
 
-
-            predict,
-
-
-            real,
+            score:0,
 
 
-            hitFront:0,
-
-
-            hitBack:0,
-
-
-            analysis:[]
+            message:""
 
 
 
@@ -67,106 +37,103 @@ class ReviewAgent{
 
 
 
-
-
-        // 前区命中
-
-
-        predict.front
-
-        .forEach(n=>{
-
-
-
-            if(
-
-            real.front.includes(n)
-
-            ){
-
-
-
-                result.hitFront++;
-
-
-
-            }
-
-
-
-        });
-
-
-
-
-
-
-
-
-        // 后区命中
-
-
-        predict.back
-
-        .forEach(n=>{
-
-
-
-            if(
-
-            real.back.includes(n)
-
-            ){
-
-
-
-                result.hitBack++;
-
-
-
-            }
-
-
-
-        });
-
-
-
-
-
-
-
-
-
-        // 分析
-
-
         if(
-
-        result.hitFront>=3
-
+            !data.evaluation
         ){
 
 
 
-            result.analysis.push(
+            return {
 
-            "前区模型有效"
 
-            );
+                score:0,
+
+
+                message:
+                "暂无回测数据"
+
+
+
+            };
 
 
         }
 
-        else{
 
 
 
-            result.analysis.push(
 
-            "前区需要优化"
 
+
+
+        let evaluation =
+
+        data.evaluation;
+
+
+
+
+
+        /*
+        
+        根据历史回测表现
+
+        判断模型状态
+        
+        */
+
+
+
+        if(
+            evaluation.average
+        ){
+
+
+
+            let avg =
+
+            Number(
+                evaluation.average
             );
+
+
+
+
+
+            if(
+                avg>=3
+            ){
+
+
+
+                result.score+=70;
+
+
+
+                result.message =
+
+                "历史表现较稳定";
+
+
+
+            }
+
+            else{
+
+
+
+                result.score+=30;
+
+
+
+                result.message =
+
+                "历史表现需要优化";
+
+
+
+            }
+
 
 
         }
@@ -178,43 +145,17 @@ class ReviewAgent{
 
 
         if(
-
-        result.hitBack>=1
-
+            evaluation.best
         ){
 
 
+            result.message +=
 
-            result.analysis.push(
+            "，最高命中记录已参考";
 
-            "后区预测正常"
-
-            );
 
 
         }
-
-        else{
-
-
-
-            result.analysis.push(
-
-            "后区权重需要调整"
-
-            );
-
-
-        }
-
-
-
-
-
-
-
-
-        this.records.push(result);
 
 
 
@@ -232,67 +173,4 @@ class ReviewAgent{
 
 
 
-
-
-
-
-
-    // ==========================
-    // 获取记录
-    // ==========================
-
-
-    getRecords(){
-
-
-
-        return this.records;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    status(){
-
-
-
-        return {
-
-
-
-            agent:this.name,
-
-
-            records:
-
-            this.records.length
-
-
-
-        };
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-window.reviewagent=
-
-new ReviewAgent();
+};

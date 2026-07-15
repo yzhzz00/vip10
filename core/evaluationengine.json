@@ -1,298 +1,175 @@
-/*
-================================
-大乐透AI_V90 CORE
+// 大乐透AI_V90
+// Evaluation Engine
+// 回测评价引擎
 
-evaluationengine.js
 
-模型评估引擎
-================================
-*/
+window.EvaluationEngine = {
 
 
-class EvaluationEngine{
+    history:[],
 
 
-    constructor(){
+    results:[],
 
 
-        this.name="evaluation";
+    initialized:false,
 
 
-        this.history=[];
 
 
-    }
 
 
 
+    // 初始化
 
 
+    init(history=[]){
 
 
+        this.history =
+        history;
 
 
-    // ==========================
-    // 评估预测结果
-    // ==========================
+        this.results=[];
 
 
-    evaluate(predict,real){
+        this.initialized=true;
 
 
 
-        let result={
+        console.log(
+            "EvaluationEngine初始化完成"
+        );
 
 
 
-            hitFront:0,
+    },
 
 
-            hitBack:0,
 
 
-            total:0
 
 
 
-        };
 
 
+    // 开始回测
 
 
+    async backtest(
+        predictor
+    ){
 
 
 
+        if(
+            !this.history.length
+        ){
 
-        // 前区命中
 
+            return {
 
-        predict.front.forEach(n=>{
 
+                status:"failed",
 
 
-            if(
+                message:
+                "没有历史数据"
 
-            real.front.includes(n)
 
-            ){
+            };
 
 
+        }
 
-                result.hitFront++;
 
 
 
-            }
 
 
+        this.results=[];
 
-        });
 
 
 
 
+        for(
+            let i=50;
+            i<this.history.length;
+            i++
+        ){
 
 
 
+            let trainData =
 
+            this.history.slice(
+                0,
+                i
+            );
 
-        // 后区命中
 
 
-        predict.back.forEach(n=>{
+            let target =
 
+            this.history[i];
 
 
-            if(
 
-            real.back.includes(n)
 
-            ){
 
+            let prediction =
 
-
-                result.hitBack++;
-
-
-
-            }
-
-
-
-        });
-
-
-
-
-
-
-
-
-        result.total=
-
-        result.hitFront
-
-        +
-
-        result.hitBack;
-
-
-
-
-
-
-
-
-        this.history.push({
-
-
-
-            predict,
-
-
-            real,
-
-
-            result,
-
-
-            time:
-
-            Date.now()
-
-
-
-        });
-
-
-
-
-
-
-
-
-        return result;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 批量回测
-    // ==========================
-
-
-    backtest(list){
-
-
-
-        let report={
-
-
-
-            total:0,
-
-
-            frontHits:0,
-
-
-            backHits:0
-
-
-
-        };
-
-
-
-
-
-
-
-        list.forEach(item=>{
-
-
-
-            let r=
-
-            this.evaluate(
-
-                item.predict,
-
-                item.real
-
+            await predictor(
+                trainData
             );
 
 
 
 
 
+            let score =
 
-
-
-            report.total++;
-
-
-            report.frontHits
-
-            +=
-
-            r.hitFront;
-
-
-
-            report.backHits
-
-            +=
-
-            r.hitBack;
-
-
-
-        });
+            this.compare(
+                prediction,
+                target
+            );
 
 
 
 
 
+            this.results.push({
+
+
+                period:i,
+
+
+                score,
+
+
+                target,
+
+
+                prediction
 
 
 
-        return report;
+            });
 
 
 
-    }
-
-
-
-
+        }
 
 
 
 
 
-    // ==========================
-    // 获取历史记录
-    // ==========================
-
-
-    getHistory(){
+        return this.summary();
 
 
 
-        return this.history;
-
-
-
-    }
+    },
 
 
 
@@ -302,20 +179,83 @@ class EvaluationEngine{
 
 
 
-    status(){
+    // 对比预测和开奖
+
+
+    compare(
+        prediction,
+        actual
+    ){
+
+
+
+        let frontHit=0;
+
+
+        let backHit=0;
+
+
+
+
+
+        prediction.front.forEach(
+            n=>{
+
+
+                if(
+                    actual.front.includes(n)
+                ){
+
+
+                    frontHit++;
+
+
+                }
+
+
+            }
+        );
+
+
+
+
+
+        prediction.back.forEach(
+            n=>{
+
+
+                if(
+                    actual.back.includes(n)
+                ){
+
+
+                    backHit++;
+
+
+                }
+
+
+            }
+        );
+
+
+
+
 
 
 
         return {
 
 
+            frontHit,
 
-            engine:this.name,
+
+            backHit,
 
 
-            count:
+            total:
 
-            this.history.length
+            frontHit+backHit
 
 
 
@@ -323,18 +263,117 @@ class EvaluationEngine{
 
 
 
+    },
+
+
+
+
+
+
+
+
+
+    // 汇总
+
+
+    summary(){
+
+
+
+        let total=0;
+
+
+        let count=0;
+
+
+
+        let best=0;
+
+
+
+
+
+        this.results.forEach(
+            item=>{
+
+
+                total +=
+
+                item.score.total;
+
+
+
+                count++;
+
+
+
+                if(
+                    item.score.total>best
+                ){
+
+                    best=
+                    item.score.total;
+
+                }
+
+
+
+            }
+        );
+
+
+
+
+
+        return {
+
+
+            periods:
+            count,
+
+
+            average:
+
+            count
+            ?
+            (
+                total/count
+            ).toFixed(2)
+            :
+            0,
+
+
+
+            best
+
+
+
+        };
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 获取详细记录
+
+
+    getResults(){
+
+
+        return this.results;
+
+
     }
 
 
 
-}
 
-
-
-
-
-
-
-window.evaluationengine=
-
-new EvaluationEngine();
+};

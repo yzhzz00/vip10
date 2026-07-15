@@ -1,69 +1,116 @@
-/*
-================================
-大乐透AI_V90 AGENTS
-
-riskagent.js
-
-风险判断智能体
-================================
-*/
+// 大乐透AI_V90
+// Risk Agent
+// 风险审查智能体
 
 
-class RiskAgent{
+window.RiskAgent = {
 
 
-    constructor(){
-
-
-        this.name="riskagent";
-
-
-    }
+    name:
+    "风险审查Agent",
 
 
 
 
+    analyze(
+        data
+    ){
 
 
 
+        let result={
 
 
-    // ==========================
-    // 风险分析
-    // ==========================
+            score:50,
 
 
-    analyze(candidate){
+            message:""
 
 
 
-        let risk=0;
-
-
-        let detail=[];
-
-
+        };
 
 
 
 
 
         if(
-
-        window.riskengine
-
+            !data.prediction
         ){
 
 
 
-            risk=
+            return {
 
-            window.riskengine.score(
 
-                candidate
+                score:0,
 
+
+                message:
+                "暂无预测方案"
+
+
+            };
+
+
+        }
+
+
+
+
+
+
+
+        let candidate =
+
+        data.prediction;
+
+
+
+
+
+        let risk=0;
+
+
+
+        let reasons=[];
+
+
+
+
+
+
+
+
+
+        // 和值检查
+
+
+        let sum =
+
+        candidate.front.reduce(
+            (
+                a,b
+            )=>a+b,
+            0
+        );
+
+
+
+
+        if(
+            sum<50 ||
+            sum>170
+        ){
+
+
+
+            risk+=20;
+
+
+            reasons.push(
+                "和值异常"
             );
-
 
 
         }
@@ -76,15 +123,56 @@ class RiskAgent{
 
 
 
-        if(risk>=3){
+        // 连号检查
+
+
+        for(
+            let i=1;
+            i<candidate.front.length;
+            i++
+        ){
 
 
 
-            detail.push(
+            if(
+                candidate.front[i]
+                -
+                candidate.front[i-1]
+                ===1
+            ){
 
-            "高风险组合"
 
-            );
+                risk+=5;
+
+
+            }
+
+
+
+        }
+
+
+
+
+
+
+
+
+        if(
+            risk>30
+        ){
+
+
+
+            result.score=30;
+
+
+
+            result.message =
+
+            "风险较高："
+            +
+            reasons.join(",");
 
 
 
@@ -94,11 +182,13 @@ class RiskAgent{
 
 
 
-            detail.push(
+            result.score=80;
 
-            "风险正常"
 
-            );
+
+            result.message=
+
+            "风险处于可接受范围";
 
 
 
@@ -108,33 +198,7 @@ class RiskAgent{
 
 
 
-
-
-
-
-        return {
-
-
-
-            agent:this.name,
-
-
-
-            risk,
-
-
-
-            score:
-
-            -risk,
-
-
-
-            detail
-
-
-
-        };
+        return result;
 
 
 
@@ -143,42 +207,4 @@ class RiskAgent{
 
 
 
-
-
-
-
-
-    status(){
-
-
-
-        return {
-
-
-
-            agent:this.name,
-
-
-            ready:true
-
-
-
-        };
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-window.riskagent=
-
-new RiskAgent();
+};

@@ -1,86 +1,199 @@
-/*
-================================
-大乐透AI_V90 CORE
-
-montecarloengine.js
-
-蒙特卡罗模拟引擎
-================================
-*/
+// 大乐透AI_V90
+// Monte Carlo Engine
+// 蒙特卡罗模拟引擎（分批版）
 
 
-class MonteCarloEngine{
+window.MonteCarloEngine = {
 
 
-    constructor(){
+    simulations:1000000,
 
 
-        this.name="montecarlo";
+    batchSize:10000,
 
 
-        this.result=[];
+    result:{},
 
 
-    }
+    running:false,
 
 
 
 
 
 
+    init(config={}){
+
+
+        this.simulations =
+
+        config.simulations ||
+
+        1000000;
 
 
 
-    // ==========================
-    // 执行模拟
-    // ==========================
+        this.batchSize =
 
+        config.batchSize ||
 
-    run(data, times=100000){
-
-
-
-        let counter={};
+        10000;
 
 
 
+        console.log(
+            "MonteCarloEngine初始化"
+        );
 
+
+    },
+
+
+
+
+
+
+
+
+
+    // 开始模拟
+
+
+    async run(
+        options={}
+    ){
+
+
+
+        if(this.running){
+
+            return;
+
+        }
+
+
+
+        this.running=true;
+
+
+
+        this.result={};
+
+
+
+
+        let total =
+        this.simulations;
+
+
+
+        let batch =
+        this.batchSize;
+
+
+
+
+
+        if(
+            window.TaskEngine
+        ){
+
+
+
+            await TaskEngine.chunkCompute(
+
+                total,
+
+                batch,
+
+                async(
+                    size,
+                    completed
+                )=>{
+
+
+                    this.simulateBatch(
+                        size,
+                        options
+                    );
+
+
+                },
+
+                "蒙特卡罗模拟"
+
+            );
+
+
+
+        }else{
+
+
+            for(
+                let i=0;
+                i<total;
+                i++
+            ){
+
+
+                this.simulateOne(
+                    options
+                );
+
+
+            }
+
+
+        }
+
+
+
+
+
+        this.running=false;
+
+
+
+        return this.getResult();
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 单批计算
+
+
+    simulateBatch(
+        count,
+        options
+    ){
 
 
 
         for(
-
-        let i=0;
-
-        i<times;
-
-        i++
-
+            let i=0;
+            i<count;
+            i++
         ){
 
 
-
-            let candidate=
-
-            this.randomCandidate();
-
+            this.simulateOne(
+                options
+            );
 
 
+        }
 
 
-
-
-            let key=
-
-            candidate.front.join(",")
-
-            +
-
-            "|"
-
-            +
-
-            candidate.back.join(",");
+    },
 
 
 
@@ -89,36 +202,69 @@ class MonteCarloEngine{
 
 
 
-            if(!counter[key]){
+
+    // 单次模拟
+
+
+    simulateOne(
+        options
+    ){
 
 
 
-                counter[key]={
+        let front =
+
+        this.randomNumbers(
+            35,
+            5
+        );
 
 
 
-                    candidate,
+        let back =
 
-
-                    count:0
-
-
-
-                };
-
-
-
-            }
-
-
-
+        this.randomNumbers(
+            12,
+            2
+        );
 
 
 
 
 
-            counter[key].count++;
+        let key =
 
+        front.join(",")
+
+        +
+
+        "|"
+
+        +
+
+        back.join(",");
+
+
+
+
+
+        if(
+            !this.result[key]
+        ){
+
+
+            this.result[key]={
+
+
+                front,
+
+                back,
+
+
+                count:0
+
+
+            };
 
 
         }
@@ -126,192 +272,47 @@ class MonteCarloEngine{
 
 
 
+        this.result[key].count++;
 
 
 
-        this.result=
+    },
 
-        Object.values(counter)
 
-        .sort(
 
-            (a,b)=>
 
-            b.count-a.count
 
-        );
 
 
 
 
+    // 随机选号
 
 
+    randomNumbers(
+        max,
+        count
+    ){
 
 
-        return this.result;
 
+        let pool=[];
 
 
-    }
 
-
-
-
-
-
-
-
-
-    // ==========================
-    // 随机生成大乐透号码
-    // ==========================
-
-
-    randomCandidate(){
-
-
-
-        return {
-
-
-
-            front:
-
-            this.randomNumbers(
-
-                1,
-
-                35,
-
-                5
-
-            ),
-
-
-
-            back:
-
-            this.randomNumbers(
-
-                1,
-
-                12,
-
-                2
-
-            )
-
-
-
-        };
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 不重复随机数
-    // ==========================
-
-
-    randomNumbers(min,max,count){
-
-
-
-        let arr=[];
-
-
-
-
-
-
-
-        while(
-
-        arr.length<count
-
+        for(
+            let i=1;
+            i<=max;
+            i++
         ){
 
 
-
-            let n=
-
-            Math.floor(
-
-                Math.random()
-
-                *
-
-                (max-min+1)
-
-            )
-
-            +
-
-            min;
-
-
-
-
-
-
-
-            if(
-
-            !arr.includes(n)
-
-            ){
-
-
-
-                arr.push(n);
-
-
-
-            }
-
+            pool.push(i);
 
 
         }
 
 
-
-
-
-
-
-        return arr.sort(
-
-            (a,b)=>a-b
-
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 根据历史数据修正
-    // ==========================
-
-
-    weightedRun(feature,times=10000){
 
 
 
@@ -319,85 +320,32 @@ class MonteCarloEngine{
 
 
 
-
-
-
-
-        for(
-
-        let i=0;
-
-        i<times;
-
-        i++
-
+        while(
+            result.length<count
         ){
 
 
 
-            let candidate=
+            let index =
 
-            this.randomCandidate();
-
-
-
-
-
-
-
-            let score=0;
+            Math.floor(
+                Math.random()
+                *
+                pool.length
+            );
 
 
 
+            result.push(
+                pool[index]
+            );
 
 
 
-
-            candidate.front
-
-            .forEach(n=>{
-
-
-
-                if(
-
-                feature.frontFrequency[n]
-
-                ){
-
-
-
-                    score+=
-
-                    feature.frontFrequency[n];
-
-
-
-                }
-
-
-
-            });
-
-
-
-
-
-
-
-            result.push({
-
-
-
-                candidate,
-
-
-                score
-
-
-
-            });
-
+            pool.splice(
+                index,
+                1
+            );
 
 
         }
@@ -406,14 +354,49 @@ class MonteCarloEngine{
 
 
 
-
-
         return result.sort(
+            (
+                a,b
+            )=>
+            a-b
+        );
 
-            (a,b)=>
 
-            b.score-a.score
 
+    },
+
+
+
+
+
+
+
+
+
+    // 获取结果排序
+
+
+    getResult(){
+
+
+
+        return Object.values(
+
+            this.result
+
+        )
+        .sort(
+
+            (
+                a,b
+            )=>
+
+            b.count-a.count
+
+        )
+        .slice(
+            0,
+            100
         );
 
 
@@ -422,45 +405,4 @@ class MonteCarloEngine{
 
 
 
-
-
-
-
-
-
-    status(){
-
-
-
-        return {
-
-
-
-            engine:this.name,
-
-
-            result:
-
-            this.result.length
-
-
-
-        };
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-window.montecarloengine=
-
-new MonteCarloEngine();
+};

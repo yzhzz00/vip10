@@ -1,46 +1,5 @@
 {
-    "name": "大乐透AI训练历史库",
-    "version": "V90.0",
+  "trainCount":0,
 
-
-    "trainingHistory": [
-
-    ],
-
-
-    "modelChanges": [
-
-    ],
-
-
-    "evaluationHistory": [
-
-    ],
-
-
-    "statistics": {
-
-
-        "totalTrain": 0,
-
-
-        "totalFeedback": 0,
-
-
-        "averageHit": 0,
-
-
-        "bestResult": {
-
-
-            "frontHit": 0,
-
-
-            "backHit": 0
-
-
-        }
-
-    }
-
+  "records":[]
 }

@@ -1,469 +1,48 @@
-/*
-================================
-大乐透AI_V90 CORE
+// 大乐透AI_V90
+// Matrix Engine
+// 多模型矩阵融合引擎
 
-matrixengine.js
 
-矩阵计算引擎
-================================
-*/
+window.MatrixEngine = {
 
 
-class MatrixEngine{
+    weights:{},
 
 
-    constructor(){
+    initialized:false,
 
 
-        this.name="matrix";
 
 
-    }
 
 
+    // 初始化
 
 
+    init(weights={}){
 
 
+        this.weights = {
 
 
+            feature:
+            weights.feature || 0.20,
 
-    // ==========================
-    // 矩阵乘法
-    // ==========================
 
+            theory:
+            weights.theory || 0.20,
 
-    multiply(A,B){
 
+            markov:
+            weights.markov || 0.20,
 
 
-        let result=[];
+            bayes:
+            weights.bayes || 0.15,
 
 
-
-
-
-
-
-        let rows=A.length;
-
-
-        let cols=B[0].length;
-
-
-        let common=B.length;
-
-
-
-
-
-
-
-
-        for(
-
-        let i=0;
-
-        i<rows;
-
-        i++
-
-        ){
-
-
-
-            result[i]=[];
-
-
-
-
-
-
-
-            for(
-
-            let j=0;
-
-            j<cols;
-
-            j++
-
-            ){
-
-
-
-                let sum=0;
-
-
-
-
-
-
-
-                for(
-
-                let k=0;
-
-                k<common;
-
-                k++
-
-                ){
-
-
-
-                    sum+=
-
-                    A[i][k]
-
-                    *
-
-                    B[k][j];
-
-
-
-                }
-
-
-
-
-
-
-
-                result[i][j]=sum;
-
-
-
-            }
-
-
-
-        }
-
-
-
-
-
-
-
-        return result;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 矩阵加法
-    // ==========================
-
-
-    add(A,B){
-
-
-
-        let result=[];
-
-
-
-
-
-
-
-        for(
-
-        let i=0;
-
-        i<A.length;
-
-        i++
-
-        ){
-
-
-
-            result[i]=[];
-
-
-
-
-
-
-
-            for(
-
-            let j=0;
-
-            j<A[i].length;
-
-            j++
-
-            ){
-
-
-
-                result[i][j]=
-
-                A[i][j]
-
-                +
-
-                B[i][j];
-
-
-
-            }
-
-
-
-        }
-
-
-
-
-
-
-
-        return result;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 权重矩阵
-    // ==========================
-
-
-    weight(matrix,weight){
-
-
-
-        return matrix.map(
-
-            row=>
-
-            row.map(
-
-                value=>
-
-                Number(
-
-                (
-
-                value*
-
-                weight
-
-                )
-
-                .toFixed(6)
-
-                )
-
-            )
-
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 向量归一化
-    // ==========================
-
-
-    normalize(vector){
-
-
-
-        let total=
-
-        vector.reduce(
-
-            (a,b)=>a+b,
-
-            0
-
-        );
-
-
-
-
-
-
-
-        if(total===0){
-
-
-
-            return vector;
-
-
-
-        }
-
-
-
-
-
-
-
-        return vector.map(
-
-            n=>
-
-            Number(
-
-            (
-
-            n/total
-
-            )
-
-            .toFixed(6)
-
-            )
-
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 生成单位矩阵
-    // ==========================
-
-
-    identity(size){
-
-
-
-        let result=[];
-
-
-
-
-
-
-
-        for(
-
-        let i=0;
-
-        i<size;
-
-        i++
-
-        ){
-
-
-
-            result[i]=[];
-
-
-
-
-
-
-
-            for(
-
-            let j=0;
-
-            j<size;
-
-            j++
-
-            ){
-
-
-
-                result[i][j]=
-
-                i===j
-
-                ?
-
-                1
-
-                :
-
-                0;
-
-
-
-            }
-
-
-
-        }
-
-
-
-
-
-
-
-        return result;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    status(){
-
-
-
-        return {
-
-
-
-            engine:this.name,
-
-
-            ready:true
+            montecarlo:
+            weights.montecarlo || 0.25
 
 
 
@@ -471,18 +50,313 @@ class MatrixEngine{
 
 
 
+        this.initialized=true;
+
+
+
+        console.log(
+            "MatrixEngine初始化完成"
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 综合矩阵计算
+
+
+    combine(data){
+
+
+
+        let result={
+
+
+            front:{},
+
+
+            back:{}
+
+
+        };
+
+
+
+
+
+        if(data.feature){
+
+
+            this.merge(
+
+                result.front,
+
+                data.feature,
+
+                this.weights.feature
+
+            );
+
+
+        }
+
+
+
+
+
+        if(data.theory){
+
+
+            this.merge(
+
+                result.front,
+
+                data.theory,
+
+                this.weights.theory
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+        if(data.markov){
+
+
+            this.merge(
+
+                result.front,
+
+                data.markov.front,
+
+                this.weights.markov
+
+            );
+
+
+
+            this.merge(
+
+                result.back,
+
+                data.markov.back,
+
+                this.weights.markov
+
+            );
+
+
+
+        }
+
+
+
+
+
+
+        if(data.bayes){
+
+
+            this.merge(
+
+                result.front,
+
+                data.bayes.front,
+
+                this.weights.bayes
+
+            );
+
+
+        }
+
+
+
+
+
+
+        if(data.montecarlo){
+
+
+            this.merge(
+
+                result.front,
+
+                data.montecarlo.front,
+
+                this.weights.montecarlo
+
+            );
+
+
+        }
+
+
+
+
+
+
+        return result;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 权重合并
+
+
+    merge(
+        target,
+        source,
+        weight
+    ){
+
+
+
+        if(!source){
+
+            return;
+
+        }
+
+
+
+        for(
+            let key in source
+        ){
+
+
+
+            let value =
+            source[key];
+
+
+
+            if(
+                typeof value !==
+                "number"
+            ){
+
+                continue;
+
+            }
+
+
+
+            target[key] =
+
+            (
+                target[key]||0
+            )
+
+            +
+
+            value *
+
+            weight;
+
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 归一化
+
+
+    normalize(data){
+
+
+
+        let max=0;
+
+
+
+        for(
+            let key in data
+        ){
+
+
+            if(
+                data[key]>max
+            ){
+
+                max=data[key];
+
+            }
+
+
+        }
+
+
+
+        if(max===0){
+
+            return data;
+
+        }
+
+
+
+        let result={};
+
+
+
+        for(
+            let key in data
+        ){
+
+
+            result[key] =
+
+            data[key]/max;
+
+
+
+        }
+
+
+
+        return result;
+
+
+
     }
 
 
 
-}
 
 
-
-
-
-
-
-window.matrixengine=
-
-new MatrixEngine();
+};

@@ -1,101 +1,145 @@
-/*
-================================
-大乐透AI_V90 AGENTS
-
-criticagent.js
-
-预测批判检查智能体
-================================
-*/
+// 大乐透AI_V90
+// Critic Agent
+// AI自我否定与批判智能体
 
 
-class CriticAgent{
+window.CriticAgent = {
 
 
-    constructor(){
-
-
-        this.name="criticagent";
-
-
-    }
+    name:
+    "AI批判Agent",
 
 
 
 
 
+    analyze(
+        data
+    ){
+
+
+        let result={
+
+
+            score:50,
+
+
+            message:"",
+
+
+            warnings:[]
+
+
+
+        };
 
 
 
 
-    // ==========================
-    // 批判分析
-    // ==========================
 
-
-    analyze(candidate,score){
-
-
-
-        let penalty=0;
-
-
-        let detail=[];
+        if(
+            !data.prediction
+        ){
 
 
 
+            return {
+
+
+                score:0,
+
+
+                message:
+                "暂无预测方案"
+
+
+
+            };
+
+
+        }
 
 
 
 
 
-        let front=
 
-        [...candidate.front]
 
-        .sort(
+        let candidate =
 
-        (a,b)=>a-b
+        data.prediction;
 
+
+
+
+
+        // =================
+        // 检查号码集中度
+        // =================
+
+
+        let unique =
+        new Set(
+            candidate.front
+        );
+
+
+
+        if(
+            unique.size
+            !==
+            candidate.front.length
+        ){
+
+
+
+            result.score-=20;
+
+
+
+            result.warnings.push(
+                "号码重复异常"
+            );
+
+
+        }
+
+
+
+
+
+
+
+        // =================
+        // 检查和值偏移
+        // =================
+
+
+        let sum =
+
+        candidate.front.reduce(
+            (
+                a,b
+            )=>a+b,
+            0
         );
 
 
 
 
+        if(
+            sum<60 ||
+            sum>160
+        ){
 
 
 
-
-        // ==================
-        // 检查极端号码集中
-        // ==================
-
-
-        let high=
-
-        front.filter(
-
-            n=>n>28
-
-        ).length;
+            result.score-=15;
 
 
 
-
-
-
-
-        if(high>=4){
-
-
-
-            penalty+=1;
-
-
-            detail.push(
-
-            "高位号码集中"
-
+            result.warnings.push(
+                "和值偏离历史范围"
             );
 
 
@@ -110,40 +154,38 @@ class CriticAgent{
 
 
 
-        // ==================
-        // 检查连续号码
-        // ==================
+        // =================
+        // 检查模型一致性
+        // =================
 
 
-        let link=0;
-
-
-
-
-
-
-
-        for(
-
-        let i=1;
-
-        i<front.length;
-
-        i++
-
+        if(
+            data.models
         ){
 
 
 
+            let count=
+
+            Object.keys(
+                data.models
+            ).length;
+
+
+
             if(
-
-            front[i]-front[i-1]===1
-
+                count<3
             ){
 
 
 
-                link++;
+                result.score-=10;
+
+
+
+                result.warnings.push(
+                    "模型数量不足"
+                );
 
 
 
@@ -160,51 +202,37 @@ class CriticAgent{
 
 
 
-        if(link>=3){
-
-
-
-            penalty+=1;
-
-
-            detail.push(
-
-            "连续结构异常"
-
-            );
-
-
-        }
-
-
-
-
-
-
-
-
-
-        // ==================
-        // 高分异常检查
-        // ==================
+        // =================
+        // 最终批判意见
+        // =================
 
 
         if(
-
-        score>20
-
+            result.warnings.length
+            >0
         ){
 
 
 
-            penalty+=1;
+            result.message=
 
+            "发现风险："+
 
-            detail.push(
-
-            "模型高分复核"
-
+            result.warnings.join(
+                "、"
             );
+
+
+
+        }
+
+        else{
+
+
+
+            result.message=
+
+            "当前方案通过批判检查";
 
 
 
@@ -215,32 +243,18 @@ class CriticAgent{
 
 
 
+        result.score =
+
+        Math.max(
+            0,
+            result.score
+        );
 
 
 
-        return {
 
 
-
-            agent:this.name,
-
-
-
-            penalty,
-
-
-
-            finalScore:
-
-            score-penalty,
-
-
-
-            detail
-
-
-
-        };
+        return result;
 
 
 
@@ -249,42 +263,4 @@ class CriticAgent{
 
 
 
-
-
-
-
-
-    status(){
-
-
-
-        return {
-
-
-
-            agent:this.name,
-
-
-            ready:true
-
-
-
-        };
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-window.criticagent=
-
-new CriticAgent();
+};

@@ -1,60 +1,32 @@
-/*
-================================
-大乐透AI_V90 AGENTS
-
-learningagent.js
-
-学习优化智能体
-================================
-*/
+// 大乐透AI_V90
+// Learning Agent
+// AI学习智能体
 
 
-class LearningAgent{
+window.LearningAgent = {
 
 
-    constructor(){
-
-
-        this.name="learningagent";
-
-
-        this.records=[];
-
-
-    }
+    name:
+    "学习优化Agent",
 
 
 
 
 
 
-
-
-
-    // ==========================
-    // 学习反馈
-    // ==========================
-
-
-    learn(feedback){
+    analyze(
+        data
+    ){
 
 
 
         let result={
 
 
-
-            time:
-
-            Date.now(),
+            score:50,
 
 
-
-            feedback,
-
-
-
-            adjustment:{}
+            message:""
 
 
 
@@ -64,50 +36,24 @@ class LearningAgent{
 
 
 
-
-
-
         if(
-
-        feedback.hitFront>=3
-
+            !data.learning
         ){
 
 
 
-            result.adjustment={
+            return {
 
 
-
-                trend:"+",
-
-                markov:"+"
+                score:0,
 
 
-
-            };
-
-
-
-        }
-
-        else{
-
-
-
-            result.adjustment={
-
-
-
-                risk:"+",
-
-
-                theory:"+"
+                message:
+                "学习模块未加载"
 
 
 
             };
-
 
 
         }
@@ -117,30 +63,108 @@ class LearningAgent{
 
 
 
-
-
-        this.records.push(result);
-
-
+        let model =
+        data.learning;
 
 
 
-
-
-        // 调用核心学习模块
 
 
         if(
-
-        window.learningengine
-
+            model.trained
         ){
 
 
 
-            window.learningengine.learn(
+            result.score +=30;
 
-                feedback
+
+
+            result.message +=
+
+            "已有训练记录";
+
+
+
+        }
+
+
+
+
+
+
+
+        if(
+            model.memory &&
+            model.memory.length>0
+        ){
+
+
+
+            result.score +=20;
+
+
+
+            result.message +=
+
+            "，历史反馈已学习";
+
+
+
+        }
+
+
+
+
+
+
+
+        result.score =
+
+        Math.min(
+            100,
+            result.score
+        );
+
+
+
+
+
+        return result;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 反馈学习接口
+
+
+    learn(
+        prediction,
+        actual
+    ){
+
+
+
+        if(
+            window.LearningEngine
+        ){
+
+
+
+            return LearningEngine.feedback(
+
+                prediction,
+
+                actual
 
             );
 
@@ -151,33 +175,7 @@ class LearningAgent{
 
 
 
-
-
-
-        return result;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 获取学习记录
-    // ==========================
-
-
-    history(){
-
-
-
-        return this.records;
+        return null;
 
 
 
@@ -187,43 +185,4 @@ class LearningAgent{
 
 
 
-
-
-
-
-    status(){
-
-
-
-        return {
-
-
-
-            agent:this.name,
-
-
-            records:
-
-            this.records.length
-
-
-
-        };
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-window.learningagent=
-
-new LearningAgent();
+};

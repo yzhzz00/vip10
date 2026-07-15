@@ -1,199 +1,42 @@
 {
-    "name": "大乐透结构模型库",
-    "version": "V90.0",
+  "oddEven":{
 
+    "normal":[
+      "3:2",
+      "2:3"
+    ]
 
-    "frontArea": {
+  },
 
 
-        "zone1": {
+  "bigSmall":{
 
-            "range": "01-07"
+    "normal":true
 
-        },
+  },
 
 
-        "zone2": {
+  "area":{
 
-            "range": "08-14"
+    "front":[
 
-        },
+      [1,7],
+      [8,14],
+      [15,21],
+      [22,28],
+      [29,35]
 
+    ]
 
-        "zone3": {
+  },
 
-            "range": "15-21"
 
-        },
+  "sum":{
 
+    "min":50,
 
-        "zone4": {
+    "max":170
 
-            "range": "22-28"
-
-        },
-
-
-        "zone5": {
-
-            "range": "29-35"
-
-        }
-
-
-    },
-
-
-    "areaPattern": [
-
-        {
-            "name": "均衡型",
-            "pattern": [
-                1,
-                1,
-                1,
-                1,
-                1
-            ],
-            "weight": 0.30
-        },
-
-
-        {
-            "name": "三区覆盖",
-            "pattern": [
-                2,
-                1,
-                1,
-                1,
-                0
-            ],
-            "weight": 0.25
-        },
-
-
-        {
-            "name": "冷热混合",
-            "pattern": [
-                1,
-                2,
-                1,
-                1,
-                0
-            ],
-            "weight": 0.20
-        }
-
-
-    ],
-
-
-    "oddEvenPattern": [
-
-        {
-            "odd": 2,
-            "even": 3,
-            "weight": 0.40
-        },
-
-
-        {
-            "odd": 3,
-            "even": 2,
-            "weight": 0.40
-        },
-
-
-        {
-            "odd": 1,
-            "even": 4,
-            "weight": 0.10
-        },
-
-
-        {
-            "odd": 4,
-            "even": 1,
-            "weight": 0.10
-        }
-
-    ],
-
-
-    "sumRange": {
-
-
-        "low": {
-
-            "min": 70,
-            "max": 95
-
-        },
-
-
-        "middle": {
-
-            "min": 96,
-            "max": 120
-
-        },
-
-
-        "high": {
-
-            "min": 121,
-            "max": 150
-
-        }
-
-
-    },
-
-
-    "span": {
-
-
-        "small": {
-
-            "min": 10,
-            "max": 18
-
-        },
-
-
-        "normal": {
-
-            "min": 19,
-            "max": 27
-
-        },
-
-
-        "large": {
-
-            "min": 28,
-            "max": 34
-
-        }
-
-
-    },
-
-
-    "continuous": {
-
-
-        "zero": 0,
-
-
-        "one": 1,
-
-
-        "two": 2,
-
-
-        "max": 2
-
-    }
+  }
 
 }

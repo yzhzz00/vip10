@@ -1,46 +1,151 @@
-/*
-================================
-大乐透AI_V90 AGENTS
-
-theoryagent.js
-
-理论规则智能体
-================================
-*/
+// 大乐透AI_V90
+// Theory Agent
+// 大乐透理论智能体
 
 
-class TheoryAgent{
+window.TheoryAgent = {
 
 
-    constructor(){
-
-
-        this.name="theoryagent";
-
-
-    }
+    name:
+    "大乐透理论Agent",
 
 
 
 
 
 
+    analyze(
+        data
+    ){
 
 
 
-    // ==========================
-    // 理论分析
-    // ==========================
+        let result={
 
 
-    analyze(candidate){
+            score:0,
+
+
+            message:""
 
 
 
-        let score=0;
+        };
 
 
-        let detail=[];
+
+
+
+
+
+        if(
+            !data.theory
+        ){
+
+
+
+            return {
+
+
+                score:0,
+
+
+                message:
+                "理论模块未加载"
+
+
+
+            };
+
+
+        }
+
+
+
+
+
+
+        let theory =
+        data.theory;
+
+
+
+
+
+        /*
+        
+        理论结构检查
+        
+        */
+
+
+
+        if(
+            theory.structure
+        ){
+
+
+
+            result.score +=30;
+
+
+
+            result.message +=
+
+            "结构理论通过";
+
+
+
+        }
+
+
+
+
+
+
+        if(
+            theory.rule
+        ){
+
+
+
+            if(
+                theory.rule.pass
+            ){
+
+
+
+                result.score +=30;
+
+
+
+                result.message +=
+
+                "，规则检查通过";
+
+
+
+            }
+
+            else{
+
+
+
+                result.score -=20;
+
+
+
+                result.message +=
+
+                "，存在规则偏差";
+
+
+
+            }
+
+
+
+        }
 
 
 
@@ -50,76 +155,18 @@ class TheoryAgent{
 
 
         if(
-
-        window.theoryengine
-
+            theory.area
         ){
 
 
 
-            let result=
-
-            window.theoryengine.check(
-
-                candidate
-
-            );
+            result.score +=20;
 
 
 
+            result.message +=
 
-
-
-
-            score=
-
-            result.score;
-
-
-
-
-
-
-            if(result.valid){
-
-
-
-                detail.push(
-
-                "号码结构合法"
-
-                );
-
-
-            }
-
-            else{
-
-
-
-                detail.push(
-
-                "号码结构异常"
-
-                );
-
-
-
-            }
-
-
-
-        }
-
-        else{
-
-
-
-            detail.push(
-
-            "理论模块未加载"
-
-            );
+            "，区间分布已分析";
 
 
 
@@ -130,56 +177,24 @@ class TheoryAgent{
 
 
 
+        result.score =
 
+        Math.max(
 
-        return {
+            0,
 
+            Math.min(
+                100,
+                result.score
+            )
 
-
-            agent:this.name,
-
-
-
-            score,
-
-
-
-            detail
-
-
-
-        };
-
-
-
-    }
+        );
 
 
 
 
 
-
-
-
-
-    status(){
-
-
-
-        return {
-
-
-
-            agent:this.name,
-
-
-            ready:
-
-            !!window.theoryengine
-
-
-
-        };
+        return result;
 
 
 
@@ -187,14 +202,5 @@ class TheoryAgent{
 
 
 
-}
 
-
-
-
-
-
-
-window.theoryagent=
-
-new TheoryAgent();
+};

@@ -1,29 +1,27 @@
-/*
-================================
-大乐透AI_V90 CORE
-
-featureengine.js
-
-历史特征计算引擎
-================================
-*/
+// 大乐透AI_V90
+// Feature Engine
+// 历史特征分析引擎
 
 
-class FeatureEngine{
+window.FeatureEngine = {
 
 
-    constructor(){
+    history: [],
 
 
-        this.name="feature";
+
+    init(data){
 
 
-        this.result=null;
+        this.history=data || [];
 
 
-    }
+        console.log(
+            "FeatureEngine初始化"
+        );
 
 
+    },
 
 
 
@@ -31,89 +29,48 @@ class FeatureEngine{
 
 
 
-    // ==========================
-    // 构建全部特征
-    // ==========================
+    // 总分析入口
 
 
-    build(data){
-
-
-
-        if(!data || data.length===0){
+    analyze(){
 
 
 
-            throw new Error(
-
-            "没有历史数据"
-
-            );
+        return {
 
 
-        }
+            frequency:
+            this.frequency(),
 
 
 
-
-
-
-
-        this.result={
-
-
-
-            frontFrequency:
-
-            this.frequency(
-
-                data,
-
-                "front"
-
-            ),
-
-
-
-            backFrequency:
-
-            this.frequency(
-
-                data,
-
-                "back"
-
-            ),
+            hotCold:
+            this.hotCold(),
 
 
 
             omission:
-
-            this.omission(data),
-
-
-
-            oddEven:
-
-            this.oddEven(data),
+            this.omission(),
 
 
 
-            area:
-
-            this.area(data),
+            structure:
+            this.structure(),
 
 
 
             sum:
-
-            this.sum(data),
-
+            this.sumAnalysis(),
 
 
-            continuous:
 
-            this.continuous(data)
+            span:
+            this.spanAnalysis(),
+
+
+
+            tail:
+            this.tailAnalysis()
 
 
 
@@ -121,16 +78,7 @@ class FeatureEngine{
 
 
 
-
-
-
-
-
-        return this.result;
-
-
-
-    }
+    },
 
 
 
@@ -140,191 +88,234 @@ class FeatureEngine{
 
 
 
-    // ==========================
-    // 频率
-    // ==========================
+    // ===================
+    // 号码频率
+    // ===================
 
 
-    frequency(data,type){
-
-
-
-        let max=
-
-        type==="front"
-
-        ?
-
-        35
-
-        :
-
-        12;
+    frequency(){
 
 
 
+        let front={};
+
+        let back={};
 
 
 
-        let map={};
+        this.history.forEach(
+            item=>{
+
+
+                item.front.forEach(
+                    n=>{
+
+                        front[n]=
+                        (front[n]||0)+1;
+
+                    }
+                );
+
+
+
+                item.back.forEach(
+                    n=>{
+
+                        back[n]=
+                        (back[n]||0)+1;
+
+                    }
+                );
+
+
+            }
+        );
+
+
+
+        return {
+
+            front,
+
+            back
+
+        };
+
+
+    },
 
 
 
 
 
 
-        for(let i=1;i<=max;i++){
 
 
 
-            map[i]=0;
+    // ===================
+    // 热冷分析
+    // ===================
 
 
+    hotCold(){
+
+
+
+        let freq =
+        this.frequency();
+
+
+
+        return {
+
+
+            hotFront:
+
+            this.sortObject(
+                freq.front
+            ),
+
+
+
+            hotBack:
+
+            this.sortObject(
+                freq.back
+            )
+
+
+        };
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // ===================
+    // 遗漏分析
+    // ===================
+
+
+    omission(){
+
+
+
+        let front={};
+
+        let back={};
+
+
+
+        for(
+            let i=1;i<=35;i++
+        ){
+
+            front[i]=null;
 
         }
 
 
 
+        for(
+            let i=1;i<=12;i++
+        ){
 
-
-
-
-        data.forEach(item=>{
-
-
-
-            item[type]
-
-            .forEach(n=>{
-
-
-
-                map[n]++;
-
-
-
-            });
-
-
-
-        });
-
-
-
-
-
-
-
-        return map;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 遗漏
-    // ==========================
-
-
-    omission(data){
-
-
-
-        let result={};
-
-
-
-
-
-
-        for(let i=1;i<=35;i++){
-
-
-
-            result[i]=999;
-
-
+            back[i]=null;
 
         }
-
-
-
 
 
 
 
         for(
+            let index=
+            this.history.length-1;
 
-        let i=data.length-1;
+            index>=0;
 
-        i>=0;
-
-        i--
-
+            index--
         ){
 
 
-
-            data[i].front
-
-            .forEach(n=>{
+            let item=
+            this.history[index];
 
 
 
-                if(result[n]===999){
+            item.front.forEach(
+                n=>{
 
 
+                    if(
+                        front[n]===null
+                    ){
 
-                    result[n]=
+                        front[n]=
+                        this.history.length
+                        -1-index;
 
-                    data.length-i-1;
-
+                    }
 
 
                 }
+            );
 
 
 
-            });
+            item.back.forEach(
+                n=>{
 
+
+                    if(
+                        back[n]===null
+                    ){
+
+                        back[n]=
+                        this.history.length
+                        -1-index;
+
+                    }
+
+
+                }
+            );
 
 
         }
 
 
 
+        return {
+
+            front,
+
+            back
+
+        };
+
+
+    },
 
 
 
 
-        return result;
-
-
-
-    }
 
 
 
 
 
+    // ===================
+    // 结构分析
+    // ===================
 
 
-
-
-    // ==========================
-    // 奇偶
-    // ==========================
-
-
-    oddEven(data){
+    structure(){
 
 
 
@@ -332,123 +323,41 @@ class FeatureEngine{
 
 
 
+        this.history.forEach(
+            item=>{
+
+
+                result.push({
+
+
+                    odd:
+
+                    item.front.filter(
+                        n=>n%2!==0
+                    ).length,
 
 
 
+                    even:
 
-        data.forEach(item=>{
-
-
-
-            let odd=
-
-            item.front.filter(
-
-                n=>n%2!==0
-
-            ).length;
+                    item.front.filter(
+                        n=>n%2===0
+                    ).length
 
 
 
+                });
 
 
-
-
-            result.push({
-
-
-
-                odd,
-
-
-                even:
-
-                5-odd
-
-
-
-            });
-
-
-
-        });
-
-
-
-
+            }
+        );
 
 
 
         return result;
 
 
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 区间分布
-    // ==========================
-
-
-    area(data){
-
-
-
-        return data.map(item=>{
-
-
-
-            return {
-
-
-
-                low:
-
-                item.front.filter(
-
-                    n=>n<=12
-
-                ).length,
-
-
-
-                mid:
-
-                item.front.filter(
-
-                    n=>n>12&&n<=24
-
-                ).length,
-
-
-
-                high:
-
-                item.front.filter(
-
-                    n=>n>24
-
-                ).length
-
-
-
-            };
-
-
-
-        });
-
-
-
-    }
+    },
 
 
 
@@ -458,109 +367,32 @@ class FeatureEngine{
 
 
 
-    // ==========================
+    // ===================
     // 和值
-    // ==========================
+    // ===================
 
 
-    sum(data){
+    sumAnalysis(){
 
 
 
-        return data.map(item=>{
+        return this.history.map(
+            item=>{
 
 
-
-            return item.front.reduce(
-
-                (a,b)=>a+b,
-
-                0
-
-            );
-
-
-
-        });
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 连号
-    // ==========================
-
-
-    continuous(data){
-
-
-
-        return data.map(item=>{
-
-
-
-            let nums=
-
-            [...item.front]
-
-            .sort(
-
-            (a,b)=>a-b
-
-            );
-
-
-
-
-
-
-
-            let count=0;
-
-
-
-
-
-
-
-            for(
-
-            let i=1;
-
-            i<nums.length;
-
-            i++
-
-            ){
-
-
-
-                if(
-
-                nums[i]-nums[i-1]===1
-
-                ){
-
-
-
-                    count++;
-
-
-
-                }
-
+                return item.front.reduce(
+                    (
+                        a,b
+                    )=>a+b,
+                    0
+                );
 
 
             }
+        );
+
+
+    },
 
 
 
@@ -569,11 +401,102 @@ class FeatureEngine{
 
 
 
-            return count;
+
+    // ===================
+    // 跨度
+    // ===================
+
+
+    spanAnalysis(){
 
 
 
-        });
+        return this.history.map(
+            item=>{
+
+
+                return Math.max(
+                    ...item.front
+                )
+                -
+                Math.min(
+                    ...item.front
+                );
+
+
+            }
+        );
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // ===================
+    // 尾数
+    // ===================
+
+
+    tailAnalysis(){
+
+
+
+        let result=[];
+
+
+
+        this.history.forEach(
+            item=>{
+
+
+                result.push(
+
+                    item.front.map(
+                        n=>n%10
+                    )
+
+                );
+
+
+            }
+        );
+
+
+
+        return result;
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 排序辅助
+
+
+    sortObject(obj){
+
+
+
+        return Object.entries(obj)
+
+        .sort(
+            (
+                a,b
+            )=>
+            b[1]-a[1]
+        );
 
 
 
@@ -582,44 +505,4 @@ class FeatureEngine{
 
 
 
-
-
-
-
-
-    status(){
-
-
-
-        return {
-
-
-
-            engine:this.name,
-
-
-            ready:
-
-            this.result!==null
-
-
-
-        };
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-window.featureengine=
-
-new FeatureEngine();
+};

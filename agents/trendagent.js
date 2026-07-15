@@ -1,67 +1,41 @@
-/*
-================================
-大乐透AI_V90 AGENTS
-
-trendagent.js
-
-趋势分析智能体
-================================
-*/
+// 大乐透AI_V90
+// Trend Agent
+// 趋势分析智能体
 
 
-class TrendAgent{
+window.TrendAgent = {
 
 
-    constructor(){
-
-
-        this.name="trendagent";
-
-
-    }
+    name:
+    "趋势分析Agent",
 
 
 
+    analyze(
+        data
+    ){
 
 
 
+        let result={
+
+
+            score:0,
+
+
+            message:""
 
 
 
-    // ==========================
-    // 分析趋势
-    // ==========================
-
-
-    analyze(candidate,context={}){
-
-
-
-        let score=0;
-
-
-
-
-
-
-
-        let feature=
-
-        context.feature;
-
-
-
+        };
 
 
 
 
 
         if(
-
-        !feature
-
+            !data.features
         ){
-
 
 
             return {
@@ -69,9 +43,8 @@ class TrendAgent{
 
                 score:0,
 
-
-                detail:"无趋势数据"
-
+                message:
+                "暂无趋势数据"
 
 
             };
@@ -83,132 +56,69 @@ class TrendAgent{
 
 
 
+        let hot =
 
+        data.features
+        .hotCold;
 
 
-        // ==================
-        // 前区频率趋势
-        // ==================
 
 
-        candidate.front
 
-        .forEach(n=>{
+        if(
+            hot
+        ){
 
 
 
-            let freq=
+            result.score +=20;
 
-            feature.frontFrequency[n] || 0;
 
 
+            result.message =
 
+            "近期冷热趋势已纳入分析";
 
 
 
+        }
 
-            if(freq>200){
 
 
 
-                score+=1;
 
+        let omission =
 
+        data.features
+        .omission;
 
-            }
 
 
 
 
+        if(
+            omission
+        ){
 
 
 
-            if(freq<50){
+            result.score +=10;
 
 
 
-                score-=0.5;
+            result.message +=
 
+            "，遗漏周期参与判断";
 
 
-            }
 
+        }
 
 
-        });
 
 
 
-
-
-
-
-
-        // ==================
-        // 后区趋势
-        // ==================
-
-
-        candidate.back
-
-        .forEach(n=>{
-
-
-
-            let freq=
-
-            feature.backFrequency[n] || 0;
-
-
-
-
-
-
-
-            if(freq>80){
-
-
-
-                score+=0.5;
-
-
-
-            }
-
-
-
-        });
-
-
-
-
-
-
-
-
-        return {
-
-
-
-            agent:this.name,
-
-
-
-            score:
-
-            Number(
-
-            score.toFixed(4)
-
-            ),
-
-
-
-            detail:"趋势分析完成"
-
-
-
-        };
+        return result;
 
 
 
@@ -218,41 +128,4 @@ class TrendAgent{
 
 
 
-
-
-
-
-    status(){
-
-
-
-        return {
-
-
-
-            agent:this.name,
-
-
-            ready:true
-
-
-
-        };
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-window.trendagent=
-
-new TrendAgent();
+};

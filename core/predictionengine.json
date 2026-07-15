@@ -1,89 +1,91 @@
-/*
-================================
-大乐透AI_V90 CORE
-
-predictionengine.js
-
-预测生成引擎
-================================
-*/
+// 大乐透AI_V90
+// Prediction Engine
+// 预测生成引擎
 
 
-class PredictionEngine{
+window.PredictionEngine = {
 
 
-    constructor(){
+    candidates: [],
 
 
-        this.name="prediction";
+    result: null,
+
+
+
+
+
+    init(){
+
+
+        this.candidates=[];
+
+        this.result=null;
+
+
+        console.log(
+            "PredictionEngine初始化完成"
+        );
+
+
+    },
+
+
+
+
+
+
+
+    // 生成预测
+
+
+    async generate(
+        models={}
+    ){
+
 
 
         this.candidates=[];
 
 
-    }
+
+
+        let pool =
+
+        this.createPool(
+            models
+        );
 
 
 
 
 
-
-
-
-
-    // ==========================
-    // 生成候选
-    // ==========================
-
-
-    generate(context){
-
-
-
-        let pool=[];
-
-
-
-
-
-
-        // 蒙特卡罗候选
-
-
-        if(
-
-        window.montecarloengine
-
+        for(
+            let item of pool
         ){
 
 
+            let score =
 
-            let monte=
-
-            window.montecarloengine.run(
-
-                context.data || [],
-
-                5000
-
+            this.scoreCandidate(
+                item,
+                models
             );
 
 
 
+            this.candidates.push({
 
 
-            monte.slice(0,100)
-
-            .forEach(item=>{
-
+                front:
+                item.front,
 
 
-                pool.push(
+                back:
+                item.back,
 
-                    item.candidate
 
-                );
-
+                score
 
 
             });
@@ -96,23 +98,99 @@ class PredictionEngine{
 
 
 
+        this.candidates.sort(
+            (
+                a,b
+            )=>
+
+            b.score-a.score
+
+        );
 
 
-        // 随机补充
 
 
-        while(
 
-        pool.length<200
+        this.result = {
 
+
+            top:
+
+            this.candidates.slice(
+                0,
+                10
+            ),
+
+
+
+            time:
+            new Date()
+            .toISOString()
+
+
+        };
+
+
+
+
+
+        return this.result;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 创建候选池
+
+
+    createPool(
+        models
+    ){
+
+
+
+        let pool=[];
+
+
+
+
+        // 如果蒙特卡罗有结果
+
+        if(
+            models.montecarlo
         ){
 
 
 
-            pool.push(
+            models.montecarlo
+            .forEach(
+                item=>{
 
-                this.randomCandidate()
 
+                    pool.push({
+
+
+                        front:
+                        item.front,
+
+
+                        back:
+                        item.back
+
+
+
+                    });
+
+
+                }
             );
 
 
@@ -124,141 +202,43 @@ class PredictionEngine{
 
 
 
+        // 没有模拟结果时生成基础候选
 
-        this.candidates=
 
-        this.removeDuplicate(
-
-            pool
-
-        );
-
-
-
-
-
-
-
-        return this.candidates;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 随机号码
-    // ==========================
-
-
-    randomCandidate(){
-
-
-
-        return {
-
-
-
-            front:
-
-            this.randomNumbers(
-
-                1,
-
-                35,
-
-                5
-
-            ),
-
-
-
-            back:
-
-            this.randomNumbers(
-
-                1,
-
-                12,
-
-                2
-
-            )
-
-
-
-        };
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    randomNumbers(min,max,count){
-
-
-
-        let result=[];
-
-
-
-
-
-
-
-        while(
-
-        result.length<count
-
+        if(
+            pool.length===0
         ){
 
 
 
-            let n=
-
-            Math.floor(
-
-                Math.random()
-
-                *
-
-                (max-min+1)
-
-            )
-
-            +
-
-            min;
-
-
-
-
-
-
-
-            if(
-
-            !result.includes(n)
-
+            for(
+                let i=0;
+                i<100;
+                i++
             ){
 
 
 
-                result.push(n);
+                pool.push({
+
+
+                    front:
+                    this.random(
+                        35,
+                        5
+                    ),
+
+
+
+                    back:
+                    this.random(
+                        12,
+                        2
+                    )
+
+
+
+                });
 
 
 
@@ -271,20 +251,147 @@ class PredictionEngine{
 
 
 
+        return pool;
 
 
 
-        return result.sort(
+    },
 
-            (a,b)=>
 
-            a-b
 
+
+
+
+
+
+
+    // 综合评分
+
+
+    scoreCandidate(
+        item,
+        models
+    ){
+
+
+
+        let score=0;
+
+
+
+        // 基础随机评分
+
+        score += Math.random()*20;
+
+
+
+
+        // 理论评分
+
+        if(
+            models.theory
+        ){
+
+
+            score +=
+
+            this.theoryScore(
+                item
+            );
+
+
+        }
+
+
+
+
+        // 马尔可夫评分
+
+        if(
+            models.markov
+        ){
+
+
+            score +=
+
+            this.markovScore(
+                item,
+                models.markov
+            );
+
+
+        }
+
+
+
+
+        // 贝叶斯评分
+
+        if(
+            models.bayes
+        ){
+
+
+            score +=
+
+            this.bayesScore(
+                item,
+                models.bayes
+            );
+
+
+        }
+
+
+
+        return score;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    theoryScore(item){
+
+
+        let score=0;
+
+
+
+        let sum =
+
+        item.front.reduce(
+            (
+                a,b
+            )=>a+b,
+            0
         );
 
 
 
-    }
+        if(
+            sum>=80 &&
+            sum<=150
+        ){
+
+            score+=20;
+
+        }
+
+
+
+        return score;
+
+
+
+    },
 
 
 
@@ -294,20 +401,16 @@ class PredictionEngine{
 
 
 
-    // ==========================
-    // 去重
-    // ==========================
+    markovScore(
+        item,
+        markov
+    ){
 
 
-    removeDuplicate(list){
+        return 10;
 
 
-
-        let map={};
-
-
-
-        let result=[];
+    },
 
 
 
@@ -316,21 +419,17 @@ class PredictionEngine{
 
 
 
-        list.forEach(item=>{
+
+    bayesScore(
+        item,
+        bayes
+    ){
 
 
+        return 10;
 
-            let key=
 
-            item.front.join("-")
-
-            +
-
-            "|"
-
-            +
-
-            item.back.join("-");
+    },
 
 
 
@@ -339,36 +438,60 @@ class PredictionEngine{
 
 
 
-            if(!map[key]){
+
+    // 随机号码
+
+
+    random(
+        max,
+        count
+    ){
 
 
 
-                map[key]=true;
+        let arr=[];
 
 
-                result.push(item);
 
+        while(
+            arr.length<count
+        ){
+
+
+
+            let n =
+
+            Math.floor(
+                Math.random()*max
+            )+1;
+
+
+
+            if(
+                !arr.includes(n)
+            ){
+
+
+                arr.push(n);
 
 
             }
 
 
-
-        });
-
+        }
 
 
 
 
+        return arr.sort(
+            (
+                a,b
+            )=>
+            a-b
+        );
 
 
-
-        return result;
-
-
-
-    }
-
+    },
 
 
 
@@ -377,44 +500,15 @@ class PredictionEngine{
 
 
 
-    // ==========================
-    // 状态
-    // ==========================
+
+    getResult(){
 
 
-    status(){
-
-
-
-        return {
-
-
-
-            engine:this.name,
-
-
-            count:
-
-            this.candidates.length
-
-
-
-        };
-
+        return this.result;
 
 
     }
 
 
 
-}
-
-
-
-
-
-
-
-window.predictionengine=
-
-new PredictionEngine();
+};

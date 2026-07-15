@@ -1,328 +1,126 @@
-/*
-================================
-大乐透AI_V90 AGENTS
-
-structureagent.js
-
-号码结构分析智能体
-================================
-*/
+// 大乐透AI_V90
+// Structure Agent
+// 结构分析智能体
 
 
-class StructureAgent{
+window.StructureAgent = {
 
 
-    constructor(){
-
-
-        this.name="structureagent";
-
-
-    }
+    name:
+    "结构分析Agent",
 
 
 
+    analyze(
+        data
+    ){
 
 
+        if(
+            !data.features
+        ){
 
 
+            return {
 
 
-    // ==========================
-    // 结构分析
-    // ==========================
+                score:0,
 
 
-    analyze(candidate){
+                message:
+                "暂无结构数据"
 
 
+            };
 
-        let score=0;
 
-
-        let detail=[];
+        }
 
 
 
 
 
+        let structure =
+
+        data.features
+        .structure;
 
 
 
-        let front=
+        let result={
 
-        [...candidate.front]
 
-        .sort(
+            score:0,
 
-        (a,b)=>a-b
 
-        );
+            message:""
 
 
 
-
-
-
-
-
-        // ==================
-        // 奇偶结构
-        // ==================
-
-
-        let odd=
-
-        front.filter(
-
-            n=>n%2!==0
-
-        ).length;
-
-
-
+        };
 
 
 
 
 
         if(
-
-        odd>=2
-
-        &&
-
-        odd<=3
-
+            structure &&
+            structure.length>0
         ){
 
 
 
-            score+=2;
+            let latest =
 
+            structure[
+                structure.length-1
+            ];
 
-            detail.push(
 
-            "奇偶合理"
 
-            );
+            /*
+            
+            奇偶平衡
 
-
-        }
-
-        else{
-
-
-            score-=1;
-
-
-            detail.push(
-
-            "奇偶偏离"
-
-            );
-
-
-        }
-
-
-
-
-
-
-
-
-
-        // ==================
-        // 和值结构
-        // ==================
-
-
-        let sum=
-
-        front.reduce(
-
-            (a,b)=>a+b,
-
-            0
-
-        );
-
-
-
-
-
-
-
-        if(
-
-        sum>=80
-
-        &&
-
-        sum<=130
-
-        ){
-
-
-
-            score+=2;
-
-
-            detail.push(
-
-            "和值合理"
-
-            );
-
-
-        }
-
-        else{
-
-
-            score-=1;
-
-
-        }
-
-
-
-
-
-
-
-
-
-        // ==================
-        // 区间结构
-        // ==================
-
-
-        let low=
-
-        front.filter(
-
-            n=>n<=12
-
-        ).length;
-
-
-
-
-
-
-
-        let middle=
-
-        front.filter(
-
-            n=>n>12
-
-            &&
-
-            n<=24
-
-        ).length;
-
-
-
-
-
-
-
-        let high=
-
-        front.filter(
-
-            n=>n>24
-
-        ).length;
-
-
-
-
-
-
-
-
-        if(
-
-        low>=1
-
-        &&
-
-        middle>=1
-
-        &&
-
-        high>=1
-
-        ){
-
-
-
-            score+=2;
-
-
-            detail.push(
-
-            "三区覆盖"
-
-            );
-
-
-        }
-
-
-
-
-
-
-
-
-
-        // ==================
-        // 连号
-        // ==================
-
-
-        let link=0;
-
-
-
-
-
-
-
-        for(
-
-        let i=1;
-
-        i<front.length;
-
-        i++
-
-        ){
-
+            */
 
 
             if(
-
-            front[i]-front[i-1]===1
-
+                Math.abs(
+                    latest.odd -
+                    latest.even
+                )
+                <=2
             ){
 
 
+                result.score+=30;
 
-                link++;
 
+                result.message +=
+
+                "奇偶结构平衡";
+
+
+            }
+
+            else{
+
+
+                result.score+=10;
+
+
+                result.message +=
+
+                "奇偶偏离需关注";
 
 
             }
 
 
 
+
+
         }
 
 
@@ -330,24 +128,21 @@ class StructureAgent{
 
 
 
+        // 理论结构判断
 
 
         if(
-
-        link<=2
-
+            data.theory
         ){
 
 
+            result.score+=20;
 
-            score+=1;
 
 
-            detail.push(
+            result.message +=
 
-            "连号正常"
-
-            );
+            "，理论结构通过";
 
 
         }
@@ -358,25 +153,7 @@ class StructureAgent{
 
 
 
-
-
-        return {
-
-
-
-            agent:this.name,
-
-
-
-            score,
-
-
-
-            detail
-
-
-
-        };
+        return result;
 
 
 
@@ -385,42 +162,4 @@ class StructureAgent{
 
 
 
-
-
-
-
-
-    status(){
-
-
-
-        return {
-
-
-
-            agent:this.name,
-
-
-            ready:true
-
-
-
-        };
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-window.structureagent=
-
-new StructureAgent();
+};

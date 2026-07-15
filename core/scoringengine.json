@@ -1,79 +1,48 @@
-/*
-================================
-大乐透AI_V90 CORE
-
-scoringengine.js
-
-综合评分引擎
-================================
-*/
+// 大乐透AI_V90
+// Scoring Engine
+// 综合评分引擎
 
 
-class ScoringEngine{
+window.ScoringEngine = {
 
 
-    constructor(){
+    weights:{},
 
 
-        this.name="scoring";
-
-
-        this.weights={
-
-
-
-            theory:0.20,
-
-
-            bayes:0.20,
-
-
-            markov:0.20,
-
-
-            trend:0.20,
-
-
-            risk:0.20
-
-
-
-        };
-
-
-
-    }
+    initialized:false,
 
 
 
 
 
+    init(weights={}){
 
 
+        this.weights = {
 
 
-    // ==========================
-    // 综合评分
-    // ==========================
+            frequency:
+            weights.frequency || 0.15,
 
 
-    score(candidate,context={}){
+            theory:
+            weights.theory || 0.20,
 
 
-
-        let result={
-
-
-
-            candidate,
+            markov:
+            weights.markov || 0.20,
 
 
+            bayes:
+            weights.bayes || 0.15,
 
-            scores:{},
+
+            montecarlo:
+            weights.montecarlo || 0.20,
 
 
-
-            finalScore:0
+            structure:
+            weights.structure || 0.10
 
 
 
@@ -81,223 +50,16 @@ class ScoringEngine{
 
 
 
+        this.initialized=true;
 
 
 
-
-        // 理论
-
-
-        if(window.theoryengine){
-
-
-
-            result.scores.theory=
-
-            window.theoryengine.score(
-
-                candidate
-
-            );
-
-
-
-        }
-
-        else{
-
-
-
-            result.scores.theory=0;
-
-
-
-        }
-
-
-
-
-
-
-
-
-
-        // 贝叶斯
-
-
-        if(window.bayesengine){
-
-
-
-            result.scores.bayes=
-
-            window.bayesengine.score(
-
-                candidate
-
-            );
-
-
-
-        }
-
-        else{
-
-
-
-            result.scores.bayes=0;
-
-
-
-        }
-
-
-
-
-
-
-
-
-
-        // 马尔可夫
-
-
-        if(
-
-        window.markovengine
-
-        &&
-
-        context.last
-
-        ){
-
-
-
-            result.scores.markov=
-
-            window.markovengine.score(
-
-                candidate,
-
-                context.last
-
-            );
-
-
-
-        }
-
-        else{
-
-
-
-            result.scores.markov=0;
-
-
-
-        }
-
-
-
-
-
-
-
-
-
-        // 趋势
-
-
-        if(
-
-        context.trendScore
-
-        ){
-
-
-
-            result.scores.trend=
-
-            context.trendScore;
-
-
-
-        }
-
-        else{
-
-
-
-            result.scores.trend=0;
-
-
-
-        }
-
-
-
-
-
-
-
-
-
-        // 风险
-
-
-        if(window.riskengine){
-
-
-
-            result.scores.risk=
-
-            window.riskengine.score(
-
-                candidate
-
-            );
-
-
-
-        }
-
-        else{
-
-
-
-            result.scores.risk=0;
-
-
-
-        }
-
-
-
-
-
-
-
-
-        result.finalScore=
-
-        this.calculate(
-
-            result.scores
-
+        console.log(
+            "ScoringEngine初始化完成"
         );
 
 
-
-
-
-
-
-        return result;
-
-
-
-    }
+    },
 
 
 
@@ -307,12 +69,13 @@ class ScoringEngine{
 
 
 
-    // ==========================
-    // 权重计算
-    // ==========================
+    // 综合评分
 
 
-    calculate(scores){
+    score(
+        candidate,
+        data={}
+    ){
 
 
 
@@ -320,44 +83,324 @@ class ScoringEngine{
 
 
 
+        total +=
 
-
-
-        Object.keys(
-
-            this.weights
-
+        this.frequencyScore(
+            candidate,
+            data.frequency
         )
-
-        .forEach(key=>{
-
-
-
-            total+=
-
-            (
-
-            scores[key] || 0
-
-            )
-
-            *
-
-            this.weights[key];
+        *
+        this.weights.frequency;
 
 
 
-        });
 
 
+        total +=
+
+        this.theoryScore(
+            candidate,
+            data.theory
+        )
+        *
+        this.weights.theory;
+
+
+
+
+
+        total +=
+
+        this.markovScore(
+            candidate,
+            data.markov
+        )
+        *
+        this.weights.markov;
+
+
+
+
+
+
+        total +=
+
+        this.bayesScore(
+            candidate,
+            data.bayes
+        )
+        *
+        this.weights.bayes;
+
+
+
+
+
+
+        total +=
+
+        this.montecarloScore(
+            candidate,
+            data.montecarlo
+        )
+        *
+        this.weights.montecarlo;
 
 
 
 
 
         return Number(
+            total.toFixed(4)
+        );
 
-        total.toFixed(6)
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 频率评分
+
+
+    frequencyScore(
+        candidate,
+        frequency
+    ){
+
+
+        if(!frequency){
+
+            return 0;
+
+        }
+
+
+        let score=0;
+
+
+
+        candidate.front.forEach(
+            n=>{
+
+
+                score +=
+
+                frequency[n]
+                ||
+                0;
+
+
+            }
+        );
+
+
+
+        return score;
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 理论评分
+
+
+    theoryScore(
+        candidate,
+        theory
+    ){
+
+
+        if(!theory){
+
+            return 50;
+
+        }
+
+
+
+        return theory.structure || 50;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 马尔可夫评分
+
+
+    markovScore(
+        candidate,
+        markov
+    ){
+
+
+
+        if(!markov){
+
+            return 0;
+
+        }
+
+
+
+        return 50;
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 贝叶斯评分
+
+
+    bayesScore(
+        candidate,
+        bayes
+    ){
+
+
+        if(!bayes){
+
+            return 0;
+
+        }
+
+
+
+        let score=0;
+
+
+
+        candidate.front.forEach(
+            n=>{
+
+
+                score +=
+
+                bayes[n]
+                ||
+                0;
+
+
+            }
+        );
+
+
+
+        return score;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 蒙特卡罗评分
+
+
+    montecarloScore(
+        candidate,
+        monte
+    ){
+
+
+
+        if(!monte){
+
+            return 0;
+
+        }
+
+
+
+        return 50;
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 批量排序
+
+
+    rank(
+        candidates,
+        data
+    ){
+
+
+
+        return candidates
+
+        .map(
+            item=>{
+
+
+                return {
+
+
+                    ...item,
+
+
+                    score:
+
+                    this.score(
+                        item,
+                        data
+                    )
+
+
+                };
+
+
+            }
+        )
+
+        .sort(
+            (
+                a,b
+            )=>
+
+            b.score-a.score
 
         );
 
@@ -369,78 +412,4 @@ class ScoringEngine{
 
 
 
-
-
-
-
-    // ==========================
-    // 更新权重
-    // ==========================
-
-
-    updateWeight(name,value){
-
-
-
-        if(
-
-        this.weights[name]
-
-        !==undefined
-
-        ){
-
-
-
-            this.weights[name]=value;
-
-
-
-        }
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    status(){
-
-
-
-        return {
-
-
-
-            engine:this.name,
-
-
-            weights:this.weights
-
-
-
-        };
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-window.scoringengine=
-
-new ScoringEngine();
+};

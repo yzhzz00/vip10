@@ -1,70 +1,56 @@
-/*
-================================
-大乐透AI_V90 CORE
-
-learningengine.js
-
-学习反馈引擎
-================================
-*/
+// 大乐透AI_V90
+// Learning Engine
+// AI反馈学习引擎
 
 
-class LearningEngine{
+window.LearningEngine = {
 
 
-    constructor(){
+    memory:[],
 
 
-        this.name="learning";
+    weights:{},
 
 
-        this.weights={
+    initialized:false,
 
 
-            trend:0.2,
 
 
-            structure:0.2,
 
 
-            markov:0.2,
+    // 初始化
 
 
-            theory:0.2,
+    init(
+        weights={}
+    ){
 
 
-            risk:0.2
+        this.weights = {
+
+
+            ...weights
 
 
         };
 
 
 
-        this.history=[];
-
-
-    }
+        this.memory=[];
 
 
 
+        this.initialized=true;
 
 
 
+        console.log(
+            "LearningEngine初始化完成"
+        );
 
 
-
-    // ==========================
-    // 学习反馈
-    // ==========================
-
-
-    learn(result){
-
-
-
-        let score=
-
-        this.evaluate(result);
+    },
 
 
 
@@ -72,19 +58,59 @@ class LearningEngine{
 
 
 
-        this.history.push({
+
+
+    // 接收开奖反馈
+
+
+    feedback(
+        prediction,
+        actual
+    ){
 
 
 
-            result,
+        let analysis =
+
+        this.compare(
+            prediction,
+            actual
+        );
 
 
-            score,
+
+
+
+        let update =
+
+        this.selfCorrection(
+            analysis
+        );
+
+
+
+
+
+        this.memory.push({
 
 
             time:
 
-            Date.now()
+            new Date()
+            .toISOString(),
+
+
+
+            prediction,
+
+
+            actual,
+
+
+            analysis,
+
+
+            update
 
 
 
@@ -94,21 +120,11 @@ class LearningEngine{
 
 
 
-
-
-        this.adjust(score);
-
+        return update;
 
 
 
-
-
-
-        return this.weights;
-
-
-
-    }
+    },
 
 
 
@@ -118,45 +134,62 @@ class LearningEngine{
 
 
 
-    // ==========================
-    // 评估效果
-    // ==========================
+    // 比较预测与开奖
 
 
-    evaluate(result){
-
-
-
-        if(!result){
+    compare(
+        prediction,
+        actual
+    ){
 
 
 
-            return 0;
+        let frontHit=0;
 
 
-
-        }
+        let backHit=0;
 
 
 
 
+        prediction.front.forEach(
+            n=>{
+
+
+                if(
+                    actual.front.includes(n)
+                ){
+
+
+                    frontHit++;
+
+
+                }
+
+
+            }
+        );
 
 
 
-        let hit=
 
-        (
 
-        result.hitFront || 0
+        prediction.back.forEach(
+            n=>{
 
-        )
 
-        +
+                if(
+                    actual.back.includes(n)
+                ){
 
-        (
 
-        result.hitBack || 0
+                    backHit++;
 
+
+                }
+
+
+            }
         );
 
 
@@ -164,31 +197,27 @@ class LearningEngine{
 
 
 
-
-        return hit;
-
+        return {
 
 
-    }
+            frontHit,
 
 
+            backHit,
 
 
+            total:
 
-
-
-
-
-    // ==========================
-    // 调整权重
-    // ==========================
-
-
-    adjust(score){
+            frontHit+
+            backHit
 
 
 
-        let step=0.01;
+        };
+
+
+
+    },
 
 
 
@@ -196,30 +225,163 @@ class LearningEngine{
 
 
 
-        if(score>2){
+
+
+    // AI自我修正
+
+
+    selfCorrection(
+        result
+    ){
 
 
 
-            this.weights.markov+=step;
+        let change={};
 
 
-            this.weights.theory+=step;
+
+
+
+        /*
+        
+        命中低：
+
+        降低过度依赖模型
+
+        命中高：
+
+        保留当前权重
+
+
+        */
+
+
+        if(
+            result.total<=1
+        ){
+
+
+
+            change={
+
+
+                status:
+                "模型需要修正",
+
+
+
+                action:
+                "降低当前预测权重"
+
+
+
+            };
+
+
+
+
+            this.reduceWeight();
 
 
 
         }
+
+
+
+
+
+
+        else if(
+            result.total>=4
+        ){
+
+
+
+            change={
+
+
+                status:
+                "模型表现良好",
+
+
+
+                action:
+                "保持当前权重"
+
+
+
+            };
+
+
+
+        }
+
+
+
+
 
         else{
 
 
 
-            this.weights.risk+=step;
+            change={
+
+
+                status:
+                "正常波动",
+
+
+                action:
+                "微调"
+
+
+
+            };
+
+
+
+            this.smallAdjust();
+
 
 
         }
 
 
 
+
+
+        return change;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 降低权重
+
+
+    reduceWeight(){
+
+
+
+        for(
+            let key in this.weights
+        ){
+
+
+
+            this.weights[key]*=0.95;
+
+
+
+        }
 
 
 
@@ -228,7 +390,7 @@ class LearningEngine{
 
 
 
-    }
+    },
 
 
 
@@ -238,80 +400,95 @@ class LearningEngine{
 
 
 
-    // ==========================
+    // 微调
+
+
+    smallAdjust(){
+
+
+
+        for(
+            let key in this.weights
+        ){
+
+
+
+            this.weights[key]*=
+            (
+                0.99+
+                Math.random()*0.02
+            );
+
+
+        }
+
+
+
+        this.normalize();
+
+
+
+    },
+
+
+
+
+
+
+
+
+
     // 权重归一化
-    // ==========================
 
 
     normalize(){
 
 
 
-        let total=0;
+        let sum=0;
+
+
+
+        for(
+            let key in this.weights
+        ){
+
+
+            sum +=
+            this.weights[key];
+
+
+        }
 
 
 
 
+        if(sum===0){
 
+            return;
 
-
-        Object.values(
-
-            this.weights
-
-        )
-
-        .forEach(v=>{
-
-
-
-            total+=v;
-
-
-
-        });
+        }
 
 
 
 
+        for(
+            let key in this.weights
+        ){
 
 
-
-        Object.keys(
-
-            this.weights
-
-        )
-
-        .forEach(k=>{
-
-
-
-            this.weights[k]=
-
-            Number(
-
-            (
-
-            this.weights[k]
-
+            this.weights[key]
+            =
+            this.weights[key]
             /
+            sum;
 
-            total
 
-            )
-
-            .toFixed(4)
-
-            );
+        }
 
 
 
-        });
-
-
-
-    }
+    },
 
 
 
@@ -321,43 +498,22 @@ class LearningEngine{
 
 
 
-    // ==========================
-    // 获取权重
-    // ==========================
+    // 获取当前模型
 
 
-    getWeights(){
-
-
-
-        return this.weights;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    status(){
+    getModel(){
 
 
 
         return {
 
 
+            weights:
+            this.weights,
 
-            engine:this.name,
 
-
-            records:
-
-            this.history.length
+            memory:
+            this.memory
 
 
 
@@ -369,14 +525,6 @@ class LearningEngine{
 
 
 
-}
 
 
-
-
-
-
-
-window.learningengine=
-
-new LearningEngine();
+};

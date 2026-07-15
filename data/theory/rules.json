@@ -1,100 +1,19 @@
 {
-    "name": "大乐透AI规则配置",
-    "version": "V90.0",
+  "frontCount":5,
+  "backCount":2,
 
-    "switch": {
+  "frontRange":[1,35],
+  "backRange":[1,12],
 
-        "sumCheck": true,
+  "rules":{
 
-        "oddEvenCheck": true,
+    "allowRepeat":true,
 
-        "areaCheck": true,
+    "maxSameNumber":3,
 
-        "continuousCheck": true,
+    "maxConsecutive":3,
 
-        "tailCheck": true,
+    "sumRange":[50,170]
 
-        "spanCheck": true
-
-    },
-
-
-    "filter": {
-
-
-        "sum": {
-
-            "enable": true,
-
-            "min": 60,
-
-            "max": 160
-
-        },
-
-
-        "oddEven": {
-
-            "enable": true,
-
-            "allow": [
-
-                "2:3",
-                "3:2"
-
-            ]
-
-        },
-
-
-        "continuous": {
-
-            "enable": true,
-
-            "maxCount": 2
-
-        },
-
-
-        "sameTail": {
-
-            "enable": true,
-
-            "maxCount": 2
-
-        },
-
-
-        "duplicate": {
-
-            "enable": true,
-
-            "maxNumber": 3
-
-        }
-
-
-    },
-
-
-    "scoreWeight": {
-
-
-        "structure": 0.25,
-
-
-        "frequency": 0.20,
-
-
-        "markov": 0.20,
-
-
-        "bayes": 0.20,
-
-
-        "risk": 0.15
-
-
-    }
-
+  }
 }

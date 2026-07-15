@@ -6,20 +6,25 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+content="width=device-width,
+initial-scale=1.0">
+
 
 <title>
-大乐透智能分析系统 V90 AI CORE
+大乐透AI_V90
 </title>
 
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet"
+href="style.css">
+
 
 </head>
 
 
 
 <body>
+
 
 
 <div class="container">
@@ -36,29 +41,30 @@ V90 AI CORE
 
 
 
-<!-- 系统状态 -->
 
-<div class="card">
+<div class="panel">
+
 
 <h3>
 系统状态
 </h3>
 
-<div id="status">
+
+<div id="systemStatus">
 
 等待加载...
 
 </div>
 
+
 </div>
 
 
 
 
 
-<!-- AI进度 -->
 
-<div class="card">
+<div class="panel">
 
 
 <h3>
@@ -66,36 +72,35 @@ AI分析进度
 </h3>
 
 
-<div class="progress-box">
+<div class="progress">
 
 
-<div id="progress-bar">
-
-</div>
-
+<div id="progressBar">
 
 </div>
 
 
-<div id="progress-text">
+</div>
+
+
+<p id="progressText">
 
 等待任务...
 
+</p>
+
+
+
 </div>
 
 
-</div>
 
 
 
 
 
 
-
-<!-- 分析中心 -->
-
-
-<div class="card">
+<div class="panel">
 
 
 <h3>
@@ -103,20 +108,14 @@ AI智能分析中心
 </h3>
 
 
-<button id="start-btn"
-onclick="startAnalysis()">
+
+<button onclick="startV90()">
 
 开始 V90 AI分析
 
 </button>
 
 
-<div id="task-status">
-
-等待分析...
-
-</div>
-
 
 </div>
 
@@ -126,11 +125,7 @@ onclick="startAnalysis()">
 
 
 
-
-<!-- 预测报告 -->
-
-
-<div class="card">
+<div class="panel">
 
 
 <h3>
@@ -138,27 +133,25 @@ AI多模型预测报告
 </h3>
 
 
-<div id="report">
 
-等待生成...
+<div id="result">
 
-</div>
-
+等待分析...
 
 </div>
 
 
 
+</div>
 
 
 
 
 
 
-<!-- 回测 -->
 
 
-<div class="card">
+<div class="panel">
 
 
 <h3>
@@ -166,20 +159,21 @@ AI多模型预测报告
 </h3>
 
 
-<button onclick="startBacktest()">
+<button>
 
 开始回测
 
 </button>
 
 
-<div id="backtest">
+<div>
 
 等待测试...
 
 </div>
 
 
+
 </div>
 
 
@@ -188,12 +182,7 @@ AI多模型预测报告
 
 
 
-
-
-<!-- 开奖反馈学习 -->
-
-
-<div class="card">
+<div class="panel">
 
 
 <h3>
@@ -201,39 +190,21 @@ AI多模型预测报告
 </h3>
 
 
+<textarea
+id="feedback"
+placeholder="输入实际开奖">
 
-<input id="front-input"
-
-placeholder="前区 例如: 03 08 17 26 33">
-
-
-<br><br>
+</textarea>
 
 
-<input id="back-input"
 
-placeholder="后区 例如: 05 11">
-
-
-<br><br>
-
-
-<button onclick="saveFeedback()">
+<button>
 
 保存开奖反馈
 
 </button>
 
 
-
-<div id="feedback">
-
-等待反馈...
-
-</div>
-
-
-
 </div>
 
 
@@ -242,12 +213,7 @@ placeholder="后区 例如: 05 11">
 
 
 
-
-
-<!-- Agent状态 -->
-
-
-<div class="card">
+<div class="panel">
 
 
 <h3>
@@ -255,7 +221,7 @@ V90 AI Agent模型
 </h3>
 
 
-<div id="agents">
+<div>
 
 加载中...
 
@@ -266,20 +232,29 @@ V90 AI Agent模型
 
 
 
-
-
-
-
 </div>
 
 
 
 
 
-<!-- ================= -->
-<!-- CORE -->
-<!-- ================= -->
 
+
+
+
+<!-- 核心 -->
+
+<script src="engine.js"></script>
+
+
+
+<!-- core -->
+
+<script src="core/loadingengine.js"></script>
+
+<script src="core/taskengine.js"></script>
+
+<script src="core/masterengine.js"></script>
 
 <script src="core/dataengine.js"></script>
 
@@ -301,23 +276,17 @@ V90 AI Agent模型
 
 <script src="core/scoringengine.js"></script>
 
+<script src="core/riskengine.js"></script>
+
 <script src="core/evaluationengine.js"></script>
 
 <script src="core/learningengine.js"></script>
 
-<script src="core/riskengine.js"></script>
-
-<script src="core/loadingengine.js"></script>
-
-<script src="core/taskengine.js"></script>
 
 
 
 
-
-<!-- ================= -->
-<!-- AGENTS -->
-<!-- ================= -->
+<!-- agents -->
 
 
 <script src="agents/trendagent.js"></script>
@@ -326,9 +295,11 @@ V90 AI Agent模型
 
 <script src="agents/markovagent.js"></script>
 
-<script src="agents/theoryagent.js"></script>
-
 <script src="agents/riskagent.js"></script>
+
+<script src="agents/reviewagent.js"></script>
+
+<script src="agents/theoryagent.js"></script>
 
 <script src="agents/criticagent.js"></script>
 
@@ -341,29 +312,7 @@ V90 AI Agent模型
 
 
 
-
-<!-- ================= -->
-<!-- WORKER -->
-<!-- ================= -->
-
-
-<script src="worker/analysisworker.js"></script>
-
-
-
-
-
-<!-- ================= -->
-<!-- ENGINE -->
-<!-- ================= -->
-
-
-<script src="engine.js"></script>
-
-
-
-<!-- 页面控制 -->
-
+<!-- 控制 -->
 
 <script src="script.js"></script>
 

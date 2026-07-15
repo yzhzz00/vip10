@@ -1,65 +1,99 @@
-/*
-================================
-大乐透AI_V90 AGENTS
-
-antihumanagent.js
-
-反人类偏差智能体
-================================
-*/
+// 大乐透AI_V90
+// Anti Human Agent
+// 反人类偏差智能体
 
 
-class AntiHumanAgent{
+window.AntiHumanAgent = {
 
 
-    constructor(){
-
-
-        this.name="antihumanagent";
-
-
-    }
+    name:
+    "反人类思维Agent",
 
 
 
 
 
 
+    analyze(
+        data
+    ){
 
 
 
-    // ==========================
-    // 反偏差分析
-    // ==========================
+        let result={
 
 
-    analyze(candidate,context={}){
+            score:50,
 
 
+            message:"",
 
-        let penalty=0;
 
-
-        let detail=[];
+            warnings:[]
 
 
 
-
-
-
-
-        let feature=
-
-        context.feature;
+        };
 
 
 
 
 
+        if(
+            !data.prediction
+        ){
 
 
 
-        if(feature){
+            return {
+
+
+                score:0,
+
+
+                message:
+                "暂无预测方案"
+
+
+
+            };
+
+
+        }
+
+
+
+
+
+
+
+
+        let candidate =
+
+        data.prediction;
+
+
+
+
+
+
+
+        // ===================
+        // 检查号码集中热门
+        // ===================
+
+
+        if(
+            data.features &&
+            data.features.frequency
+        ){
+
+
+
+            let freq =
+
+            data.features.frequency.front;
+
 
 
 
@@ -69,45 +103,27 @@ class AntiHumanAgent{
 
 
 
+            candidate.front.forEach(
+                n=>{
 
 
-            candidate.front
-
-            .forEach(n=>{
-
-
-
-                let freq=
-
-                feature.frontFrequency[n]
-
-                ||
-
-                0;
+                    if(
+                        freq[n]
+                        &&
+                        freq[n]
+                        >
+                        30
+                    ){
 
 
+                        hotCount++;
 
 
-
-
-
-                // 过热号码
-
-
-                if(freq>250){
-
-
-
-                    hotCount++;
-
+                    }
 
 
                 }
-
-
-
-            });
-
+            );
 
 
 
@@ -115,20 +131,19 @@ class AntiHumanAgent{
 
 
 
-            if(hotCount>=4){
+            if(
+                hotCount>=4
+            ){
 
 
 
-                penalty+=2;
+                result.score-=20;
 
 
 
-                detail.push(
-
-                "热门集中风险"
-
+                result.warnings.push(
+                    "号码过度集中热门"
                 );
-
 
 
             }
@@ -145,49 +160,37 @@ class AntiHumanAgent{
 
 
 
-        // ==================
-        // 检查号码密集
-        // ==================
+        // ===================
+        // 检查号码过于整齐
+        // ===================
 
 
-        let front=
+        let sum=
 
-        [...candidate.front]
-
-        .sort(
-
-        (a,b)=>a-b
-
+        candidate.front.reduce(
+            (
+                a,b
+            )=>
+            a+b,
+            0
         );
 
 
 
 
 
-
-
-        let range=
-
-        front[4]-front[0];
-
+        if(
+            sum%10===0
+        ){
 
 
 
+            result.score-=5;
 
 
 
-        if(range<15){
-
-
-
-            penalty+=1;
-
-
-
-            detail.push(
-
-            "号码跨度过小"
-
+            result.warnings.push(
+                "和值存在人为偏好风险"
             );
 
 
@@ -202,113 +205,101 @@ class AntiHumanAgent{
 
 
 
-        // ==================
-        // 检查尾数集中
-        // ==================
+        // ===================
+        // 检查尾数规律
+        // ===================
 
 
-        let tails={};
+        let tails =
 
+        candidate.front.map(
+            n=>n%10
+        );
 
 
 
+        let unique =
 
+        new Set(
+            tails
+        );
 
 
-        front.forEach(n=>{
 
 
+        if(
+            unique.size<=2
+        ){
 
-            let t=
 
-            n%10;
 
+            result.score-=15;
 
 
 
+            result.warnings.push(
+                "尾数过度集中"
+            );
 
 
+        }
 
-            tails[t]=
 
-            (
 
-            tails[t]||0
 
-            )
 
-            +1;
 
 
 
-        });
+        if(
+            result.warnings.length
+            >0
+        ){
 
 
 
+            result.message=
 
+            "反人类检查发现："
 
+            +
 
+            result.warnings.join(
+                "、"
+            );
 
 
-        Object.values(tails)
 
-        .forEach(v=>{
+        }
 
+        else{
 
 
-            if(v>=3){
+            result.message=
 
+            "未发现明显人为偏差";
 
 
-                penalty+=1;
 
+        }
 
 
-                detail.push(
 
-                "尾数集中"
 
-                );
 
 
+        result.score=
 
-            }
+        Math.max(
+            0,
+            result.score
+        );
 
 
 
-        });
 
 
-
-
-
-
-
-
-
-        return {
-
-
-
-            agent:this.name,
-
-
-
-            penalty,
-
-
-
-            score:
-
-            -penalty,
-
-
-
-            detail
-
-
-
-        };
+        return result;
 
 
 
@@ -317,42 +308,4 @@ class AntiHumanAgent{
 
 
 
-
-
-
-
-
-    status(){
-
-
-
-        return {
-
-
-
-            agent:this.name,
-
-
-            ready:true
-
-
-
-        };
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-window.antihumanagent=
-
-new AntiHumanAgent();
+};

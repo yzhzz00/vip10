@@ -1,145 +1,113 @@
-/*
-================================
-大乐透AI_V90 CORE
+// 大乐透AI_V90
+// Bayes Engine
+// 贝叶斯概率修正引擎
 
-bayesengine.js
 
-贝叶斯概率修正引擎
-================================
-*/
+window.BayesEngine = {
 
 
-class BayesEngine{
+    history: [],
 
 
-    constructor(){
+    prior:{},
 
 
-        this.name="bayes";
+    posterior:{},
 
 
-        this.probability={};
 
+    initialized:false,
 
-        this.ready=false;
 
 
-    }
 
 
 
+    // 初始化
 
 
+    init(history=[]){
 
 
+        this.history =
+        history;
 
 
-    // ==========================
-    // 初始化先验概率
-    // ==========================
 
+        this.calculatePrior();
 
-    init(frequency){
 
 
+        this.initialized=true;
 
-        let total=0;
 
 
+        console.log(
+            "BayesEngine初始化完成"
+        );
 
 
 
+    },
 
 
-        Object.values(frequency)
 
-        .forEach(v=>{
 
 
-            total+=v;
 
 
-        });
 
 
+    // 计算先验概率
 
 
+    calculatePrior(){
 
 
 
-        Object.keys(frequency)
+        let count={};
 
-        .forEach(n=>{
 
 
+        this.history.forEach(
+            item=>{
 
-            this.probability[n]=
 
-            Number(
+                item.front.forEach(
+                    n=>{
 
-            (
 
-            frequency[n]
+                        count[n] =
+                        (count[n]||0)+1;
 
-            /
 
-            total
+                    }
+                );
 
-            )
 
-            .toFixed(6)
+            }
+        );
 
-            );
 
 
+        let total =
+        this.history.length * 5;
 
-        });
 
 
-
-
-
-
-
-        this.ready=true;
-
-
-
-
-
-
-        return this.probability;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 贝叶斯更新
-    // ==========================
-
-
-    update(number,likelihood){
-
-
-
-        if(
-
-        !this.probability[number]
-
+        for(
+            let n=1;
+            n<=35;
+            n++
         ){
 
 
 
-            return 0;
+            this.prior[n] =
+
+            (count[n]||0)
+            /
+            total;
 
 
 
@@ -148,12 +116,7 @@ class BayesEngine{
 
 
 
-
-
-
-        let prior=
-
-        this.probability[number];
+    },
 
 
 
@@ -161,37 +124,65 @@ class BayesEngine{
 
 
 
-        let posterior=
-
-        prior*
-
-        likelihood;
 
 
+    // 贝叶斯更新
+
+
+    update(
+        evidence={}
+    ){
+
+
+
+        let result={};
 
 
 
 
+        for(
+            let n in this.prior
+        ){
 
-        this.probability[number]=
 
-        Number(
 
-        posterior.toFixed(6)
+            let prior =
+            this.prior[n];
 
+
+
+            let likelihood =
+
+            evidence[n]
+            ||
+            1;
+
+
+
+            result[n] =
+
+            prior *
+            likelihood;
+
+
+
+        }
+
+
+
+        this.posterior =
+
+        this.normalize(
+            result
         );
 
 
 
+        return this.posterior;
 
 
 
-
-        return this.probability[number];
-
-
-
-    }
+    },
 
 
 
@@ -201,95 +192,138 @@ class BayesEngine{
 
 
 
-    // ==========================
-    // 候选评分
-    // ==========================
+    // 条件概率修正
 
 
-    score(candidate){
-
-
-
-        let score=0;
+    conditionalUpdate(
+        recent=[]
+    ){
 
 
 
+        let factor={};
 
 
 
-
-        candidate.front
-
-        .forEach(n=>{
+        recent.forEach(
+            item=>{
 
 
-
-            if(
-
-            this.probability[n]
-
-            ){
+                item.front.forEach(
+                    n=>{
 
 
+                        factor[n] =
 
-                score+=
+                        (
+                            factor[n]||0
+                        )
+                        +
+                        1;
 
-                this.probability[n];
 
+                    }
+                );
 
 
             }
-
-
-
-        });
-
-
-
-
-
-
-
-        candidate.back
-
-        .forEach(n=>{
-
-
-
-            if(
-
-            this.probability[n]
-
-            ){
-
-
-
-                score+=
-
-                this.probability[n];
-
-
-
-            }
-
-
-
-        });
-
-
-
-
-
-
-
-        return Number(
-
-        score.toFixed(6)
-
         );
 
 
 
+        return this.update(
+            factor
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 获取预测概率
+
+
+    predict(){
+
+
+        return this.posterior;
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 归一化
+
+
+    normalize(data){
+
+
+
+        let sum=0;
+
+
+
+        for(
+            let k in data
+        ){
+
+
+            sum += data[k];
+
+
+        }
+
+
+
+
+        let result={};
+
+
+
+        if(sum===0){
+
+            return data;
+
+        }
+
+
+
+
+        for(
+            let k in data
+        ){
+
+
+
+            result[k] =
+
+            data[k]/sum;
+
+
+
+        }
+
+
+
+
+        return result;
+
+
+
     }
 
 
@@ -297,63 +331,4 @@ class BayesEngine{
 
 
 
-
-
-
-    // ==========================
-    // 获取概率
-    // ==========================
-
-
-    get(number){
-
-
-
-        return this.probability[number] || 0;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    status(){
-
-
-
-        return {
-
-
-
-            engine:this.name,
-
-
-            ready:this.ready
-
-
-
-        };
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-window.bayesengine=
-
-new BayesEngine();
+};

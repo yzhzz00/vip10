@@ -1,114 +1,118 @@
-/*
-================================
-大乐透AI_V90 CORE
-
-dataengine.js
-
-大乐透TXT数据读取引擎
-================================
-*/
+// 大乐透AI_V90
+// Data Engine
+// 历史开奖数据管理
 
 
-class DataEngine{
+window.DataEngine = {
 
 
-    constructor(){
+    history: [],
 
 
-        this.name="data";
+    loaded:false,
 
 
-        this.data=[];
+
+    // 初始化
+
+    async init(){
 
 
-        this.loaded=false;
+        await this.loadData();
 
 
-    }
+    },
 
 
 
 
 
+    // 加载历史数据
+
+
+    async loadData(){
+
+
+        try{
+
+
+            let response =
+
+            await fetch(
+                "data/dlt.txt"
+            );
+
+
+
+            let text =
+
+            await response.text();
+
+
+
+            this.history =
+
+            this.parseData(
+                text
+            );
+
+
+
+            this.loaded=true;
+
+
+
+            console.log(
+                "历史数据加载完成:",
+                this.history.length
+            );
+
+
+
+        }catch(error){
+
+
+
+            console.error(
+                "数据加载失败",
+                error
+            );
+
+
+
+            this.history=[];
+
+
+
+        }
+
+
+
+    },
 
 
 
 
-    // ==========================
-    // 加载TXT文件
-    // ==========================
-
-
-    async load(){
 
 
 
-        let response=
 
-        await fetch(
 
-            "data/dlt.txt"
+    // 数据解析
 
+
+    parseData(text){
+
+
+
+        let lines =
+
+        text
+        .split("\n")
+        .filter(
+            line =>
+            line.trim()!==""
         );
-
-
-
-
-
-        let text=
-
-        await response.text();
-
-
-
-
-
-
-        this.data=
-
-        this.parse(text);
-
-
-
-
-
-
-        this.loaded=true;
-
-
-
-
-
-
-
-        return this.data;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // TXT解析
-    // ==========================
-
-
-    parse(text){
-
-
-
-        let lines=
-
-        text.split("\n");
-
-
 
 
 
@@ -116,178 +120,34 @@ class DataEngine{
 
 
 
+        for(
+            let line of lines
+        ){
+
+
+            let item =
+
+            this.parseLine(
+                line
+            );
 
 
 
+            if(item){
 
-        lines.forEach(line=>{
-
-
-
-            line=line.trim();
-
-
-
-
-
-
-
-            if(!line){
-
-
-
-                return;
-
-
+                result.push(item);
 
             }
 
 
-
-
-
-
-
-            let parts=
-
-            line.split(/\s+/);
-
-
-
-
-
-
-
-            if(parts.length<8){
-
-
-
-                return;
-
-
-
-            }
-
-
-
-
-
-
-
-
-            let period=
-
-            parts[0];
-
-
-
-
-
-
-
-            let date=
-
-            parts[1];
-
-
-
-
-
-
-
-
-            let numbers=
-
-            parts
-
-            .slice(2)
-
-            .map(Number);
-
-
-
-
-
-
-
-            let front=
-
-            numbers.slice(0,5);
-
-
-
-
-
-
-
-            let back=
-
-            numbers.slice(5,7);
-
-
-
-
-
-
-
-
-            result.push({
-
-
-
-                period,
-
-
-                date,
-
-
-                front,
-
-
-                back
-
-
-
-            });
-
-
-
-        });
-
-
-
-
+        }
 
 
 
         return result;
 
 
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 获取数据
-    // ==========================
-
-
-    get(){
-
-
-
-        return this.data;
-
-
-
-    }
+    },
 
 
 
@@ -297,53 +157,99 @@ class DataEngine{
 
 
 
-    // ==========================
-    // 最近多少期
-    // ==========================
+    // 单行解析
 
 
-    recent(count=50){
+    parseLine(line){
 
 
 
-        return this.data.slice(
+        /*
+        
+        支持格式：
 
-            -count
+        2026001 01 05 12 23 35 03 08
 
+        或
+
+        01 05 12 23 35 + 03 08
+
+        */
+
+
+
+        let clean =
+
+        line.replace(
+            /\+/g,
+            " "
         );
 
 
 
-    }
+        let nums =
+
+        clean
+        .split(
+            /\s+/
+        )
+        .map(
+            Number
+        )
+        .filter(
+            n =>
+            !isNaN(n)
+        );
 
 
 
+        if(
+            nums.length < 7
+        ){
+
+            return null;
+
+        }
 
 
 
+        let start = 0;
 
 
 
-    // ==========================
-    // 状态
-    // ==========================
+        // 如果第一位是期号
 
+        if(
+            nums.length >=8
+        ){
 
-    status(){
+            start=1;
+
+        }
+
 
 
 
         return {
 
 
-
-            engine:this.name,
-
-
-            loaded:this.loaded,
+            front:
 
 
-            total:this.data.length
+            nums.slice(
+                start,
+                start+5
+            ),
+
+
+
+            back:
+
+
+            nums.slice(
+                start+5,
+                start+7
+            )
 
 
 
@@ -351,18 +257,67 @@ class DataEngine{
 
 
 
+    },
+
+
+
+
+
+
+
+
+
+    // 获取全部历史
+
+
+    getHistory(){
+
+
+        return this.history;
+
+
+    },
+
+
+
+
+
+
+
+    // 获取最近多少期
+
+
+    getRecent(
+        count=100
+    ){
+
+
+        return this.history.slice(
+            -count
+        );
+
+
+    },
+
+
+
+
+
+
+
+    // 获取最新一期
+
+
+    getLatest(){
+
+
+        return this.history[
+            this.history.length-1
+        ];
+
+
     }
 
 
 
-}
-
-
-
-
-
-
-
-window.dataengine=
-
-new DataEngine();
+};

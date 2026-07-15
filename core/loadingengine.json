@@ -1,108 +1,181 @@
-/*
-================================
-大乐透AI_V90 CORE
-
-loadingengine.js
-
-加载进度引擎
-================================
-*/
+// 大乐透AI_V90
+// Loading Engine
+// 负责任务进度与分段计算状态
 
 
-class LoadingEngine{
+window.LoadingEngine = {
 
 
-    constructor(){
+    progress:0,
 
 
-        this.name="loading";
+    currentTask:"等待任务",
 
 
-        this.progress=0;
-
-
-        this.message="等待分析";
-
-
-        this.history=[];
-
-
-    }
+    status:"idle",
 
 
 
+    // 初始化
+
+    init(){
+
+
+        this.progress = 0;
+
+        this.currentTask =
+        "系统准备";
+
+        this.status =
+        "ready";
+
+
+        this.updateUI();
+
+
+    },
+
+
+
+
+
+    // 开始任务
+
+
+    start(task){
+
+
+        this.status =
+        "running";
+
+
+        this.currentTask =
+        task;
+
+
+        this.setProgress(
+            0,
+            task
+        );
+
+
+    },
 
 
 
 
 
 
-    // ==========================
+
     // 更新进度
-    // ==========================
 
 
-    update(progress,message){
+    setProgress(
+        percent,
+        task
+    ){
+
+
+        this.progress =
+        percent;
+
+
+        if(task){
+
+            this.currentTask =
+            task;
+
+        }
 
 
 
-        this.progress=
+        this.updateUI();
 
-        Math.min(
 
-            100,
+    },
 
-            Math.max(
 
-                0,
 
-                progress
 
-            )
 
+
+
+
+    // 增加进度
+
+
+    addProgress(
+        value,
+        task
+    ){
+
+
+
+        let next =
+        this.progress + value;
+
+
+
+        if(next>100){
+
+            next=100;
+
+        }
+
+
+
+        this.setProgress(
+            next,
+            task
         );
 
 
 
+    },
 
 
 
 
-        this.message=
 
-        message || "";
 
 
 
+    // 完成任务
 
 
+    finish(task){
 
 
+        this.progress =
+        100;
 
-        let state={
 
+        this.status =
+        "complete";
 
 
-            progress:
 
-            this.progress,
+        if(task){
 
+            this.currentTask =
+            task;
 
+        }else{
 
-            message:
 
-            this.message,
+            this.currentTask =
+            "任务完成";
 
 
+        }
 
-            time:
 
-            Date.now()
 
+        this.updateUI();
 
 
-        };
 
+    },
 
 
 
@@ -110,78 +183,99 @@ class LoadingEngine{
 
 
 
-        this.history.push(state);
+    // 分段等待
 
+    async sleep(ms){
 
 
+        return new Promise(
+            resolve =>
+            setTimeout(
+                resolve,
+                ms
+            )
+        );
 
 
+    },
 
 
-        this.send();
 
 
 
-        return state;
 
 
 
-    }
+    // 执行分段任务
 
 
+    async runChunk(
+        total,
+        batch,
+        callback,
+        name
+    ){
 
 
 
+        let completed = 0;
 
 
 
+        this.start(
+            name
+        );
 
-    // ==========================
-    // 通知页面
-    // ==========================
 
 
-    send(){
-
-
-
-        if(
-
-        typeof window !== "undefined"
-
+        while(
+            completed < total
         ){
 
 
 
-            window.dispatchEvent(
-
-                new CustomEvent(
-
-                    "V90_PROGRESS",
-
-                    {
-
-                        detail:{
-
-
-                            progress:
-
-                            this.progress,
-
-
-                            message:
-
-                            this.message
-
-
-
-                        }
-
-                    }
-
-                )
-
+            let current =
+            Math.min(
+                batch,
+                total-completed
             );
+
+
+
+            await callback(
+                current,
+                completed
+            );
+
+
+
+            completed += current;
+
+
+
+            let percent =
+            Math.floor(
+                completed /
+                total *
+                100
+            );
+
+
+
+            this.setProgress(
+                percent,
+                name+
+                " "+
+                completed+
+                "/"+
+                total
+            );
+
+
+
+            // 给手机浏览器释放时间
+
+            await this.sleep(20);
 
 
 
@@ -189,7 +283,12 @@ class LoadingEngine{
 
 
 
-    }
+        this.finish(
+            name+"完成"
+        );
+
+
+    },
 
 
 
@@ -199,65 +298,22 @@ class LoadingEngine{
 
 
 
-    // ==========================
-    // 重置
-    // ==========================
+    // 更新页面
 
 
-    reset(){
+    updateUI(){
 
 
-
-        this.progress=0;
-
-
-        this.message="等待分析";
+        if(window.UI){
 
 
-        this.history=[];
+            window.UI.updateProgress(
+                this.progress,
+                this.currentTask
+            );
 
 
-        this.send();
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // 获取状态
-    // ==========================
-
-
-    get(){
-
-
-
-        return {
-
-
-
-            progress:
-
-            this.progress,
-
-
-
-            message:
-
-            this.message
-
-
-
-        };
-
+        }
 
 
     }
@@ -265,40 +321,4 @@ class LoadingEngine{
 
 
 
-
-
-
-    status(){
-
-
-
-        return {
-
-
-
-            engine:this.name,
-
-
-            ...this.get()
-
-
-
-        };
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-window.loadingengine=
-
-new LoadingEngine();
+};

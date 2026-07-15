@@ -1,27 +1,25 @@
-/*
-================================
-大乐透AI_V90 AGENTS
-
-masteragent.js
-
-Agent总控智能体
-================================
-*/
+// 大乐透AI_V90
+// Master Agent V2
+// AI会议总裁决系统
 
 
-class MasterAgent{
+window.MasterAgent = {
 
 
-    constructor(){
+    name:
+    "AI总会议Agent",
 
 
-        this.name="masteragent";
+
+    agents:{},
 
 
-        this.result=[];
+
+    weights:{},
 
 
-    }
+
+    initialized:false,
 
 
 
@@ -29,18 +27,52 @@ class MasterAgent{
 
 
 
-
-
-    // ==========================
-    // 综合分析
-    // ==========================
-
-
-    analyze(candidates,context={}){
+    init(){
 
 
 
-        let results=[];
+        this.agents={
+
+
+
+            trend:
+            window.TrendAgent,
+
+
+            structure:
+            window.StructureAgent,
+
+
+            markov:
+            window.MarkovAgent,
+
+
+            theory:
+            window.TheoryAgent,
+
+
+            risk:
+            window.RiskAgent,
+
+
+            review:
+            window.ReviewAgent,
+
+
+            critic:
+            window.CriticAgent,
+
+
+            learning:
+            window.LearningAgent,
+
+
+            antihuman:
+            window.AntiHumanAgent
+
+
+
+        };
 
 
 
@@ -48,49 +80,223 @@ class MasterAgent{
 
 
 
-        candidates.forEach(candidate=>{
+        this.weights={
+
+
+            trend:0.10,
+
+
+            structure:0.15,
+
+
+            markov:0.15,
+
+
+            theory:0.15,
+
+
+            risk:0.10,
+
+
+            review:0.10,
+
+
+            critic:0.10,
+
+
+            learning:0.10,
+
+
+            antihuman:0.05
 
 
 
-            let total=0;
-
-
-            let details=[];
+        };
 
 
 
 
 
+        this.initialized=true;
 
 
 
-            // 趋势
+        console.log(
+            "MasterAgent V2启动完成"
+        );
 
 
-            if(window.trendagent){
+
+    },
 
 
 
-                let r=
 
-                window.trendagent.analyze(
 
-                    candidate,
 
-                    context
 
+
+
+    // AI会议
+
+
+    async analyze(
+        data
+    ){
+
+
+
+        if(
+            !this.initialized
+        ){
+
+
+            this.init();
+
+
+        }
+
+
+
+
+
+
+        let opinions={};
+
+
+
+
+        for(
+            let key in this.agents
+        ){
+
+
+
+            let agent =
+
+            this.agents[key];
+
+
+
+
+            if(
+                agent &&
+                agent.analyze
+            ){
+
+
+
+                opinions[key]=
+
+                await agent.analyze(
+                    data
                 );
 
 
 
+            }
+
+
+        }
 
 
 
 
-                total+=r.score;
 
 
-                details.push(r);
+        return this.judge(
+            opinions
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 最终裁决
+
+
+    judge(
+        opinions
+    ){
+
+
+
+        let support=0;
+
+
+        let oppose=0;
+
+
+        let messages=[];
+
+
+
+
+
+
+        for(
+            let key in opinions
+        ){
+
+
+
+            let item =
+            opinions[key];
+
+
+
+            let weight =
+            this.weights[key]
+            ||
+            0;
+
+
+
+
+
+            let score =
+
+            item.score
+            ||
+            0;
+
+
+
+
+
+
+            if(
+                score>=50
+            ){
+
+
+
+                support +=
+
+                score*
+                weight;
+
+
+
+            }
+
+            else{
+
+
+
+                oppose +=
+
+                (100-score)
+                *
+                weight;
 
 
 
@@ -102,255 +308,17 @@ class MasterAgent{
 
 
 
+            messages.push({
 
-            // 结构
 
+                agent:key,
 
-            if(window.structureagent){
 
+                score,
 
 
-                let r=
-
-                window.structureagent.analyze(
-
-                    candidate
-
-                );
-
-
-
-
-
-
-
-                total+=r.score;
-
-
-                details.push(r);
-
-
-
-            }
-
-
-
-
-
-
-
-
-            // 马尔可夫
-
-
-            if(window.markovagent){
-
-
-
-                let r=
-
-                window.markovagent.analyze(
-
-                    candidate,
-
-                    context.last
-
-                );
-
-
-
-
-
-
-
-                total+=r.score;
-
-
-                details.push(r);
-
-
-
-            }
-
-
-
-
-
-
-
-
-            // 理论
-
-
-            if(window.theoryagent){
-
-
-
-                let r=
-
-                window.theoryagent.analyze(
-
-                    candidate
-
-                );
-
-
-
-
-
-
-
-                total+=r.score;
-
-
-                details.push(r);
-
-
-
-            }
-
-
-
-
-
-
-
-
-            // 风险
-
-
-            if(window.riskagent){
-
-
-
-                let r=
-
-                window.riskagent.analyze(
-
-                    candidate
-
-                );
-
-
-
-
-
-
-
-                total+=r.score;
-
-
-                details.push(r);
-
-
-
-            }
-
-
-
-
-
-
-
-
-            // 批判
-
-
-            if(window.criticagent){
-
-
-
-                let r=
-
-                window.criticagent.analyze(
-
-                    candidate,
-
-                    total
-
-                );
-
-
-
-
-
-
-
-                total=
-
-                r.finalScore;
-
-
-                details.push(r);
-
-
-
-            }
-
-
-
-
-
-
-
-
-            // 反人类
-
-
-            if(window.antihumanagent){
-
-
-
-                let r=
-
-                window.antihumanagent.analyze(
-
-                    candidate,
-
-                    context
-
-                );
-
-
-
-
-
-
-
-                total+=r.score;
-
-
-                details.push(r);
-
-
-
-            }
-
-
-
-
-
-
-
-
-            results.push({
-
-
-
-                candidate,
-
-
-                score:
-
-                Number(
-
-                total.toFixed(6)
-
-                ),
-
-
-
-                details
+                message:
+                item.message
 
 
 
@@ -358,7 +326,7 @@ class MasterAgent{
 
 
 
-        });
+        }
 
 
 
@@ -366,15 +334,10 @@ class MasterAgent{
 
 
 
+        let finalScore =
 
-
-        results.sort(
-
-            (a,b)=>
-
-            b.score-a.score
-
-        );
+        support -
+        oppose;
 
 
 
@@ -382,69 +345,64 @@ class MasterAgent{
 
 
 
-        this.result=
-
-        results.slice(
-
-            0,
-
-            10
-
-        );
+        let decision;
 
 
 
+        if(
+            finalScore>20
+        ){
 
 
+            decision=
+            "AI倾向执行";
+
+        }
+
+        else if(
+            finalScore<-20
+        ){
 
 
-
-        return this.result;
-
-
-
-    }
+            decision=
+            "AI建议否定";
 
 
+        }
+
+        else{
 
 
+            decision=
+            "AI保持谨慎";
 
 
-
-
-
-    getResult(){
-
-
-
-        return this.result;
-
-
-
-    }
+        }
 
 
 
 
 
-
-
-
-
-    status(){
 
 
 
         return {
 
 
+            score:
 
-            agent:this.name,
+            Number(
+                finalScore.toFixed(2)
+            ),
 
 
-            count:
 
-            this.result.length
+            decision,
+
+
+
+            opinions:
+            messages
 
 
 
@@ -456,14 +414,4 @@ class MasterAgent{
 
 
 
-}
-
-
-
-
-
-
-
-window.masteragent=
-
-new MasterAgent();
+};

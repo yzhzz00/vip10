@@ -1,62 +1,80 @@
-/*
-================================
-大乐透AI_V90 CORE
-
-taskengine.js
-
-分段任务调度引擎
-================================
-*/
+// 大乐透AI_V90
+// Task Engine
+// 分析任务调度中心
 
 
-class TaskEngine{
+window.TaskEngine = {
 
 
-    constructor(){
+    tasks:{},
 
 
-        this.name="task";
+    running:false,
 
+
+
+    // 初始化
+
+    init(){
+
+
+        this.tasks={};
 
         this.running=false;
 
 
-        this.tasks=[];
+        console.log(
+            "TaskEngine初始化完成"
+        );
 
 
-    }
-
-
-
-
+    },
 
 
 
 
 
-    // ==========================
+    // 注册任务
+
+
+    register(
+        name,
+        handler
+    ){
+
+
+        this.tasks[name]=handler;
+
+
+    },
+
+
+
+
+
+
+
     // 执行任务
-    // ==========================
 
 
-    async run(options){
+    async execute(
+        name,
+        params={}
+    ){
 
 
 
-        if(this.running){
-
+        if(
+            !this.tasks[name]
+        ){
 
 
             throw new Error(
-
-            "已有任务运行"
-
+                "任务不存在:"+name
             );
 
 
         }
-
-
 
 
 
@@ -65,174 +83,14 @@ class TaskEngine{
 
 
 
-
-
-
-
-        let total=
-
-        options.total || 1000000;
-
-
-
-
-
-
-
-        let batch=
-
-        options.batch || 50000;
-
-
-
-
-
-
-
-        let result=[];
-
-
-
-
-
-
-
-        let completed=0;
-
-
-
-
-
-
-
-
-        while(
-
-        completed < total
-
-        ){
-
-
-
-            let current=
-
-            Math.min(
-
-                batch,
-
-                total-completed
-
-            );
-
-
-
-
-
-
-
-            let data=
-
-            await this.executeBatch(
-
-                current,
-
-                options
-
-            );
-
-
-
-
-
-
-
-
-            result=
-
-            result.concat(data);
-
-
-
-
-
-
-
-            completed+=current;
-
-
-
-
-
-
-
-            let progress=
-
-            Math.floor(
-
-                completed
-
-                /
-
-                total
-
-                *
-
-                100
-
-            );
-
-
-
-
-
-
-
-
-            if(window.loadingengine){
-
-
-
-                window.loadingengine.update(
-
-                    progress,
-
-                    "计算中 "+
-
-                    completed+
-
-                    "/"+
-
-                    total
-
-                );
-
-
-            }
-
-
-
-
-
-
-
-            await this.sleep(10);
-
-
-
-        }
-
-
-
-
-
+        let result =
+        await this.tasks[name](
+            params
+        );
 
 
 
         this.running=false;
-
-
-
-
 
 
 
@@ -240,7 +98,7 @@ class TaskEngine{
 
 
 
-    }
+    },
 
 
 
@@ -248,203 +106,183 @@ class TaskEngine{
 
 
 
+    // 执行完整AI分析流程
 
 
-    // ==========================
-    // 执行单批任务
-    // ==========================
+    async runAnalysis(){
 
 
-    executeBatch(size,options){
 
+        if(
+            !window.LoadingEngine
+        ){
 
+            throw new Error(
+                "LoadingEngine未加载"
+            );
 
-        return new Promise(
+        }
 
-            resolve=>{
 
 
 
 
-
-
-                let worker=
-
-                new Worker(
-
-                    "worker.js"
-
-                );
-
-
-
-
-
-
-
-                worker.postMessage({
-
-
-
-                    type:
-
-                    options.type || 
-
-                    "MONTE_CARLO",
-
-
-
-                    data:
-
-                    options.data || [],
-
-
-
-                    times:
-
-                    size
-
-
-
-                });
-
-
-
-
-
-
-
-
-                worker.onmessage=
-
-                function(event){
-
-
-
-                    worker.terminate();
-
-
-
-                    resolve(
-
-                        event.data.result || []
-
-                    );
-
-
-
-                };
-
-
-
-
-
-
-
-            }
-
+        LoadingEngine.start(
+            "启动AI分析任务"
         );
 
 
 
-    }
 
 
+        // 第一阶段
 
-
-
-
-
-
-
-    // ==========================
-    // 停止任务
-    // ==========================
-
-
-    stop(){
-
-
-
-        this.running=false;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    sleep(ms){
-
-
-
-        return new Promise(
-
-            resolve=>
-
-            setTimeout(
-
-                resolve,
-
-                ms
-
-            )
-
+        await this.executeStage(
+            "读取历史数据",
+            15
         );
 
 
-    }
+
+
+        // 第二阶段
+
+        await this.executeStage(
+            "大乐透理论分析",
+            20
+        );
 
 
 
 
 
+        // 第三阶段
+
+        await this.executeStage(
+            "多模型计算",
+            35
+        );
 
 
 
 
-    status(){
+
+        // 第四阶段
+
+        await this.executeStage(
+            "蒙特卡罗模拟",
+            20
+        );
+
+
+
+
+
+        // 第五阶段
+
+        await this.executeStage(
+            "AI Agent会议",
+            10
+        );
+
+
+
+
+
+        LoadingEngine.finish(
+            "AI分析完成"
+        );
 
 
 
         return {
 
+            status:"complete",
 
-
-            engine:
-
-            this.name,
-
-
-
-            running:
-
-            this.running
-
-
+            message:
+            "分析任务完成"
 
         };
 
+
+    },
+
+
+
+
+
+
+
+
+
+    // 模拟阶段接口
+
+    async executeStage(
+        name,
+        progress
+    ){
+
+
+
+        LoadingEngine.setProgress(
+            LoadingEngine.progress,
+            name
+        );
+
+
+
+        await LoadingEngine.sleep(
+            100
+        );
+
+
+
+        LoadingEngine.addProgress(
+            progress,
+            name
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    // 分批计算接口
+
+
+    async chunkCompute(
+        total,
+        batch,
+        callback,
+        name
+    ){
+
+
+
+        return await LoadingEngine.runChunk(
+
+            total,
+
+            batch,
+
+            callback,
+
+            name
+
+        );
 
 
     }
 
 
 
-}
 
 
-
-
-
-
-
-window.taskengine=
-
-new TaskEngine();
+};
