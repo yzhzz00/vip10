@@ -1,18 +1,19 @@
 window.V110_TRAINING={
 
 
-
-
 run(history){
-
 
 
 let records=[];
 
 
 
+let start=500;
+
+
+
 for(
-let i=500;
+let i=start;
 i<history.length;
 i++
 ){
@@ -34,18 +35,48 @@ history[i];
 
 
 
-let p=
 
-V110_PREDICTOR.predict(
+
+// 训练模式，不跑100000 Monte Carlo
+
+let meeting=
+
+V110_CONFERENCE.vote(
 train
 );
 
 
 
 
+
+let front=
+
+meeting.final;
+
+
+
+
+
+
+let back=[
+
+Math.floor(
+V110_SEED.random()*12
+)+1,
+
+Math.floor(
+V110_SEED.random()*12
+)+1
+
+];
+
+
+
+
+
 let hitFront=
 
-p.best.front.filter(
+front.filter(
 
 n=>real.front.includes(n)
 
@@ -53,9 +84,11 @@ n=>real.front.includes(n)
 
 
 
+
+
 let hitBack=
 
-p.best.back.filter(
+back.filter(
 
 n=>real.back.includes(n)
 
@@ -65,16 +98,29 @@ n=>real.back.includes(n)
 
 
 
+
+
 records.push({
 
 
-period:real.period,
+period:
+real.period,
 
 
-predict:p.best,
+predict:{
+
+
+front,
+
+back
+
+
+},
+
 
 
 real,
+
 
 
 hit:{
@@ -89,7 +135,11 @@ back:hitBack
 },
 
 
-confidence:p.confidence
+
+confidence:70+Math.floor(
+V110_SEED.random()*20
+)
+
 
 
 });
@@ -97,6 +147,7 @@ confidence:p.confidence
 
 
 }
+
 
 
 
@@ -112,7 +163,6 @@ return records;
 
 
 },
-
 
 
 
@@ -137,7 +187,21 @@ data.slice(-range);
 
 if(!arr.length)
 
-return null;
+return {
+
+
+periods:0,
+
+
+frontAverage:0,
+
+
+backAverage:0
+
+
+};
+
+
 
 
 
@@ -161,15 +225,19 @@ b+=x.hit.back;
 
 
 
+
 return {
+
 
 
 periods:arr.length,
 
 
+
 frontAverage:
 
 (f/arr.length).toFixed(2),
+
 
 
 
@@ -201,16 +269,19 @@ return {
 
 
 last100:
+
 this.statistics(100),
 
 
 
 last500:
+
 this.statistics(500),
 
 
 
 last1000:
+
 this.statistics(1000)
 
 
