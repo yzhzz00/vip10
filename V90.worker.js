@@ -1,10 +1,12 @@
-// ==================================================
+// ================================================
 // 大乐透AI V90 Worker
-// Monte Carlo 后台计算
-// ==================================================
+// Monte Carlo计算线程
+// ================================================
 
 
 "use strict";
+
+
 
 
 
@@ -12,229 +14,219 @@ self.onmessage=function(e){
 
 
 
-    let msg=e.data;
+let msg=e.data;
 
 
 
-    if(
-        msg.type!=="MONTE_CARLO"
-    ){
 
-        return;
+if(
+msg.type!=="MONTE_CARLO"
+){
 
-    }
+return;
 
+}
 
 
 
 
-    let times =
-    msg.times || 1000000;
 
+let times =
+msg.times || 1000000;
 
 
 
+let result={};
 
-    let result={};
 
 
 
 
 
 
-    for(
-        let i=0;
-        i<times;
-        i++
-    ){
+for(
+let i=0;
+i<times;
+i++
+){
 
 
 
+let nums=[];
 
 
-        let nums=[];
 
 
 
+while(
+nums.length<5
+){
 
 
-        while(
-            nums.length<5
-        ){
 
+let n=
 
+Math.floor(
+Math.random()*35
+)+1;
 
-            let n =
 
-            Math.floor(
-                Math.random()*35
-            )+1;
 
 
+if(
+!nums.includes(n)
+){
 
 
 
-            if(
-                !nums.includes(n)
-            ){
+nums.push(n);
 
 
 
-                nums.push(n);
+}
 
 
 
-            }
+}
 
 
 
-        }
 
 
 
+nums.sort(
+(a,b)=>a-b
+);
 
 
 
-        nums.sort(
-            (a,b)=>a-b
-        );
 
 
 
+let key=
+nums.join("-");
 
 
 
-        let key =
-        nums.join(",");
 
 
+if(
+!result[key]
+){
 
+result[key]=0;
 
 
-        if(
-            !result[key]
-        ){
+}
 
 
-            result[key]=0;
 
+result[key]++;
 
-        }
 
 
 
 
-        result[key]++;
 
 
 
+// 每50000次反馈一次
 
+if(
+i%50000===0
+){
 
 
 
+self.postMessage({
 
-        // 每5万次返回进度
 
-        if(
-            i%50000===0
-        ){
 
+type:"PROGRESS",
 
 
-            self.postMessage({
 
+value:
 
+Math.floor(
+i/times*100
+),
 
-                type:
-                "PROGRESS",
 
 
+current:i,
 
-                value:
-                Math.floor(
-                    i/times*100
-                ),
 
 
+total:times
 
-                current:i,
 
 
+});
 
-                total:times
 
 
+}
 
-            });
 
 
+}
 
-        }
 
 
 
 
 
-    }
 
 
+let ranking =
 
+Object.keys(result)
 
+.sort(
 
+(a,b)=>
 
+result[b]-result[a]
 
-    let ranking =
+)
 
-    Object.keys(result)
+.slice(0,20)
 
-    .sort(
+.map(x=>({
 
-        (a,b)=>
 
-        result[b]-result[a]
 
-    )
+number:x,
 
-    .slice(0,20)
 
-    .map(x=>({
+count:
+result[x]
 
 
 
-        numbers:x,
+}));
 
 
 
-        count:
-        result[x]
 
 
 
-    }));
 
 
+self.postMessage({
 
 
 
+type:"RESULT",
 
 
-    self.postMessage({
 
+data:ranking
 
 
-        type:
-        "RESULT",
 
-
-
-        data:
-        ranking
-
-
-
-    });
-
-
+});
 
 
 

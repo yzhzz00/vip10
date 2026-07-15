@@ -5,17 +5,13 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>
 大乐透AI V90 CORE
 </title>
 
-
 <link rel="stylesheet" href="style.css">
-
 
 </head>
 
@@ -26,49 +22,41 @@ content="width=device-width, initial-scale=1.0">
 <div class="app">
 
 
+<header>
+
 <h1>
 大乐透智能分析系统
 </h1>
-
 
 <h2>
 V90 AI CORE
 </h2>
 
 
+<div class="status">
 
-
-
-<div class="panel">
-
-
-<div>
-
-状态：
+系统状态：
 
 <span id="status">
-等待启动...
+等待启动
 </span>
 
 
 </div>
 
 
-</div>
+</header>
 
 
 
 
 
-
-
-<div class="panel">
+<section class="card">
 
 
 <h3>
-历史数据
+数据中心
 </h3>
-
 
 
 <input
@@ -77,16 +65,12 @@ id="dataFile"
 accept=".txt">
 
 
-
-<div id="dataInfo">
-
-未加载
-
-</div>
+<p id="dataInfo">
+历史数据未加载
+</p>
 
 
-
-</div>
+</section>
 
 
 
@@ -95,13 +79,12 @@ accept=".txt">
 
 
 
-<div class="panel">
+<section class="card">
 
 
 <h3>
 AI分析中心
 </h3>
-
 
 
 <button id="startBtn">
@@ -112,109 +95,172 @@ AI分析中心
 
 
 
-
-
 <div class="progress">
 
-
-<div id="progressBar">
-
-</div>
-
+<div id="progressBar"></div>
 
 </div>
 
 
-
-
-<div id="progressText">
-
-0%
-
-</div>
-
-
-
-
-
-<pre id="report">
+<p id="progressText">
 
 等待分析...
 
-</pre>
+</p>
+
+
+</section>
 
 
 
+
+
+
+
+
+
+<section class="card">
+
+
+<h3>
+最终预测结果
+</h3>
+
+
+<div id="prediction">
+
+
+等待预测
 
 </div>
 
 
 
+</section>
 
 
 
 
 
 
-<div class="panel">
+
+
+<section class="card">
 
 
 <h3>
-
-开奖反馈学习
+TOP候选方案
 
 </h3>
 
 
+<div id="ranking">
+
+
+等待生成
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<section class="card">
+
+
+<h3>
+开奖反馈复盘
+
+</h3>
+
+
+<input
+id="period"
+placeholder="开奖期号">
+
 
 <textarea
-id="feedback"
-placeholder="输入开奖号码，例如：
-03 08 17 26 33 05 11">
+id="realNumber"
+placeholder="
+输入开奖号码:
 
+前区5个 后区2个
+
+例如:
+03 12 18 26 34 04 09
+">
 </textarea>
-
 
 
 
 <button id="feedbackBtn">
 
-保存开奖反馈
+开始复盘学习
 
 </button>
 
 
 
+<div id="review">
+
+等待反馈
+
+</div>
 
 
-<div id="learnStatus">
+</section>
 
-等待反馈...
+
+
+
+
+
+
+
+<section class="card">
+
+
+<h3>
+AI成长记录
+</h3>
+
+
+
+<div id="learning">
+
+暂无学习数据
+
+</div>
+
+
+</section>
+
+
+
+
+
+
 
 </div>
 
 
 
 
-</div>
 
+<script src="V90.ai.js"></script>
 
-
-
-
-
-</div>
-
-
-
-
-
+<script src="V90.review.js"></script>
 
 <script src="V90.bundle.js"></script>
 
 
-
 </body>
-
 
 </html>
