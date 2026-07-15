@@ -1,6 +1,6 @@
 // ================================================
-// 大乐透AI V90 FINAL
-// 系统启动控制中心
+// 大乐透AI V90 FINAL R2
+// 总控制中心
 // ================================================
 
 "use strict";
@@ -9,9 +9,9 @@
 
 window.V90={
 
-history:[],
+version:"V90 FINAL R2",
 
-version:"V90 FINAL"
+history:[]
 
 };
 
@@ -21,12 +21,14 @@ version:"V90 FINAL"
 
 
 
-// ================================================
+
+
+// =================================
 // 进度控制
-// ================================================
+// =================================
 
 
-window.V90AppProgress=function(value){
+window.V90Progress=function(p){
 
 
 
@@ -47,17 +49,19 @@ document.getElementById(
 
 
 
+
 if(bar){
 
 
 
 bar.style.width=
 
-value+"%";
+p+"%";
 
 
 
 }
+
 
 
 
@@ -73,7 +77,7 @@ text.innerHTML=
 
 +
 
-value
+p
 
 +
 
@@ -95,12 +99,12 @@ value
 
 
 
-// ================================================
+// =================================
 // 显示模型状态
-// ================================================
+// =================================
 
 
-function showModelStatus(){
+function showModel(){
 
 
 
@@ -112,6 +116,8 @@ document.getElementById(
 
 
 
+
+
 if(box){
 
 
@@ -119,7 +125,6 @@ if(box){
 box.innerHTML=
 
 `
-模型状态：<br>
 
 频率模型 ✓<br>
 
@@ -132,6 +137,7 @@ Bayes评分 ✓<br>
 Markov转移 ✓<br>
 
 蒙特卡罗 ✓
+
 `;
 
 
@@ -150,12 +156,12 @@ Markov转移 ✓<br>
 
 
 
-// ================================================
-// 显示最终结果
-// ================================================
+// =================================
+// 输出分析结果
+// =================================
 
 
-function showResult(result){
+function showAIResult(result){
 
 
 
@@ -167,24 +173,13 @@ result.final;
 
 
 
-let box=
 
 document.getElementById(
 "finalResult"
-);
-
-
-
-
-
-
-if(box){
-
-
-
-box.innerHTML=
+).innerHTML=
 
 `
+
 前区：
 
 ${final.front.join(" ")}
@@ -199,41 +194,29 @@ ${final.back.join(" ")}
 
 综合评分：
 
-${final.score.toFixed(2)}
+${final.score}
 
 `;
 
 
 
-}
 
 
 
 
-
-
-let list=
 
 document.getElementById(
 "candidateList"
-);
+).innerHTML=
 
 
-
-
-
-
-if(list){
-
-
-
-list.innerHTML=
 
 result.top10
 
 .map(
+(x,i)=>
 
-(x,i)=>`
+`
 
 第${i+1}组：
 
@@ -247,7 +230,7 @@ ${x.back.join("-")}
 
 评分：
 
-${x.score.toFixed(2)}
+${x.score}
 
 <br><br>
 
@@ -259,36 +242,21 @@ ${x.score.toFixed(2)}
 
 
 
-}
 
 
 
 
 
-
-
-
-let meeting=
 
 document.getElementById(
 "aiMeeting"
-);
+).innerHTML=
 
 
-
-
-
-
-if(meeting){
-
-
-
-meeting.innerHTML=
 
 result.meeting
 
 .map(
-
 x=>
 
 x.name
@@ -311,24 +279,18 @@ x.text
 
 
 
-}
 
 
 
 
 
 
-
-
-
-// ================================================
+// =================================
 // 开始分析
-// ================================================
+// =================================
 
 
-async function startAI(){
-
-
+async function startAnalysis(){
 
 
 
@@ -342,9 +304,53 @@ document.getElementById(
 
 
 
+
 text.innerHTML=
 
 "正在读取历史数据...";
+
+
+
+
+
+
+let data=
+
+V90Data.get();
+
+
+
+
+
+
+if(
+data.length===0
+){
+
+
+
+text.innerHTML=
+
+"没有历史数据，无法分析";
+
+
+
+return;
+
+
+
+}
+
+
+
+
+
+
+
+text.innerHTML=
+
+"AI模型计算启动...";
+
 
 
 
@@ -360,7 +366,9 @@ await V90AI.analyze();
 
 
 
-showResult(result);
+
+showAIResult(result);
+
 
 
 
@@ -378,20 +386,16 @@ Date.now(),
 
 
 
-period:
-
-"待开奖",
-
-
-
 front:
 
 result.final.front,
 
 
+
 back:
 
 result.final.back,
+
 
 
 score:
@@ -408,8 +412,8 @@ result.final.score
 
 
 
-
 V90Record.show();
+
 
 
 
@@ -432,9 +436,9 @@ text.innerHTML=
 
 
 
-// ================================================
+// =================================
 // 页面启动
-// ================================================
+// =================================
 
 
 document.addEventListener(
@@ -449,12 +453,9 @@ async()=>{
 
 document.getElementById(
 "status"
-)
-
-.innerHTML=
+).innerHTML=
 
 "V90 AI CORE启动完成";
-
 
 
 
@@ -470,11 +471,10 @@ await V90Data.load();
 
 
 
+
 document.getElementById(
 "dataStatus"
-)
-
-.innerHTML=
+).innerHTML=
 
 "历史数据：已加载 "
 
@@ -492,7 +492,14 @@ history.length
 
 
 
-showModelStatus();
+V90.history=history;
+
+
+
+
+
+
+showModel();
 
 
 
@@ -517,7 +524,7 @@ if(btn){
 
 btn.onclick=
 
-startAI;
+startAnalysis;
 
 
 
@@ -534,7 +541,4 @@ V90Record.show();
 
 
 
-
-}
-
-);
+});

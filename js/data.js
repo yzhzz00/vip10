@@ -1,21 +1,20 @@
-// ================================================
-// 大乐透AI V90 FINAL
-// 数据中心
-// ================================================
-
 "use strict";
 
 
+
 window.V90Data={
+
 
 
 history:[],
 
 
 
-// ================================================
-// 自动加载历史数据
-// ================================================
+
+
+// =================================
+// 加载历史数据
+// =================================
 
 
 async load(){
@@ -24,7 +23,7 @@ async load(){
 try{
 
 
-let response=
+let res=
 
 await fetch(
 "data/dlt.txt"
@@ -34,7 +33,7 @@ await fetch(
 
 let text=
 
-await response.text();
+await res.text();
 
 
 
@@ -51,11 +50,7 @@ this.history=data;
 
 
 
-
-
 window.V90.history=data;
-
-
 
 
 
@@ -68,7 +63,7 @@ return data;
 
 
 console.error(
-"历史数据加载失败",
+"数据加载失败",
 e
 );
 
@@ -90,34 +85,33 @@ return [];
 
 
 
-// ================================================
-// 自动解析数据
-// 支持：
-// 1. 期号+7号码
-// 2. 直接7号码
-// 3. 空格/逗号
-// ================================================
+// =================================
+// 数据解析
+// 自动兼容：
+// 期号+号码
+// 号码直接排列
+// 空格/逗号
+// =================================
 
 
 parse(text){
 
 
 
-let result=[];
+let list=[];
 
 
 
 let lines=
 
-text
-.split(/\r?\n/);
+text.split(/\r?\n/);
 
 
 
 
 
 
-lines.forEach(line=>{
+for(let line of lines){
 
 
 
@@ -127,8 +121,7 @@ line=line.trim();
 
 if(!line)
 
-return;
-
+continue;
 
 
 
@@ -145,8 +138,7 @@ line
 .map(Number)
 
 .filter(
-n=>
-!isNaN(n)
+x=>!isNaN(x)
 );
 
 
@@ -154,14 +146,17 @@ n=>
 
 
 
-// 找最后7个有效号码
+if(nums.length<7)
+
+continue;
 
 
-if(nums.length>=7){
 
 
 
-let seven=
+// 取最后7个数字
+
+let arr=
 
 nums.slice(
 nums.length-7
@@ -171,48 +166,56 @@ nums.length-7
 
 
 
+
 let front=
 
-seven.slice(
-0,5
-);
-
-
+arr.slice(0,5);
 
 
 
 let back=
 
-seven.slice(
-5,7
-);
+arr.slice(5,7);
 
 
 
 
 
 
-// 大乐透合法范围检查
+
+// 大乐透范围过滤
 
 
-if(
+let ok=
+
+
 
 front.every(
+
 n=>n>=1&&n<=35
+
 )
 
 &&
 
 
 back.every(
+
 n=>n>=1&&n<=12
-)
 
-){
-
+);
 
 
-result.push({
+
+
+
+
+
+if(ok){
+
+
+
+list.push({
 
 
 
@@ -231,19 +234,15 @@ back
 
 
 
+
+
 }
 
 
 
 
-});
 
-
-
-
-
-
-return result;
+return list;
 
 
 
@@ -255,12 +254,13 @@ return result;
 
 
 
-// ================================================
-// 获取历史
-// ================================================
+// =================================
+// 获取数据
+// =================================
 
 
 get(){
+
 
 
 return this.history;
@@ -275,29 +275,21 @@ return this.history;
 
 
 
-// ================================================
-// 最新一期
-// ================================================
+// =================================
+// 数据数量
+// =================================
 
 
-last(){
-
-
-if(
-this.history.length===0
-)
-
-return null;
+count(){
 
 
 
-return this.history[
-this.history.length-1
-];
+return this.history.length;
 
 
 
 }
+
 
 
 

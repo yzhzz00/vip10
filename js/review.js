@@ -1,6 +1,6 @@
 // ================================================
-// 大乐透AI V90 FINAL
-// 开奖反馈复盘学习模块
+// 大乐透AI V90 FINAL R2
+// 开奖反馈学习模块
 // ================================================
 
 "use strict";
@@ -10,7 +10,7 @@ window.V90Review={
 
 
 
-learningKey:"V90_LEARNING_RECORD",
+key:"V90_LEARNING",
 
 
 
@@ -18,9 +18,7 @@ learningKey:"V90_LEARNING_RECORD",
 
 
 
-// ================================================
 // 解析开奖
-// ================================================
 
 
 parse(text){
@@ -38,7 +36,7 @@ text
 .map(Number)
 
 .filter(
-n=>!isNaN(n)
+x=>!isNaN(x)
 );
 
 
@@ -49,10 +47,7 @@ if(
 nums.length!==7
 ){
 
-
-
 return null;
-
 
 }
 
@@ -88,9 +83,7 @@ nums.slice(5,7)
 
 
 
-// ================================================
-// 对比预测
-// ================================================
+// 对比结果
 
 
 compare(pred,real){
@@ -108,11 +101,9 @@ let backHit=0;
 pred.front.forEach(n=>{
 
 
-
 if(
 real.front.includes(n)
 ){
-
 
 
 frontHit++;
@@ -132,11 +123,9 @@ frontHit++;
 pred.back.forEach(n=>{
 
 
-
 if(
 real.back.includes(n)
 ){
-
 
 
 backHit++;
@@ -181,27 +170,27 @@ frontHit+backHit
 
 
 
-// ================================================
 // AI复盘
-// ================================================
 
 
-analysis(result){
+analysis(r){
 
 
 
-let text=[];
+let arr=[];
+
+
 
 
 
 if(
-result.frontHit>=3
+r.frontHit>=3
 ){
 
 
 
-text.push(
-"前区模型表现良好"
+arr.push(
+"前区模型命中表现较好"
 );
 
 
@@ -210,8 +199,8 @@ text.push(
 
 
 
-text.push(
-"前区偏差较大，需要调整权重"
+arr.push(
+"前区需要调整冷热权重"
 );
 
 
@@ -224,13 +213,13 @@ text.push(
 
 
 if(
-result.backHit>=1
+r.backHit>=1
 ){
 
 
 
-text.push(
-"后区判断有效"
+arr.push(
+"后区预测有效"
 );
 
 
@@ -239,8 +228,8 @@ text.push(
 
 
 
-text.push(
-"后区模型需要优化"
+arr.push(
+"后区需要重新训练"
 );
 
 
@@ -252,8 +241,7 @@ text.push(
 
 
 
-
-return text;
+return arr;
 
 
 
@@ -265,9 +253,7 @@ return text;
 
 
 
-// ================================================
 // 保存学习
-// ================================================
 
 
 save(data){
@@ -279,7 +265,7 @@ let list=
 JSON.parse(
 
 localStorage.getItem(
-this.learningKey
+this.key
 )
 
 ||
@@ -287,6 +273,7 @@ this.learningKey
 "[]"
 
 );
+
 
 
 
@@ -301,7 +288,7 @@ list.push(data);
 
 localStorage.setItem(
 
-this.learningKey,
+this.key,
 
 JSON.stringify(list)
 
@@ -317,9 +304,7 @@ JSON.stringify(list)
 
 
 
-// ================================================
 // 学习次数
-// ================================================
 
 
 count(){
@@ -329,7 +314,7 @@ count(){
 return JSON.parse(
 
 localStorage.getItem(
-this.learningKey
+this.key
 )
 
 ||
@@ -350,9 +335,7 @@ this.learningKey
 
 
 
-// ================================================
-// 初始化按钮
-// ================================================
+// 初始化
 
 
 init(){
@@ -378,19 +361,18 @@ return;
 
 
 
-btn.onclick=function(){
+
+btn.onclick=()=>{
 
 
 
 
 
-let value=
+let input=
 
 document.getElementById(
 "openResult"
-)
-
-.value;
+).value;
 
 
 
@@ -399,7 +381,7 @@ document.getElementById(
 
 let real=
 
-V90Review.parse(value);
+this.parse(input);
 
 
 
@@ -412,15 +394,14 @@ if(!real){
 
 document.getElementById(
 "reviewResult"
-)
+).innerHTML=
 
-.innerHTML=
-
-"开奖号码格式错误，请输入7个号码";
+"请输入7个开奖号码";
 
 
 
 return;
+
 
 
 }
@@ -445,15 +426,14 @@ if(!pred){
 
 document.getElementById(
 "reviewResult"
-)
+).innerHTML=
 
-.innerHTML=
-
-"没有找到预测记录";
+"暂无预测记录";
 
 
 
 return;
+
 
 
 }
@@ -465,14 +445,10 @@ return;
 
 let result=
 
-V90Review.compare(
-
+this.compare(
 pred,
-
 real
-
 );
-
 
 
 
@@ -480,7 +456,7 @@ real
 
 let report=
 
-V90Review.analysis(
+this.analysis(
 result
 );
 
@@ -490,7 +466,7 @@ result
 
 
 
-V90Review.save({
+this.save({
 
 
 
@@ -499,16 +475,13 @@ time:
 Date.now(),
 
 
-
 prediction:pred,
 
 
-
-real:real,
-
+real,
 
 
-result:result
+result
 
 
 
@@ -521,101 +494,62 @@ result:result
 
 
 
-
 document.getElementById(
 "reviewResult"
-)
+).innerHTML=
 
-.innerHTML=
+`
 
+预测结果：
 
+<br>
 
-"预测结果：<br>"
-
-+
-
-pred.front.join(" ")
+${pred.front.join(" ")}
 
 +
 
-" + "
+${pred.back.join(" ")}
+
+<br><br>
+
+
+实际结果：
+
+<br>
+
+${real.front.join(" ")}
 
 +
 
-pred.back.join(" ")
+${real.back.join(" ")}
 
-+
+<br><br>
 
-"<br><br>"
 
-+
+命中：
 
-"实际结果：<br>"
+<br>
 
-+
+前区 ${result.frontHit}/5
 
-real.front.join(" ")
+<br>
 
-+
+后区 ${result.backHit}/2
 
-" + "
+<br>
 
-+
+总命中 ${result.total}/7
 
-real.back.join(" ")
+<br><br>
 
-+
 
-"<br><br>"
+AI复盘：
 
-+
+<br>
 
-"命中统计：<br>"
+${report.join("<br>")}
 
-+
-
-"前区："
-
-+
-
-result.frontHit
-
-+
-
-"/5<br>"
-
-+
-
-"后区："
-
-+
-
-result.backHit
-
-+
-
-"/2<br>"
-
-+
-
-"总命中："
-
-+
-
-result.total
-
-+
-
-"/7<br><br>"
-
-+
-
-"AI复盘：<br>"
-
-+
-
-report.join("<br>");
-
+`;
 
 
 
@@ -631,6 +565,8 @@ document.getElementById(
 
 
 
+
+
 if(learn){
 
 
@@ -641,7 +577,7 @@ learn.innerHTML=
 
 +
 
-V90Review.count();
+this.count();
 
 
 
@@ -655,13 +591,16 @@ V90Review.count();
 
 
 
+
 }
 
 
 
 
 
+
 };
+
 
 
 

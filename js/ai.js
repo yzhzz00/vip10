@@ -1,6 +1,6 @@
 // ================================================
-// 大乐透AI V90 FINAL
-// AI决策中心
+// 大乐透AI V90 FINAL R2
+// AI综合决策中心
 // ================================================
 
 "use strict";
@@ -10,32 +10,43 @@ window.V90AI={
 
 
 
-// ================================================
-// 生成候选池
-// ================================================
-
-
-buildCandidates(mc){
-
-
-
-let list=[];
-
-
-
-let modelScore=
-V90Model.bayes();
 
 
 
 
+// =================================
+// 单注综合评分
+// =================================
 
-mc.forEach(item=>{
+
+score(item){
 
 
 
 let front=item.front;
 
+
+
+let score=0;
+
+
+
+
+
+// 模拟热度
+
+
+score +=
+
+item.count * 5;
+
+
+
+
+
+
+
+// 结构评分
 
 
 let structure=
@@ -47,25 +58,19 @@ V90Model.structure(front);
 
 
 
-let score=
-
-item.count;
-
-
-
-
-
-// 结构评分
-
-
 if(
 structure.odd>=1 &&
 structure.odd<=4
 ){
 
-score+=20;
+
+
+score+=15;
+
 
 }
+
+
 
 
 
@@ -74,9 +79,14 @@ structure.big>=1 &&
 structure.big<=4
 ){
 
-score+=20;
+
+
+score+=15;
+
 
 }
+
+
 
 
 
@@ -85,7 +95,10 @@ structure.sum>=80 &&
 structure.sum<=140
 ){
 
-score+=30;
+
+
+score+=20;
+
 
 }
 
@@ -94,17 +107,24 @@ score+=30;
 
 
 
-// Bayes加权
+// Bayes权重
+
+
+let bayes=
+
+V90Model.bayes();
+
+
+
 
 
 front.forEach(n=>{
 
 
-score+=
 
-(modelScore[n]||0)
-*
-100;
+score +=
+
+(bayes[n]||0)*100;
 
 
 
@@ -115,45 +135,8 @@ score+=
 
 
 
-
-
-list.push({
-
-
-
-front,
-
-
-back:item.back,
-
-
-score:
-
-
-
-Number(
+return Number(
 score.toFixed(2)
-)
-
-
-
-});
-
-
-
-
-});
-
-
-
-
-
-return list.sort(
-
-(a,b)=>
-
-b.score-a.score
-
 );
 
 
@@ -166,9 +149,9 @@ b.score-a.score
 
 
 
-// ================================================
-// 风险检测
-// ================================================
+// =================================
+// 风险分析
+// =================================
 
 
 risk(front){
@@ -195,8 +178,9 @@ s.odd===5
 
 
 risk.push(
-"奇偶结构异常"
+"奇偶极端"
 );
+
 
 
 }
@@ -213,13 +197,12 @@ s.big===5
 
 
 risk.push(
-"大小结构异常"
+"大小极端"
 );
 
 
 
 }
-
 
 
 
@@ -256,9 +239,9 @@ return risk;
 
 
 
-// ================================================
+// =================================
 // AI会议
-// ================================================
+// =================================
 
 
 meeting(result){
@@ -267,28 +250,14 @@ meeting(result){
 
 return [
 
-
-
 {
 
 name:"趋势AI",
 
 text:
-"根据历史频率和冷热变化分析"
+"结合历史冷热与频率变化完成分析"
 
 },
-
-
-
-{
-
-name:"概率AI",
-
-text:
-"Bayes概率模型评分完成"
-
-},
-
 
 
 {
@@ -300,6 +269,15 @@ text:
 
 },
 
+
+{
+
+name:"概率AI",
+
+text:
+"Bayes概率评分完成"
+
+},
 
 
 {
@@ -316,7 +294,7 @@ result.risk.length===0
 
 :
 
-"发现风险："+result.risk.join(",")
+"发现："+result.risk.join("、")
 
 }
 
@@ -334,31 +312,33 @@ result.risk.length===0
 
 
 
-// ================================================
-// 最终分析
-// ================================================
+// =================================
+// 主分析
+// =================================
 
 
 async analyze(){
 
 
 
-let mc=
+let candidates=
+
+
 
 await V90MonteCarlo.run(
 
 1000000,
 
-function(progress){
+function(p){
 
 
 
 if(
-window.V90AppProgress
+window.V90Progress
 ){
 
 
-V90AppProgress(progress);
+V90Progress(p);
 
 
 }
@@ -374,54 +354,21 @@ V90AppProgress(progress);
 
 
 
-let candidates=
-
-this.buildCandidates(mc);
 
 
-
-
-
-let top10=[];
+let list=
 
 
 
 
 
-for(
-let i=0;
-i<candidates.length &&
-top10.length<10;
-i++
-){
+candidates
+
+.map(item=>{
 
 
 
-let item=
-
-candidates[i];
-
-
-
-
-let risk=
-
-this.risk(
-item.front
-);
-
-
-
-
-
-if(
-risk.length<=1
-){
-
-
-
-top10.push({
-
+return {
 
 
 front:item.front,
@@ -430,38 +377,54 @@ front:item.front,
 back:item.back,
 
 
-score:item.score,
+count:item.count,
 
 
-risk
+score:
 
-
-
-});
-
-
-
-}
+this.score(item)
 
 
 
-}
+};
 
 
 
+})
 
+.sort(
 
+(a,b)=>
 
-let final=
+b.score-a.score
 
-top10[0];
+);
 
 
 
 
 
 
-let result={
+
+let top10=
+
+list.slice(
+0,
+10
+);
+
+
+
+
+
+
+let final=top10[0];
+
+
+
+
+
+return {
 
 
 
@@ -471,9 +434,24 @@ final,
 top10,
 
 
+risk:
+
+this.risk(
+final.front
+),
+
+
 meeting:
 
-this.meeting(final)
+this.meeting({
+
+risk:
+
+this.risk(
+final.front
+)
+
+})
 
 
 
@@ -481,10 +459,6 @@ this.meeting(final)
 
 
 
-
-
-
-return result;
 
 
 

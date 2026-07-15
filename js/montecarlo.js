@@ -1,6 +1,6 @@
 // ================================================
-// 大乐透AI V90 FINAL
-// Monte Carlo 模拟模块
+// 大乐透AI V90 FINAL R2
+// Monte Carlo 100万模拟
 // ================================================
 
 "use strict";
@@ -10,21 +10,20 @@ window.V90MonteCarlo={
 
 
 
-// ================================================
-// 单次生成
-// ================================================
+// 生成前区
 
 
-createNumber(){
+createFront(){
 
 
 
-let nums=[];
+let arr=[];
+
 
 
 
 while(
-nums.length<5
+arr.length<5
 ){
 
 
@@ -37,12 +36,16 @@ Math.random()*35
 
 
 
+
+
 if(
-!nums.includes(n)
+!arr.includes(n)
 ){
 
 
-nums.push(n);
+
+arr.push(n);
+
 
 
 }
@@ -53,7 +56,7 @@ nums.push(n);
 
 
 
-return nums.sort(
+return arr.sort(
 (a,b)=>a-b
 );
 
@@ -67,21 +70,19 @@ return nums.sort(
 
 
 
-// ================================================
-// 后区生成
-// ================================================
+// 生成后区
 
 
 createBack(){
 
 
 
-let nums=[];
+let arr=[];
 
 
 
 while(
-nums.length<2
+arr.length<2
 ){
 
 
@@ -94,12 +95,16 @@ Math.random()*12
 
 
 
+
+
 if(
-!nums.includes(n)
+!arr.includes(n)
 ){
 
 
-nums.push(n);
+
+arr.push(n);
+
 
 
 }
@@ -110,7 +115,7 @@ nums.push(n);
 
 
 
-return nums.sort(
+return arr.sort(
 (a,b)=>a-b
 );
 
@@ -124,12 +129,12 @@ return nums.sort(
 
 
 
-// ================================================
-// 模拟100万次
-// ================================================
+// =================================
+// 分批模拟
+// =================================
 
 
-run(times=1000000,callback){
+run(times,progress){
 
 
 
@@ -141,41 +146,42 @@ let result={};
 
 
 
-
-
-let i=0;
-
+let current=0;
 
 
 
 
-function loop(){
+function batch(){
 
 
 
-let batch=5000;
+let batchSize=5000;
 
 
 
 
 
 for(
-let j=0;
-j<batch && i<times;
-j++,i++
+let i=0;
+
+i<batchSize && current<times;
+
+i++,current++
+
 ){
 
 
 
 let front=
 
-this.createNumber();
+V90MonteCarlo.createFront();
 
 
 
 let back=
 
-this.createBack();
+V90MonteCarlo.createBack();
+
 
 
 
@@ -227,6 +233,8 @@ count:0
 
 
 
+
+
 result[key].count++;
 
 
@@ -238,25 +246,22 @@ result[key].count++;
 
 
 
-
-// 更新进度
-
-
-let progress=
+let p=
 
 Math.floor(
-i/times*100
+current/times*100
 );
 
 
 
 
 
-if(callback){
+
+if(progress){
 
 
 
-callback(progress);
+progress(p);
 
 
 
@@ -267,20 +272,24 @@ callback(progress);
 
 
 
+
 if(
-i<times
+current<times
 ){
 
 
 
 setTimeout(
-loop,
+batch,
 0
 );
 
 
 
 }else{
+
+
+
 
 
 
@@ -296,7 +305,8 @@ b.count-a.count
 
 )
 
-.slice(0,50);
+.slice(0,100);
+
 
 
 
@@ -312,13 +322,14 @@ resolve(ranking);
 
 
 
+
 }
 
 
 
+batch();
 
 
-loop();
 
 
 
