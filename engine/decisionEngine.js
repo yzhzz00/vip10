@@ -2,89 +2,69 @@
 
 
 /*
-    DLT-AI CORE
+    DLT-AI CORE V1.0
 
-    Decision Engine V1.0
+    Decision Engine
 
-
-    AI会议评分中心
-
+    AI综合评分中心
 
 */
 
 
 
-// 基础模型权重
-
-const defaultWeights = {
-
-
-    sum:0.25,
-
-
-    zone:0.25,
-
-
-    span:0.20,
-
-
-    oddEven:0.15,
-
-
-    frequency:0.15
-
-
-};
+const fs = require("fs");
+const path = require("path");
 
 
 
+const sumModel =
+require("../models/sumModel");
 
 
-// 和值评分
-
-function sumScore(
-    candidate,
-    portrait
-){
+const spanModel =
+require("../models/spanModel");
 
 
-    const s =
-    candidate.sum;
+const zoneModel =
+require("../models/zoneModel");
 
 
-
-    const min =
-    portrait.sum.range.min;
-
-
-    const max =
-    portrait.sum.range.max;
+const frequencyModel =
+require("../models/frequencyModel");
 
 
+const missingModel =
+require("../models/missingModel");
 
-    if(
-        s>=min
-        &&
-        s<=max
-    ){
 
-        return 100;
-
-    }
+const markovModel =
+require("../models/markovModel");
 
 
 
-    const distance =
-    Math.min(
-        Math.abs(s-min),
-        Math.abs(s-max)
+
+
+// 读取权重配置
+
+function loadWeights(){
+
+
+    const file =
+
+    path.join(
+        __dirname,
+        "../config/weights.json"
     );
 
 
 
-    return Math.max(
-        0,
-        100-distance*10
+    return JSON.parse(
+
+        fs.readFileSync(
+            file,
+            "utf8"
+        )
+
     );
 
 
@@ -95,221 +75,146 @@ function sumScore(
 
 
 
-// 三区评分
 
-function zoneScore(
+
+
+function evaluate(
     candidate,
-    portrait
+    prediction,
+    history
 ){
 
 
-    if(
-        candidate.zone
-        ===
-        portrait.zone.value
-    ){
-
-        return 100;
-
-    }
+    const weights =
+    loadWeights();
 
 
-    return 50;
 
-}
+    const scores={};
 
 
 
 
 
-// 跨度评分
+    scores.sum =
 
-function spanScore(
-    candidate,
-    portrait
-){
-
-
-    const span =
-    Math.max(
-        ...candidate.front
-    )
-    -
-    Math.min(
-        ...candidate.front
+    sumModel(
+        candidate.front,
+        prediction.sum
     );
 
 
 
-    const min =
-    portrait.span.range.min;
 
 
-    const max =
-    portrait.span.range.max;
+    scores.span =
 
-
-
-    if(
-        span>=min
-        &&
-        span<=max
-    ){
-
-        return 100;
-
-    }
-
-
-    return 60;
-
-}
-
-
-
-
-
-// 奇偶评分
-
-function oddEvenScore(
-    candidate,
-    portrait
-){
-
-
-    let odd=0;
-
-
-    candidate.front.forEach(
-        n=>{
-
-            if(n%2!==0)
-                odd++;
-
-        }
+    spanModel(
+        candidate.front,
+        prediction.span
     );
 
 
 
-    const even =
-    5-odd;
 
 
+    scores.zone =
 
-    const type =
-    `${odd}-${even}`;
-
-
-
-    if(
-        type
-        ===
-        portrait.oddEven.value
-    ){
-
-        return 100;
-
-    }
-
-
-    return 50;
-
-}
+    zoneModel(
+        candidate.front,
+        prediction.zone
+    );
 
 
 
 
 
-// 综合评分
+    scores.frequency =
 
-function evaluateCandidate(
-    candidate,
-    portrait,
-    weights=defaultWeights
-){
-
-
-
-    const scores={
+    frequencyModel(
+        candidate.front,
+        history
+    );
 
 
 
-        sum:
-        sumScore(
-            candidate,
-            portrait
-        ),
+
+
+    scores.missing =
+
+    missingModel(
+        candidate.front,
+        history
+    );
 
 
 
-        zone:
-        zoneScore(
-            candidate,
-            portrait
-        ),
+
+
+    scores.markov =
+
+    markovModel(
+        candidate.front,
+        history
+    );
 
 
 
-        span:
-        spanScore(
-            candidate,
-            portrait
-        ),
 
 
 
-        oddEven:
-        oddEvenScore(
-            candidate,
-            portrait
-        ),
+
+
+    const finalScore =
 
 
 
-        frequency:70
-
-    };
-
-
-
-    const total =
-
-
-        scores.sum
-        *
-        weights.sum
+    scores.sum.score
+    *
+    weights.sum
 
 
 
-        +
+    +
 
-        scores.zone
-        *
-        weights.zone
-
-
-
-        +
-
-        scores.span
-        *
-        weights.span
+    scores.span.score
+    *
+    weights.span
 
 
 
-        +
+    +
 
-        scores.oddEven
-        *
-        weights.oddEven
+    scores.zone.score
+    *
+    weights.zone
 
 
 
-        +
+    +
 
-        scores.frequency
-        *
-        weights.frequency;
+    scores.frequency.score
+    *
+    weights.frequency
+
+
+
+    +
+
+    scores.missing.score
+    *
+    weights.missing
+
+
+
+    +
+
+    scores.markov.score
+    *
+    weights.markov;
+
+
+
 
 
 
@@ -324,8 +229,9 @@ function evaluateCandidate(
 
 
         finalScore:
+
         Number(
-            total.toFixed(2)
+            finalScore.toFixed(2)
         )
 
 
@@ -338,36 +244,46 @@ function evaluateCandidate(
 
 
 
-// 批量决策
+
+
+
 
 function decisionEngine(
     candidates,
-    portrait
+    prediction,
+    history
 ){
+
 
 
     return candidates
 
     .map(
+
         item=>
 
-        evaluateCandidate(
+        evaluate(
             item,
-            portrait
+            prediction,
+            history
         )
 
     )
 
     .sort(
+
         (a,b)=>
+
         b.finalScore
         -
         a.finalScore
+
     );
 
 
-
 }
+
+
 
 
 

@@ -2,10 +2,9 @@
 
 
 /*
-    DLT-AI CORE
+    DLT-AI CORE V1.0
 
-    Main Controller V1.0
-
+    Main Controller
 
 */
 
@@ -15,24 +14,41 @@ const dataLoader =
 require("./core/dataLoader");
 
 
+
+const featureBuilder =
+require("./core/featureBuilder");
+
+
+
 const portraitBuilder =
 require("./core/portraitBuilder");
+
 
 
 const portraitPredictor =
 require("./portrait/portraitPredictor");
 
 
+
+const portraitMatcher =
+require("./portrait/portraitMatcher");
+
+
+
 const candidateGenerator =
 require("./engine/candidateGenerator");
+
 
 
 const decisionEngine =
 require("./engine/decisionEngine");
 
 
+
 const rankingEngine =
 require("./engine/rankingEngine");
+
+
 
 
 
@@ -44,64 +60,110 @@ function runAI(){
 
 
     console.log(
-        "===== DLT-AI CORE START ====="
+        "===== DLT-AI CORE V1.0 ====="
     );
 
 
 
-    // 1.读取历史数据
+
+
+    // 1.读取数据
+
 
     const history =
+
     dataLoader();
 
 
 
     console.log(
+
         "历史数据:",
+
         history.length,
+
         "期"
+
     );
 
 
 
 
 
-    // 2.生成开奖画像
 
 
-    const portraits =
-    portraitBuilder(
+
+    // 2.特征计算
+
+
+    const features =
+
+    featureBuilder(
         history
     );
 
 
 
-    console.log(
-        "画像生成完成:",
-        portraits.length
+
+
+
+
+
+    // 3.生成画像
+
+
+    const portraits =
+
+    portraitBuilder(
+        features
     );
 
 
 
 
 
-    // 3.预测下一期画像
 
 
-    const portraitPrediction =
+
+    // 4.预测下一期结构
+
+
+    const prediction =
+
     portraitPredictor(
         portraits
     );
 
 
 
+
     console.log(
-        "预测画像:"
+
+        "预测结构:",
+
+        prediction.prediction
+
     );
 
 
-    console.log(
-        portraitPrediction
+
+
+
+
+
+
+
+    // 5.历史相似分析
+
+
+    const similar =
+
+    portraitMatcher(
+
+        portraits,
+
+        prediction.prediction
+
     );
 
 
@@ -110,13 +172,16 @@ function runAI(){
 
 
 
-    // 4.生成候选号码
+
+
+    // 6.生成候选
 
 
     const candidates =
+
     candidateGenerator(
 
-        portraitPrediction.prediction,
+        prediction.prediction,
 
         5000
 
@@ -125,8 +190,11 @@ function runAI(){
 
 
     console.log(
+
         "候选数量:",
+
         candidates.length
+
     );
 
 
@@ -135,34 +203,36 @@ function runAI(){
 
 
 
-    // 5.AI评分
+
+
+    // 7.综合评分
 
 
     const scored =
+
     decisionEngine(
 
         candidates,
 
-        portraitPrediction.prediction
+        prediction.prediction,
+
+        history
 
     );
 
 
 
-    console.log(
-        "评分完成"
-    );
 
 
 
 
 
 
+    // 8.TOP输出
 
-    // 6.TOP结果
 
+    const ranking =
 
-    const result =
     rankingEngine(
 
         scored,
@@ -173,6 +243,9 @@ function runAI(){
 
 
 
+
+
+
     console.log(
         "===== TOP10 ====="
     );
@@ -180,29 +253,40 @@ function runAI(){
 
 
     console.table(
-        result
+        ranking
     );
+
+
+
+
 
 
 
     return {
 
 
-        prediction:
-        portraitPrediction,
+        prediction,
 
 
-        result
+        similar,
+
+
+        ranking
 
 
     };
+
+
 
 }
 
 
 
 
-// 导出
+
+
+
+
 
 module.exports =
 runAI;
@@ -211,7 +295,9 @@ runAI;
 
 
 
-// 如果直接运行
+
+
+// 直接运行
 
 if(
     require.main

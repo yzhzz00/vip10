@@ -2,59 +2,27 @@
 
 
 /*
-    DLT-AI CORE
+    DLT-AI CORE V1.0
 
-    Ranking Engine V1.0
+    Ranking Engine
 
-
-    功能：
+    功能:
 
     AI评分结果
 
         ↓
 
-    最终预测列表
+    TOP排名结果
 
 
 */
 
 
 
-function getLevel(score){
+function formatNumbers(numbers){
 
 
-    if(score>=90){
-
-        return "★★★★★";
-
-    }
-
-
-    if(score>=80){
-
-        return "★★★★";
-
-    }
-
-
-    if(score>=70){
-
-        return "★★★";
-
-    }
-
-
-    return "★★";
-
-}
-
-
-
-
-function formatNumber(arr){
-
-
-    return arr
+    return numbers
     .map(
         n=>
         String(n)
@@ -68,64 +36,83 @@ function formatNumber(arr){
 
 
 
-function buildReason(item){
 
 
-    const reasons=[];
+function getLevel(score){
 
 
+    if(score>=90){
 
-    if(
-        item.scores.sum>=90
-    ){
-
-        reasons.push(
-            "和值符合"
-        );
+        return "A+";
 
     }
 
 
+    if(score>=80){
 
-    if(
-        item.scores.zone>=90
-    ){
-
-        reasons.push(
-            "三区符合"
-        );
+        return "A";
 
     }
 
 
+    if(score>=70){
 
-    if(
-        item.scores.span>=90
-    ){
-
-        reasons.push(
-            "跨度符合"
-        );
+        return "B";
 
     }
 
 
+    return "C";
 
-    if(
-        item.scores.oddEven>=90
-    ){
-
-        reasons.push(
-            "奇偶符合"
-        );
-
-    }
-
-
-
-    return reasons;
 
 }
+
+
+
+
+
+
+
+
+
+function getSupportModels(scores){
+
+
+    const result=[];
+
+
+
+    Object.keys(scores)
+    .forEach(
+        key=>{
+
+
+            if(
+                scores[key]
+                &&
+                scores[key].score>=80
+            ){
+
+                result.push(
+                    key
+                );
+
+            }
+
+
+        }
+    );
+
+
+
+    return result;
+
+
+}
+
+
+
+
 
 
 
@@ -135,6 +122,7 @@ function rankingEngine(
     results,
     limit=10
 ){
+
 
 
     return results
@@ -156,17 +144,24 @@ function rankingEngine(
 
 
 
+                number:
+
+
+                `${formatNumbers(item.front)}
+
+                 +
+
+                 ${formatNumbers(item.back)}`,
+
+
+
                 front:
-                formatNumber(
-                    item.front
-                ),
+                item.front,
 
 
 
                 back:
-                formatNumber(
-                    item.back
-                ),
+                item.back,
 
 
 
@@ -182,10 +177,12 @@ function rankingEngine(
 
 
 
-                reasons:
-                buildReason(
-                    item
+                support:
+
+                getSupportModels(
+                    item.scores
                 )
+
 
             };
 
@@ -195,7 +192,10 @@ function rankingEngine(
     );
 
 
+
 }
+
+
 
 
 

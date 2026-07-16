@@ -2,44 +2,31 @@
 
 
 /*
-    DLT-AI CORE
+    DLT-AI CORE V1.0
 
-    Candidate Generator V1.0
+    Candidate Generator
 
+    功能:
 
-    输入:
+    根据预测画像
 
-    Portrait预测
-
-
-    输出:
-
-    候选号码池
+    生成候选号码
 
 
 */
 
 
-function randomInt(min,max){
 
-    return Math.floor(
-        Math.random()
-        *
-        (max-min+1)
-    )
-    +
-    min;
+// 组合生成
 
-}
-
-
-
-// 生成组合
-
-function combination(arr,size){
+function combination(
+    arr,
+    size
+){
 
 
     const result=[];
+
 
 
     function backtrack(
@@ -74,18 +61,22 @@ function combination(arr,size){
             );
 
 
+
             backtrack(
                 i+1,
                 path
             );
 
 
+
             path.pop();
+
 
         }
 
 
     }
+
 
 
     backtrack(
@@ -94,110 +85,68 @@ function combination(arr,size){
     );
 
 
+
     return result;
 
-}
-
-
-
-
-// 前区生成
-
-function generateFront(){
-
-
-    const numbers=[];
-
-
-    for(
-        let i=1;
-        i<=35;
-        i++
-    ){
-
-        numbers.push(i);
-
-    }
-
-
-
-    return combination(
-        numbers,
-        5
-    );
-
-}
-
-
-
-// 后区生成
-
-function generateBack(){
-
-
-    const numbers=[];
-
-
-    for(
-        let i=1;
-        i<=12;
-        i++
-    ){
-
-        numbers.push(i);
-
-    }
-
-
-
-    return combination(
-        numbers,
-        2
-    );
 
 }
 
 
 
 
-// 计算和值
 
-function sum(arr){
+
+
+function getSum(arr){
+
 
     return arr.reduce(
         (a,b)=>a+b,
         0
     );
 
+
 }
 
 
 
 
-// 三区
 
-function zone(front){
+
+
+function getZone(front){
 
 
     let a=0;
+
     let b=0;
+
     let c=0;
 
 
-    front.forEach(n=>{
+
+    front.forEach(num=>{
 
 
-        if(n<=12)
+        if(num<=12){
+
             a++;
 
-        else if(n<=24)
+        }
+        else if(num<=24){
+
             b++;
 
-        else
+        }
+        else{
+
             c++;
+
+        }
 
 
     });
+
 
 
     return `${a}-${b}-${c}`;
@@ -208,18 +157,160 @@ function zone(front){
 
 
 
+
+
+
+
+function generateFrontCandidates(
+    prediction
+){
+
+
+    const nums=[];
+
+
+
+    for(
+        let i=1;
+        i<=35;
+        i++
+    ){
+
+        nums.push(i);
+
+    }
+
+
+
+
+    const all =
+    combination(
+        nums,
+        5
+    );
+
+
+
+    return all.filter(
+        front=>{
+
+
+            const sum =
+            getSum(front);
+
+
+
+            const zone =
+            getZone(front);
+
+
+
+
+
+            // 和值过滤
+
+            if(
+                sum
+                <
+                prediction.sum.min
+                ||
+                sum
+                >
+                prediction.sum.max
+            ){
+
+                return false;
+
+            }
+
+
+
+
+            // 三区过滤
+
+            if(
+                zone
+                !==
+                prediction.zone
+            ){
+
+                return false;
+
+            }
+
+
+
+            return true;
+
+
+        }
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+function generateBackCandidates(){
+
+
+    const nums=[];
+
+
+
+    for(
+        let i=1;
+        i<=12;
+        i++
+    ){
+
+        nums.push(i);
+
+    }
+
+
+
+    return combination(
+        nums,
+        2
+    );
+
+
+}
+
+
+
+
+
+
+
+
 function generateCandidates(
-    portrait,
+    prediction,
     limit=5000
 ){
 
 
+
     const fronts =
-    generateFront();
+
+    generateFrontCandidates(
+        prediction
+    );
+
 
 
     const backs =
-    generateBack();
+
+    generateBackCandidates();
+
+
 
 
 
@@ -227,86 +318,60 @@ function generateCandidates(
 
 
 
-    fronts.forEach(front=>{
 
 
-        // 和值过滤
-
-        const s =
-        sum(front);
+    fronts.forEach(
+        front=>{
 
 
+            backs.forEach(
+                back=>{
 
-        if(
-            s <
-            portrait.sum.range.min
-            ||
-            s >
-            portrait.sum.range.max
-        ){
 
-            return;
+                    result.push({
+
+                        front,
+
+                        back,
+
+
+                        sum:
+                        getSum(front),
+
+
+                        zone:
+                        getZone(front)
+
+
+                    });
+
+
+                }
+            );
+
 
         }
-
-
-
-        // 三区过滤
-
-        if(
-            zone(front)
-            !==
-            portrait.zone.value
-        ){
-
-            return;
-
-        }
-
-
-
-        backs.forEach(back=>{
-
-
-            result.push({
-
-                front,
-
-                back,
-
-
-                sum:s,
-
-
-                zone:
-                zone(front)
-
-            });
-
-
-
-        });
-
-
-
-    });
-
-
-
-    // 随机打乱
-
-    result.sort(
-        ()=>Math.random()-0.5
     );
 
 
 
-    return result.slice(
+
+
+
+    // 防止过多
+
+    return result
+    .slice(
         0,
         limit
     );
 
+
 }
+
+
+
+
 
 
 
