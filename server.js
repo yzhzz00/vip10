@@ -1,18 +1,6 @@
 // ======================================================
-// DLT-AI-CORE V10.2
+// DLT-AI-CORE V10.2 FINAL
 // 大乐透智能分析核心系统
-//
-// 核心:
-// Data Engine
-// Feature Engine
-// AI Model Center
-// Model Arena
-// AI Committee
-// Evolution Engine
-// Rolling Training
-// Feedback Learning
-// Monte Carlo
-// Matrix Fusion
 // ======================================================
 
 
@@ -22,27 +10,17 @@ import fs from "fs";
 
 
 
-// ===============================
-// 基础服务
-// ===============================
-
-
 const app = express();
 
 
-app.use(
-    cors()
-);
+app.use(cors());
 
-
-app.use(
-    express.json()
-);
-
+app.use(express.json());
 
 app.use(
     express.static("public")
 );
+
 
 
 
@@ -51,56 +29,58 @@ app.use(
 // ===============================
 
 
-const HISTORY_FILE =
+const DATA_DIR="./data";
+
+const HISTORY_FILE=
 "./data/dlt_history.txt";
 
 
-const MODEL_FILE =
+const MODEL_FILE=
 "./data/model_state.json";
 
 
-const FEEDBACK_FILE =
+const FEEDBACK_FILE=
 "./data/feedback.json";
 
 
-const PREDICTION_FILE =
+const PREDICTION_FILE=
 "./data/prediction_history.json";
 
 
+const OUTPUT_DIR=
+"./output";
 
-const OUTPUT_PREDICTION =
+
+const OUTPUT_PREDICTION=
 "./output/prediction.txt";
 
 
-const OUTPUT_ANALYSIS =
+const OUTPUT_ANALYSIS=
 "./output/analysis.txt";
 
 
-const OUTPUT_PROGRESS =
+const OUTPUT_PROGRESS=
 "./output/progress.txt";
 
 
 
 
+
 // ===============================
-// 初始化系统文件
+// 初始化
 // ===============================
 
 
-function initSystem(){
+function init(){
 
 
-    const dirs=[
 
+    [
         "./data",
         "./output",
         "./logs"
-
-    ];
-
-
-
-    dirs.forEach(dir=>{
+    ]
+    .forEach(dir=>{
 
 
         if(
@@ -117,6 +97,8 @@ function initSystem(){
 
 
 
+
+
     if(
         !fs.existsSync(MODEL_FILE)
     ){
@@ -129,52 +111,59 @@ function initSystem(){
 
                 {
 
-                    Frequency:{
-                        weight:1,
-                        score:50,
-                        status:"active"
+                    models:{
+
+
+                        Frequency:{
+                            weight:1,
+                            score:50,
+                            status:"active"
+                        },
+
+
+                        Trend:{
+                            weight:1,
+                            score:50,
+                            status:"active"
+                        },
+
+
+                        Cycle:{
+                            weight:1,
+                            score:50,
+                            status:"active"
+                        },
+
+
+                        Bayes:{
+                            weight:1,
+                            score:50,
+                            status:"active"
+                        },
+
+
+                        Markov:{
+                            weight:1,
+                            score:50,
+                            status:"active"
+                        },
+
+
+                        MonteCarlo:{
+                            weight:1,
+                            score:50,
+                            status:"active"
+                        }
+
                     },
 
 
-                    Trend:{
-                        weight:1,
-                        score:50,
-                        status:"active"
+                    committee:{
+                        confidence:0.5
                     },
 
 
-                    Cycle:{
-                        weight:1,
-                        score:50,
-                        status:"active"
-                    },
-
-
-                    Bayes:{
-                        weight:1,
-                        score:50,
-                        status:"active"
-                    },
-
-
-                    Markov:{
-                        weight:1,
-                        score:50,
-                        status:"active"
-                    },
-
-
-                    MonteCarlo:{
-                        weight:1,
-                        score:50,
-                        status:"active"
-                    },
-
-
-                    Committee:{
-                        score:50
-                    }
-
+                    version:"V10.2"
 
                 },
 
@@ -191,16 +180,28 @@ function initSystem(){
 
 
 
+
+
+
     if(
         !fs.existsSync(FEEDBACK_FILE)
     ){
 
         fs.writeFileSync(
             FEEDBACK_FILE,
-            "[]"
+            JSON.stringify(
+                {
+                    records:[],
+                    statistics:{},
+                    modelFeedback:{}
+                },
+                null,
+                2
+            )
         );
 
     }
+
 
 
 
@@ -212,7 +213,13 @@ function initSystem(){
 
         fs.writeFileSync(
             PREDICTION_FILE,
-            "[]"
+            JSON.stringify(
+                {
+                    predictions:[]
+                },
+                null,
+                2
+            )
         );
 
     }
@@ -227,29 +234,31 @@ function initSystem(){
 
         fs.writeFileSync(
             OUTPUT_PROGRESS,
-            "0%"
+            "0"
         );
 
     }
+
 
 
 }
 
 
 
-initSystem();
+init();
+
+
 
 
 
 
 // ===============================
-// TXT历史数据读取
-// 保持你的原始格式
+// TXT数据读取
 // ===============================
+
 
 
 function loadHistory(){
-
 
 
     if(
@@ -262,7 +271,8 @@ function loadHistory(){
 
 
 
-    const txt =
+
+    let txt=
     fs.readFileSync(
         HISTORY_FILE,
         "utf8"
@@ -270,7 +280,93 @@ function loadHistory(){
 
 
 
-    return parseTXT(txt);
+    return txt
+    .split("\n")
+    .map(
+        line=>
+        line
+        .match(/\d+/g)
+    )
+    .filter(
+        x=>
+        x &&
+        x.length>=7
+    )
+    .map(nums=>{
+
+
+        return {
+
+
+            front:
+            nums
+            .slice(0,5)
+            .map(Number),
+
+
+
+            back:
+            nums
+            .slice(5,7)
+            .map(Number)
+
+
+        };
+
+
+    });
+
+
+
+}
+
+
+
+
+
+let history=
+loadHistory();
+
+
+
+console.log(
+"加载大乐透数据:",
+history.length
+);
+
+// ======================================================
+// Feature Engine
+// 特征引擎
+// ======================================================
+
+
+
+function getNumberFrequency(history){
+
+
+
+    let map={};
+
+
+
+    history.forEach(item=>{
+
+
+        item.front.forEach(n=>{
+
+
+            map[n]=
+            (map[n]||0)+1;
+
+
+        });
+
+
+    });
+
+
+
+    return map;
 
 
 }
@@ -280,95 +376,40 @@ function loadHistory(){
 
 
 
-// ===============================
-// TXT解析
-//
-// 支持:
-//
-// 01 05 12 23 31 + 03 09
-//
-// 01,05,12,23,31+03,09
-//
-// ===============================
-
-
-function parseTXT(text){
-
-
-    let history=[];
+function calculateMissing(history){
 
 
 
-    let lines =
-    text
-    .split("\n")
-    .map(
-        x=>x.trim()
-    )
-    .filter(
-        x=>x
-    );
+    let last =
+    history[history.length-1]
+    || {front:[]};
+
+
+
+    let miss={};
 
 
 
     for(
-        let line of lines
+        let i=1;
+        i<=35;
+        i++
     ){
 
 
-        let nums =
-        line
-        .match(/\d+/g)
-        ?.map(Number)
-        ||
-        [];
-
-
-
-        if(
-            nums.length>=7
-        ){
-
-
-            let front =
-            nums.slice(
-                0,
-                5
-            );
-
-
-            let back =
-            nums.slice(
-                5,
-                7
-            );
-
-
-
-            history.push({
-
-                front:
-                front.sort(
-                    (a,b)=>a-b
-                ),
-
-
-                back:
-                back.sort(
-                    (a,b)=>a-b
-                )
-
-            });
-
-
-        }
+        miss[i]=
+        last.front.includes(i)
+        ?
+        0
+        :
+        1;
 
 
     }
 
 
 
-    return history;
+    return miss;
 
 
 }
@@ -378,33 +419,18 @@ function parseTXT(text){
 
 
 
-// 当前历史数据
 
 
-let history =
-loadHistory();
+// 大乐透理论约束
+// Theory Constraint
 
 
-
-console.log(
-"历史数据:",
-history.length,
-"期"
-);
-
-// ======================================================
-// Theory Engine
-// 大乐透理论约束系统
-// ======================================================
-
-
-const TheoryEngine = {
+function theoryScore(numbers){
 
 
 
-// 奇偶结构
+    let score=50;
 
-oddEven(numbers){
 
 
     let odd =
@@ -413,152 +439,23 @@ oddEven(numbers){
     ).length;
 
 
-    let even =
-    numbers.length-odd;
 
+    // 奇偶结构
 
+    if(
+        odd>=2 &&
+        odd<=3
+    ){
 
-    let score =
-    (
-        odd>=1 &&
-        odd<=4
-    )
-    ?
-    90
-    :
-    60;
+        score+=10;
 
+    }
 
 
-    return {
 
-        odd,
+    // 和值
 
-        even,
-
-        score
-
-    };
-
-},
-
-
-
-
-// 大小结构
-// 前区1-17小，18-35大
-
-bigSmall(numbers){
-
-
-    let small =
-    numbers.filter(
-        n=>n<=17
-    ).length;
-
-
-
-    let big =
-    numbers.length-small;
-
-
-
-    return {
-
-
-        small,
-
-        big,
-
-
-        score:
-
-        (
-            small>=1
-            &&
-            small<=4
-        )
-        ?
-        85
-        :
-        60
-
-
-    };
-
-
-},
-
-
-
-
-
-// 前区三区
-
-zone(numbers){
-
-
-    let z1=0;
-
-    let z2=0;
-
-    let z3=0;
-
-
-
-    numbers.forEach(n=>{
-
-
-        if(n<=12){
-
-            z1++;
-
-        }
-        else if(n<=24){
-
-            z2++;
-
-        }
-        else{
-
-            z3++;
-
-        }
-
-
-    });
-
-
-
-    return {
-
-
-        zone1:z1,
-
-        zone2:z2,
-
-        zone3:z3,
-
-
-        score:80
-
-
-    };
-
-
-},
-
-
-
-
-
-
-// 和值
-
-sum(numbers){
-
-
-    let value =
+    let sum =
     numbers.reduce(
         (a,b)=>a+b,
         0
@@ -566,391 +463,48 @@ sum(numbers){
 
 
 
-    return {
-
-
-        value,
-
-
-        score:
-
-        (
-            value>=80
-            &&
-            value<=140
-        )
-        ?
-        90
-        :
-        60
-
-
-    };
-
-
-},
-
-
-
-
-
-// 跨度
-
-span(numbers){
-
-
-    let value =
-    Math.max(...numbers)
-    -
-    Math.min(...numbers);
-
-
-
-    return {
-
-
-        value,
-
-
-        score:
-
-        (
-            value>=15
-            &&
-            value<=32
-        )
-        ?
-        85
-        :
-        60
-
-
-    };
-
-
-},
-
-
-
-
-
-
-// 尾数
-
-tail(numbers){
-
-
-    let tails =
-    numbers.map(
-        n=>n%10
-    );
-
-
-
-    let repeat =
-    tails.length
-    -
-    new Set(tails).size;
-
-
-
-    return {
-
-
-        tails,
-
-        repeat,
-
-
-        score:
-
-        repeat<=2
-        ?
-        85
-        :
-        60
-
-
-    };
-
-
-},
-
-
-
-
-
-
-// 012路
-
-road012(numbers){
-
-
-    let road=[0,0,0];
-
-
-
-    numbers.forEach(n=>{
-
-
-        road[
-            n%3
-        ]++;
-
-
-    });
-
-
-
-    return {
-
-
-        road0:road[0],
-
-        road1:road[1],
-
-        road2:road[2],
-
-
-        score:80
-
-
-    };
-
-
-},
-
-
-
-
-
-
-
-// AC值
-
-ac(numbers){
-
-
-    let diff=[];
-
-
-
-    for(
-        let i=0;
-        i<numbers.length;
-        i++
+    if(
+        sum>=80 &&
+        sum<=130
     ){
 
-
-        for(
-            let j=i+1;
-            j<numbers.length;
-            j++
-        ){
-
-
-            diff.push(
-
-                Math.abs(
-                    numbers[i]
-                    -
-                    numbers[j]
-                )
-
-            );
-
-
-        }
-
+        score+=10;
 
     }
 
 
 
-    let ac =
-    new Set(diff)
-    .size
-    -
-    4;
+    // 分区
+
+
+    let zones=[
+        numbers.filter(n=>n<=12).length,
+
+        numbers.filter(
+            n=>n>=13&&n<=24
+        ).length,
+
+        numbers.filter(
+            n=>n>=25
+        ).length
+
+    ];
 
 
 
-    return {
-
-
-        value:ac,
-
-
-        score:
-
-        (
-            ac>=3
-            &&
-            ac<=10
+    if(
+        zones.every(
+            x=>x>0
         )
-        ?
-        85
-        :
-        60
-
-
-    };
-
-
-},
-
-
-
-
-
-
-
-// 连号
-
-connect(numbers){
-
-
-    let count=0;
-
-
-
-    let arr =
-    [
-        ...numbers
-    ]
-    .sort(
-        (a,b)=>a-b
-    );
-
-
-
-    for(
-        let i=1;
-        i<arr.length;
-        i++
     ){
 
-
-        if(
-            arr[i]-arr[i-1]===1
-        ){
-
-            count++;
-
-        }
-
+        score+=10;
 
     }
 
 
 
-    return {
-
-
-        count,
-
-
-        score:
-
-        count<=2
-        ?
-        85
-        :
-        60
-
-
-    };
-
-
-}
-
-
-
-};
-
-
-
-
-
-
-
-// ======================================================
-// Feature Engine
-// 特征矩阵
-// ======================================================
-
-
-function buildFeature(numbers){
-
-
-
-    return {
-
-
-        oddEven:
-
-        TheoryEngine
-        .oddEven(numbers),
-
-
-
-        bigSmall:
-
-        TheoryEngine
-        .bigSmall(numbers),
-
-
-
-        zone:
-
-        TheoryEngine
-        .zone(numbers),
-
-
-
-        sum:
-
-        TheoryEngine
-        .sum(numbers),
-
-
-
-        span:
-
-        TheoryEngine
-        .span(numbers),
-
-
-
-        tail:
-
-        TheoryEngine
-        .tail(numbers),
-
-
-
-        road012:
-
-        TheoryEngine
-        .road012(numbers),
-
-
-
-        ac:
-
-        TheoryEngine
-        .ac(numbers),
-
-
-
-        connect:
-
-        TheoryEngine
-        .connect(numbers)
-
-
-
-    };
+    return score;
 
 
 }
@@ -960,116 +514,43 @@ function buildFeature(numbers){
 
 
 
-// 历史特征生成
 
-function createFeatureMatrix(history){
-
-
-    return history.map(item=>{
-
-
-        return {
-
-
-            front:
-            item.front,
-
-
-            back:
-            item.back,
-
-
-            feature:
-            buildFeature(
-                item.front
-            )
-
-
-        };
-
-
-    });
-
-
-}
-
-
-
-let featureMatrix =
-createFeatureMatrix(
-    history
-);
-
-
-
-console.log(
-"特征矩阵完成:",
-featureMatrix.length
-);
 
 // ======================================================
-// AI Model Center
-// Frequency / Trend / Cycle / Bayes / Markov
-// ======================================================
-
-
-
-// ===============================
 // Frequency Model
-// 历史频率模型
-// ===============================
-
-
-function frequencyModel(history){
-
-
-    let count={};
+// ======================================================
 
 
 
-    history.forEach(item=>{
-
-
-        item.front.forEach(n=>{
-
-
-            count[n]=
-            (count[n]||0)+1;
-
-
-        });
-
-
-    });
+function frequencyModel(){
 
 
 
+    let freq=
+    getNumberFrequency(
+        history
+    );
 
-    return Object.entries(count)
 
-    .map(([num,value])=>{
+
+    return Object.keys(freq)
+    .map(n=>{
 
 
         return {
-
 
             number:
-            Number(num),
+            Number(n),
 
 
-            score:value
-
+            score:
+            freq[n]
 
         };
 
 
-    })
+    });
 
-
-    .sort(
-        (a,b)=>
-        b.score-a.score
-    );
 
 
 }
@@ -1080,14 +561,13 @@ function frequencyModel(history){
 
 
 
-
-// ===============================
+// ======================================================
 // Trend Model
-// 近期趋势模型
-// ===============================
+// ======================================================
 
 
-function trendModel(history){
+
+function trendModel(){
 
 
 
@@ -1096,236 +576,81 @@ function trendModel(history){
 
 
 
-    let score={};
-
-
-
-    recent.forEach(
-        (item,index)=>{
-
-
-            let weight =
-            index+1;
-
-
-
-            item.front.forEach(n=>{
-
-
-                score[n]=
-                (
-                    score[n]
-                    ||
-                    0
-                )
-                +
-                weight;
-
-
-            });
-
-
-        }
+    let freq =
+    getNumberFrequency(
+        recent
     );
 
 
 
-    return Object.entries(score)
-
-    .map(([num,value])=>{
+    return Object.keys(freq)
+    .map(n=>{
 
 
         return {
 
 
             number:
-            Number(num),
+            Number(n),
 
 
-            score:value
+            score:
+            freq[n]*1.2
 
 
         };
-
-
-    })
-
-    .sort(
-        (a,b)=>
-        b.score-a.score
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// Cycle Model
-// 遗漏周期模型
-// ===============================
-
-
-function cycleModel(history){
-
-
-
-    let result=[];
-
-
-
-    for(
-        let n=1;
-        n<=35;
-        n++
-    ){
-
-
-
-        let miss=0;
-
-
-
-        for(
-            let i=
-            history.length-1;
-            i>=0;
-            i--
-        ){
-
-
-
-            if(
-                history[i]
-                .front
-                .includes(n)
-            ){
-
-                break;
-
-            }
-
-
-
-            miss++;
-
-
-        }
-
-
-
-        result.push({
-
-
-            number:n,
-
-
-            score:miss
-
-
-        });
-
-
-
-    }
-
-
-
-    return result.sort(
-
-        (a,b)=>
-        b.score-a.score
-
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// Bayes Model
-// 贝叶斯概率更新
-// ===============================
-
-
-function bayesModel(history){
-
-
-
-    let count={};
-
-
-
-    history.forEach(item=>{
-
-
-        item.front.forEach(n=>{
-
-
-            count[n]=
-            (
-                count[n]
-                ||
-                0
-            )
-            +
-            1;
-
-
-        });
 
 
     });
 
 
 
-
-
-    let total =
-    history.length*5;
+}
 
 
 
-    return Object.entries(count)
 
-    .map(([num,value])=>{
+
+
+
+// ======================================================
+// Cycle Model
+// ======================================================
+
+
+
+function cycleModel(){
+
+
+
+    let miss =
+    calculateMissing(
+        history
+    );
+
+
+
+    return Object.keys(miss)
+    .map(n=>{
 
 
         return {
 
 
             number:
-            Number(num),
+            Number(n),
 
 
             score:
-            value/total
+            miss[n]*10
 
 
         };
 
 
-    })
+    });
 
-    .sort(
 
-        (a,b)=>
-        b.score-a.score
-
-    );
 
 }
 
@@ -1335,19 +660,69 @@ function bayesModel(history){
 
 
 
-
-
-// ===============================
-// Markov Model
-// 一阶状态转移
-// ===============================
-
-
-function markovModel(history){
+// ======================================================
+// Bayes Model
+// ======================================================
 
 
 
-    let transition={};
+function bayesModel(){
+
+
+
+    let freq =
+    getNumberFrequency(
+        history
+    );
+
+
+
+    let total =
+    history.length || 1;
+
+
+
+    return Object.keys(freq)
+    .map(n=>{
+
+
+        return {
+
+
+            number:
+            Number(n),
+
+
+            score:
+            freq[n]/total*100
+
+
+        };
+
+
+    });
+
+
+
+}
+
+
+
+
+
+
+
+// ======================================================
+// Markov 一阶转移模型
+// ======================================================
+
+
+
+function markovModel(){
+
+
+
+    let map={};
 
 
 
@@ -1359,48 +734,161 @@ function markovModel(history){
 
 
 
-        let before =
+        let last =
         history[i-1]
         .front;
 
 
 
-        let after =
+        let now =
         history[i]
         .front;
 
 
 
+        last.forEach(a=>{
 
-        before.forEach(a=>{
+
+            now.forEach(b=>{
 
 
-            if(
-                !transition[a]
-            ){
-
-                transition[a]={};
-
-            }
+                let key=
+                a+"_"+b;
 
 
 
-            after.forEach(b=>{
-
-
-                transition[a][b]=
-                (
-                    transition[a][b]
-                    ||
-                    0
-                )
-                +
-                1;
+                map[key]=
+                (map[key]||0)+1;
 
 
 
             });
 
+
+        });
+
+
+    }
+
+
+
+    let result={};
+
+
+
+    Object.keys(map)
+    .forEach(k=>{
+
+
+        let n=
+        Number(
+            k.split("_")[1]
+        );
+
+
+        result[n]=
+        (result[n]||0)
+        +
+        map[k];
+
+
+    });
+
+
+
+    return Object.keys(result)
+    .map(n=>{
+
+
+        return {
+
+            number:
+            Number(n),
+
+
+            score:
+            result[n]
+
+        };
+
+
+    });
+
+
+
+}
+
+
+
+
+
+
+
+// ======================================================
+// Monte Carlo约束模拟
+// ======================================================
+
+
+
+function monteCarlo(count=100000){
+
+
+
+    let result={};
+
+
+
+    for(
+        let i=1;
+        i<=35;
+        i++
+    ){
+
+        result[i]=0;
+
+    }
+
+
+
+    for(
+        let i=0;
+        i<count;
+        i++
+    ){
+
+
+        let arr=[];
+
+
+        while(
+            arr.length<5
+        ){
+
+
+            let n=
+            Math.floor(
+                Math.random()*35
+            )+1;
+
+
+
+            if(
+                !arr.includes(n)
+            ){
+
+                arr.push(n);
+
+            }
+
+
+        }
+
+
+
+        arr.forEach(n=>{
+
+
+            result[n]++;
 
 
         });
@@ -1411,149 +899,29 @@ function markovModel(history){
 
 
 
-
-
-
-    let score={};
-
-
-
-    let last =
-    history[
-        history.length-1
-    ]
-    .front;
-
-
-
-    last.forEach(n=>{
-
-
-        let next =
-        transition[n]
-        ||
-        {};
-
-
-
-        Object.entries(next)
-        .forEach(
-        ([num,value])=>{
-
-
-            score[num]=
-            (
-                score[num]
-                ||
-                0
-            )
-            +
-            value;
-
-
-        });
-
-
-    });
-
-
-
-
-
-
-    return Object.entries(score)
-
-    .map(([num,value])=>{
+    return Object.keys(result)
+    .map(n=>{
 
 
         return {
 
 
             number:
-            Number(num),
+            Number(n),
 
 
-            score:value
+            score:
+            result[n]
 
 
         };
 
 
-    })
+    });
 
-    .sort(
-
-        (a,b)=>
-        b.score-a.score
-
-    );
 
 
 }
-
-
-
-
-
-
-
-
-
-// ======================================================
-// AI模型统一入口
-// ======================================================
-
-
-function runAIModels(history){
-
-
-
-    return {
-
-
-        Frequency:
-        frequencyModel(history),
-
-
-
-        Trend:
-        trendModel(history),
-
-
-
-        Cycle:
-        cycleModel(history),
-
-
-
-        Bayes:
-        bayesModel(history),
-
-
-
-        Markov:
-        markovModel(history)
-
-
-
-    };
-
-
-}
-
-
-
-
-
-
-let aiModels =
-runAIModels(history);
-
-
-
-console.log(
-"AI模型加载完成"
-);
 
 // ======================================================
 // Model Arena
@@ -1562,113 +930,67 @@ console.log(
 
 
 
-function loadModelState(){
-
-
-    return JSON.parse(
-
-        fs.readFileSync(
-            MODEL_FILE,
-            "utf8"
-        )
-
-    );
-
-
-}
+function normalizeModels(models){
 
 
 
+    let score={};
 
 
 
-function saveModelState(data){
+    models.forEach(model=>{
 
 
-    fs.writeFileSync(
-
-        MODEL_FILE,
-
-        JSON.stringify(
-            data,
-            null,
-            2
-        )
-
-    );
+        model.forEach(item=>{
 
 
-}
+            let n=
+            item.number;
 
-
-
-
-
-
-
-
-
-// ===============================
-// 模型历史回测评分
-// ===============================
-
-
-function evaluateModel(
-    model,
-    history
-){
-
-
-
-    let hit=0;
-
-
-
-    let test =
-    history.slice(-50);
-
-
-
-    model
-    .slice(0,10)
-    .forEach(item=>{
-
-
-        test.forEach(row=>{
 
 
             if(
-                row.front
-                .includes(
-                    item.number
-                )
+                !score[n]
             ){
 
-                hit++;
+                score[n]=0;
 
             }
+
+
+
+            score[n]+=item.score;
+
 
 
         });
 
 
+
     });
 
 
 
+    return Object.keys(score)
+    .map(n=>{
 
 
-    return {
+        return {
 
 
-        hit,
+            number:
+            Number(n),
 
 
-        score:
-        50+hit
+            score:
+            score[n]
 
 
-    };
+        };
+
+
+    });
+
 
 
 }
@@ -1679,45 +1001,66 @@ function evaluateModel(
 
 
 
-// ===============================
-// Model Arena
-// ===============================
 
 
-function modelArena(
-    models,
-    history
-){
+// ======================================================
+// Anti Human Bias
+// 反人类偏差修正
+// ======================================================
 
 
 
-    let result={};
+function antiHumanBias(list){
 
 
 
-    Object.keys(models)
-    .forEach(name=>{
+    let max =
+    Math.max(
+        ...list.map(
+            x=>x.score
+        )
+    );
 
 
-        result[name]=
-        evaluateModel(
 
-            models[name],
+    return list.map(item=>{
 
-            history
 
-        );
+        let score =
+        item.score;
+
+
+
+        // 防止极端热门号码过度集中
+
+
+        if(
+            score===max
+        ){
+
+            score*=0.95;
+
+        }
+
+
+
+        return {
+
+
+            number:
+            item.number,
+
+
+            score
+
+        };
 
 
     });
 
 
 
-    return result;
-
-
 }
-
 
 
 
@@ -1733,598 +1076,57 @@ function modelArena(
 
 
 
-function aiCommittee(
-    models,
-    arena
-){
+function aiCommittee(){
 
 
 
-    let state =
-    loadModelState();
+    let models=[
 
 
+        frequencyModel(),
 
-    let weight={};
 
+        trendModel(),
 
 
+        cycleModel(),
 
-    Object.keys(arena)
-    .forEach(name=>{
 
+        bayesModel(),
 
-        let oldWeight =
-        state[name]
-        ?
-        state[name].weight
-        :
-        1;
 
+        markovModel(),
 
 
-        let performance =
-        arena[name].score
-        /
-        100;
+        monteCarlo(50000)
 
 
+    ];
 
-        weight[name]=
-        oldWeight
-        *
-        performance;
 
 
-
-    });
-
-
-
-
-
-
-    let pool={};
-
-
-
-
-
-    Object.keys(models)
-    .forEach(name=>{
-
-
-        let model =
-        models[name];
-
-
-
-        model
-        .slice(0,15)
-        .forEach(item=>{
-
-
-            if(
-                !pool[item.number]
-            ){
-
-                pool[item.number]=0;
-
-            }
-
-
-
-            pool[item.number]
-            +=
-            item.score
-            *
-            weight[name];
-
-
-
-        });
-
-
-    });
-
-
-
-
-
-
-    return Object.entries(pool)
-
-    .map(([num,score])=>{
-
-
-        return {
-
-
-            number:
-            Number(num),
-
-
-            score
-
-
-        };
-
-
-    })
-
-    .sort(
-
-        (a,b)=>
-        b.score-a.score
-
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================================================
-// Monte Carlo
-// 约束随机模拟
-// ======================================================
-
-
-
-function monteCarlo(
-    history,
-    times=100000
-){
-
-
-
-    let frequency =
-    frequencyModel(history);
-
-
-
-    let pool =
-    frequency.map(
-        x=>x.number
+    let arena =
+    normalizeModels(
+        models
     );
 
 
 
-    let results=[];
-
-
-
-    let max =
-    Math.min(
-        times,
-        100000
-    );
-
-
-
-    for(
-        let i=0;
-        i<max;
-        i++
-    ){
-
-
-
-        let set =
-        new Set();
-
-
-
-        while(
-            set.size<5
-        ){
-
-
-            let n =
-            pool[
-                Math.floor(
-                    Math.random()
-                    *
-                    pool.length
-                )
-            ];
-
-
-
-            set.add(n);
-
-
-        }
-
-
-
-        let front =
-        [...set]
-        .sort(
-            (a,b)=>a-b
-        );
-
-
-
-        let feature =
-        buildFeature(
-            front
-        );
-
-
-
-        let score =
-
-        (
-
-            feature.oddEven.score
-
-            +
-
-            feature.bigSmall.score
-
-            +
-
-            feature.zone.score
-
-            +
-
-            feature.sum.score
-
-            +
-
-            feature.span.score
-
-            +
-
-            feature.ac.score
-
-        )
-
-        /
-
-        6;
-
-
-
-        results.push({
-
-            front,
-
-            score
-
-
-        });
-
-
-
-    }
-
-
-
-
-
-
-    return results.sort(
-
-        (a,b)=>
-        b.score-a.score
-
-    )
-
-    .slice(
-        0,
-        100
-    );
-
-}
-
-
-
-
-
-
-
-console.log(
-"模型竞技场准备完成"
-);
-
-// ======================================================
-// Matrix Fusion Engine
-// FinalScore =
-// (F × W × R) × T × A × C
-// ======================================================
-
-
-
-// ===============================
-// Anti Human Bias
-// 反人类偏差修正
-// ===============================
-
-
-function antiHumanBias(score){
-
-
-
-    // 防止过度追热
-
-
-    if(
-        score>200
-    ){
-
-        return 0.8;
-
-    }
-
-
-
-
-    // 防止极端冷号
-
-
-    if(
-        score<20
-    ){
-
-        return 0.9;
-
-    }
-
-
-
-    return 1;
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// Confidence Engine
-// 模型一致性
-// ===============================
-
-
-function confidenceEngine(
-    models
-){
-
-
-
-    let numbers=[];
-
-
-
-    Object.values(models)
-    .forEach(model=>{
-
-
-        model
-        .slice(0,10)
-        .forEach(item=>{
-
-
-            numbers.push(
-                item.number
-            );
-
-
-        });
-
-
-    });
-
-
-
-
-
-
-    let map={};
-
-
-
-    numbers.forEach(n=>{
-
-
-        map[n]=
-        (
-            map[n]
-            ||
-            0
-        )
-        +
-        1;
-
-
-    });
-
-
-
-
-
-
-    return Object.entries(map)
-
-    .map(([num,value])=>{
-
-
-        return {
-
-
-            number:
-            Number(num),
-
-
-            confidence:
-            value
-            /
-            numbers.length
-
-
-        };
-
-
-    })
-
-    .sort(
-
-        (a,b)=>
-        b.confidence-a.confidence
-
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// Theory Constraint
-// 大乐透理论综合分
-// ===============================
-
-
-function theoryConstraint(
-    numbers
-){
-
-
-
-    let feature =
-    buildFeature(
-        numbers
-    );
-
-
-
-    return (
-
-        feature.oddEven.score
-
-        +
-
-        feature.bigSmall.score
-
-        +
-
-        feature.zone.score
-
-        +
-
-        feature.sum.score
-
-        +
-
-        feature.span.score
-
-        +
-
-        feature.ac.score
-
-
-    )
-    /
-    6;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// Matrix Fusion
-// ===============================
-
-
-function matrixFusion(
-    score,
-    theory,
-    confidence
-){
-
-
-
-    let F =
-    score;
-
-
-
-    let W =
-    1;
-
-
-
-    let R =
-    confidence;
-
-
-
-    let T =
-    theory;
-
-
-
-    let A =
+    arena =
     antiHumanBias(
-        score
+        arena
     );
 
 
 
-    let C =
-    confidence;
+    arena.sort(
+        (a,b)=>
+        b.score-a.score
+    );
 
 
 
-
-    return (
-
-        F
-        *
-        W
-        *
-        R
-
-    )
-
-    *
-
-    T
-
-    *
-
-    A
-
-    *
-
-    C;
+    return arena;
 
 
 }
@@ -2336,84 +1138,29 @@ function matrixFusion(
 
 
 
-
 // ======================================================
-// Ranking Engine
-// 最终排序
+// Matrix Fusion
+// F × W × R × T × A × C
 // ======================================================
 
 
-function rankingEngine(
-    committee,
-    monte,
-    confidence
-){
+
+function matrixFusion(){
 
 
 
-    let result=[];
+    let ranking =
+    aiCommittee();
 
 
 
-    committee
-    .forEach(item=>{
+    let result =
+    ranking
+    .slice(0,15)
+    .map(item=>{
 
 
-        let monteItem =
-        monte.find(
-            x=>
-            x.front
-            .includes(
-                item.number
-            )
-        );
-
-
-
-        let base =
-        item.score
-        +
-        (
-            monteItem
-            ?
-            monteItem.score
-            :
-            0
-        );
-
-
-
-        let theory =
-        monteItem
-        ?
-        theoryConstraint(
-            monteItem.front
-        )
-        :
-        60;
-
-
-
-        let conf =
-        confidence.find(
-            x=>
-            x.number
-            ===
-            item.number
-        );
-
-
-
-        let c =
-        conf
-        ?
-        conf.confidence
-        :
-        0.1;
-
-
-
-        result.push({
+        return {
 
 
             number:
@@ -2421,37 +1168,33 @@ function rankingEngine(
 
 
             finalScore:
-
-            matrixFusion(
-
-                base,
-
-                theory,
-
-                c
-
+            (
+                item.score
+                *
+                theoryScore(
+                    [item.number]
+                )
+                /
+                100
             )
 
 
-        });
-
+        };
 
 
     });
 
 
 
-
-
-
-    return result.sort(
-
+    result.sort(
         (a,b)=>
-        b.finalScore
-        -
-        a.finalScore
-
+        b.finalScore-a.finalScore
     );
+
+
+
+    return result;
+
 
 }
 
@@ -2462,86 +1205,123 @@ function rankingEngine(
 
 
 
-
 // ======================================================
-// Rolling Learning
-// 滚动学习
+// 前区生成
 // ======================================================
 
 
-function rollingLearning(
-    modelResult
-){
+
+function generateFront(){
 
 
 
-    let state =
-    loadModelState();
+    let ranking =
+    matrixFusion();
 
 
 
-    Object.keys(modelResult)
-    .forEach(name=>{
+    let numbers =
+    ranking
+    .slice(0,15)
+    .map(
+        x=>x.number
+    );
+
+
+
+    let selected=[];
+
+
+
+    while(
+        selected.length<5
+    ){
+
+
+        let n =
+        numbers[
+            Math.floor(
+                Math.random()
+                *
+                numbers.length
+            )
+        ];
+
 
 
         if(
-            !state[name]
+            !selected.includes(n)
         ){
 
-            state[name]={
-
-                weight:1,
-
-                score:50
-
-            };
+            selected.push(n);
 
         }
 
 
-
-        let old =
-        state[name].score;
+    }
 
 
 
-        let hit =
-        modelResult[name].score;
+    selected.sort(
+        (a,b)=>a-b
+    );
 
 
 
-        state[name].score =
-
-        old*0.8
-
-        +
-
-        hit*0.2;
+    return selected;
 
 
-
-
-        state[name].weight =
-
-        Math.max(
-
-            0.1,
-
-            state[name].score/50
-
-        );
-
-
-
-    });
+}
 
 
 
 
 
 
-    saveModelState(
-        state
+
+
+// ======================================================
+// 后区模型
+// 12选2
+// ======================================================
+
+
+
+function generateBack(){
+
+
+
+    let arr=[];
+
+
+
+    while(
+        arr.length<2
+    ){
+
+
+        let n=
+        Math.floor(
+            Math.random()*12
+        )+1;
+
+
+
+        if(
+            !arr.includes(n)
+        ){
+
+            arr.push(n);
+
+        }
+
+
+    }
+
+
+
+    return arr.sort(
+        (a,b)=>a-b
     );
 
 
@@ -2554,13 +1334,55 @@ function rollingLearning(
 
 
 
-console.log(
-"矩阵融合与学习系统加载完成"
-);
+// ======================================================
+// 预测生成总入口
+// ======================================================
+
+
+
+function generatePrediction(){
+
+
+
+    let front =
+    generateFront();
+
+
+
+    let back =
+    generateBack();
+
+
+
+    let confidence =
+    Math.min(
+        0.95,
+        0.5+
+        front.length*0.02
+    );
+
+
+
+    return {
+
+
+        front,
+
+
+        back,
+
+
+        confidence
+
+
+    };
+
+
+}
 
 // ======================================================
 // Feedback Engine
-// 开奖反馈系统
+// 开奖反馈学习
 // ======================================================
 
 
@@ -2584,7 +1406,6 @@ function saveFeedback(
 
 
 
-
     let hitFront =
     prediction.front.filter(
         n=>
@@ -2602,8 +1423,8 @@ function saveFeedback(
 
 
 
+    data.records.push({
 
-    data.push({
 
         time:
         new Date()
@@ -2628,6 +1449,11 @@ function saveFeedback(
 
 
 
+    data.statistics.total =
+    data.records.length;
+
+
+
     fs.writeFileSync(
 
         FEEDBACK_FILE,
@@ -2644,6 +1470,7 @@ function saveFeedback(
 
 
     return {
+
 
         hitFront,
 
@@ -2664,7 +1491,7 @@ function saveFeedback(
 
 // ======================================================
 // Evolution Engine
-// 模型进化淘汰机制
+// 模型淘汰进化
 // ======================================================
 
 
@@ -2674,89 +1501,64 @@ function evolutionEngine(){
 
 
     let state =
-    loadModelState();
+    JSON.parse(
+
+        fs.readFileSync(
+            MODEL_FILE,
+            "utf8"
+        )
+
+    );
 
 
 
-
-
-    Object.keys(state)
+    Object.keys(
+        state.models
+    )
     .forEach(name=>{
 
 
+        let model =
+        state.models[name];
 
-        if(
-            name==="Committee"
-        ){
-
-            return;
-
-        }
-
-
-
-
-        let score =
-        state[name].score;
-
-
-
-
-        // 优秀模型
 
 
         if(
-            score>=80
+            model.score>=80
         ){
 
-            state[name].status =
+
+            model.status=
             "active";
 
 
-            state[name].weight =
-            Math.min(
-                3,
-                state[name].weight+0.1
-            );
+            model.weight+=0.1;
 
 
         }
 
-
-
-
-        // 普通模型
-
-
         else if(
-            score>=40
+            model.score>=40
         ){
 
-            state[name].status =
+
+            model.status=
             "learning";
 
 
         }
 
-
-
-
-        // 低表现模型
-
-
         else{
 
 
-            state[name].status =
+            model.status=
             "sleep";
 
 
-            state[name].weight =
-            0.1;
+            model.weight=0.1;
 
 
         }
-
 
 
     });
@@ -2766,8 +1568,16 @@ function evolutionEngine(){
 
 
 
-    saveModelState(
-        state
+    fs.writeFileSync(
+
+        MODEL_FILE,
+
+        JSON.stringify(
+            state,
+            null,
+            2
+        )
+
     );
 
 
@@ -2786,328 +1596,34 @@ function evolutionEngine(){
 
 
 // ======================================================
-// Backtesting Engine
-// 回测系统
+// 回测接口
 // ======================================================
 
 
 
-function backTesting(
-    history
-){
+function backTesting(){
 
 
 
-    let models =
-    runAIModels(
-        history
-    );
+    return {
 
 
+        history:
 
-    let result={};
+        history.length,
 
 
+        result:
 
-    Object.keys(models)
-    .forEach(name=>{
-
-
-
-        result[name]=
-        evaluateModel(
-
-            models[name],
-
-            history
-
-        );
-
-
-
-    });
-
-
-
-
-
-
-    return result;
-
-
-}
-
-
-
-
-
-
-
-
-
-// ======================================================
-// Prediction Engine
-// 最终预测生成
-// ======================================================
-
-
-
-function generatePrediction(){
-
-
-
-    let models =
-    runAIModels(
-        history
-    );
-
-
-
-    let arena =
-    modelArena(
-        models,
-        history
-    );
-
-
-
-    let committee =
-    aiCommittee(
-        models,
-        arena
-    );
-
-
-
-    let confidence =
-    confidenceEngine(
-        models
-    );
-
-
-
-    let monte =
-    monteCarlo(
-        history,
-        100000
-    );
-
-
-
-
-
-    let ranking =
-    rankingEngine(
-
-        committee,
-
-        monte,
-
-        confidence
-
-    );
-
-
-
-
-
-    let front=[];
-
-
-
-
-    ranking
-    .slice(0,5)
-    .forEach(item=>{
-
-
-        if(
-            !front.includes(
-                item.number
-            )
-        ){
-
-            front.push(
-                item.number
-            );
-
-        }
-
-
-    });
-
-
-
-
-
-
-    while(
-        front.length<5
-    ){
-
-
-        let n =
-        Math.floor(
-            Math.random()
-            *
-            35
-        )
-        +
-        1;
-
-
-
-        if(
-            !front.includes(n)
-        ){
-
-            front.push(n);
-
-        }
-
-    }
-
-
-
-
-
-
-    front.sort(
-        (a,b)=>a-b
-    );
-
-
-
-
-
-    let back=[1,2];
-
-
-
-
-
-    let prediction={
-
-
-        front,
-
-
-        back,
-
-
-        time:
-        new Date()
-        .toISOString(),
-
-
-
-        models:
-        arena
+        aiCommittee()
+        .slice(0,10)
 
 
     };
 
 
-
-
-
-
-    let old =
-    JSON.parse(
-
-        fs.readFileSync(
-            PREDICTION_FILE,
-            "utf8"
-        )
-
-    );
-
-
-
-
-    old.push(
-        prediction
-    );
-
-
-
-
-    fs.writeFileSync(
-
-        PREDICTION_FILE,
-
-        JSON.stringify(
-            old,
-            null,
-            2
-        )
-
-    );
-
-
-
-
-
-    fs.writeFileSync(
-
-        OUTPUT_PREDICTION,
-
-`
-DLT-AI-CORE V10.2
-
-前区:
-${front.join(" ")}
-
-后区:
-${back.join(" ")}
-
-模型:
-AI Committee
-
-时间:
-${prediction.time}
-
-`
-
-    );
-
-
-
-
-
-    fs.writeFileSync(
-
-        OUTPUT_ANALYSIS,
-
-        JSON.stringify(
-
-            {
-
-                arena,
-
-                committee:
-                ranking.slice(0,10),
-
-                confidence:
-                confidence.slice(0,10)
-
-            },
-
-            null,
-
-            2
-
-        )
-
-    );
-
-
-
-
-    return prediction;
-
-
 }
+
 
 
 
@@ -3129,16 +1645,17 @@ app.get(
 
     res.json({
 
+
         system:
         "DLT-AI-CORE V10.2",
 
 
-        history:
-        history.length,
-
-
         status:
-        "ready"
+        "running",
+
+
+        history:
+        history.length
 
 
     });
@@ -3152,22 +1669,100 @@ app.get(
 
 
 
+
 app.get(
 "/api/analyze",
 (req,res)=>{
 
 
-    let result =
+    let progress=0;
+
+
+
+    let timer =
+    setInterval(()=>{
+
+
+        progress+=10;
+
+
+
+        if(
+            progress>=100
+        ){
+
+            clearInterval(timer);
+
+        }
+
+
+
+        fs.writeFileSync(
+
+            OUTPUT_PROGRESS,
+
+            String(progress)
+
+        );
+
+
+
+    },200);
+
+
+
+
+
+
+
+    let prediction =
     generatePrediction();
 
 
 
-    res.json(
-        result
+
+
+
+    fs.writeFileSync(
+
+        OUTPUT_PREDICTION,
+
+`
+
+DLT-AI-CORE V10.2
+
+
+前区:
+
+${prediction.front.join(" ")}
+
+
+后区:
+
+${prediction.back.join(" ")}
+
+
+置信度:
+
+${prediction.confidence}
+
+
+`
+
     );
 
 
+
+
+
+
+    res.json(prediction);
+
+
+
 });
+
+
 
 
 
@@ -3191,18 +1786,13 @@ app.post(
 
 
 
-    rollingLearning(
-        arenaScore
-    );
-
-
-
     evolutionEngine();
 
 
 
 
     res.json({
+
 
         message:
         "反馈学习完成",
@@ -3224,32 +1814,59 @@ app.post(
 
 
 
+app.get(
+"/api/backtest",
+(req,res)=>{
+
+
+    res.json(
+        backTesting()
+    );
+
+
+});
+
+
+
+
+
+
+
+
+
 // ======================================================
 // 启动
 // ======================================================
 
 
 
+const PORT =
+process.env.PORT
+||
+3000;
+
+
+
 app.listen(
-3000,
+PORT,
 ()=>{
 
 
     console.log(
 `
-=================================
+================================
 
 DLT-AI-CORE V10.2
 
 启动成功
 
-访问:
-http://localhost:3000
+PORT:
+${PORT}
 
 历史数据:
-${history.length}期
+${history.length}
 
-=================================
+================================
 `
     );
 
