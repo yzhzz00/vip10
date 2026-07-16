@@ -2,19 +2,20 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 
-
-const app = express();
-
-
-app.use(cors());
-
-app.use(express.json());
+const runAI = require("./app");
 
 
+const server = express();
 
-// 加载前端
 
-app.use(
+server.use(cors());
+
+server.use(express.json());
+
+
+// 加载网页目录
+
+server.use(
     express.static(
         path.join(
             __dirname,
@@ -24,10 +25,9 @@ app.use(
 );
 
 
-
 // 首页
 
-app.get("/", function(req,res){
+server.get("/", (req,res)=>{
 
     res.sendFile(
 
@@ -42,39 +42,38 @@ app.get("/", function(req,res){
 });
 
 
-
 // 测试接口
 
-app.get("/api/test",function(req,res){
+server.get(
+    "/api/test",
+    (req,res)=>{
 
-    res.json({
+        res.json({
 
-        status:"ok",
+            status:"ok",
 
-        version:"V1.0.0"
+            version:"V1.0.0"
 
-    });
+        });
 
-});
+    }
+);
 
 
+// AI接口
 
-// AI接口占位
+server.get(
+    "/api/analyze",
+    (req,res)=>{
 
-app.get("/api/analyze",function(req,res){
+        res.json(
 
-    res.json({
+            runAI()
 
-        success:true,
+        );
 
-        message:"AI系统连接成功",
-
-        ranking:[]
-
-    });
-
-});
-
+    }
+);
 
 
 
@@ -83,9 +82,9 @@ process.env.PORT || 3000;
 
 
 
-app.listen(
+server.listen(
     PORT,
-    function(){
+    ()=>{
 
         console.log(
             "DLT-AI CORE V1.0.0 running"
