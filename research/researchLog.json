@@ -1,17 +1,28 @@
 {
-    "version": "DLT-AI-CORE V1.0",
+    "version":
+    "DLT-AI-CORE V1.0",
 
-    "created": "2026-07-16",
 
-    "backtest": [],
+    "backtest":[],
 
-    "training": [],
 
-    "weightHistory": [],
 
-    "notes": [
-        "初始模型建立",
+    "training":[],
+
+
+
+    "weightHistory":[],
+
+
+
+    "notes":[
+
         "六模型评分体系",
-        "支持反馈学习"
+
+        "支持开奖反馈",
+
+        "支持权重调整"
+
     ]
+
 }

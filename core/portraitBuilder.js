@@ -2,7 +2,7 @@
 
 
 /*
-    DLT-AI CORE V1.0
+    DLT-AI CORE V1.1
 
     Portrait Builder
 
@@ -14,57 +14,40 @@
 
     开奖画像
 
-
 */
 
 
 
-// 和值等级
-
-function sumLevel(sum){
 
 
-    if(sum<80){
 
-        return "低";
+function average(
+    arr
+){
 
-    }
 
+    if(
+        arr.length===0
+    ){
 
-    if(sum<110){
-
-        return "中";
+        return 0;
 
     }
 
 
-    return "高";
 
+    return (
 
-}
+        arr.reduce(
+            (a,b)=>a+b,
+            0
+        )
 
+        /
 
+        arr.length
 
-// 跨度等级
-
-function spanLevel(span){
-
-
-    if(span<=15){
-
-        return "小";
-
-    }
-
-
-    if(span<=25){
-
-        return "中";
-
-    }
-
-
-    return "大";
+    );
 
 
 }
@@ -72,125 +55,43 @@ function spanLevel(span){
 
 
 
-// 后区等级
-
-function backLevel(sum){
-
-
-    if(sum<=10){
-
-        return "低";
-
-    }
-
-
-    if(sum<=18){
-
-        return "中";
-
-    }
-
-
-    return "高";
-
-}
 
 
 
 
-function buildPortrait(item){
+function buildSumPortrait(
+    features
+){
 
 
-    const f =
-    item.features;
+    const sums =
+
+    features.map(
+
+        item=>
+
+        item.frontSum
+
+    );
 
 
 
     return {
 
 
-        issue:
-        item.issue,
+        avg:
 
-
-        date:
-        item.date,
-
-
-        front:
-        item.front,
-
-
-        back:
-        item.back,
+        Number(
+            average(sums)
+            .toFixed(2)
+        ),
 
 
 
-        features:f,
+        recent:
 
+        sums.slice(-20)
 
-
-        portrait:{
-
-
-
-            sum:f.sum,
-
-
-            sumLevel:
-            sumLevel(
-                f.sum
-            ),
-
-
-
-            span:f.span,
-
-
-            spanLevel:
-            spanLevel(
-                f.span
-            ),
-
-
-
-            zone:
-            f.zone,
-
-
-
-            oddEven:
-            f.oddEven,
-
-
-
-            bigSmall:
-            f.bigSmall,
-
-
-
-            ac:
-            f.ac,
-
-
-
-            backSum:
-            f.backSum,
-
-
-            backLevel:
-            backLevel(
-                f.backSum
-            ),
-
-
-
-            structure:
-
-            `${sumLevel(f.sum)}和值+${spanLevel(f.span)}跨度`
-
-
-        }
 
 
     };
@@ -202,16 +103,274 @@ function buildPortrait(item){
 
 
 
-function portraitBuilder(features){
 
 
-    return features.map(
+
+
+function buildSpanPortrait(
+    features
+){
+
+
+
+    const spans =
+
+    features.map(
+
         item=>
-        buildPortrait(item)
+
+        item.frontSpan
+
     );
 
 
+
+    return {
+
+
+        avg:
+
+        Number(
+            average(spans)
+            .toFixed(2)
+        ),
+
+
+
+        recent:
+
+        spans.slice(-20)
+
+
+    };
+
+
 }
+
+
+
+
+
+
+
+
+
+function buildZonePortrait(
+    features
+){
+
+
+
+    let z1=0;
+
+    let z2=0;
+
+    let z3=0;
+
+
+
+    features.forEach(
+        item=>{
+
+
+            z1 +=
+
+            item.frontZone.zone1;
+
+
+
+            z2 +=
+
+            item.frontZone.zone2;
+
+
+
+            z3 +=
+
+            item.frontZone.zone3;
+
+
+
+        }
+    );
+
+
+
+
+    const total =
+
+    z1+z2+z3;
+
+
+
+
+    return {
+
+
+        zone1:
+
+        Number(
+            (z1/total)
+            .toFixed(3)
+        ),
+
+
+
+        zone2:
+
+        Number(
+            (z2/total)
+            .toFixed(3)
+        ),
+
+
+
+        zone3:
+
+        Number(
+            (z3/total)
+            .toFixed(3)
+        )
+
+
+    };
+
+
+}
+
+
+
+
+
+
+
+
+
+function buildOddEvenPortrait(
+    features
+){
+
+
+
+    let odd=0;
+
+    let even=0;
+
+
+
+    features.forEach(
+        item=>{
+
+
+            odd +=
+
+            item.frontOddEven.odd;
+
+
+
+            even +=
+
+            item.frontOddEven.even;
+
+
+        }
+    );
+
+
+
+
+    const total=
+
+    odd+even;
+
+
+
+    return {
+
+
+        odd:
+
+        Number(
+            (odd/total)
+            .toFixed(3)
+        ),
+
+
+
+        even:
+
+        Number(
+            (even/total)
+            .toFixed(3)
+        )
+
+
+    };
+
+}
+
+
+
+
+
+
+
+
+
+function portraitBuilder(
+    features
+){
+
+
+
+    return {
+
+
+        count:
+
+        features.length,
+
+
+
+        sum:
+
+        buildSumPortrait(
+            features
+        ),
+
+
+
+        span:
+
+        buildSpanPortrait(
+            features
+        ),
+
+
+
+        zone:
+
+        buildZonePortrait(
+            features
+        ),
+
+
+
+        oddEven:
+
+        buildOddEvenPortrait(
+            features
+        )
+
+
+    };
+
+
+}
+
+
+
+
 
 
 

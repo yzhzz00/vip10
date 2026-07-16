@@ -2,141 +2,178 @@
 
 
 /*
-    DLT-AI CORE V1.0
+    DLT-AI CORE V1.1
 
     Data Loader
 
     功能:
+
     读取大乐透历史数据
 
 */
 
 
 const fs = require("fs");
+
 const path = require("path");
+
+
+
+
+
+
+function parseLine(line){
+
+
+    const arr =
+
+    line
+    .trim()
+    .split(/\s+/);
+
+
+
+    // 数据不足跳过
+
+    if(
+        arr.length < 9
+    ){
+
+        return null;
+
+    }
+
+
+
+
+
+    return {
+
+
+        issue:
+
+        arr[0],
+
+
+
+        date:
+
+        arr[1],
+
+
+
+        front:
+
+
+        arr
+        .slice(2,7)
+        .map(Number),
+
+
+
+        back:
+
+
+        arr
+        .slice(7,9)
+        .map(Number)
+
+
+
+    };
+
+
+}
+
+
+
+
+
+
 
 
 
 function dataLoader(){
 
 
-    const filePath =
+
+    const file =
+
+
     path.join(
+
         __dirname,
+
         "../data/dlt_history.txt"
+
     );
 
 
-
-    if(
-        !fs.existsSync(filePath)
-    ){
-
-        throw new Error(
-            "找不到大乐透历史数据文件: "
-            +
-            filePath
-        );
-
-    }
 
 
 
     const text =
+
+
     fs.readFileSync(
-        filePath,
+
+        file,
+
         "utf8"
+
     );
 
 
 
-    const lines =
+
+
+
+    const history=[];
+
+
+
+
+
     text
-    .split(/\r?\n/)
-    .filter(
-        line =>
-        line.trim()!==""
-    );
 
+    .split("\n")
 
+    .forEach(
 
-    const history =
-    [];
-
-
-
-    lines.forEach(
         line=>{
 
 
-            const parts =
-            line.split("|");
+            const item =
+
+            parseLine(line);
 
 
 
-            if(
-                parts.length!==4
-            ){
+            if(item){
 
-                return;
+                history.push(item);
 
             }
 
 
-
-            const issue =
-            parts[0].trim();
-
-
-
-            const date =
-            parts[1].trim();
-
-
-
-            const front =
-            parts[2]
-            .trim()
-            .split(" ")
-            .map(
-                Number
-            );
-
-
-
-            const back =
-            parts[3]
-            .trim()
-            .split(" ")
-            .map(
-                Number
-            );
-
-
-
-            history.push({
-
-                issue,
-
-                date,
-
-                front,
-
-                back
-
-            });
-
-
-
         }
+
     );
+
+
+
 
 
 
     return history;
 
 
+
 }
+
+
+
+
 
 
 

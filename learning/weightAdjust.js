@@ -1,28 +1,16 @@
 // learning/weightAdjust.js
 
 
-/*
-    DLT-AI CORE V1.0
 
-    Weight Adjust
-
-    功能:
-
-    根据反馈
-
-    自动调整模型权重
+function normalize(
+    weights
+){
 
 
-*/
-
-
-
-function normalize(weights){
-
-
-    const sum =
+    const total=
 
     Object.values(weights)
+
     .reduce(
         (a,b)=>a+b,
         0
@@ -31,27 +19,32 @@ function normalize(weights){
 
 
     Object.keys(weights)
-    .forEach(key=>{
+
+    .forEach(
+        key=>{
 
 
-        weights[key]
-        =
-        Number(
-            (
-            weights[key]
-            /
-            sum
-            )
-            .toFixed(3)
-        );
+            weights[key]=
+
+            Number(
+
+                (
+                weights[key]
+                /
+                total
+                )
+
+                .toFixed(3)
+
+            );
 
 
-    });
+        }
+    );
 
 
 
     return weights;
-
 
 }
 
@@ -61,68 +54,47 @@ function normalize(weights){
 
 
 
-function adjustWeights(
+
+
+function weightAdjust(
     weights,
     performance
 ){
 
 
 
-    const newWeights =
-    {
+    const result={
+
         ...weights
+
     };
 
 
 
 
 
-    Object.keys(
-        performance
-    )
+    Object.keys(performance)
+
     .forEach(
         key=>{
 
 
-            const score =
-            performance[key];
-
-
-
-            /*
-                表现好
-
-                +5%
-
-                表现差
-
-                -5%
-
-            */
-
-
-
             if(
-                score>=80
+                performance[key]>=80
             ){
 
-                newWeights[key]
-                *=
-                1.05;
+                result[key]*=1.05;
 
             }
 
 
             else if(
-                score<60
+                performance[key]<60
             ){
 
-                newWeights[key]
-                *=
-                0.95;
+                result[key]*=0.95;
 
             }
-
 
 
         }
@@ -133,7 +105,7 @@ function adjustWeights(
 
 
     return normalize(
-        newWeights
+        result
     );
 
 
@@ -143,7 +115,5 @@ function adjustWeights(
 
 
 
-
-
 module.exports =
-adjustWeights;
+weightAdjust;

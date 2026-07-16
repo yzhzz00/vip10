@@ -2,38 +2,9 @@
 
 
 /*
-    DLT-AI CORE V1.0
-
-    Backtest Engine
-
-    功能:
-
-    历史模拟测试
+    历史回测模块
 
 */
-
-
-
-const portraitPredictor =
-require("../portrait/portraitPredictor");
-
-
-const candidateGenerator =
-require("../engine/candidateGenerator");
-
-
-const decisionEngine =
-require("../engine/decisionEngine");
-
-
-const rankingEngine =
-require("../engine/rankingEngine");
-
-
-
-
-
-
 
 
 
@@ -44,8 +15,9 @@ function hitCount(
 
 
     return predict.filter(
-        n =>
-        actual.includes(n)
+
+        n=>actual.includes(n)
+
     )
     .length;
 
@@ -58,202 +30,77 @@ function hitCount(
 
 
 
-
-
 function backtest(
+    predictions,
     history
 ){
 
 
 
-    const records=[];
+    const result=[];
 
 
 
-    /*
-        从第100期开始
 
-        保留前面数据训练
+    predictions.forEach(
 
-    */
+        (item,index)=>{
 
 
 
-    for(
-        let i=100;
-        i<history.length;
-        i++
-    ){
+            const actual=
 
+            history[index];
 
 
-        const train =
 
-        history.slice(
-            0,
-            i
-        );
+            result.push({
 
 
 
-        const actual =
+                issue:
+                actual.issue,
 
-        history[i];
 
 
-
-
-
-
-        // 生成画像预测
-
-
-        const prediction =
-
-        portraitPredictor(
-            train
-        );
-
-
-
-
-
-
-        // 生成候选
-
-
-        const candidates =
-
-        candidateGenerator(
-            prediction.prediction,
-            5000
-        );
-
-
-
-
-
-
-        // 评分
-
-
-        const scored =
-
-        decisionEngine(
-            candidates,
-            prediction.prediction,
-            train
-        );
-
-
-
-
-
-
-        // TOP10
-
-
-        const top10 =
-
-        rankingEngine(
-            scored,
-            10
-        );
-
-
-
-
-
-
-
-        let bestFront=0;
-
-        let bestBack=0;
-
-
-
-
-
-
-        top10.forEach(
-            item=>{
-
-
-                const frontHit =
+                frontHit:
 
                 hitCount(
+
                     item.front,
+
                     actual.front
-                );
+
+                ),
 
 
 
-                const backHit =
+                backHit:
 
                 hitCount(
+
                     item.back,
+
                     actual.back
-                );
+
+                )
 
 
 
-
-                if(
-                    frontHit>bestFront
-                ){
-
-                    bestFront=
-                    frontHit;
-
-                }
+            });
 
 
-                if(
-                    backHit>bestBack
-                ){
 
-                    bestBack=
-                    backHit;
+        }
 
-                }
-
-
-            }
-        );
+    );
 
 
 
 
 
+    return result;
 
-
-        records.push({
-
-
-            issue:
-            actual.issue,
-
-
-            frontHit:
-            bestFront,
-
-
-            backHit:
-            bestBack
-
-
-
-        });
-
-
-
-    }
-
-
-
-
-
-    return records;
 
 
 }

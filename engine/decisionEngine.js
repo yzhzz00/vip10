@@ -1,245 +1,29 @@
 // engine/decisionEngine.js
 
 
-/*
-    DLT-AI CORE V1.0
 
-    Decision Engine
-
-    AI综合评分中心
-
-*/
-
-
-
-const fs = require("fs");
-const path = require("path");
+const weights =
+require("../config/weights.json");
 
 
 
 const sumModel =
 require("../models/sumModel");
 
-
 const spanModel =
 require("../models/spanModel");
-
 
 const zoneModel =
 require("../models/zoneModel");
 
-
 const frequencyModel =
 require("../models/frequencyModel");
-
 
 const missingModel =
 require("../models/missingModel");
 
-
 const markovModel =
 require("../models/markovModel");
-
-
-
-
-
-// 读取权重配置
-
-function loadWeights(){
-
-
-    const file =
-
-    path.join(
-        __dirname,
-        "../config/weights.json"
-    );
-
-
-
-    return JSON.parse(
-
-        fs.readFileSync(
-            file,
-            "utf8"
-        )
-
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-function evaluate(
-    candidate,
-    prediction,
-    history
-){
-
-
-    const weights =
-    loadWeights();
-
-
-
-    const scores={};
-
-
-
-
-
-    scores.sum =
-
-    sumModel(
-        candidate.front,
-        prediction.sum
-    );
-
-
-
-
-
-    scores.span =
-
-    spanModel(
-        candidate.front,
-        prediction.span
-    );
-
-
-
-
-
-    scores.zone =
-
-    zoneModel(
-        candidate.front,
-        prediction.zone
-    );
-
-
-
-
-
-    scores.frequency =
-
-    frequencyModel(
-        candidate.front,
-        history
-    );
-
-
-
-
-
-    scores.missing =
-
-    missingModel(
-        candidate.front,
-        history
-    );
-
-
-
-
-
-    scores.markov =
-
-    markovModel(
-        candidate.front,
-        history
-    );
-
-
-
-
-
-
-
-
-    const finalScore =
-
-
-
-    scores.sum.score
-    *
-    weights.sum
-
-
-
-    +
-
-    scores.span.score
-    *
-    weights.span
-
-
-
-    +
-
-    scores.zone.score
-    *
-    weights.zone
-
-
-
-    +
-
-    scores.frequency.score
-    *
-    weights.frequency
-
-
-
-    +
-
-    scores.missing.score
-    *
-    weights.missing
-
-
-
-    +
-
-    scores.markov.score
-    *
-    weights.markov;
-
-
-
-
-
-
-
-    return {
-
-
-        ...candidate,
-
-
-        scores,
-
-
-        finalScore:
-
-        Number(
-            finalScore.toFixed(2)
-        )
-
-
-    };
-
-
-}
-
 
 
 
@@ -256,29 +40,135 @@ function decisionEngine(
 
 
 
-    return candidates
+    return candidates.map(
 
-    .map(
+        item=>{
 
-        item=>
 
-        evaluate(
-            item,
-            prediction,
-            history
-        )
+            const scores={};
 
-    )
 
-    .sort(
 
-        (a,b)=>
+            scores.sum=
 
-        b.finalScore
-        -
-        a.finalScore
+            sumModel(
+                item.front,
+                prediction.sum
+            );
+
+
+
+            scores.span=
+
+            spanModel(
+                item.front,
+                prediction.span
+            );
+
+
+
+            scores.zone=
+
+            zoneModel(
+                item.front,
+                prediction.zone
+            );
+
+
+
+            scores.frequency=
+
+            frequencyModel(
+                item.front,
+                history
+            );
+
+
+
+            scores.missing=
+
+            missingModel(
+                item.front,
+                history
+            );
+
+
+
+            scores.markov=
+
+            markovModel(
+                item.front,
+                history
+            );
+
+
+
+
+
+
+            const finalScore=
+
+            scores.sum.score
+            *
+            weights.sum
+
+            +
+
+            scores.span.score
+            *
+            weights.span
+
+            +
+
+            scores.zone.score
+            *
+            weights.zone
+
+            +
+
+            scores.frequency.score
+            *
+            weights.frequency
+
+            +
+
+            scores.missing.score
+            *
+            weights.missing
+
+            +
+
+            scores.markov.score
+            *
+            weights.markov;
+
+
+
+
+
+
+            return {
+
+
+                ...item,
+
+
+                scores,
+
+
+                finalScore:
+
+                Number(
+                    finalScore.toFixed(2)
+                )
+
+
+            };
+
+        }
 
     );
+
 
 
 }

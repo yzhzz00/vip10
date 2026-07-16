@@ -1,8 +1,8 @@
-// app.js
-
-
 /*
-    DLT-AI CORE V1.0
+    DLT-AI CORE
+
+    Version:
+    V1.0.0
 
     Main Controller
 
@@ -14,35 +14,24 @@ const dataLoader =
 require("./core/dataLoader");
 
 
-
 const featureBuilder =
 require("./core/featureBuilder");
-
 
 
 const portraitBuilder =
 require("./core/portraitBuilder");
 
 
-
 const portraitPredictor =
 require("./portrait/portraitPredictor");
-
-
-
-const portraitMatcher =
-require("./portrait/portraitMatcher");
-
 
 
 const candidateGenerator =
 require("./engine/candidateGenerator");
 
 
-
 const decisionEngine =
 require("./engine/decisionEngine");
-
 
 
 const rankingEngine =
@@ -55,20 +44,12 @@ require("./engine/rankingEngine");
 
 
 
+
 function runAI(){
 
 
 
-    console.log(
-        "===== DLT-AI CORE V1.0 ====="
-    );
-
-
-
-
-
-    // 1.读取数据
-
+    // 1.读取历史数据
 
     const history =
 
@@ -76,24 +57,9 @@ function runAI(){
 
 
 
-    console.log(
-
-        "历史数据:",
-
-        history.length,
-
-        "期"
-
-    );
 
 
-
-
-
-
-
-
-    // 2.特征计算
+    // 2.生成特征
 
 
     const features =
@@ -106,13 +72,10 @@ function runAI(){
 
 
 
-
-
-
     // 3.生成画像
 
 
-    const portraits =
+    const portrait =
 
     portraitBuilder(
         features
@@ -122,27 +85,13 @@ function runAI(){
 
 
 
-
-
-
-    // 4.预测下一期结构
+    // 4.预测结构
 
 
     const prediction =
 
     portraitPredictor(
-        portraits
-    );
-
-
-
-
-    console.log(
-
-        "预测结构:",
-
-        prediction.prediction
-
+        portrait
     );
 
 
@@ -150,31 +99,7 @@ function runAI(){
 
 
 
-
-
-
-    // 5.历史相似分析
-
-
-    const similar =
-
-    portraitMatcher(
-
-        portraits,
-
-        prediction.prediction
-
-    );
-
-
-
-
-
-
-
-
-
-    // 6.生成候选
+    // 5.生成候选
 
 
     const candidates =
@@ -189,23 +114,11 @@ function runAI(){
 
 
 
-    console.log(
-
-        "候选数量:",
-
-        candidates.length
-
-    );
 
 
 
 
-
-
-
-
-
-    // 7.综合评分
+    // 6.综合评分
 
 
     const scored =
@@ -226,9 +139,7 @@ function runAI(){
 
 
 
-
-
-    // 8.TOP输出
+    // 7.排名TOP10
 
 
     const ranking =
@@ -246,29 +157,18 @@ function runAI(){
 
 
 
-    console.log(
-        "===== TOP10 ====="
-    );
-
-
-
-    console.table(
-        ranking
-    );
-
-
-
-
-
-
 
     return {
 
 
+        version:
+
+        "V1.0.0",
+
+
+
         prediction,
 
-
-        similar,
 
 
         ranking
@@ -285,26 +185,5 @@ function runAI(){
 
 
 
-
-
-
 module.exports =
 runAI;
-
-
-
-
-
-
-
-// 直接运行
-
-if(
-    require.main
-    ===
-    module
-){
-
-    runAI();
-
-}

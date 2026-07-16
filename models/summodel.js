@@ -2,109 +2,82 @@
 
 
 /*
-    DLT-AI CORE V1.0
-
-    Sum Model
-
-    功能:
-
-    前区和值评分
-
+    和值评分模型
 */
 
 
+function sumModel(
+    numbers,
+    range
+){
 
-function calculateSum(front){
 
+    const sum =
 
-    return front.reduce(
+    numbers.reduce(
         (a,b)=>a+b,
         0
     );
 
 
-}
+
+    let score = 100;
 
 
-
-
-function scoreSum(
-    front,
-    prediction
-){
-
-
-    const sum =
-    calculateSum(front);
-
-
-
-    const min =
-    prediction.min;
-
-
-
-    const max =
-    prediction.max;
-
-
-
-
-
-    let score;
-
-
-
-    // 在预测范围内
 
     if(
-        sum>=min &&
-        sum<=max
+        sum < range.min
+        ||
+        sum > range.max
     ){
 
-        score=100;
+        score -= 40;
 
     }
-
-
     else{
 
 
-        const distance =
+        const center =
 
-        Math.min(
-
-            Math.abs(
-                sum-min
-            ),
-
-            Math.abs(
-                sum-max
-            )
-
-        );
+        (
+            range.min
+            +
+            range.max
+        )
+        /
+        2;
 
 
 
-        score =
-        Math.max(
-            0,
-            100-distance*8
-        );
+        score -=
+
+        Math.abs(
+            sum-center
+        )
+        *
+        1.5;
 
 
     }
 
+
+
+    if(score<0){
+
+        score=0;
+
+    }
 
 
 
     return {
 
 
-        value:sum,
+        sum,
 
 
         score:
+
         Number(
             score.toFixed(2)
         )
@@ -117,7 +90,5 @@ function scoreSum(
 
 
 
-
-
 module.exports =
-scoreSum;
+sumModel;

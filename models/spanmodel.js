@@ -2,102 +2,68 @@
 
 
 /*
-    DLT-AI CORE V1.0
-
-    Span Model
-
-    功能:
-
-    前区跨度评分
-
+    跨度评分模型
 */
 
 
 
-function calculateSpan(front){
-
-
-    return (
-
-        Math.max(
-            ...front
-        )
-
-        -
-
-        Math.min(
-            ...front
-        )
-
-    );
-
-
-}
-
-
-
-
-
-function scoreSpan(
-    front,
-    prediction
+function spanModel(
+    numbers,
+    range
 ){
 
 
     const span =
-    calculateSpan(front);
+
+    Math.max(...numbers)
+
+    -
+
+    Math.min(...numbers);
 
 
 
-    const min =
-    prediction.min;
-
-
-
-    const max =
-    prediction.max;
-
-
-
-
-    let score;
+    let score=100;
 
 
 
     if(
-        span>=min &&
-        span<=max
+        span<range.min
+        ||
+        span>range.max
     ){
 
-        score=100;
+        score-=45;
 
     }
-
     else{
 
 
-        const distance =
+        const center =
 
-        Math.min(
+        (
+            range.min
+            +
+            range.max
+        )
+        /
+        2;
 
-            Math.abs(
-                span-min
-            ),
 
-            Math.abs(
-                span-max
-            )
 
+        score-=
+
+        Math.abs(
+            span-center
         );
 
+    }
 
 
-        score =
-        Math.max(
-            0,
-            100-distance*10
-        );
 
+    if(score<0){
+
+        score=0;
 
     }
 
@@ -107,11 +73,11 @@ function scoreSpan(
     return {
 
 
-        value:
         span,
 
 
         score:
+
         Number(
             score.toFixed(2)
         )
@@ -124,7 +90,5 @@ function scoreSpan(
 
 
 
-
-
 module.exports =
-scoreSpan;
+spanModel;

@@ -2,117 +2,118 @@
 
 
 /*
-    DLT-AI CORE V1.0
+    DLT-AI CORE V1.1
 
     Feature Builder
 
     功能:
 
-    开奖号码
+    历史开奖
 
         ↓
 
-    特征数据
-
+    AI特征数据
 
 */
 
 
 
-// 和值
 
-function getSum(numbers){
+
+function sum(numbers){
+
 
     return numbers.reduce(
+
         (a,b)=>a+b,
+
         0
+
     );
 
 }
 
 
 
-// 跨度
 
-function getSpan(numbers){
+
+
+
+function span(numbers){
+
 
     return Math.max(...numbers)
+
     -
+
     Math.min(...numbers);
+
 
 }
 
 
 
-// 奇偶
+
+
+
 
 function getOddEven(numbers){
 
 
+
     let odd=0;
+
     let even=0;
 
 
+
     numbers.forEach(num=>{
+
 
         if(num%2===0){
 
             even++;
 
-        }else{
+        }
+
+        else{
 
             odd++;
 
         }
 
+
     });
 
 
-    return `${odd}-${even}`;
+
+    return {
+
+        odd,
+
+        even
+
+    };
+
 
 }
 
 
 
-// 大小
-
-function getBigSmall(numbers){
-
-
-    let big=0;
-    let small=0;
-
-
-    numbers.forEach(num=>{
-
-
-        if(num>=18){
-
-            big++;
-
-        }else{
-
-            small++;
-
-        }
-
-
-    });
-
-
-    return `${big}-${small}`;
-
-}
 
 
 
-// 三区
+
+
 
 function getZone(numbers){
 
 
+
     let zone1=0;
+
     let zone2=0;
+
     let zone3=0;
 
 
@@ -125,11 +126,13 @@ function getZone(numbers){
             zone1++;
 
         }
+
         else if(num<=24){
 
             zone2++;
 
         }
+
         else{
 
             zone3++;
@@ -141,86 +144,31 @@ function getZone(numbers){
 
 
 
-    return `${zone1}-${zone2}-${zone3}`;
+
+    return {
+
+
+        zone1,
+
+        zone2,
+
+        zone3
+
+
+    };
+
 
 }
 
 
 
-// AC值
-// 大乐透常用离散程度指标
-
-function getAC(numbers){
 
 
-    const diffs=[];
-
-
-    for(
-        let i=0;
-        i<numbers.length;
-        i++
-    ){
-
-        for(
-            let j=i+1;
-            j<numbers.length;
-            j++
-        ){
-
-            diffs.push(
-                Math.abs(
-                    numbers[j]
-                    -
-                    numbers[i]
-                )
-            );
-
-        }
-
-    }
-
-
-
-    const unique =
-    [
-        ...new Set(diffs)
-    ];
-
-
-
-    return unique.length
-    -
-    (numbers.length-1);
-
-}
-
-
-
-// 尾数
-
-function getTails(numbers){
-
-    return numbers
-    .map(
-        n=>n%10
-    )
-    .join(",");
-
-}
 
 
 
 
 function buildFeature(item){
-
-
-    const front =
-    item.front;
-
-
-    const back =
-    item.back;
 
 
 
@@ -233,61 +181,70 @@ function buildFeature(item){
         date:item.date,
 
 
-        front,
+
+        front:item.front,
 
 
-        back,
-
-
-
-        features:{
-
-
-            sum:
-            getSum(front),
+        back:item.back,
 
 
 
-            span:
-            getSpan(front),
+
+
+        frontSum:
+
+        sum(
+            item.front
+        ),
 
 
 
-            oddEven:
-            getOddEven(front),
+
+        frontSpan:
+
+        span(
+            item.front
+        ),
 
 
 
-            bigSmall:
-            getBigSmall(front),
+
+
+        frontOddEven:
+
+        getOddEven(
+            item.front
+        ),
 
 
 
-            zone:
-            getZone(front),
+
+        frontZone:
+
+        getZone(
+            item.front
+        ),
 
 
 
-            ac:
-            getAC(front),
+
+
+        backSum:
+
+        sum(
+            item.back
+        ),
 
 
 
-            tails:
-            getTails(front),
 
 
+        backSpan:
 
-            backSum:
-            getSum(back),
+        span(
+            item.back
+        )
 
-
-
-            backOddEven:
-            getOddEven(back)
-
-
-        }
 
 
     };
@@ -299,16 +256,32 @@ function buildFeature(item){
 
 
 
-function featureBuilder(history){
+
+
+
+
+function featureBuilder(
+    history
+){
+
 
 
     return history.map(
+
         item=>
+
         buildFeature(item)
+
     );
 
 
+
 }
+
+
+
+
+
 
 
 

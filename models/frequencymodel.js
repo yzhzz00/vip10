@@ -2,164 +2,101 @@
 
 
 /*
-    DLT-AI CORE V1.0
-
-    Frequency Model
-
-    功能:
-
-    前区号码频率评分
-
+    频率评分模型
 */
 
 
 
-function buildFrequencyMap(
+function frequencyModel(
+    numbers,
     history
 ){
 
 
-    const map={};
+    const count={};
 
 
 
-    history.forEach(item=>{
+    history.forEach(
+        item=>{
 
 
-        item.front.forEach(num=>{
+            item.front.forEach(
+                n=>{
 
 
-            if(!map[num]){
-
-                map[num]=0;
-
-            }
+                    count[n]=
+                    (count[n]||0)+1;
 
 
-            map[num]++;
+                }
+            );
 
 
-        });
-
-
-    });
-
-
-
-    return map;
-
-
-}
-
-
-
-
-
-
-
-function scoreFrequency(
-    front,
-    history
-){
-
-
-
-    const frequency =
-    buildFrequencyMap(
-        history
+        }
     );
 
 
 
-    const total =
-    history.length;
+
+
+    let total=0;
 
 
 
-    let score=0;
+    numbers.forEach(
+        n=>{
 
 
+            total +=
 
-    front.forEach(num=>{
+            count[n]||0;
 
-
-        const count =
-        frequency[num]
-        ||
-        0;
-
-
-
-        const rate =
-        count
-        /
-        total;
-
-
-
-        /*
-            大乐透前区理论概率
-
-            单号出现概率约:
-
-            5/35
-
-        */
-
-
-
-        const ideal =
-        5/35;
-
-
-
-        const diff =
-        Math.abs(
-            rate-ideal
-        );
-
-
-
-        let numScore =
-        100-diff*300;
-
-
-
-        if(
-            numScore<0
-        ){
-
-            numScore=0;
 
         }
+    );
 
 
 
-        score+=numScore;
+
+
+    const avg =
+
+    total /
+    numbers.length;
 
 
 
-    });
 
 
+    let score =
+
+    50
+    +
+    avg;
+
+
+
+    if(score>100){
+
+        score=100;
+
+    }
 
 
 
     return {
 
 
+        frequency:count,
+
+
         score:
 
         Number(
-            (
-            score/5
-            )
-            .toFixed(2)
-        ),
+            score.toFixed(2)
+        )
 
-
-
-        frequency
 
     };
 
@@ -168,7 +105,5 @@ function scoreFrequency(
 
 
 
-
-
 module.exports =
-scoreFrequency;
+frequencyModel;

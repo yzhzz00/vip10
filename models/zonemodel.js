@@ -2,56 +2,50 @@
 
 
 /*
-    DLT-AI CORE V1.0
-
-    Zone Model
-
-    功能:
-
-    前区三区结构评分
-
+    三区结构评分模型
 */
 
 
 
-function calculateZone(front){
+function getZone(numbers){
 
 
-    let zone1=0;
+    let z1=0;
 
-    let zone2=0;
+    let z2=0;
 
-    let zone3=0;
-
-
-
-    front.forEach(num=>{
+    let z3=0;
 
 
-        if(num<=12){
 
-            zone1++;
+    numbers.forEach(
+        n=>{
+
+
+            if(n<=12){
+
+                z1++;
+
+            }
+            else if(n<=24){
+
+                z2++;
+
+            }
+            else{
+
+                z3++;
+
+            }
+
 
         }
-
-        else if(num<=24){
-
-            zone2++;
-
-        }
-
-        else{
-
-            zone3++;
-
-        }
-
-
-    });
+    );
 
 
 
-    return `${zone1}-${zone2}-${zone3}`;
+    return `${z1}-${z2}-${z3}`;
+
 
 }
 
@@ -59,14 +53,18 @@ function calculateZone(front){
 
 
 
-function scoreZone(
-    front,
-    prediction
+
+
+
+function zoneModel(
+    numbers,
+    target
 ){
 
 
     const zone =
-    calculateZone(front);
+
+    getZone(numbers);
 
 
 
@@ -75,78 +73,28 @@ function scoreZone(
 
 
     if(
-        zone
-        ===
-        prediction
+        zone===target
     ){
 
         score=100;
 
     }
-
     else{
 
 
-        const target =
-        prediction
-        .split("-")
-        .map(Number);
-
-
-
-        const current =
-        zone
-        .split("-")
-        .map(Number);
-
-
-
-        const diff =
-
-        Math.abs(
-            target[0]
-            -
-            current[0]
-        )
-
-        +
-
-        Math.abs(
-            target[1]
-            -
-            current[1]
-        )
-
-        +
-
-        Math.abs(
-            target[2]
-            -
-            current[2]
-        );
-
-
-
-        score =
-        Math.max(
-            0,
-            100-diff*20
-        );
+        score=60;
 
 
     }
-
 
 
 
     return {
 
 
-        value:
         zone,
 
 
-        score:
         score
 
 
@@ -159,5 +107,7 @@ function scoreZone(
 
 
 
+
+
 module.exports =
-scoreZone;
+zoneModel;

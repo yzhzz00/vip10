@@ -2,44 +2,20 @@
 
 
 /*
-    DLT-AI CORE V1.0
-
-    Missing Model
-
-    功能:
-
-    前区号码遗漏评分
-
+    遗漏评分模型
 */
 
 
 
-function buildMissingMap(
+function calculateMissing(
+    number,
     history
 ){
 
 
-    const missing={};
+    let miss=0;
 
 
-
-    // 初始化1-35
-
-    for(
-        let i=1;
-        i<=35;
-        i++
-    ){
-
-        missing[i]=
-        history.length;
-
-    }
-
-
-
-
-    // 从最新一期往前找
 
     for(
         let i=history.length-1;
@@ -48,33 +24,25 @@ function buildMissingMap(
     ){
 
 
-        history[i]
-        .front
-        .forEach(num=>{
+        if(
+            history[i]
+            .front
+            .includes(number)
+        ){
+
+            break;
+
+        }
 
 
-            if(
-                missing[num]
-                ===
-                history.length
-            ){
-
-                missing[num]
-                =
-                history.length-1-i;
-
-            }
-
-
-        });
-
+        miss++;
 
 
     }
 
 
 
-    return missing;
+    return miss;
 
 
 }
@@ -85,16 +53,11 @@ function buildMissingMap(
 
 
 
-function scoreMissing(
-    front,
+
+function missingModel(
+    numbers,
     history
 ){
-
-
-    const missingMap =
-    buildMissingMap(
-        history
-    );
 
 
 
@@ -102,84 +65,75 @@ function scoreMissing(
 
 
 
-    front.forEach(num=>{
+    numbers.forEach(
+        n=>{
 
 
-        const miss =
-        missingMap[num];
+            const miss=
 
-
-
-        let score;
-
-
-
-        /*
-            遗漏过短:
-            热度过高
-
-            遗漏适中:
-            加分
-
-            遗漏过长:
-            防止追冷
-
-        */
+            calculateMissing(
+                n,
+                history
+            );
 
 
 
-        if(
-            miss>=3 &&
-            miss<=20
-        ){
+            total += miss;
 
-            score=100;
 
         }
-
-
-        else if(
-            miss<3
-        ){
-
-            score=70;
-
-        }
-
-
-        else{
-
-            score=50;
-
-        }
+    );
 
 
 
-        total+=score;
+
+
+    const avg =
+
+    total /
+    numbers.length;
 
 
 
-    });
 
 
+    let score =
+
+    100 -
+    Math.abs(
+        avg-10
+    )
+    *
+    3;
+
+
+
+
+    if(score<0){
+
+        score=0;
+
+    }
 
 
 
     return {
 
 
-        score:
+        averageMissing:
 
         Number(
-            (
-            total/5
-            )
-            .toFixed(2)
+            avg.toFixed(2)
         ),
 
 
 
-        missingMap
+        score:
+
+        Number(
+            score.toFixed(2)
+        )
+
 
     };
 
@@ -191,4 +145,4 @@ function scoreMissing(
 
 
 module.exports =
-scoreMissing;
+missingModel;

@@ -2,53 +2,25 @@
 
 
 /*
-    DLT-AI CORE V1.0
-
-    Feedback Module
-
-    功能:
-
-    预测结果
-
-        ↓
-
-    开奖结果比较
+    开奖反馈模块
 
 */
 
 
-
-function compareFront(
+function hitNumbers(
     predict,
     actual
 ){
 
 
     return predict.filter(
-        num =>
-        actual.includes(num)
+
+        n=>actual.includes(n)
+
     );
 
 
 }
-
-
-
-
-function compareBack(
-    predict,
-    actual
-){
-
-
-    return predict.filter(
-        num =>
-        actual.includes(num)
-    );
-
-
-}
-
 
 
 
@@ -58,25 +30,25 @@ function compareBack(
 
 function feedback(
     prediction,
-    actual
+    result
 ){
 
 
 
     const frontHit =
 
-    compareFront(
+    hitNumbers(
         prediction.front,
-        actual.front
+        result.front
     );
 
 
 
     const backHit =
 
-    compareBack(
+    hitNumbers(
         prediction.back,
-        actual.back
+        result.back
     );
 
 
@@ -87,60 +59,24 @@ function feedback(
 
 
         issue:
-        actual.issue,
+        result.issue,
 
 
 
-        predict:{
+        frontHit,
 
 
-            front:
-            prediction.front,
-
-
-            back:
-            prediction.back
-
-
-        },
+        backHit,
 
 
 
-        actual:{
-
-
-            front:
-            actual.front,
-
-
-            back:
-            actual.back
-
-
-        },
+        frontCount:
+        frontHit.length,
 
 
 
-        result:{
-
-
-            frontHit,
-
-
-            frontCount:
-            frontHit.length,
-
-
-
-            backHit,
-
-
-            backCount:
-            backHit.length
-
-
-
-        },
+        backCount:
+        backHit.length,
 
 
 
@@ -149,13 +85,12 @@ function feedback(
         .toISOString()
 
 
+
     };
 
 
 
 }
-
-
 
 
 

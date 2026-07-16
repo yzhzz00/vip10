@@ -1,13 +1,13 @@
 {
-    "sum": 0.25,
+    "sum":0.25,
 
-    "span": 0.15,
+    "span":0.15,
 
-    "zone": 0.20,
+    "zone":0.20,
 
-    "frequency": 0.15,
+    "frequency":0.15,
 
-    "missing": 0.10,
+    "missing":0.10,
 
-    "markov": 0.15
+    "markov":0.15
 }

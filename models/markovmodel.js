@@ -2,93 +2,65 @@
 
 
 /*
-    DLT-AI CORE V1.0
-
-    Markov Model
-
-    功能:
-
-    一阶状态转移评分
-
-    上一期号码
-
-        ↓
-
-    下一期候选号码
-
-
+    马尔可夫转移评分模型
 */
 
 
 
-// 建立转移矩阵
-
-function buildMarkovMatrix(
+function buildTransition(
     history
 ){
 
 
-    const matrix={};
+
+    const map={};
 
 
 
     for(
-        let i=1;
-        i<=35;
+        let i=0;
+        i<history.length-1;
         i++
     ){
-
-        matrix[i]={};
-
-    }
-
-
-
-
-
-    for(
-        let i=1;
-        i<history.length;
-        i++
-    ){
-
-
-        const previous =
-        history[i-1]
-        .front;
-
 
 
         const current =
-        history[i]
-        .front;
+
+        history[i].front;
+
+
+
+        const next =
+
+        history[i+1].front;
 
 
 
 
 
-        previous.forEach(
-            prevNum=>{
+        current.forEach(
+            a=>{
 
 
-                current.forEach(
-                    curNum=>{
+                if(!map[a]){
 
+                    map[a]={};
 
-                        if(
-                            !matrix[prevNum][curNum]
-                        ){
-
-                            matrix[prevNum][curNum]
-                            =
-                            0;
-
-                        }
+                }
 
 
 
-                        matrix[prevNum][curNum]++;
+                next.forEach(
+                    b=>{
 
+
+                        map[a][b]=
+
+                        (
+                            map[a][b]||0
+                        )
+
+                        +1;
 
 
                     }
@@ -99,11 +71,12 @@ function buildMarkovMatrix(
         );
 
 
+
     }
 
 
 
-    return matrix;
+    return map;
 
 
 }
@@ -115,21 +88,26 @@ function buildMarkovMatrix(
 
 
 
-function scoreMarkov(
-    front,
+
+function markovModel(
+    numbers,
     history
 ){
 
 
 
-    const matrix =
-    buildMarkovMatrix(
+    const transition =
+
+    buildTransition(
         history
     );
 
 
 
+
+
     const last =
+
     history[
         history.length-1
     ]
@@ -137,86 +115,56 @@ function scoreMarkov(
 
 
 
-    let total=0;
+
+
+    let score=0;
 
 
 
-    front.forEach(
-        num=>{
-
-
-            let probability=0;
-
-
-
-            last.forEach(
-                lastNum=>{
-
-
-                    const row =
-                    matrix[lastNum];
-
-
-
-                    const sum =
-                    Object.values(row)
-                    .reduce(
-                        (a,b)=>a+b,
-                        0
-                    );
-
-
-
-                    if(
-                        row[num]
-                        &&
-                        sum>0
-                    ){
-
-                        probability +=
-
-                        row[num]
-                        /
-                        sum;
-
-                    }
-
-
-
-                }
-            );
-
-
-
-            probability =
-            probability
-            /
-            last.length;
-
-
-
-            let score =
-            probability
-            *
-            100;
-
+    last.forEach(
+        a=>{
 
 
             if(
-                score>100
+                transition[a]
             ){
 
-                score=100;
+
+                numbers.forEach(
+                    b=>{
+
+
+                        if(
+                            transition[a][b]
+                        ){
+
+                            score +=
+
+                            transition[a][b];
+
+
+                        }
+
+
+                    }
+                );
+
 
             }
 
 
-
-            total+=score;
-
-
-
         }
+    );
+
+
+
+
+
+    score =
+
+    Math.min(
+        100,
+        score
     );
 
 
@@ -228,19 +176,15 @@ function scoreMarkov(
 
         score:
 
+
         Number(
-            (
-            total/5
-            )
-            .toFixed(2)
-        ),
+            score.toFixed(2)
+        )
 
-
-
-        matrix
 
 
     };
+
 
 
 }
@@ -249,5 +193,6 @@ function scoreMarkov(
 
 
 
+
 module.exports =
-scoreMarkov;
+markovModel;

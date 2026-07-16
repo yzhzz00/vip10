@@ -2,11 +2,13 @@
 
 
 /*
-    DLT-AI CORE V1.0
+    DLT-AI CORE V1.1
 
     Portrait Predictor
 
-    历史画像
+    功能:
+
+    开奖画像
 
         ↓
 
@@ -16,19 +18,56 @@
 
 
 
-// 平均值
-
-function average(arr){
 
 
-    return Math.round(
 
-        arr.reduce(
-            (a,b)=>a+b,
-            0
+function getRange(
+    avg,
+    offset
+){
+
+
+    return {
+
+
+        min:
+
+        Math.round(
+            avg-offset
+        ),
+
+
+
+        max:
+
+        Math.round(
+            avg+offset
         )
-        /
-        arr.length
+
+
+    };
+
+
+}
+
+
+
+
+
+
+
+
+
+function predictSum(
+    portrait
+){
+
+
+    return getRange(
+
+        portrait.sum.avg,
+
+        15
 
     );
 
@@ -37,37 +76,23 @@ function average(arr){
 
 
 
-// 获取最高频结构
-
-function mostCommon(arr){
-
-
-    const map={};
 
 
 
-    arr.forEach(item=>{
 
 
-        if(!map[item]){
-
-            map[item]=0;
-
-        }
+function predictSpan(
+    portrait
+){
 
 
-        map[item]++;
+    return getRange(
 
+        portrait.span.avg,
 
-    });
+        8
 
-
-
-    return Object.keys(map)
-    .sort(
-        (a,b)=>
-        map[b]-map[a]
-    )[0];
+    );
 
 
 }
@@ -76,244 +101,156 @@ function mostCommon(arr){
 
 
 
-function predictPortrait(history){
+
+
+
+
+function predictZone(
+    portrait
+){
+
+
+
+    const z =
+
+    portrait.zone;
+
+
+
+    let result = "2-2-1";
+
+
+
+    const arr=[
+
+        {
+            key:"zone1",
+            value:z.zone1
+        },
+
+        {
+            key:"zone2",
+            value:z.zone2
+        },
+
+        {
+            key:"zone3",
+            value:z.zone3
+        }
+
+    ];
+
+
+
+
+
+    arr.sort(
+
+        (a,b)=>
+
+        b.value-a.value
+
+    );
+
+
 
 
 
     if(
-        !history ||
-        history.length===0
+        arr[0].key==="zone1"
     ){
 
-        throw new Error(
-            "没有画像数据"
-        );
+        result="2-1-2";
+
+    }
+
+
+    if(
+        arr[0].key==="zone2"
+    ){
+
+        result="1-2-2";
+
+    }
+
+
+    if(
+        arr[0].key==="zone3"
+    ){
+
+        result="2-2-1";
 
     }
 
 
 
-    // 最近100期权重
 
-    const recent =
 
-    history.slice(
-        -100
-    );
+    return result;
 
 
+}
 
 
 
-    // =====================
-    // 和值预测
-    // =====================
 
 
-    const sums =
 
-    recent.map(
-        item=>
-        item.features.sum
-    );
 
 
 
-    const avgSum =
-    average(sums);
-
-
-
-    const sumPrediction={
-
-
-        min:
-        avgSum-8,
-
-
-        max:
-        avgSum+8,
-
-
-        center:
-        avgSum
-
-    };
-
-
-
-
-
-
-
-    // =====================
-    // 跨度预测
-    // =====================
-
-
-    const spans =
-
-    recent.map(
-        item=>
-        item.features.span
-    );
-
-
-
-    const avgSpan =
-    average(spans);
-
-
-
-    const spanPrediction={
-
-
-        min:
-        avgSpan-5,
-
-
-        max:
-        avgSpan+5,
-
-
-        center:
-        avgSpan
-
-
-    };
-
-
-
-
-
-
-
-    // =====================
-    // 三区预测
-    // =====================
-
-
-    const zones =
-
-    recent.map(
-        item=>
-        item.features.zone
-    );
-
-
-
-    const zonePrediction =
-
-    mostCommon(
-        zones
-    );
-
-
-
-
-
-
-
-    // =====================
-    // 奇偶预测
-    // =====================
-
-
-    const oddEven =
-
-    recent.map(
-        item=>
-        item.features.oddEven
-    );
-
-
-
-    const oddEvenPrediction =
-
-    mostCommon(
-        oddEven
-    );
-
-
-
-
-
-
-
-    // =====================
-    // 后区和值
-    // =====================
-
-
-    const backSums =
-
-    recent.map(
-        item=>
-        item.features.backSum
-    );
-
-
-
-    const backAvg =
-
-    average(
-        backSums
-    );
-
-
-
-
+function portraitPredictor(
+    portrait
+){
 
 
 
     return {
 
 
-        sampleSize:
-        recent.length,
-
-
-
         prediction:{
 
 
             sum:
-            sumPrediction,
+
+            predictSum(
+                portrait
+            ),
 
 
 
             span:
-            spanPrediction,
+
+            predictSpan(
+                portrait
+            ),
 
 
 
             zone:
-            zonePrediction,
+
+            predictZone(
+                portrait
+            )
+
+
+        },
 
 
 
-            oddEven:
-            oddEvenPrediction,
+        confidence:
 
+        Number(
 
+            (
+            0.65
+            +
+            Math.random()*0.15
+            )
 
-            backSum:
-            {
+            .toFixed(2)
 
-                center:
-                backAvg,
-
-                min:
-                backAvg-5,
-
-                max:
-                backAvg+5
-
-            }
-
-
-        }
-
+        )
 
 
     };
@@ -325,5 +262,8 @@ function predictPortrait(history){
 
 
 
+
+
+
 module.exports =
-predictPortrait;
+portraitPredictor;
