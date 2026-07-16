@@ -1,0 +1,14 @@
+{
+  "name": "dlt-ai-core-v10.2",
+  "version": "10.2.0",
+  "description": "大乐透智能分析核心系统",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
+  }
+}

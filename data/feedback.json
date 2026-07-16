@@ -1,0 +1,36 @@
+{
+  "records": [],
+  "statistics": {
+    "total": 0,
+    "hit3": 0,
+    "hit4": 0,
+    "hit5": 0,
+    "backHit": 0
+  },
+  "modelFeedback": {
+    "Frequency": {
+      "score": 50,
+      "weight": 1
+    },
+    "Trend": {
+      "score": 50,
+      "weight": 1
+    },
+    "Cycle": {
+      "score": 50,
+      "weight": 1
+    },
+    "Bayes": {
+      "score": 50,
+      "weight": 1
+    },
+    "Markov": {
+      "score": 50,
+      "weight": 1
+    },
+    "MonteCarlo": {
+      "score": 50,
+      "weight": 1
+    }
+  }
+}
