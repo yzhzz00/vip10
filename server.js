@@ -6,8 +6,12 @@ const historyEngine = require("./ai_core/engine/history_engine");
 
 const featureMatrix = require("./ai_core/matrix/feature_matrix");
 
+const rankingEngine = require("./ai_core/engine/ranking_engine");
+
+
 
 const app = express();
+
 
 
 app.use(cors());
@@ -16,10 +20,12 @@ app.use(express.json());
 
 
 
+
+
 app.get("/", (req,res)=>{
 
     res.send(
-        "dlt ai core v10.2 online"
+        "dlt ai core v10.4 online"
     );
 
 });
@@ -28,12 +34,14 @@ app.get("/", (req,res)=>{
 
 
 
-// 历史数据接口
+
+// 历史数据
 
 app.get("/api/history",(req,res)=>{
 
 
-    const data = historyEngine.loadHistory();
+    const data =
+        historyEngine.loadHistory();
 
 
 
@@ -54,15 +62,20 @@ app.get("/api/history",(req,res)=>{
 
 
 
-// 特征矩阵接口
+
+
+// 特征矩阵
 
 app.get("/api/features",(req,res)=>{
 
 
-    const history = historyEngine.loadHistory();
+    const history =
+        historyEngine.loadHistory();
 
 
-    const matrix = featureMatrix.buildMatrix(history);
+
+    const matrix =
+        featureMatrix.buildMatrix(history);
 
 
 
@@ -83,22 +96,68 @@ app.get("/api/features",(req,res)=>{
 
 
 
-const port = process.env.PORT || 3000;
+
+
+// 评分排序
+
+app.get("/api/ranking",(req,res)=>{
+
+
+    const history =
+        historyEngine.loadHistory();
 
 
 
-app.listen(port,"0.0.0.0",()=>{
+    const matrix =
+        featureMatrix.buildMatrix(history);
 
 
-    console.log(
-        "dlt ai core start"
-    );
+
+    const ranking =
+        rankingEngine.rank(matrix);
 
 
-    console.log(
-        "port:",
-        port
-    );
+
+    res.json({
+
+        status:"success",
+
+        count:ranking.length,
+
+        data:ranking
+
+    });
 
 
 });
+
+
+
+
+
+
+
+const port =
+    process.env.PORT || 3000;
+
+
+
+app.listen(
+    port,
+    "0.0.0.0",
+    ()=>{
+
+
+        console.log(
+            "dlt ai core start"
+        );
+
+
+        console.log(
+            "port:",
+            port
+        );
+
+
+    }
+);
