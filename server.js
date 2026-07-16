@@ -1,209 +1,95 @@
-/*
-    DLT-AI CORE
-
-    Server
-
-    Version:
-    V1.0.0
-
-*/
-
-
 const express = require("express");
-
 const cors = require("cors");
-
 const path = require("path");
-
-
-const runAI = require("./app");
-
 
 
 const app = express();
 
 
-
-const PORT = 3000;
-
-
-
-// 跨域
-
 app.use(cors());
 
-
-// JSON解析
-
-app.use(
-    express.json()
-);
+app.use(express.json());
 
 
 
-// 静态网页
+// 加载前端
 
 app.use(
-
     express.static(
-
         path.join(
             __dirname,
             "frontend"
         )
-
     )
-
 );
 
 
 
+// 首页
 
-// 首页测试
+app.get("/", function(req,res){
 
-app.get(
-    "/",
-    (req,res)=>{
+    res.sendFile(
 
+        path.join(
+            __dirname,
+            "frontend",
+            "index.html"
+        )
 
-        res.json({
+    );
 
-            system:
-            "DLT-AI CORE",
+});
 
 
-            version:
-            "V1.0.0",
 
+// 测试接口
 
-            status:
-            "running"
+app.get("/api/test",function(req,res){
 
+    res.json({
 
-        });
+        status:"ok",
 
+        version:"V1.0.0"
 
-    }
+    });
 
-);
+});
 
 
 
+// AI接口占位
 
+app.get("/api/analyze",function(req,res){
 
-// AI分析接口
+    res.json({
 
-app.get(
+        success:true,
 
-    "/api/analyze",
+        message:"AI系统连接成功",
 
-    (req,res)=>{
+        ranking:[]
 
+    });
 
-        try{
+});
 
 
-            const result =
 
-            runAI();
 
-
-
-            res.json({
-
-                success:true,
-
-
-                data:result
-
-
-            });
-
-
-
-        }
-
-        catch(error){
-
-
-
-            res.json({
-
-                success:false,
-
-
-                error:
-                error.message
-
-
-            });
-
-
-        }
-
-
-    }
-
-);
-
-
-
-
-
-
-// 开奖反馈接口
-
-app.post(
-
-    "/api/feedback",
-
-    (req,res)=>{
-
-
-        res.json({
-
-            success:true,
-
-
-            message:
-            "反馈已接收"
-
-
-        });
-
-
-
-    }
-
-);
-
-
-
-
+const PORT =
+process.env.PORT || 3000;
 
 
 
 app.listen(
-
     PORT,
-
-    ()=>{
-
+    function(){
 
         console.log(
-
-        `
-DLT-AI CORE V1.0.0
-
-Server running:
-
-http://localhost:${PORT}
-
-`
-
+            "DLT-AI CORE V1.0.0 running"
         );
 
-
     }
-
 );
