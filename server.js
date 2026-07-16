@@ -1,8 +1,16 @@
 const express = require("express");
+const cors = require("cors");
 const path = require("path");
 
 
 const app = express();
+
+
+app.use(cors());
+
+app.use(
+    express.json()
+);
 
 
 
@@ -33,6 +41,41 @@ app.get("/",(req,res)=>{
 
 
 
+app.get(
+    "/api/test",
+    (req,res)=>{
+
+        res.json({
+
+            status:"ok",
+
+            version:"V1.0"
+
+        });
+
+    }
+);
+
+
+
+app.get(
+    "/api/analyze",
+    (req,res)=>{
+
+
+        const result =
+        require("./app")();
+
+
+
+        res.json(result);
+
+
+    }
+);
+
+
+
 const PORT =
 process.env.PORT || 3000;
 
@@ -43,7 +86,7 @@ app.listen(
     ()=>{
 
         console.log(
-            "SERVER OK"
+            "DLT-AI CORE START"
         );
 
     }

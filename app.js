@@ -1,25 +1,23 @@
-function runAI(){
+function AI(){
 
 
     return {
-
-        version:
-        "V1.0.0",
-
 
         system:
         "DLT-AI CORE",
 
 
+        version:
+        "V1.0",
+
+
         message:
-        "AI系统连接成功",
+        "AI连接成功",
 
 
-        ranking:[
+        result:[
 
             {
-                rank:1,
-
                 front:[
                     3,
                     8,
@@ -38,6 +36,7 @@ function runAI(){
 
         ]
 
+
     };
 
 
@@ -45,4 +44,4 @@ function runAI(){
 
 
 
-module.exports = runAI;
+module.exports = AI;
