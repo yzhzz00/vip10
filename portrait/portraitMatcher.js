@@ -2,51 +2,72 @@
 
 
 /*
-    DLT-AI CORE
+    DLT-AI CORE V1.0
 
-    Portrait Matcher V1.0
+    Portrait Matcher
 
+    功能:
 
-    功能：
-
-    预测画像
+    当前预测画像
 
         ↓
 
-    历史相似画像匹配
-
+    历史相似开奖匹配
 
 */
 
 
-function matchPortrait(
-    history,
-    target
+
+// 单项距离评分
+
+function rangeScore(
+    value,
+    min,
+    max
 ){
 
 
     if(
-        !history ||
-        history.length===0
+        value>=min &&
+        value<=max
     ){
 
-        throw new Error(
-            "没有历史画像"
-        );
+        return 100;
 
     }
 
 
+    const distance =
+    Math.min(
+        Math.abs(value-min),
+        Math.abs(value-max)
+    );
 
-    const result=[];
+
+    return Math.max(
+        0,
+        100-distance*10
+    );
+
+
+}
+
+
+
+
+
+function matchPortrait(
+    history,
+    prediction
+){
+
+
+
+    const results=[];
 
 
 
     history.forEach(item=>{
-
-
-        let score=0;
-
 
 
         const p =
@@ -54,57 +75,58 @@ function matchPortrait(
 
 
 
-        // =====================
-        // 和值相似度
-        // =====================
+        let score=0;
 
+
+
+        // 和值
+
+        score +=
+
+        rangeScore(
+
+            p.sum,
+
+            prediction.sum.min,
+
+            prediction.sum.max
+
+        )
+        *
+        0.35;
+
+
+
+
+
+        // 跨度
+
+        score +=
+
+        rangeScore(
+
+            p.span,
+
+            prediction.span.min,
+
+            prediction.span.max
+
+        )
+        *
+        0.25;
+
+
+
+
+
+
+
+        // 三区
 
         if(
-            target.sum.range.min
-            <=
-            p.sum
-            &&
-            p.sum
-            <=
-            target.sum.range.max
-        ){
-
-            score+=30;
-
-        }
-
-
-
-        // =====================
-        // 跨度相似度
-        // =====================
-
-
-        if(
-            target.span.range.min
-            <=
-            p.span
-            &&
-            p.span
-            <=
-            target.span.range.max
-        ){
-
-            score+=25;
-
-        }
-
-
-
-        // =====================
-        // 三区匹配
-        // =====================
-
-
-        if(
-            target.zone.value
-            ===
             p.zone
+            ===
+            prediction.zone
         ){
 
             score+=25;
@@ -113,31 +135,37 @@ function matchPortrait(
 
 
 
-        // =====================
-        // 奇偶匹配
-        // =====================
 
+
+
+
+        // 奇偶
 
         if(
-            target.oddEven.value
-            ===
             p.oddEven
+            ===
+            prediction.oddEven
         ){
 
-            score+=20;
+            score+=15;
 
         }
 
 
 
-        result.push({
+
+
+
+
+        results.push({
 
 
             issue:
             item.issue,
 
 
-            score,
+            date:
+            item.date,
 
 
             front:
@@ -148,8 +176,15 @@ function matchPortrait(
             item.back,
 
 
-            portrait:
-            p
+
+            score:
+            Number(
+                score.toFixed(2)
+            ),
+
+
+
+            portrait:p
 
 
         });
@@ -160,24 +195,26 @@ function matchPortrait(
 
 
 
-    // 排序
 
-    result.sort(
+
+    // 高分优先
+
+    results.sort(
         (a,b)=>
         b.score-a.score
     );
 
 
 
-    // 返回最相似10期
-
-    return result.slice(
+    return results.slice(
         0,
-        10
+        20
     );
 
 
 }
+
+
 
 
 

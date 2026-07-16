@@ -1,253 +1,313 @@
 // portrait/portraitPredictor.js
 
+
 /*
-    DLT-AI CORE
+    DLT-AI CORE V1.0
 
-    Portrait Predictor V1.0
+    Portrait Predictor
 
-    输入:
-    历史开奖画像
+    历史画像
 
-    输出:
-    下一期画像预测
+        ↓
+
+    下一期结构预测
 
 */
+
+
+
+// 平均值
+
+function average(arr){
+
+
+    return Math.round(
+
+        arr.reduce(
+            (a,b)=>a+b,
+            0
+        )
+        /
+        arr.length
+
+    );
+
+
+}
+
+
+
+// 获取最高频结构
+
+function mostCommon(arr){
+
+
+    const map={};
+
+
+
+    arr.forEach(item=>{
+
+
+        if(!map[item]){
+
+            map[item]=0;
+
+        }
+
+
+        map[item]++;
+
+
+    });
+
+
+
+    return Object.keys(map)
+    .sort(
+        (a,b)=>
+        map[b]-map[a]
+    )[0];
+
+
+}
+
+
+
 
 
 function predictPortrait(history){
 
 
-    if(!history || history.length===0){
+
+    if(
+        !history ||
+        history.length===0
+    ){
 
         throw new Error(
-            "没有历史画像数据"
+            "没有画像数据"
         );
 
     }
 
 
 
-    // 最近多少期参与分析
-
-    const recentCount =
-        Math.min(
-            100,
-            history.length
-        );
-
+    // 最近100期权重
 
     const recent =
-        history.slice(
-            -recentCount
-        );
+
+    history.slice(
+        -100
+    );
+
+
 
 
 
     // =====================
-    // 和值分析
+    // 和值预测
     // =====================
 
 
     const sums =
-        recent.map(
-            item =>
-            item.portrait.sum
-        );
+
+    recent.map(
+        item=>
+        item.features.sum
+    );
+
 
 
     const avgSum =
-        Math.round(
-            sums.reduce(
-                (a,b)=>a+b,
-                0
-            )
-            /
-            sums.length
-        );
+    average(sums);
 
 
 
-    const sumRange={
+    const sumPrediction={
 
-        min:avgSum-8,
 
-        max:avgSum+8
+        min:
+        avgSum-8,
+
+
+        max:
+        avgSum+8,
+
+
+        center:
+        avgSum
 
     };
 
 
 
+
+
+
+
     // =====================
-    // 跨度分析
+    // 跨度预测
     // =====================
 
 
     const spans =
-        recent.map(
-            item =>
-            item.portrait.span
-        );
+
+    recent.map(
+        item=>
+        item.features.span
+    );
+
 
 
     const avgSpan =
-        Math.round(
-
-            spans.reduce(
-                (a,b)=>a+b,
-                0
-            )
-            /
-            spans.length
-
-        );
+    average(spans);
 
 
 
-    const spanRange={
+    const spanPrediction={
 
-        min:avgSpan-5,
 
-        max:avgSpan+5
+        min:
+        avgSpan-5,
+
+
+        max:
+        avgSpan+5,
+
+
+        center:
+        avgSpan
+
 
     };
 
 
 
-    // =====================
-    // 三区统计
-    // =====================
 
-
-    const zoneCount={};
-
-
-
-    recent.forEach(item=>{
-
-
-        const zone =
-        item.portrait.zone;
-
-
-        if(!zoneCount[zone]){
-
-            zoneCount[zone]=0;
-
-        }
-
-
-        zoneCount[zone]++;
-
-
-    });
-
-
-
-    const bestZone =
-        Object.keys(zoneCount)
-        .sort(
-            (a,b)=>
-            zoneCount[b]
-            -
-            zoneCount[a]
-        )[0];
 
 
 
     // =====================
-    // 奇偶
+    // 三区预测
     // =====================
 
 
-    const oddEvenCount={};
+    const zones =
+
+    recent.map(
+        item=>
+        item.features.zone
+    );
 
 
 
-    recent.forEach(item=>{
+    const zonePrediction =
 
-
-        const oe =
-        item.portrait.oddEven;
-
-
-        if(!oddEvenCount[oe]){
-
-            oddEvenCount[oe]=0;
-
-        }
-
-
-        oddEvenCount[oe]++;
-
-
-    });
+    mostCommon(
+        zones
+    );
 
 
 
-    const bestOddEven =
-        Object.keys(oddEvenCount)
-        .sort(
-            (a,b)=>
-            oddEvenCount[b]
-            -
-            oddEvenCount[a]
-        )[0];
+
 
 
 
     // =====================
-    // 输出画像预测
+    // 奇偶预测
     // =====================
+
+
+    const oddEven =
+
+    recent.map(
+        item=>
+        item.features.oddEven
+    );
+
+
+
+    const oddEvenPrediction =
+
+    mostCommon(
+        oddEven
+    );
+
+
+
+
+
+
+
+    // =====================
+    // 后区和值
+    // =====================
+
+
+    const backSums =
+
+    recent.map(
+        item=>
+        item.features.backSum
+    );
+
+
+
+    const backAvg =
+
+    average(
+        backSums
+    );
+
+
+
+
+
 
 
     return {
 
 
         sampleSize:
-            recentCount,
+        recent.length,
+
 
 
         prediction:{
 
 
-            sum:{
-
-                range:sumRange,
-
-                confidence:
-                    0.65
-
-            },
+            sum:
+            sumPrediction,
 
 
-            span:{
 
-                range:spanRange,
-
-                confidence:
-                    0.60
-
-            },
+            span:
+            spanPrediction,
 
 
-            zone:{
 
-                value:
-                bestZone,
-
-                confidence:
-                0.70
-
-            },
+            zone:
+            zonePrediction,
 
 
-            oddEven:{
 
-                value:
-                bestOddEven,
+            oddEven:
+            oddEvenPrediction,
 
-                confidence:
-                0.65
+
+
+            backSum:
+            {
+
+                center:
+                backAvg,
+
+                min:
+                backAvg-5,
+
+                max:
+                backAvg+5
 
             }
 
@@ -255,10 +315,13 @@ function predictPortrait(history){
         }
 
 
+
     };
 
 
 }
+
+
 
 
 

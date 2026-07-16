@@ -1,218 +1,219 @@
 // core/portraitBuilder.js
 
-/*
-    DLT-AI CORE
 
-    Portrait Builder V1.0
+/*
+    DLT-AI CORE V1.0
+
+    Portrait Builder
 
     功能:
-    历史开奖数据
+
+    特征数据
+
         ↓
+
     开奖画像
+
 
 */
 
 
-function buildPortrait(history){
 
+// 和值等级
 
-    return history.map(item=>{
+function sumLevel(sum){
 
 
-        const front = item.front;
-        const back = item.back;
+    if(sum<80){
 
+        return "低";
 
+    }
 
-        // =====================
-        // 前区和值
-        // =====================
 
-        const sum = front.reduce(
-            (a,b)=>a+b,
-            0
-        );
+    if(sum<110){
 
+        return "中";
 
+    }
 
-        // =====================
-        // 前区跨度
-        // =====================
 
-        const span =
-            Math.max(...front)
-            -
-            Math.min(...front);
-
-
-
-        // =====================
-        // 奇偶
-        // =====================
-
-        let odd = 0;
-        let even = 0;
-
-
-        front.forEach(num=>{
-
-            if(num % 2 === 0){
-
-                even++;
-
-            }else{
-
-                odd++;
-
-            }
-
-        });
-
-
-
-        // =====================
-        // 大小
-        // 1-17 小
-        // 18-35 大
-        // =====================
-
-        let small = 0;
-        let big = 0;
-
-
-        front.forEach(num=>{
-
-            if(num <=17){
-
-                small++;
-
-            }else{
-
-                big++;
-
-            }
-
-        });
-
-
-
-        // =====================
-        // 三区
-        // 01-12
-        // 13-24
-        // 25-35
-        // =====================
-
-
-        let zone1=0;
-        let zone2=0;
-        let zone3=0;
-
-
-        front.forEach(num=>{
-
-
-            if(num<=12){
-
-                zone1++;
-
-            }
-            else if(num<=24){
-
-                zone2++;
-
-            }
-            else{
-
-                zone3++;
-
-            }
-
-
-        });
-
-
-
-        // =====================
-        // 后区画像
-        // =====================
-
-
-        const backSum =
-            back.reduce(
-                (a,b)=>a+b,
-                0
-            );
-
-
-        const backOdd =
-            back.filter(
-                n=>n%2!==0
-            ).length;
-
-
-        const backEven =
-            back.length-backOdd;
-
-
-
-        // =====================
-        // 返回画像
-        // =====================
-
-
-        return {
-
-
-            issue:item.issue,
-
-            date:item.date,
-
-
-            front:item.front,
-
-            back:item.back,
-
-
-            portrait:{
-
-
-                sum,
-
-
-                span,
-
-
-                oddEven:
-                    `${odd}-${even}`,
-
-
-                bigSmall:
-                    `${big}-${small}`,
-
-
-                zone:
-                    `${zone1}-${zone2}-${zone3}`,
-
-
-                backSum,
-
-
-                backOddEven:
-                    `${backOdd}-${backEven}`
-
-
-            }
-
-
-        };
-
-
-    });
+    return "高";
 
 
 }
 
 
 
-module.exports = buildPortrait;
+// 跨度等级
+
+function spanLevel(span){
+
+
+    if(span<=15){
+
+        return "小";
+
+    }
+
+
+    if(span<=25){
+
+        return "中";
+
+    }
+
+
+    return "大";
+
+
+}
+
+
+
+
+// 后区等级
+
+function backLevel(sum){
+
+
+    if(sum<=10){
+
+        return "低";
+
+    }
+
+
+    if(sum<=18){
+
+        return "中";
+
+    }
+
+
+    return "高";
+
+}
+
+
+
+
+function buildPortrait(item){
+
+
+    const f =
+    item.features;
+
+
+
+    return {
+
+
+        issue:
+        item.issue,
+
+
+        date:
+        item.date,
+
+
+        front:
+        item.front,
+
+
+        back:
+        item.back,
+
+
+
+        features:f,
+
+
+
+        portrait:{
+
+
+
+            sum:f.sum,
+
+
+            sumLevel:
+            sumLevel(
+                f.sum
+            ),
+
+
+
+            span:f.span,
+
+
+            spanLevel:
+            spanLevel(
+                f.span
+            ),
+
+
+
+            zone:
+            f.zone,
+
+
+
+            oddEven:
+            f.oddEven,
+
+
+
+            bigSmall:
+            f.bigSmall,
+
+
+
+            ac:
+            f.ac,
+
+
+
+            backSum:
+            f.backSum,
+
+
+            backLevel:
+            backLevel(
+                f.backSum
+            ),
+
+
+
+            structure:
+
+            `${sumLevel(f.sum)}和值+${spanLevel(f.span)}跨度`
+
+
+        }
+
+
+    };
+
+
+}
+
+
+
+
+
+function portraitBuilder(features){
+
+
+    return features.map(
+        item=>
+        buildPortrait(item)
+    );
+
+
+}
+
+
+
+module.exports =
+portraitBuilder;
