@@ -3,49 +3,52 @@
 // AI总控制中心
 
 
-import DataEngine from "./data.js";
-import Validator from "./validator.js";
-import FeatureEngine from "./feature.js";
-import LearningEngine from "./learning.js";
-import ReportEngine from "./report.js";
-
-import ModelCommittee from "../models/committee.js";
-
+import DataManager from "./data.js";
+import Committee from "../models/committee.js";
+import Score from "./score.js";
+import Feature from "./feature.js";
 
 
 class Engine {
 
 
-    constructor(){
+    constructor(config = {}){
+
+
+        this.config = config;
+
+
+        this.history = [];
+
+
+        this.historyCount = 0;
 
 
         this.data =
-        new DataEngine();
-
-
-        this.validator =
-        new Validator();
+        new DataManager(
+            config
+        );
 
 
         this.feature =
-        new FeatureEngine();
-
-
-        this.learning =
-        new LearningEngine();
-
-
-        this.report =
-        new ReportEngine();
+        new Feature(
+            config
+        );
 
 
         this.committee =
-        new ModelCommittee();
+        new Committee(
+            config
+        );
 
 
+        this.score =
+        new Score(
+            config
+        );
 
-        this.ready =
-        false;
+
+        this.ready = false;
 
 
     }
@@ -55,46 +58,115 @@ class Engine {
 
 
 
-
-    async initialize(){
+    async init(){
 
 
         console.log(
-            "Initializing DLT-AI-CORE..."
+            "Engine initializing..."
         );
 
 
-        const history =
-        await this.data.load();
+        try{
+
+
+            await this.loadData();
+
+
+            await this.committee.init?.();
+
+
+            this.ready = true;
+
+
+            console.log(
+                "Engine ready"
+            );
+
+
+            return true;
+
+
+        }
+
+
+        catch(error){
+
+
+            console.error(
+                "Engine init failed:",
+                error
+            );
+
+
+            throw error;
+
+
+        }
+
+
+    }
 
 
 
-        this.validator.check(
-            history
-        );
 
 
 
-        await this.committee.train(
-            history
-        );
+    async loadData(){
+
+
+        try{
+
+
+            const result =
+
+            await this.data.load();
 
 
 
-        this.ready =
-        true;
+            if(
+                Array.isArray(result)
+            ){
+
+
+                this.history =
+                result;
+
+
+            }
 
 
 
-        return {
+            this.historyCount =
+            this.history.length;
 
-            status:
-            "ready",
 
-            samples:
-            history.length
 
-        };
+            console.log(
+
+                "History loaded:",
+                this.historyCount
+
+            );
+
+
+        }
+
+
+        catch(error){
+
+
+            console.error(
+                "Data load error:",
+                error
+            );
+
+
+            this.history = [];
+
+            this.historyCount = 0;
+
+
+        }
 
 
     }
@@ -106,9 +178,7 @@ class Engine {
 
 
 
-
-    async analyze(){
-
+    async predict(){
 
 
         if(
@@ -116,48 +186,85 @@ class Engine {
         ){
 
 
-            throw new Error(
-                "Engine not initialized"
-            );
+            await this.init();
 
 
         }
 
 
 
-        const history =
-        await this.data.load();
-
-
-
-        const features =
-        this.feature.generate(
-            history
+        console.log(
+            "Prediction started..."
         );
 
 
 
-        const result =
+        const features =
+
+        await this.feature.generate(
+            this.history
+        );
+
+
+
+        const models =
+
         await this.committee.predict(
             features
         );
 
 
 
-        const report =
-        this.report.create(
-            result
+        const finalResult =
+
+        await this.score.calculate(
+            models
         );
+
+
+
+        const prediction = {
+
+
+            front:
+
+            finalResult.front
+            ||
+            [],
+
+
+
+            back:
+
+            finalResult.back
+            ||
+            []
+
+
+
+        };
 
 
 
         return {
 
 
-            result,
+            success:true,
 
 
-            report
+            prediction,
+
+
+            models,
+
+
+            historyCount:
+            this.historyCount,
+
+
+            time:
+            new Date()
+            .toISOString()
 
 
 
@@ -167,46 +274,6 @@ class Engine {
     }
 
 
-
-
-
-
-
-
-
-    async feedback(data){
-
-
-
-        return await this.learning.update(
-            data
-        );
-
-
-    }
-
-
-
-
-
-    getStatus(){
-
-
-        return {
-
-
-            ready:
-            this.ready,
-
-
-            version:
-            "V11 FINAL"
-
-
-        };
-
-
-    }
 
 
 
