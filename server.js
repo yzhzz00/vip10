@@ -7,7 +7,6 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 
-
 import Engine from "./core/engine.js";
 
 
@@ -22,8 +21,6 @@ const __dirname =
 path.dirname(
     __filename
 );
-
-
 
 
 
@@ -60,6 +57,9 @@ app.use(
 
 
 
+
+// 创建AI核心实例
+
 const engine =
 new Engine();
 
@@ -67,13 +67,54 @@ new Engine();
 
 
 
+// 初始化系统
+
+async function initSystem(){
+
+
+    try{
+
+
+        await engine.init();
+
+
+
+        console.log(
+            "AI Engine initialized"
+        );
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+
+            "Engine initialization failed:",
+            error
+
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+// 状态接口
+
 app.get(
     "/api/status",
     async(req,res)=>{
 
 
         res.json({
-
 
             status:
             "running",
@@ -86,10 +127,7 @@ app.get(
 
 
             models:
-
             "frequency trend bayes markov montecarlo"
-
-
 
         });
 
@@ -104,7 +142,7 @@ app.get(
 
 
 
-
+// 预测接口
 
 app.post(
     "/api/predict",
@@ -131,19 +169,21 @@ app.post(
         catch(error){
 
 
+            console.error(
+                error
+            );
+
+
             res.status(500)
             .json({
 
-
                 error:
                 error.message
-
 
             });
 
 
         }
-
 
 
     }
@@ -156,19 +196,23 @@ app.post(
 
 
 
+// Express 5 fallback
+// 不使用 app.get("*")
 
-
-app.get(
-    "*",
+app.use(
     (req,res)=>{
 
 
         res.sendFile(
 
             path.join(
+
                 __dirname,
+
                 "public",
+
                 "index.html"
+
             )
 
         );
@@ -185,21 +229,36 @@ app.get(
 
 
 
+// 启动服务器
 
-app.listen(
-    PORT,
-    ()=>{
-
-
-        console.log(
-
-        "DLT-AI-CORE running on port "
-        +
-        PORT
-
-        );
+async function start(){
 
 
-    }
+    await initSystem();
 
-);
+
+
+    app.listen(
+        PORT,
+        ()=>{
+
+
+            console.log(
+
+                "DLT-AI-CORE running on port "
+                +
+                PORT
+
+            );
+
+
+        }
+
+    );
+
+
+}
+
+
+
+start();
