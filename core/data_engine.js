@@ -3,36 +3,29 @@
 //
 // 数据引擎
 //
-// 负责:
-// 1.读取历史开奖
-// 2.数据格式化
-// 3.提供统一数据接口
+// 功能:
+// 1.读取大乐透历史数据
+// 2.解析号码
+// 3.提供统一数据格式
 
 
 import fs from "fs";
 
-import path from "path";
-
 import CONFIG from "../config.js";
-
-
 
 
 
 class DataEngine {
 
 
+
     constructor(){
 
 
-        this.history = [];
-
-
-        this.loaded = false;
+        this.history=[];
 
 
     }
-
 
 
 
@@ -46,21 +39,17 @@ class DataEngine {
     load(){
 
 
-        const file =
-
-        path.resolve(
-
-            CONFIG.DATA_PATH
-
-        );
-
-
 
         if(
 
-            !fs.existsSync(file)
+            !fs.existsSync(
+
+                CONFIG.DATA_PATH
+
+            )
 
         ){
+
 
 
             throw new Error(
@@ -77,11 +66,12 @@ class DataEngine {
 
 
 
-        const content =
+
+        const text =
 
         fs.readFileSync(
 
-            file,
+            CONFIG.DATA_PATH,
 
             "utf-8"
 
@@ -95,19 +85,7 @@ class DataEngine {
 
         this.history =
 
-        this.parse(
-
-            content
-
-        );
-
-
-
-
-
-
-
-        this.loaded = true;
+        this.parse(text);
 
 
 
@@ -132,19 +110,19 @@ class DataEngine {
     // 数据解析
     // ======================
 
-    parse(content){
+    parse(text){
 
 
 
-        const lines =
+        let lines =
 
-        content
+        text
 
         .split(/\r?\n/)
 
         .filter(
 
-            line =>
+            line=>
 
             line.trim()
 
@@ -156,20 +134,16 @@ class DataEngine {
 
 
 
-
-        let result = [];
-
+        let result=[];
 
 
 
 
 
 
-        for(
 
-            let line of lines
 
-        ){
+        lines.forEach(line=>{
 
 
 
@@ -177,97 +151,76 @@ class DataEngine {
 
             line
 
-            .match(/\d+/g);
+            .trim()
+
+            .split(/\s+/)
+
+            .map(Number)
+
+            .filter(
+
+                n=>
+
+                !isNaN(n)
+
+            );
 
 
 
 
 
+
+
+            // 大乐透格式
+
+            // 前区5 + 后区2
 
             if(
 
-                !nums
+                nums.length>=7
 
-                ||
-
-                nums.length < 7
-
-            )
-
-                continue;
+            ){
 
 
 
+                result.push({
 
 
 
+                    front:
 
+                    nums.slice(
 
-            nums =
+                        0,
 
-            nums
+                        5
 
-            .map(
-
-                n =>
-
-                Number(n)
-
-            );
+                    ),
 
 
 
+                    back:
+
+                    nums.slice(
+
+                        5,
+
+                        7
+
+                    )
 
 
 
-
-            let front =
-
-            nums.slice(
-
-                nums.length-7,
-
-                nums.length-2
-
-            );
+                });
 
 
 
+            }
 
 
 
-            let back =
+        });
 
-            nums.slice(
-
-                nums.length-2
-
-            );
-
-
-
-
-
-
-
-
-            result.push({
-
-
-
-                front,
-
-
-
-                back
-
-
-
-            });
-
-
-
-        }
 
 
 
@@ -288,7 +241,7 @@ class DataEngine {
 
 
     // ======================
-    // 获取全部历史
+    // 获取历史
     // ======================
 
     getHistory(){
@@ -297,12 +250,14 @@ class DataEngine {
 
         if(
 
-            !this.loaded
+            this.history.length===0
 
         ){
 
 
+
             this.load();
+
 
 
         }
@@ -312,37 +267,8 @@ class DataEngine {
 
 
 
+
         return this.history;
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 获取最近多少期
-    // ======================
-
-    getRecent(count){
-
-
-
-        return this
-
-        .getHistory()
-
-        .slice(
-
-            -count
-
-        );
-
 
 
     }
@@ -369,26 +295,35 @@ class DataEngine {
 
             loaded:
 
-            this.loaded,
+            this.history.length>0,
 
 
 
             count:
 
-            this.history.length
+            this.history.length,
+
+
+
+            path:
+
+            CONFIG.DATA_PATH
 
 
 
         };
 
 
+
     }
 
 
 
+
+
+
+
 }
-
-
 
 
 

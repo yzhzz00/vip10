@@ -1,18 +1,10 @@
 // DLT-AI-CORE VIP
 // core/feature_engine.js
 //
-// 特征工程引擎
+// 特征工程
 //
-// 生成:
-// 三区
-// 奇偶
-// 大小
-// 和值
-// 连号
-// 重号
-// 遗漏
-// 周期
-// 后区结构
+// 功能:
+// 生成大乐透核心统计特征
 
 
 class FeatureEngine {
@@ -20,9 +12,7 @@ class FeatureEngine {
 
     constructor(){
 
-
-        this.features = [];
-
+        this.features={};
 
     }
 
@@ -33,110 +23,71 @@ class FeatureEngine {
 
 
     // ======================
-    // 构建全部特征
+    // 构建特征
     // ======================
 
     build(history){
 
 
-        this.features =
 
-
-        history.map(
-
-            (item,index)=>{
-
-
-                return {
-
-
-                    index,
-
-
-                    front:item.front,
-
-
-                    back:item.back,
+        this.features={
 
 
 
-                    front_zone:
+            count:
 
-                    this.zone(
-
-                        item.front
-
-                    ),
+            history.length,
 
 
 
-                    odd_even:
+            zone:
 
-                    this.oddEven(
-
-                        item.front
-
-                    ),
+            this.zone(history),
 
 
 
-                    front_sum:
+            oddEven:
 
-                    this.sum(
-
-                        item.front
-
-                    ),
+            this.oddEven(history),
 
 
 
-                    front_big_small:
+            sum:
 
-                    this.bigSmall(
-
-                        item.front
-
-                    ),
+            this.sum(history),
 
 
 
-                    consecutive:
+            consecutive:
 
-                    this.consecutive(
-
-                        item.front
-
-                    ),
+            this.consecutive(history),
 
 
 
-                    repeat:
+            repeat:
 
-                    this.repeat(
-
-                        history,
-
-                        index
-
-                    ),
+            this.repeat(history),
 
 
 
-                    back_structure:
+            omission:
 
-                    this.backStructure(
-
-                        item.back
-
-                    )
+            this.omission(history),
 
 
-                };
+
+            back:
+
+            this.backStructure(history)
 
 
-            }
 
-        );
+        };
+
+
+
+
+
 
 
         return this.features;
@@ -153,48 +104,68 @@ class FeatureEngine {
 
 
     // ======================
-    // 前区三区
+    // 三区分析
     // ======================
 
-    zone(numbers){
+    zone(history){
 
 
-        let result = {
+
+        let result={
+
 
 
             zone1:0,
 
+
             zone2:0,
 
+
             zone3:0
+
 
 
         };
 
 
 
-        numbers.forEach(num=>{
-
-
-            if(num<=12)
-
-                result.zone1++;
 
 
 
-            else if(num<=24)
-
-                result.zone2++;
+        history.forEach(item=>{
 
 
 
-            else
+            item.front.forEach(num=>{
 
-                result.zone3++;
+
+
+                if(num<=12)
+
+                    result.zone1++;
+
+
+
+                else if(num<=24)
+
+                    result.zone2++;
+
+
+
+                else
+
+                    result.zone3++;
+
+
+
+            });
 
 
 
         });
+
+
+
 
 
 
@@ -212,23 +183,44 @@ class FeatureEngine {
 
 
     // ======================
-    // 奇偶
+    // 奇偶分析
     // ======================
 
-    oddEven(numbers){
+    oddEven(history){
 
 
 
         let odd=0;
 
 
+        let even=0;
 
-        numbers.forEach(n=>{
 
 
-            if(n%2!==0)
 
-                odd++;
+
+
+        history.forEach(item=>{
+
+
+
+            item.front.forEach(num=>{
+
+
+
+                if(num%2)
+
+                    odd++;
+
+
+                else
+
+                    even++;
+
+
+
+            });
+
 
 
         });
@@ -236,15 +228,18 @@ class FeatureEngine {
 
 
 
+
+
+
         return {
+
 
 
             odd,
 
 
-            even:
+            even
 
-            numbers.length-odd
 
 
         };
@@ -261,51 +256,42 @@ class FeatureEngine {
 
 
     // ======================
-    // 和值
+    // 和值分析
     // ======================
 
-    sum(numbers){
+    sum(history){
 
 
 
-        return numbers.reduce(
-
-            (a,b)=>
-
-            a+b,
-
-            0
-
-        );
-
-
-    }
+        let list=[];
 
 
 
 
 
 
+        history.forEach(item=>{
 
 
 
-    // ======================
-    // 大小结构
-    // ======================
-
-    bigSmall(numbers){
-
-
-        let big=0;
+            list.push(
 
 
 
-        numbers.forEach(n=>{
+                item.front.reduce(
+
+                    (a,b)=>
+
+                    a+b,
+
+                    0
+
+                )
 
 
-            if(n>=18)
 
-                big++;
+            );
+
 
 
         });
@@ -315,15 +301,47 @@ class FeatureEngine {
 
 
 
+
         return {
 
 
-            big,
+
+            latest:
+
+            list[0],
 
 
-            small:
 
-            numbers.length-big
+            average:
+
+            Number(
+
+                (
+
+                list.reduce(
+
+                    (a,b)=>
+
+                    a+b,
+
+                    0
+
+                )
+
+                /
+
+                list.length
+
+                )
+
+                .toFixed(2)
+
+            ),
+
+
+
+            history:list
+
 
 
         };
@@ -340,10 +358,10 @@ class FeatureEngine {
 
 
     // ======================
-    // 连号数量
+    // 连号分析
     // ======================
 
-    consecutive(numbers){
+    consecutive(history){
 
 
 
@@ -351,14 +369,90 @@ class FeatureEngine {
 
 
 
-        let arr=[...numbers]
 
-        .sort(
 
-            (a,b)=>a-b
 
-        );
+        history.forEach(item=>{
 
+
+
+            let nums=
+
+            item.front.sort(
+
+                (a,b)=>a-b
+
+            );
+
+
+
+
+
+
+            for(
+
+                let i=1;
+
+                i<nums.length;
+
+                i++
+
+            ){
+
+
+
+                if(
+
+                    nums[i]-nums[i-1]===1
+
+                )
+
+                    count++;
+
+
+
+            }
+
+
+
+        });
+
+
+
+
+
+
+
+        return {
+
+
+
+            count
+
+
+
+        };
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ======================
+    // 重号分析
+    // ======================
+
+    repeat(history){
+
+
+
+        let result=[];
 
 
 
@@ -369,7 +463,7 @@ class FeatureEngine {
 
             let i=1;
 
-            i<arr.length;
+            i<history.length;
 
             i++
 
@@ -377,13 +471,43 @@ class FeatureEngine {
 
 
 
-            if(
+            let last=
 
-                arr[i]-arr[i-1]===1
+            history[i-1].front;
 
-            )
 
-                count++;
+
+            let now=
+
+            history[i].front;
+
+
+
+
+
+
+
+            let same=
+
+            now.filter(
+
+                n=>
+
+                last.includes(n)
+
+            );
+
+
+
+
+
+
+
+            result.push(
+
+                same
+
+            );
 
 
 
@@ -392,7 +516,10 @@ class FeatureEngine {
 
 
 
-        return count;
+
+
+
+        return result;
 
 
     }
@@ -406,45 +533,92 @@ class FeatureEngine {
 
 
     // ======================
-    // 重号
+    // 遗漏分析
     // ======================
 
-    repeat(history,index){
+    omission(history){
 
 
 
-        if(index===0)
-
-            return 0;
-
-
-
-
-
-
-        let current=
-
-        history[index].front;
-
-
-
-        let last=
-
-        history[index-1].front;
+        let result={};
 
 
 
 
 
 
-        return current.filter(
+        for(
 
-            n=>
+            let num=1;
 
-            last.includes(n)
+            num<=35;
 
-        ).length;
+            num++
 
+        ){
+
+
+
+            let gap=0;
+
+
+
+
+
+
+
+            for(
+
+                let i=0;
+
+                i<history.length;
+
+                i++
+
+            ){
+
+
+
+                if(
+
+                    history[i].front.includes(num)
+
+                ){
+
+
+
+                    break;
+
+
+                }
+
+
+
+                gap++;
+
+
+
+            }
+
+
+
+
+
+
+
+            result[num]=gap;
+
+
+
+        }
+
+
+
+
+
+
+
+        return result;
 
 
     }
@@ -461,20 +635,67 @@ class FeatureEngine {
     // 后区结构
     // ======================
 
-    backStructure(numbers){
+    backStructure(history){
 
 
 
-        let odd=0;
+        let result={
 
 
 
-        numbers.forEach(n=>{
+            small:0,
 
 
-            if(n%2!==0)
+            big:0,
 
-                odd++;
+
+            odd:0,
+
+
+            even:0
+
+
+
+        };
+
+
+
+
+
+
+
+        history.forEach(item=>{
+
+
+
+            item.back.forEach(num=>{
+
+
+
+                if(num<=6)
+
+                    result.small++;
+
+
+                else
+
+                    result.big++;
+
+
+
+                if(num%2)
+
+                    result.odd++;
+
+
+                else
+
+                    result.even++;
+
+
+
+            });
+
 
 
         });
@@ -484,29 +705,8 @@ class FeatureEngine {
 
 
 
-        return {
 
-
-            odd,
-
-
-            even:
-
-            numbers.length-odd,
-
-
-
-            sum:
-
-            numbers.reduce(
-
-                (a,b)=>a+b,
-
-                0
-
-            )
-
-        };
+        return result;
 
 
     }
@@ -517,13 +717,8 @@ class FeatureEngine {
 
 
 
-
-
-    // ======================
-    // 获取特征
-    // ======================
-
     get(){
+
 
 
         return this.features;
