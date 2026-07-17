@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>DLT-AI-CORE VIP</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<h1>
+DLT-AI-CORE VIP
+</h1>
+
+
+<h2>
+大乐透智能分析核心系统
+</h2>
+
+
+
+<div class="card">
+
+<h3>系统状态</h3>
+
+<div id="status">
+
+加载中...
+
+</div>
+
+</div>
+
+
+
+
+
+<div class="card">
+
+<h3>模型权重</h3>
+
+<div id="models">
+
+加载中...
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h3>预测结果</h3>
+
+
+<button onclick="predict()">
+
+开始分析
+
+</button>
+
+
+
+<div id="result">
+
+等待分析
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h3>蒙特卡罗模拟</h3>
+
+
+
+<button onclick="montecarlo()">
+
+100万次模拟
+
+</button>
+
+
+
+<div class="progress">
+
+
+<div id="bar">
+
+</div>
+
+
+</div>
+
+
+<div id="mcstatus">
+
+等待
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h3>
+开奖反馈学习
+</h3>
+
+
+
+<input id="issue" placeholder="期号">
+
+
+
+<h4>
+前区
+</h4>
+
+
+<input id="f1">
+<input id="f2">
+<input id="f3">
+<input id="f4">
+<input id="f5">
+
+
+
+<h4>
+后区
+</h4>
+
+
+<input id="b1">
+<input id="b2">
+
+
+
+<button onclick="feedback()">
+
+提交开奖
+
+</button>
+
+
+<div id="feedback">
+
+</div>
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+<script src="app.js"></script>
+
+
+</body>
+
+
+</html>

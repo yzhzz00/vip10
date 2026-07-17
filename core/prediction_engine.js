@@ -12,7 +12,128 @@ class PredictionEngine {
 
 
 
-    generate(){
+
+
+
+    generate(modelResult){
+
+
+
+        let scores=
+
+        modelResult.scores;
+
+
+
+        let numbers=Object.keys(scores)
+
+        .map(n=>({
+
+
+            number:Number(n),
+
+
+            score:scores[n]
+
+
+        }))
+
+        .sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
+
+
+
+
+
+        let candidates=[];
+
+
+
+        // 取高评分号码池
+
+        let pool=
+
+        numbers.slice(0,20)
+
+        .map(x=>x.number);
+
+
+
+
+
+
+
+        while(
+
+            candidates.length<300
+
+        ){
+
+
+
+            let front=
+
+            this.pickFront(
+
+                pool
+
+            );
+
+
+
+            if(
+
+                this.checkFront(front)
+
+            ){
+
+
+
+                candidates.push({
+
+
+                    front,
+
+
+                    score:
+
+                    this.calcScore(
+
+                        front,
+
+                        scores
+
+                    )
+
+
+                });
+
+
+            }
+
+
+
+        }
+
+
+
+
+
+
+        candidates.sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
+
+
 
 
 
@@ -20,91 +141,38 @@ class PredictionEngine {
 
 
 
-        for(let i=0;i<3;i++){
+        for(
+
+            let i=0;
+
+            i<3;
+
+            i++
+
+        ){
 
 
 
-            let front=new Set();
+            let item=
 
-
-
-            while(front.size<5){
-
-
-                front.add(
-
-                    Math.floor(
-
-                        Math.random()*35
-
-                    )+1
-
-                );
-
-
-            }
-
-
-
-
-            let back=new Set();
-
-
-
-            while(back.size<2){
-
-
-                back.add(
-
-                    Math.floor(
-
-                        Math.random()*12
-
-                    )+1
-
-                );
-
-
-            }
-
-
+            candidates[i];
 
 
 
             result.push({
 
 
-                front:
-
-                [...front].sort(
-
-                    (a,b)=>a-b
-
-                ),
+                front:item.front,
 
 
-
-                back:
-
-                [...back].sort(
-
-                    (a,b)=>a-b
-
-                ),
-
+                back:this.generateBack(),
 
 
                 score:
 
                 Number(
 
-                    (
-
-                    Math.random()*30+70
-
-                    )
-
-                    .toFixed(2)
+                    item.score.toFixed(2)
 
                 )
 
@@ -117,11 +185,246 @@ class PredictionEngine {
 
 
 
+
+
         this.result=result;
 
 
 
         return result;
+
+
+
+    }
+
+
+
+
+
+
+
+
+    pickFront(pool){
+
+
+
+        let arr=[];
+
+
+
+        while(
+
+            arr.length<5
+
+        ){
+
+
+
+            let n=
+
+            pool[
+
+                Math.floor(
+
+                    Math.random()*pool.length
+
+                )
+
+            ];
+
+
+
+            if(
+
+                !arr.includes(n)
+
+            ){
+
+                arr.push(n);
+
+            }
+
+
+
+        }
+
+
+
+        return arr.sort(
+
+            (a,b)=>a-b
+
+        );
+
+    }
+
+
+
+
+
+
+
+    generateBack(){
+
+
+
+        let arr=[];
+
+
+
+        while(
+
+            arr.length<2
+
+        ){
+
+
+
+            let n=
+
+            Math.floor(
+
+                Math.random()*12
+
+            )+1;
+
+
+
+            if(
+
+                !arr.includes(n)
+
+            )
+
+            arr.push(n);
+
+
+
+        }
+
+
+
+        return arr.sort(
+
+            (a,b)=>a-b
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    checkFront(front){
+
+
+
+        let odd=
+
+        front.filter(
+
+            n=>n%2!==0
+
+        ).length;
+
+
+
+        let sum=
+
+        front.reduce(
+
+            (a,b)=>a+b,
+
+            0
+
+        );
+
+
+
+        // 奇偶
+
+        if(
+
+            odd<1 ||
+
+            odd>4
+
+        )
+
+        return false;
+
+
+
+
+        // 和值范围
+
+        if(
+
+            sum<60 ||
+
+            sum>170
+
+        )
+
+        return false;
+
+
+
+
+        // 不允许全同区
+
+        return true;
+
+
+    }
+
+
+
+
+
+
+
+    calcScore(front,scores){
+
+
+
+        let total=0;
+
+
+
+        front.forEach(n=>{
+
+
+            total+=
+
+            scores[n]||0;
+
+
+        });
+
+
+
+        return total/5;
+
+
+
+    }
+
+
+
+
+
+
+    getResult(){
+
+
+        return this.result;
 
 
     }
