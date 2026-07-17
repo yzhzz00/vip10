@@ -1,25 +1,26 @@
 // DLT-AI-CORE VIP
 // models/monte_carlo_model.js
 //
-// 蒙特卡罗模拟模型
+// 蒙特卡罗模型
 //
-// 功能:
-// 1.建立概率池
-// 2.随机采样组合
-// 3.统计组合频率
-// 4.输出排序结果
+// 随机模拟组合概率
 
 
 class MonteCarloModel {
 
 
+
     constructor(){
 
 
-        this.name = "monte_carlo";
+        this.front=[];
 
 
-        this.results = [];
+        this.back=[];
+
+
+        this.times=100000;
+
 
 
     }
@@ -30,11 +31,205 @@ class MonteCarloModel {
 
 
 
-    // ======================
-    // 构建概率池
-    // ======================
 
-    buildPool(scores){
+
+    train(history){
+
+
+
+        let frontCount={};
+
+
+        let backCount={};
+
+
+
+
+
+
+
+        for(
+
+            let i=1;
+
+            i<=35;
+
+            i++
+
+        ){
+
+
+
+            frontCount[i]=0;
+
+
+
+        }
+
+
+
+
+
+
+
+        for(
+
+            let i=1;
+
+            i<=12;
+
+            i++
+
+        ){
+
+
+
+            backCount[i]=0;
+
+
+
+        }
+
+
+
+
+
+
+
+        for(
+
+            let i=0;
+
+            i<this.times;
+
+            i++
+
+        ){
+
+
+
+            let front=
+
+            this.pick(
+
+                35,
+
+                5
+
+            );
+
+
+
+
+
+
+
+            let back=
+
+            this.pick(
+
+                12,
+
+                2
+
+            );
+
+
+
+
+
+
+
+            front.forEach(num=>{
+
+
+
+                frontCount[num]++;
+
+
+
+            });
+
+
+
+
+
+
+
+            back.forEach(num=>{
+
+
+
+                backCount[num]++;
+
+
+
+            });
+
+
+
+        }
+
+
+
+
+
+
+
+
+        this.front=
+
+        this.normalize(
+
+            frontCount
+
+        );
+
+
+
+
+
+
+
+        this.back=
+
+        this.normalize(
+
+            backCount
+
+        );
+
+
+
+
+
+
+
+
+        return true;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    pick(
+
+        max,
+
+        count
+
+    ){
+
+
+
+        let arr=[];
 
 
         let pool=[];
@@ -45,100 +240,23 @@ class MonteCarloModel {
 
 
 
-        scores.forEach(item=>{
+        for(
 
+            let i=1;
 
-            let weight =
+            i<=max;
 
-            Math.max(
+            i++
 
-                item.score,
-
-                0.01
-
-            );
+        ){
 
 
 
+            pool.push(i);
 
 
 
-
-            let times =
-
-            Math.floor(
-
-                weight*100
-
-            );
-
-
-
-
-
-
-
-            for(
-
-                let i=0;
-
-                i<times;
-
-                i++
-
-            ){
-
-
-                pool.push(
-
-                    item.number
-
-                );
-
-
-            }
-
-
-
-        });
-
-
-
-
-
-
-
-        return pool;
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 随机选择
-    // ======================
-
-    selectNumbers(
-
-        pool,
-
-        count
-
-    ){
-
-
-
-        let result=[];
-
-
-        let temp=[...pool];
+        }
 
 
 
@@ -148,7 +266,7 @@ class MonteCarloModel {
 
         while(
 
-            result.length<count
+            arr.length<count
 
         ){
 
@@ -162,7 +280,7 @@ class MonteCarloModel {
 
                 *
 
-                temp.length
+                pool.length
 
             );
 
@@ -172,30 +290,25 @@ class MonteCarloModel {
 
 
 
-            let num=
+            arr.push(
 
-            temp[index];
+                pool[index]
 
-
-
-
-
-
-            if(
-
-                !result.includes(num)
-
-            ){
+            );
 
 
 
-                result.push(num);
 
 
 
-            }
 
+            pool.splice(
 
+                index,
+
+                1
+
+            );
 
 
 
@@ -207,11 +320,7 @@ class MonteCarloModel {
 
 
 
-        return result.sort(
-
-            (a,b)=>a-b
-
-        );
+        return arr;
 
 
     }
@@ -224,94 +333,15 @@ class MonteCarloModel {
 
 
 
-    // ======================
-    // 单次模拟
-    // ======================
-
-    simulate(
-
-        frontPool,
-
-        backPool
-
-    ){
+    normalize(data){
 
 
 
-        return {
+        let max=
 
+        Math.max(
 
-
-            front:
-
-            this.selectNumbers(
-
-                frontPool,
-
-                5
-
-            ),
-
-
-
-            back:
-
-            this.selectNumbers(
-
-                backPool,
-
-                2
-
-            )
-
-
-
-        };
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 大规模模拟
-    // ======================
-
-    run(
-
-        frontScores,
-
-        backScores,
-
-        times=100000
-
-    ){
-
-
-
-        let frontPool=
-
-        this.buildPool(
-
-            frontScores
-
-        );
-
-
-
-
-
-        let backPool=
-
-        this.buildPool(
-
-            backScores
+            ...Object.values(data)
 
         );
 
@@ -321,140 +351,41 @@ class MonteCarloModel {
 
 
 
-        let map={};
+        return Object.keys(data)
 
+        .map(num=>({
 
 
 
+            number:Number(num),
 
 
 
-        for(
+            score:
 
-            let i=0;
+            Number(
 
-            i<times;
+                (
 
-            i++
-
-        ){
-
-
-
-            let result=
-
-            this.simulate(
-
-                frontPool,
-
-                backPool
-
-            );
-
-
-
-
-
-
-
-            let key=
-
-            result.front.join("-")
-
-            +
-
-            "|"
-
-            +
-
-            result.back.join("-");
-
-
-
-
-
-
-
-            map[key]=
-
-            (
-
-                map[key]
-
-                ||
-
-                0
-
-            )
-
-            +1;
-
-
-
-        }
-
-
-
-
-
-
-
-        this.results =
-
-        Object.keys(map)
-
-        .map(key=>{
-
-
-
-            let arr=
-
-            key.split("|");
-
-
-
-
-
-
-            return {
-
-
-
-                front:
-
-                arr[0]
-
-                .split("-")
-
-                .map(Number),
-
-
-
-                back:
-
-                arr[1]
-
-                .split("-")
-
-                .map(Number),
-
-
-
-                score:
-
-                map[key]
+                data[num]
 
                 /
 
-                times
+                max
+
+                *
+
+                100
+
+                )
+
+                .toFixed(2)
+
+            )
 
 
 
-            };
-
-
-
-        })
+        }))
 
         .sort(
 
@@ -466,14 +397,6 @@ class MonteCarloModel {
 
 
 
-
-
-
-
-
-        return this.results;
-
-
     }
 
 
@@ -484,10 +407,6 @@ class MonteCarloModel {
 
 
 
-    // ======================
-    // 输出
-    // ======================
-
     analyze(){
 
 
@@ -496,21 +415,11 @@ class MonteCarloModel {
 
 
 
-            model:
-
-            this.name,
+            front:this.front,
 
 
 
-            results:
-
-            this.results.slice(
-
-                0,
-
-                100
-
-            )
+            back:this.back
 
 
 

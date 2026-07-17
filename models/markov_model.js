@@ -1,13 +1,11 @@
 // DLT-AI-CORE VIP
 // models/markov_model.js
 //
-// 马尔可夫转移模型
+// 一阶马尔可夫模型
 //
 // 分析:
-// 当前状态
-// ↓
-// 下一状态概率
-
+// 上一期号码 -> 下一期号码
+//
 
 class MarkovModel {
 
@@ -15,16 +13,16 @@ class MarkovModel {
     constructor(){
 
 
-        this.name = "markov";
+        this.front=[];
 
 
-        this.frontTransition = {};
-
-        this.backTransition = {};
+        this.back=[];
 
 
-        this.zoneTransition = {};
+        this.frontMatrix={};
 
+
+        this.backMatrix={};
 
 
     }
@@ -35,19 +33,25 @@ class MarkovModel {
 
 
 
-    // ======================
-    // 训练
-    // ======================
 
     train(history){
 
 
 
+        this.frontMatrix={};
+
+        this.backMatrix={};
+
+
+
+
+
+
         for(
 
-            let i=1;
+            let i=0;
 
-            i<history.length;
+            i<history.length-1;
 
             i++
 
@@ -55,37 +59,35 @@ class MarkovModel {
 
 
 
-            let previous =
-
-            history[i-1];
-
-
-
-            let current =
+            let current=
 
             history[i];
 
 
 
+            let next=
+
+            history[i+1];
 
 
 
 
 
-            // 前区号码转移
 
-            previous.front.forEach(oldNum=>{
+
+            current.front.forEach(a=>{
+
 
 
                 if(
 
-                    !this.frontTransition[oldNum]
+                    !this.frontMatrix[a]
 
                 ){
 
 
 
-                    this.frontTransition[oldNum]={};
+                    this.frontMatrix[a]={};
 
 
 
@@ -97,14 +99,15 @@ class MarkovModel {
 
 
 
-                current.front.forEach(newNum=>{
+                next.front.forEach(b=>{
 
 
-                    this.frontTransition[oldNum][newNum]=
+
+                    this.frontMatrix[a][b]=
 
                     (
 
-                        this.frontTransition[oldNum][newNum]
+                        this.frontMatrix[a][b]
 
                         ||
 
@@ -112,7 +115,9 @@ class MarkovModel {
 
                     )
 
-                    +1;
+                    +
+
+                    1;
 
 
 
@@ -129,21 +134,19 @@ class MarkovModel {
 
 
 
+            current.back.forEach(a=>{
 
-            // 后区号码转移
-
-            previous.back.forEach(oldNum=>{
 
 
                 if(
 
-                    !this.backTransition[oldNum]
+                    !this.backMatrix[a]
 
                 ){
 
 
 
-                    this.backTransition[oldNum]={};
+                    this.backMatrix[a]={};
 
 
 
@@ -155,14 +158,15 @@ class MarkovModel {
 
 
 
-                current.back.forEach(newNum=>{
+                next.back.forEach(b=>{
 
 
-                    this.backTransition[oldNum][newNum]=
+
+                    this.backMatrix[a][b]=
 
                     (
 
-                        this.backTransition[oldNum][newNum]
+                        this.backMatrix[a][b]
 
                         ||
 
@@ -170,7 +174,9 @@ class MarkovModel {
 
                     )
 
-                    +1;
+                    +
+
+                    1;
 
 
 
@@ -179,75 +185,6 @@ class MarkovModel {
 
 
             });
-
-
-
-
-
-
-
-
-
-            // 区域状态转移
-
-            let oldZone =
-
-            this.getZone(
-
-                previous.front
-
-            );
-
-
-
-
-
-            let newZone =
-
-            this.getZone(
-
-                current.front
-
-            );
-
-
-
-
-
-
-
-            if(
-
-                !this.zoneTransition[oldZone]
-
-            ){
-
-
-                this.zoneTransition[oldZone]={};
-
-
-            }
-
-
-
-
-
-
-            this.zoneTransition[oldZone][newZone]=
-
-            (
-
-                this.zoneTransition[oldZone][newZone]
-
-                ||
-
-                0
-
-            )
-
-            +1;
-
-
 
 
 
@@ -259,124 +196,11 @@ class MarkovModel {
 
 
 
+        this.front=
 
-        return this;
+        this.calculate(
 
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 区三区间
-    // ======================
-
-    getZone(numbers){
-
-
-
-        let zone1=0;
-
-
-        let zone2=0;
-
-
-        let zone3=0;
-
-
-
-
-
-
-
-        numbers.forEach(num=>{
-
-
-
-            if(num<=12)
-
-                zone1++;
-
-
-            else if(num<=24)
-
-                zone2++;
-
-
-            else
-
-                zone3++;
-
-
-
-        });
-
-
-
-
-
-
-
-        return `${zone1}-${zone2}-${zone3}`;
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 获取转移概率
-    // ======================
-
-    probability(
-
-        table,
-
-        from
-
-    ){
-
-
-
-        let data =
-
-        table[from];
-
-
-
-
-
-        if(!data)
-
-            return {};
-
-
-
-
-
-
-
-        let total =
-
-        Object.values(data)
-
-        .reduce(
-
-            (a,b)=>a+b,
-
-            0
+            this.frontMatrix
 
         );
 
@@ -386,7 +210,13 @@ class MarkovModel {
 
 
 
-        let result={};
+        this.back=
+
+        this.calculate(
+
+            this.backMatrix
+
+        );
 
 
 
@@ -394,28 +224,72 @@ class MarkovModel {
 
 
 
-        Object.keys(data)
-
-        .forEach(key=>{
+        return true;
 
 
-            result[key]=
+    }
 
-            Number(
+
+
+
+
+
+
+
+
+    calculate(matrix){
+
+
+
+        let score={};
+
+
+
+
+
+
+
+        Object.keys(matrix)
+
+        .forEach(from=>{
+
+
+
+            let target=
+
+            matrix[from];
+
+
+
+
+
+
+
+            Object.keys(target)
+
+            .forEach(to=>{
+
+
+
+                score[to]=
 
                 (
 
-                data[key]
+                    score[to]
 
-                /
+                    ||
 
-                total
+                    0
 
                 )
 
-                .toFixed(6)
+                +
 
-            );
+                target[to];
+
+
+
+            });
 
 
 
@@ -426,7 +300,65 @@ class MarkovModel {
 
 
 
-        return result;
+
+        let max=
+
+        Math.max(
+
+            ...Object.values(score)
+
+        );
+
+
+
+
+
+
+
+        return Object.keys(score)
+
+        .map(num=>({
+
+
+
+            number:Number(num),
+
+
+
+            score:
+
+            Number(
+
+                (
+
+                score[num]
+
+                /
+
+                max
+
+                *
+
+                100
+
+                )
+
+                .toFixed(2)
+
+            )
+
+
+
+        }))
+
+        .sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
+
 
 
     }
@@ -439,11 +371,7 @@ class MarkovModel {
 
 
 
-    // ======================
-    // 分析
-    // ======================
-
-    analyze(last){
+    analyze(){
 
 
 
@@ -451,45 +379,11 @@ class MarkovModel {
 
 
 
-            model:
-
-            this.name,
+            front:this.front,
 
 
 
-            front:
-
-            this.probability(
-
-                this.frontTransition,
-
-                last.front[0]
-
-            ),
-
-
-
-            back:
-
-            this.probability(
-
-                this.backTransition,
-
-                last.back[0]
-
-            ),
-
-
-
-            zone:
-
-            this.probability(
-
-                this.zoneTransition,
-
-                this.getZone(last.front)
-
-            )
+            back:this.back
 
 
 
@@ -498,7 +392,6 @@ class MarkovModel {
 
 
     }
-
 
 
 

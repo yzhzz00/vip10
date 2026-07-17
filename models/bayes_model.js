@@ -1,25 +1,22 @@
 // DLT-AI-CORE VIP
 // models/bayes_model.js
 //
-// 贝叶斯概率模型
+// 贝叶斯模型
 //
-// 核心:
-// 先验概率 + 新数据
-// 更新后验概率
+// 历史先验 + 新数据更新
 
 
 class BayesModel {
 
 
+
     constructor(){
 
 
-        this.name = "bayes";
+        this.front=[];
 
 
-        this.frontProbability = {};
-
-        this.backProbability = {};
+        this.back=[];
 
 
     }
@@ -30,9 +27,7 @@ class BayesModel {
 
 
 
-    // ======================
-    // 训练
-    // ======================
+
 
     train(history){
 
@@ -40,7 +35,59 @@ class BayesModel {
 
         let frontCount={};
 
+
         let backCount={};
+
+
+
+
+
+
+
+        for(let i=1;i<=35;i++){
+
+
+
+            frontCount[i]=0;
+
+
+
+        }
+
+
+
+
+
+
+
+        for(let i=1;i<=12;i++){
+
+
+
+            backCount[i]=0;
+
+
+
+        }
+
+
+
+
+
+
+
+        let totalFront=
+
+        history.length*5;
+
+
+
+
+
+        let totalBack=
+
+        history.length*2;
+
 
 
 
@@ -54,19 +101,9 @@ class BayesModel {
             item.front.forEach(num=>{
 
 
-                frontCount[num]=
 
-                (
+                frontCount[num]++;
 
-                    frontCount[num]
-
-                    ||
-
-                    0
-
-                )
-
-                +1;
 
 
             });
@@ -80,19 +117,9 @@ class BayesModel {
             item.back.forEach(num=>{
 
 
-                backCount[num]=
 
-                (
+                backCount[num]++;
 
-                    backCount[num]
-
-                    ||
-
-                    0
-
-                )
-
-                +1;
 
 
             });
@@ -108,45 +135,29 @@ class BayesModel {
 
 
 
-        const total =
-
-        history.length;
-
-
-
-
-
-
-
         // 贝叶斯平滑
 
-        for(
-
-            let i=1;
-
-            i<=35;
-
-            i++
-
-        ){
+        let alpha=1;
 
 
 
-            let prior =
-
-            1/35;
 
 
 
-            let likelihood =
+
+        this.front=
+
+        Object.keys(frontCount)
+
+        .map(num=>{
+
+
+
+            let prior=
 
             (
 
-                frontCount[i]
-
-                ||
-
-                0
+                frontCount[num]+alpha
 
             )
 
@@ -154,7 +165,9 @@ class BayesModel {
 
             (
 
-                total*5
+                totalFront+
+
+                35*alpha
 
             );
 
@@ -164,203 +177,127 @@ class BayesModel {
 
 
 
+            return {
 
-            this.frontProbability[i]=
 
 
-            this.update(
+                number:Number(num),
 
-                prior,
 
-                likelihood
 
-            );
+                score:
 
+                Number(
 
-        }
+                    (
 
+                    prior*100
 
+                    )
 
-
-
-
-
-
-        for(
-
-            let i=1;
-
-            i<=12;
-
-            i++
-
-        ){
-
-
-
-            let prior =
-
-            1/12;
-
-
-
-            let likelihood =
-
-            (
-
-                backCount[i]
-
-                ||
-
-                0
-
-            )
-
-            /
-
-            (
-
-                total*2
-
-            );
-
-
-
-
-
-
-
-
-            this.backProbability[i]=
-
-
-            this.update(
-
-                prior,
-
-                likelihood
-
-            );
-
-
-
-        }
-
-
-
-
-
-
-        return this;
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 贝叶斯更新
-    // ======================
-
-    update(
-
-        prior,
-
-        likelihood
-
-    ){
-
-
-
-        let value =
-
-        prior *
-
-        likelihood;
-
-
-
-
-
-
-        return Number(
-
-            value.toFixed(8)
-
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 归一化
-    // ======================
-
-    normalize(obj){
-
-
-
-        let sum =
-
-        Object.values(obj)
-
-        .reduce(
-
-            (a,b)=>a+b,
-
-            0
-
-        );
-
-
-
-
-
-
-
-        Object.keys(obj)
-
-        .forEach(key=>{
-
-
-
-            obj[key]=
-
-            Number(
-
-                (
-
-                obj[key]
-
-                /
-
-                sum
+                    .toFixed(2)
 
                 )
 
-                .toFixed(6)
+
+
+            };
+
+
+
+        })
+
+        .sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
+
+
+
+
+
+
+
+
+        this.back=
+
+        Object.keys(backCount)
+
+        .map(num=>{
+
+
+
+            let prior=
+
+            (
+
+                backCount[num]+alpha
+
+            )
+
+            /
+
+            (
+
+                totalBack+
+
+                12*alpha
 
             );
 
 
 
-        });
 
+
+
+
+            return {
+
+
+
+                number:Number(num),
+
+
+
+                score:
+
+                Number(
+
+                    (
+
+                    prior*100
+
+                    )
+
+                    .toFixed(2)
+
+                )
+
+
+
+            };
+
+
+
+        })
+
+        .sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
+
+
+
+
+
+
+        return true;
 
 
     }
@@ -373,31 +310,7 @@ class BayesModel {
 
 
 
-    // ======================
-    // 分析输出
-    // ======================
-
     analyze(){
-
-
-
-        this.normalize(
-
-            this.frontProbability
-
-        );
-
-
-
-        this.normalize(
-
-            this.backProbability
-
-        );
-
-
-
-
 
 
 
@@ -405,25 +318,16 @@ class BayesModel {
 
 
 
-            model:
-
-            this.name,
+            front:this.front,
 
 
 
-            front:
-
-            this.frontProbability,
-
-
-
-            back:
-
-            this.backProbability
+            back:this.back
 
 
 
         };
+
 
 
     }

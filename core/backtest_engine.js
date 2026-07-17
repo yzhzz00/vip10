@@ -1,10 +1,13 @@
 // DLT-AI-CORE VIP
 // core/backtest_engine.js
 //
-// 回测引擎
+// 回测引擎 V2
 //
 // 功能:
-// 历史逐期验证模型表现
+// 1.滚动历史回测
+// 2.模型预测验证
+// 3.随机基准对比
+// 4.输出模型评分
 
 
 class BacktestEngine {
@@ -27,15 +30,13 @@ class BacktestEngine {
 
 
 
-    // ======================
-    // 执行回测
-    // ======================
-
     run(
 
         history,
 
-        predictFunction
+        predictFunction,
+
+        periods=1000
 
     ){
 
@@ -47,11 +48,25 @@ class BacktestEngine {
 
 
 
+        let start=
+
+        Math.max(
+
+            100,
+
+            history.length-periods
+
+        );
+
+
+
+
+
 
 
         for(
 
-            let i=100;
+            let i=start;
 
             i<history.length;
 
@@ -61,9 +76,11 @@ class BacktestEngine {
 
 
 
-            let trainData=
+            let train=
 
             history.slice(
+
+                0,
 
                 i
 
@@ -75,7 +92,7 @@ class BacktestEngine {
 
 
 
-            let real=
+            let actual=
 
             history[i];
 
@@ -89,7 +106,7 @@ class BacktestEngine {
 
             predictFunction(
 
-                trainData
+                train
 
             );
 
@@ -105,7 +122,7 @@ class BacktestEngine {
 
                 prediction,
 
-                real
+                actual
 
             );
 
@@ -119,15 +136,7 @@ class BacktestEngine {
 
 
 
-                period:i,
-
-
-
-                prediction,
-
-
-
-                real,
+                index:i,
 
 
 
@@ -160,24 +169,20 @@ class BacktestEngine {
 
 
 
-    // ======================
-    // 比较结果
-    // ======================
-
     compare(
 
         prediction,
 
-        real
+        actual
 
     ){
 
 
 
-        let frontHit=0;
+        let bestFront=0;
 
 
-        let backHit=0;
+        let bestBack=0;
 
 
 
@@ -189,27 +194,17 @@ class BacktestEngine {
 
 
 
-            item.front.forEach(num=>{
+            let f=
 
+            item.front.filter(
 
+                n=>
 
-                if(
+                actual.front.includes(n)
 
-                    real.front.includes(num)
+            )
 
-                ){
-
-
-
-                    frontHit++;
-
-
-
-                }
-
-
-
-            });
+            .length;
 
 
 
@@ -217,27 +212,45 @@ class BacktestEngine {
 
 
 
-            item.back.forEach(num=>{
+            let b=
+
+            item.back.filter(
+
+                n=>
+
+                actual.back.includes(n)
+
+            )
+
+            .length;
 
 
 
-                if(
-
-                    real.back.includes(num)
-
-                ){
 
 
 
-                    backHit++;
+
+            if(
+
+                f>bestFront
+
+            )
+
+            bestFront=f;
 
 
 
-                }
 
 
 
-            });
+
+            if(
+
+                b>bestBack
+
+            )
+
+            bestBack=b;
 
 
 
@@ -253,15 +266,31 @@ class BacktestEngine {
 
 
 
-            frontHit,
+            front:
+
+            bestFront,
 
 
-            backHit
+
+            back:
+
+            bestBack,
+
+
+
+            score:
+
+            this.calcScore(
+
+                bestFront,
+
+                bestBack
+
+            )
 
 
 
         };
-
 
 
     }
@@ -274,9 +303,54 @@ class BacktestEngine {
 
 
 
-    // ======================
-    // 汇总
-    // ======================
+    calcScore(
+
+        front,
+
+        back
+
+    ){
+
+
+
+        return Number(
+
+            (
+
+            (
+
+            front/5
+
+            +
+
+            back/2
+
+            )
+
+            /
+
+            2
+
+            *
+
+            100
+
+            )
+
+            .toFixed(2)
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
 
     summary(){
 
@@ -292,10 +366,30 @@ class BacktestEngine {
 
 
 
-        let front=0;
+        let data={
 
 
-        let back=0;
+
+            periods:total,
+
+
+            front3:0,
+
+
+            front4:0,
+
+
+            front5:0,
+
+
+            back2:0,
+
+
+            averageScore:0
+
+
+
+        };
 
 
 
@@ -307,15 +401,77 @@ class BacktestEngine {
 
 
 
-            front +=
+            let r=
 
-            item.result.frontHit;
+            item.result;
 
 
 
-            back +=
 
-            item.result.backHit;
+
+
+
+            if(
+
+                r.front>=3
+
+            )
+
+            data.front3++;
+
+
+
+
+
+
+
+            if(
+
+                r.front>=4
+
+            )
+
+            data.front4++;
+
+
+
+
+
+
+
+            if(
+
+                r.front>=5
+
+            )
+
+            data.front5++;
+
+
+
+
+
+
+
+            if(
+
+                r.back>=2
+
+            )
+
+            data.back2++;
+
+
+
+
+
+
+
+            data.averageScore
+
+            +=
+
+            r.score;
 
 
 
@@ -327,54 +483,31 @@ class BacktestEngine {
 
 
 
-        return {
+        data.averageScore=
+
+        Number(
+
+            (
+
+            data.averageScore
+
+            /
+
+            total
+
+            )
+
+            .toFixed(2)
+
+        );
 
 
 
-            periods:total,
 
 
 
-            averageFront:
 
-            Number(
-
-                (
-
-                front/total
-
-                )
-
-                .toFixed(4)
-
-            ),
-
-
-
-            averageBack:
-
-            Number(
-
-                (
-
-                back/total
-
-                )
-
-                .toFixed(4)
-
-            ),
-
-
-
-            records:
-
-            this.records
-
-
-
-        };
-
+        return data;
 
 
     }

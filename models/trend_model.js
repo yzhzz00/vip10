@@ -3,10 +3,7 @@
 //
 // 趋势模型
 //
-// 分析:
-// 最近走势
-// 活跃变化
-// 短期趋势
+// 分析近期号码活跃趋势
 
 
 class TrendModel {
@@ -15,15 +12,10 @@ class TrendModel {
     constructor(){
 
 
-        this.name = "trend";
+        this.front=[];
 
 
-        this.recent = 30;
-
-
-        this.frontTrend = {};
-
-        this.backTrend = {};
+        this.back=[];
 
 
     }
@@ -34,29 +26,15 @@ class TrendModel {
 
 
 
-    // ======================
-    // 训练
-    // ======================
 
     train(history){
 
 
 
-        let data =
-
-        history.slice(
-
-            -this.recent
-
-        );
+        let frontScore={};
 
 
-
-
-
-        this.frontTrend = {};
-
-        this.backTrend = {};
+        let backScore={};
 
 
 
@@ -64,13 +42,58 @@ class TrendModel {
 
 
 
-        data.forEach((item,index)=>{
+        for(let i=1;i<=35;i++){
+
+
+            frontScore[i]=0;
+
+
+        }
 
 
 
-            let weight =
 
-            index + 1;
+
+
+        for(let i=1;i<=12;i++){
+
+
+            backScore[i]=0;
+
+
+        }
+
+
+
+
+
+
+
+        let length=history.length;
+
+
+
+
+
+
+
+        history.forEach((item,index)=>{
+
+
+
+            // 越近期权重越高
+
+            let weight=
+
+            (
+
+                index+1
+
+            )
+
+            /
+
+            length;
 
 
 
@@ -82,26 +105,11 @@ class TrendModel {
 
 
 
-                this.frontTrend[num] =
-
-                (
-
-                    this.frontTrend[num]
-
-                    ||
-
-                    0
-
-                )
-
-                +
-
-                weight;
+                frontScore[num]+=weight;
 
 
 
             });
-
 
 
 
@@ -113,28 +121,11 @@ class TrendModel {
 
 
 
-                this.backTrend[num] =
-
-                (
-
-                    this.backTrend[num]
-
-                    ||
-
-                    0
-
-                )
-
-                +
-
-                weight;
+                backScore[num]+=weight;
 
 
 
             });
-
-
-
 
 
 
@@ -145,38 +136,12 @@ class TrendModel {
 
 
 
-        return this;
 
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 前区趋势评分
-    // ======================
-
-    scoreFront(num){
-
-
-
-        let max =
+        let maxFront=
 
         Math.max(
 
-            ...
-
-            Object.values(
-
-                this.frontTrend
-
-            )
+            ...Object.values(frontScore)
 
         );
 
@@ -184,62 +149,13 @@ class TrendModel {
 
 
 
-        if(!max)
-
-            return 0;
 
 
-
-
-
-
-
-        return Number(
-
-            (
-
-            this.frontTrend[num]
-
-            /
-
-            max
-
-            )
-
-            .toFixed(4)
-
-        );
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 后区趋势评分
-    // ======================
-
-    scoreBack(num){
-
-
-
-        let max =
+        let maxBack=
 
         Math.max(
 
-            ...
-
-            Object.values(
-
-                this.backTrend
-
-            )
+            ...Object.values(backScore)
 
         );
 
@@ -247,31 +163,109 @@ class TrendModel {
 
 
 
-        if(!max)
-
-            return 0;
 
 
+        this.front=
+
+        Object.keys(frontScore)
+
+        .map(num=>({
 
 
 
+            number:Number(num),
 
 
-        return Number(
 
-            (
+            score:Number(
 
-            this.backTrend[num]
+                (
 
-            /
+                frontScore[num]
 
-            max
+                /
+
+                maxFront
+
+                *
+
+                100
+
+                )
+
+                .toFixed(2)
 
             )
 
-            .toFixed(4)
+
+
+        }))
+
+        .sort(
+
+            (a,b)=>
+
+            b.score-a.score
 
         );
+
+
+
+
+
+
+
+
+        this.back=
+
+        Object.keys(backScore)
+
+        .map(num=>({
+
+
+
+            number:Number(num),
+
+
+
+            score:Number(
+
+                (
+
+                backScore[num]
+
+                /
+
+                maxBack
+
+                *
+
+                100
+
+                )
+
+                .toFixed(2)
+
+            )
+
+
+
+        }))
+
+        .sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
+
+
+
+
+
+
+        return true;
 
 
     }
@@ -283,112 +277,18 @@ class TrendModel {
 
 
 
-
-    // ======================
-    // 分析输出
-    // ======================
 
     analyze(){
-
-
-
-        let front=[];
-
-
-        let back=[];
-
-
-
-
-
-
-        for(
-
-            let i=1;
-
-            i<=35;
-
-            i++
-
-        ){
-
-
-            front.push({
-
-
-                number:i,
-
-
-                score:
-
-                this.scoreFront(i)
-
-
-            });
-
-
-
-        }
-
-
-
-
-
-
-        for(
-
-            let i=1;
-
-            i<=12;
-
-            i++
-
-        ){
-
-
-
-            back.push({
-
-
-                number:i,
-
-
-                score:
-
-                this.scoreBack(i)
-
-
-            });
-
-
-
-        }
-
-
-
 
 
 
         return {
 
 
-            model:
-
-            this.name,
+            front:this.front,
 
 
-
-            window:
-
-            this.recent,
-
-
-
-            front,
-
-
-
-            back
+            back:this.back
 
 
 
@@ -396,7 +296,6 @@ class TrendModel {
 
 
     }
-
 
 
 

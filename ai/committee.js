@@ -1,12 +1,13 @@
 // DLT-AI-CORE VIP
 // ai/committee.js
 //
-// AI委员会
+// AI委员会 V2
 //
 // 功能:
-// 1.模型投票
-// 2.权重融合
-// 3.生成综合评分
+// 1.模型权重融合
+// 2.模型状态过滤
+// 3.评分归一化
+// 4.输出统一评分
 
 
 class Committee {
@@ -14,7 +15,9 @@ class Committee {
 
     constructor(){
 
+
         this.result={};
+
 
     }
 
@@ -24,15 +27,14 @@ class Committee {
 
 
 
-    // ======================
-    // 模型决策
-    // ======================
 
     decide(
 
         modelResult,
 
-        weights={}
+        weights={},
+
+        status={}
 
     ){
 
@@ -47,11 +49,35 @@ class Committee {
 
 
 
-
-
         Object.keys(modelResult)
 
         .forEach(name=>{
+
+
+
+            // 淘汰模型跳过
+
+            if(
+
+                status[name]
+
+                &&
+
+                status[name].state
+
+                ===
+
+                "retired"
+
+            ){
+
+                return;
+
+            }
+
+
+
+
 
 
 
@@ -69,10 +95,9 @@ class Committee {
 
             weights[name]
 
-            ??
+            ||
 
             1;
-
 
 
 
@@ -107,6 +132,8 @@ class Committee {
 
 
 
+
+
         });
 
 
@@ -115,13 +142,13 @@ class Committee {
 
 
 
-        let result={
+        this.result={
 
 
 
             front:
 
-            this.sort(
+            this.normalize(
 
                 front
 
@@ -131,7 +158,7 @@ class Committee {
 
             back:
 
-            this.sort(
+            this.normalize(
 
                 back
 
@@ -147,11 +174,8 @@ class Committee {
 
 
 
-        this.result=result;
+        return this.result;
 
-
-
-        return result;
 
 
     }
@@ -163,10 +187,6 @@ class Committee {
 
 
 
-
-    // ======================
-    // 合并模型评分
-    // ======================
 
     merge(
 
@@ -186,7 +206,7 @@ class Committee {
 
         )
 
-            return;
+        return;
 
 
 
@@ -195,20 +215,6 @@ class Committee {
 
 
         list.forEach(item=>{
-
-
-
-            if(
-
-                !item.number
-
-            )
-
-                return;
-
-
-
-
 
 
 
@@ -236,7 +242,11 @@ class Committee {
 
             +=
 
-            item.score
+            (
+
+                item.score || 0
+
+            )
 
             *
 
@@ -258,39 +268,93 @@ class Committee {
 
 
 
-    // ======================
-    // 排序
-    // ======================
+    normalize(data){
 
-    sort(data){
+
+
+        let values=
+
+        Object.values(data);
+
+
+
+
+
+
+
+        if(
+
+            values.length===0
+
+        )
+
+        return [];
+
+
+
+
+
+
+
+        let max=
+
+        Math.max(
+
+            ...values
+
+        );
+
+
+
+
 
 
 
         return Object.keys(data)
 
-        .map(num=>({
+        .map(num=>{
 
 
 
-            number:
-
-            Number(num),
+            return {
 
 
 
-            score:
+                number:
 
-            Number(
-
-                data[num]
-
-                .toFixed(6)
-
-            )
+                Number(num),
 
 
 
-        }))
+                score:
+
+                Number(
+
+                    (
+
+                    data[num]
+
+                    /
+
+                    max
+
+                    *
+
+                    100
+
+                    )
+
+                    .toFixed(2)
+
+                )
+
+
+
+            };
+
+
+
+        })
 
         .sort(
 
@@ -324,6 +388,8 @@ class Committee {
 
 
 }
+
+
 
 
 

@@ -3,13 +3,7 @@
 //
 // 大乐透理论模型
 //
-// 包含:
-// 三区理论
-// 奇偶理论
-// 和值理论
-// 连号理论
-// 重号理论
-// 后区结构
+// 负责结构评分
 
 
 class DltTheoryModel {
@@ -18,24 +12,10 @@ class DltTheoryModel {
     constructor(){
 
 
-        this.name = "dlt_theory";
+        this.front=[];
 
 
-        this.statistics = {
-
-            zones:{},
-
-            oddEven:{},
-
-            sum:{},
-
-            consecutive:{},
-
-            repeat:{},
-
-            back:{}
-
-        };
+        this.back=[];
 
 
     }
@@ -46,209 +26,15 @@ class DltTheoryModel {
 
 
 
-    // ======================
-    // 训练
-    // ======================
+
 
     train(history){
 
 
+        this.history=history;
 
-        history.forEach(
 
-        (item,index)=>{
-
-
-
-            let zone =
-
-            this.zone(
-
-                item.front
-
-            );
-
-
-
-
-
-            this.count(
-
-                this.statistics.zones,
-
-                zone
-
-            );
-
-
-
-
-
-
-
-            let odd =
-
-            item.front.filter(
-
-                n=>n%2!==0
-
-            ).length;
-
-
-
-
-
-
-            this.count(
-
-                this.statistics.oddEven,
-
-                odd
-
-            );
-
-
-
-
-
-
-
-            let sum =
-
-            item.front.reduce(
-
-                (a,b)=>a+b,
-
-                0
-
-            );
-
-
-
-
-
-
-            let sumArea =
-
-            this.sumArea(sum);
-
-
-
-
-
-
-            this.count(
-
-                this.statistics.sum,
-
-                sumArea
-
-            );
-
-
-
-
-
-
-
-
-            let con =
-
-            this.consecutive(
-
-                item.front
-
-            );
-
-
-
-
-
-
-
-            this.count(
-
-                this.statistics.consecutive,
-
-                con
-
-            );
-
-
-
-
-
-
-
-
-            let repeat =
-
-            index===0
-
-            ?
-
-            0
-
-            :
-
-            this.repeat(
-
-                history[index-1].front,
-
-                item.front
-
-            );
-
-
-
-
-
-
-
-            this.count(
-
-                this.statistics.repeat,
-
-                repeat
-
-            );
-
-
-
-
-
-
-
-            let back =
-
-            this.backStructure(
-
-                item.back
-
-            );
-
-
-
-
-
-
-
-            this.count(
-
-                this.statistics.back,
-
-                back
-
-            );
-
-
-
-
-        });
-
-
-
-        return this;
+        return true;
 
 
     }
@@ -261,119 +47,16 @@ class DltTheoryModel {
 
 
 
-    // ======================
-    // 三区
-    // ======================
+    analyze(){
 
-    zone(numbers){
 
 
+        // 生成理论评分池
 
-        let z1=0;
+        this.front=[];
 
-        let z2=0;
 
-        let z3=0;
-
-
-
-
-
-
-        numbers.forEach(num=>{
-
-
-            if(num<=12)
-
-                z1++;
-
-            else if(num<=24)
-
-                z2++;
-
-            else
-
-                z3++;
-
-
-
-        });
-
-
-
-
-
-
-        return `${z1}-${z2}-${z3}`;
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 和值区间
-    // ======================
-
-    sumArea(sum){
-
-
-
-        if(sum<80)
-
-            return "low";
-
-
-
-        if(sum<110)
-
-            return "middle";
-
-
-
-        return "high";
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 连号
-    // ======================
-
-    consecutive(numbers){
-
-
-
-        let arr=
-
-        [...numbers]
-
-        .sort(
-
-            (a,b)=>a-b
-
-        );
-
-
-
-
-
-
-        let count=0;
+        this.back=[];
 
 
 
@@ -384,7 +67,7 @@ class DltTheoryModel {
 
             let i=1;
 
-            i<arr.length;
+            i<=35;
 
             i++
 
@@ -392,13 +75,21 @@ class DltTheoryModel {
 
 
 
-            if(
+            this.front.push({
 
-                arr[i]-arr[i-1]===1
 
-            )
 
-                count++;
+                number:i,
+
+
+
+                score:
+
+                this.numberScore(i)
+
+
+
+            });
 
 
 
@@ -409,189 +100,49 @@ class DltTheoryModel {
 
 
 
-        return count;
+        for(
 
+            let i=1;
 
-    }
+            i<=12;
 
+            i++
 
+        ){
 
 
 
+            this.back.push({
 
 
 
+                number:i,
 
-    // ======================
-    // 重号
-    // ======================
 
-    repeat(
 
-        last,
+                score:
 
-        current
+                this.backScore(i)
 
-    ){
 
 
+            });
 
-        return current.filter(
 
-            n=>
 
-            last.includes(n)
+        }
 
-        )
 
-        .length;
 
 
-    }
 
 
 
+        this.front.sort(
 
+            (a,b)=>
 
-
-
-
-
-    // ======================
-    // 后区结构
-    // ======================
-
-    backStructure(numbers){
-
-
-
-        let odd=
-
-        numbers.filter(
-
-            n=>n%2!==0
-
-        )
-
-        .length;
-
-
-
-
-
-
-
-        let big=
-
-        numbers.filter(
-
-            n=>n>6
-
-        )
-
-        .length;
-
-
-
-
-
-
-        return `${odd}-${big}`;
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 统计
-    // ======================
-
-    count(
-
-        obj,
-
-        key
-
-    ){
-
-
-
-        obj[key]=
-
-        (
-
-            obj[key]
-
-            ||
-
-            0
-
-        )
-
-        +1;
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 结构评分
-    // ======================
-
-    scoreStructure(
-
-        type,
-
-        value
-
-    ){
-
-
-
-        let data=
-
-        this.statistics[type];
-
-
-
-
-
-        if(
-
-            !data[value]
-
-        )
-
-            return 0;
-
-
-
-
-
-
-        let total=
-
-        Object.values(data)
-
-        .reduce(
-
-            (a,b)=>a+b,
-
-            0
+            b.score-a.score
 
         );
 
@@ -600,38 +151,18 @@ class DltTheoryModel {
 
 
 
-        return Number(
 
-            (
+        this.back.sort(
 
-            data[value]
+            (a,b)=>
 
-            /
-
-            total
-
-            )
-
-            .toFixed(4)
+            b.score-a.score
 
         );
 
 
-    }
 
 
-
-
-
-
-
-
-
-    // ======================
-    // 分析
-    // ======================
-
-    analyze(){
 
 
 
@@ -639,15 +170,10 @@ class DltTheoryModel {
 
 
 
-            model:
-
-            this.name,
+            front:this.front,
 
 
-
-            statistics:
-
-            this.statistics
+            back:this.back
 
 
 
@@ -655,6 +181,317 @@ class DltTheoryModel {
 
 
     }
+
+
+
+
+
+
+
+
+
+    // ======================
+    // 前区号码理论评分
+    // ======================
+
+    numberScore(num){
+
+
+
+        let score=50;
+
+
+
+
+
+
+
+        // 三区基础
+
+        if(num<=12)
+
+            score+=5;
+
+
+        else if(num<=24)
+
+            score+=10;
+
+
+        else
+
+            score+=5;
+
+
+
+
+
+
+
+        // 奇偶平衡
+
+        if(num%2)
+
+            score+=3;
+
+        else
+
+            score+=2;
+
+
+
+
+
+
+
+        return score;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ======================
+    // 后区评分
+    // ======================
+
+    backScore(num){
+
+
+
+        let score=50;
+
+
+
+
+
+
+
+        if(num>=4 && num<=9)
+
+            score+=10;
+
+
+
+
+
+
+
+        if(num%2)
+
+            score+=3;
+
+        else
+
+            score+=2;
+
+
+
+
+
+
+
+        return score;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ======================
+    // 组合结构评分
+    // ======================
+
+    combinationScore(
+
+        front,
+
+        back
+
+    ){
+
+
+
+        let score=50;
+
+
+
+
+
+
+
+        // 三区
+
+        let zone=[0,0,0];
+
+
+
+
+
+
+
+        front.forEach(num=>{
+
+
+
+            if(num<=12)
+
+                zone[0]++;
+
+
+            else if(num<=24)
+
+                zone[1]++;
+
+
+            else
+
+                zone[2]++;
+
+
+
+        });
+
+
+
+
+
+
+
+        if(
+
+            Math.max(...zone)<=3
+
+        )
+
+            score+=15;
+
+
+
+
+
+
+
+        // 奇偶
+
+        let odd=
+
+        front.filter(
+
+            n=>n%2
+
+        )
+
+        .length;
+
+
+
+
+
+
+
+        if(
+
+            odd>=2
+
+            &&
+
+            odd<=3
+
+        )
+
+            score+=15;
+
+
+
+
+
+
+
+        // 和值
+
+        let sum=
+
+        front.reduce(
+
+            (a,b)=>
+
+            a+b,
+
+            0
+
+        );
+
+
+
+
+
+
+
+        if(
+
+            sum>=80
+
+            &&
+
+            sum<=130
+
+        )
+
+            score+=10;
+
+
+
+
+
+
+
+        // 后区
+
+        if(
+
+            back[0]
+
+            <=
+
+            6
+
+            &&
+
+            back[1]
+
+            >
+
+            6
+
+        )
+
+            score+=10;
+
+
+
+
+
+
+
+        return score;
+
+
+    }
+
+
 
 
 

@@ -3,25 +3,20 @@
 //
 // 周期模型
 //
-// 分析:
-// 出现周期
-// 平均间隔
-// 当前周期位置
+// 分析号码历史出现周期
 
 
 class CycleModel {
 
 
+
     constructor(){
 
 
-        this.name = "cycle";
+        this.front=[];
 
 
-        this.frontCycle = {};
-
-        this.backCycle = {};
-
+        this.back=[];
 
 
     }
@@ -32,39 +27,21 @@ class CycleModel {
 
 
 
-    // ======================
-    // 训练
-    // ======================
+
 
     train(history){
 
 
 
-        this.frontCycle =
+        this.front=
 
-        this.calculateCycle(
-
-            history,
-
-            "front",
-
-            35
-
-        );
-
-
-
-
-
-        this.backCycle =
-
-        this.calculateCycle(
+        this.calculate(
 
             history,
 
-            "back",
+            35,
 
-            12
+            "front"
 
         );
 
@@ -74,7 +51,25 @@ class CycleModel {
 
 
 
-        return this;
+        this.back=
+
+        this.calculate(
+
+            history,
+
+            12,
+
+            "back"
+
+        );
+
+
+
+
+
+
+
+        return true;
 
 
     }
@@ -87,23 +82,19 @@ class CycleModel {
 
 
 
-    // ======================
-    // 周期计算
-    // ======================
-
-    calculateCycle(
+    calculate(
 
         history,
 
-        type,
+        maxNum,
 
-        max
+        type
 
     ){
 
 
 
-        let result={};
+        let result=[];
 
 
 
@@ -115,7 +106,7 @@ class CycleModel {
 
             let num=1;
 
-            num<=max;
+            num<=maxNum;
 
             num++
 
@@ -133,32 +124,39 @@ class CycleModel {
 
             history.forEach(
 
-            (item,index)=>{
+                (item,index)=>{
 
 
 
-                if(
+                    if(
 
-                    item[type]
+                        item[type]
 
-                    .includes(num)
+                        .includes(num)
 
-                ){
+                    ){
 
 
 
-                    positions.push(
+                        positions.push(
 
-                        index
+                            index
 
-                    );
+                        );
+
+
+
+                    }
+
 
 
                 }
 
+            );
 
 
-            });
+
+
 
 
 
@@ -170,23 +168,32 @@ class CycleModel {
 
 
 
-                result[num]={
+                result.push({
 
 
-                    average:0,
+
+                    number:num,
 
 
-                    current:0,
+
+                    cycle:0,
 
 
-                    score:0
+
+                    position:0,
 
 
-                };
+
+                    score:10
+
+
+
+                });
 
 
 
                 continue;
+
 
 
             }
@@ -228,6 +235,7 @@ class CycleModel {
                 );
 
 
+
             }
 
 
@@ -236,11 +244,13 @@ class CycleModel {
 
 
 
-            let average =
+            let avgCycle=
 
             gaps.reduce(
 
-                (a,b)=>a+b,
+                (a,b)=>
+
+                a+b,
 
                 0
 
@@ -256,9 +266,9 @@ class CycleModel {
 
 
 
-            let current =
+            let last=
 
-            history.length
+            history.length-1
 
             -
 
@@ -274,37 +284,75 @@ class CycleModel {
 
 
 
-            result[num]={
+            let distance=
+
+            Math.abs(
+
+                avgCycle-last
+
+            );
 
 
 
-                average:
+
+
+
+
+            let score=
+
+            100
+
+            /
+
+            (
+
+                1+
+
+                distance
+
+            );
+
+
+
+
+
+
+
+            result.push({
+
+
+
+                number:num,
+
+
+
+                cycle:
 
                 Number(
 
-                    average.toFixed(2)
+                    avgCycle.toFixed(2)
 
                 ),
 
 
 
-                current,
+                position:
+
+                last,
 
 
 
                 score:
 
-                this.cycleScore(
+                Number(
 
-                    current,
-
-                    average
+                    score.toFixed(2)
 
                 )
 
 
 
-            };
+            });
 
 
 
@@ -315,7 +363,14 @@ class CycleModel {
 
 
 
-        return result;
+
+        return result.sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
 
 
     }
@@ -327,86 +382,6 @@ class CycleModel {
 
 
 
-
-    // ======================
-    // 周期评分
-    // ======================
-
-    cycleScore(
-
-        current,
-
-        average
-
-    ){
-
-
-
-        if(
-
-            average===0
-
-        )
-
-            return 0;
-
-
-
-
-
-
-        let distance =
-
-        Math.abs(
-
-            current-average
-
-        );
-
-
-
-
-
-
-        return Number(
-
-            (
-
-            1
-
-            -
-
-            distance
-
-            /
-
-            (
-
-            average+1
-
-            )
-
-            )
-
-            .toFixed(4)
-
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 输出
-    // ======================
 
     analyze(){
 
@@ -416,26 +391,15 @@ class CycleModel {
 
 
 
-            model:
-
-            this.name,
+            front:this.front,
 
 
 
-            front:
-
-            this.frontCycle,
-
-
-
-            back:
-
-            this.backCycle
+            back:this.back
 
 
 
         };
-
 
 
     }

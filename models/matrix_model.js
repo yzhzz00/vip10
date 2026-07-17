@@ -3,27 +3,23 @@
 //
 // 矩阵模型
 //
-// 包含:
-// 号码状态矩阵
-// 三区结构矩阵
-// 状态转移矩阵
+// 分析号码之间共现关系
 
 
 class MatrixModel {
 
 
+
     constructor(){
 
 
-        this.name = "matrix";
+        this.front=[];
 
 
-        this.frontMatrix = {};
+        this.back=[];
 
-        this.zoneMatrix = {};
 
-        this.structureMatrix = {};
-
+        this.matrix={};
 
 
     }
@@ -34,58 +30,16 @@ class MatrixModel {
 
 
 
-    // ======================
-    // 训练
-    // ======================
+
 
     train(history){
 
 
 
-        this.createNumberMatrix(
-
-            history
-
-        );
+        this.matrix={};
 
 
 
-        this.createZoneMatrix(
-
-            history
-
-        );
-
-
-
-        this.createStructureMatrix(
-
-            history
-
-        );
-
-
-
-
-
-        return this;
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 号码状态矩阵
-    // ======================
-
-    createNumberMatrix(history){
 
 
 
@@ -101,19 +55,310 @@ class MatrixModel {
 
 
 
-            this.frontMatrix[i]={
+            this.matrix[i]={};
 
 
-                recent:0,
+
+            for(
+
+                let j=1;
+
+                j<=35;
+
+                j++
+
+            ){
 
 
-                total:0,
+
+                this.matrix[i][j]=0;
 
 
-                weight:0
+
+            }
 
 
-            };
+        }
+
+
+
+
+
+
+
+
+
+        history.forEach(item=>{
+
+
+
+            let nums=
+
+            item.front;
+
+
+
+
+
+
+
+            for(
+
+                let i=0;
+
+                i<nums.length;
+
+                i++
+
+            ){
+
+
+
+                for(
+
+                    let j=i+1;
+
+                    j<nums.length;
+
+                    j++
+
+                ){
+
+
+
+                    let a=nums[i];
+
+
+                    let b=nums[j];
+
+
+
+
+
+
+
+                    this.matrix[a][b]++;
+
+
+                    this.matrix[b][a]++;
+
+
+
+                }
+
+
+
+            }
+
+
+
+        });
+
+
+
+
+
+
+
+        this.front=
+
+        this.calculate();
+
+
+
+
+
+
+
+        return true;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    calculate(){
+
+
+
+        let score={};
+
+
+
+
+
+
+
+        Object.keys(
+
+            this.matrix
+
+        )
+
+        .forEach(num=>{
+
+
+
+            let total=
+
+            Object.values(
+
+                this.matrix[num]
+
+            )
+
+            .reduce(
+
+                (a,b)=>
+
+                a+b,
+
+                0
+
+            );
+
+
+
+
+
+
+
+            score[num]=total;
+
+
+
+        });
+
+
+
+
+
+
+
+        let max=
+
+        Math.max(
+
+            ...Object.values(score)
+
+        );
+
+
+
+
+
+
+
+        return Object.keys(score)
+
+        .map(num=>({
+
+
+
+            number:Number(num),
+
+
+
+            score:
+
+            Number(
+
+                (
+
+                score[num]
+
+                /
+
+                max
+
+                *
+
+                100
+
+                )
+
+                .toFixed(2)
+
+            )
+
+
+
+        }))
+
+        .sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // 组合评分
+
+    combinationScore(nums){
+
+
+
+        let score=0;
+
+
+
+
+
+
+
+        for(
+
+            let i=0;
+
+            i<nums.length;
+
+            i++
+
+        ){
+
+
+
+            for(
+
+                let j=i+1;
+
+                j<nums.length;
+
+                j++
+
+            ){
+
+
+
+                score +=
+
+                this.matrix
+
+                [nums[i]]
+
+                [nums[j]];
+
+
+
+            }
 
 
 
@@ -125,87 +370,7 @@ class MatrixModel {
 
 
 
-        history.forEach(
-
-        (item,index)=>{
-
-
-
-            item.front.forEach(num=>{
-
-
-
-                this.frontMatrix[num].total++;
-
-
-
-                this.frontMatrix[num].recent +=
-
-                index + 1;
-
-
-
-            });
-
-
-
-        });
-
-
-
-
-
-
-
-
-        Object.keys(
-
-            this.frontMatrix
-
-        )
-
-        .forEach(num=>{
-
-
-
-            let data=
-
-            this.frontMatrix[num];
-
-
-
-
-
-            data.weight=
-
-            Number(
-
-
-
-                (
-
-                data.recent
-
-                /
-
-                (
-
-                data.total+1
-
-                )
-
-                )
-
-                .toFixed(4)
-
-
-
-            );
-
-
-
-        });
-
+        return score;
 
 
     }
@@ -217,250 +382,6 @@ class MatrixModel {
 
 
 
-
-    // ======================
-    // 三区状态矩阵
-    // ======================
-
-    createZoneMatrix(history){
-
-
-
-        history.forEach(item=>{
-
-
-
-            let zone=
-
-            this.getZone(
-
-                item.front
-
-            );
-
-
-
-
-
-
-            if(
-
-                !this.zoneMatrix[zone]
-
-            ){
-
-
-
-                this.zoneMatrix[zone]=0;
-
-
-
-            }
-
-
-
-
-
-
-            this.zoneMatrix[zone]++;
-
-
-
-        });
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 结构矩阵
-    // ======================
-
-    createStructureMatrix(history){
-
-
-
-        history.forEach(item=>{
-
-
-
-            let odd=0;
-
-
-
-
-
-            item.front.forEach(num=>{
-
-
-
-                if(num%2!==0)
-
-                    odd++;
-
-
-
-            });
-
-
-
-
-
-
-
-            let key=
-
-            `${odd}-${6-odd}`;
-
-
-
-            if(
-
-                !this.structureMatrix[key]
-
-            ){
-
-
-
-                this.structureMatrix[key]=0;
-
-
-
-            }
-
-
-
-
-
-
-            this.structureMatrix[key]++;
-
-
-
-        });
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 三区计算
-    // ======================
-
-    getZone(numbers){
-
-
-
-        let a=0;
-
-        let b=0;
-
-        let c=0;
-
-
-
-
-
-
-
-        numbers.forEach(num=>{
-
-
-
-            if(num<=12)
-
-                a++;
-
-
-
-            else if(num<=24)
-
-                b++;
-
-
-
-            else
-
-                c++;
-
-
-
-        });
-
-
-
-
-
-
-        return `${a}-${b}-${c}`;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 号码评分
-    // ======================
-
-    score(num){
-
-
-
-        if(
-
-            !this.frontMatrix[num]
-
-        )
-
-            return 0;
-
-
-
-
-
-
-
-        return this.frontMatrix[num].weight;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 输出分析
-    // ======================
 
     analyze(){
 
@@ -470,32 +391,15 @@ class MatrixModel {
 
 
 
-            model:
-
-            this.name,
+            front:this.front,
 
 
 
-            numberMatrix:
-
-            this.frontMatrix,
-
-
-
-            zoneMatrix:
-
-            this.zoneMatrix,
-
-
-
-            structureMatrix:
-
-            this.structureMatrix
+            back:this.back
 
 
 
         };
-
 
 
     }

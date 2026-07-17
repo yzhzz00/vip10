@@ -3,10 +3,7 @@
 //
 // 频率模型
 //
-// 分析:
-// 号码历史出现次数
-// 热度
-// 活跃程度
+// 根据历史出现次数评分
 
 
 class FrequencyModel {
@@ -15,7 +12,13 @@ class FrequencyModel {
     constructor(){
 
 
-        this.name = "frequency";
+        this.front=[];
+
+
+        this.back=[];
+
+
+        this.history=[];
 
 
     }
@@ -26,216 +29,24 @@ class FrequencyModel {
 
 
 
-    // ======================
-    // 训练
-    // ======================
+    train(
 
-    train(history){
+        history
 
+    ){
 
 
-        this.frontCount = {};
 
-        this.backCount = {};
+        this.history=
 
+        history;
 
 
 
+        let frontCount={};
 
 
-        // 前区统计
-
-        history.forEach(item=>{
-
-
-            item.front.forEach(num=>{
-
-
-                this.frontCount[num] =
-
-                (
-
-                    this.frontCount[num]
-
-                    ||
-
-                    0
-
-                )
-
-                +1;
-
-
-            });
-
-
-
-
-
-
-
-            item.back.forEach(num=>{
-
-
-                this.backCount[num] =
-
-                (
-
-                    this.backCount[num]
-
-                    ||
-
-                    0
-
-                )
-
-                +1;
-
-
-            });
-
-
-
-        });
-
-
-
-
-
-
-        return this;
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 前区评分
-    // ======================
-
-    scoreFront(num){
-
-
-
-        let max =
-
-        Math.max(
-
-            ...
-
-            Object.values(
-
-                this.frontCount
-
-            )
-
-        );
-
-
-
-
-
-        return Number(
-
-            (
-
-            this.frontCount[num]
-
-            /
-
-            max
-
-            )
-
-            .toFixed(4)
-
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 后区评分
-    // ======================
-
-    scoreBack(num){
-
-
-
-        let max =
-
-        Math.max(
-
-            ...
-
-            Object.values(
-
-                this.backCount
-
-            )
-
-        );
-
-
-
-
-
-
-        return Number(
-
-            (
-
-            this.backCount[num]
-
-            /
-
-            max
-
-            )
-
-            .toFixed(4)
-
-        );
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 生成评分表
-    // ======================
-
-    analyze(){
-
-
-
-        let front=[];
-
-
-        let back=[];
+        let backCount={};
 
 
 
@@ -252,24 +63,9 @@ class FrequencyModel {
 
         ){
 
-
-
-            front.push({
-
-
-                number:i,
-
-
-                score:
-
-                this.scoreFront(i)
-
-
-            });
-
+            frontCount[i]=0;
 
         }
-
 
 
 
@@ -286,21 +82,7 @@ class FrequencyModel {
 
         ){
 
-
-
-            back.push({
-
-
-                number:i,
-
-
-                score:
-
-                this.scoreBack(i)
-
-
-            });
-
+            backCount[i]=0;
 
         }
 
@@ -310,24 +92,181 @@ class FrequencyModel {
 
 
 
-        return {
 
-
-            model:
-
-            this.name,
+        history.forEach(item=>{
 
 
 
-            front,
+            item.front.forEach(num=>{
 
 
 
-            back
+                frontCount[num]++;
 
 
 
-        };
+            });
+
+
+
+
+
+
+
+            item.back.forEach(num=>{
+
+
+
+                backCount[num]++;
+
+
+
+            });
+
+
+
+        });
+
+
+
+
+
+
+
+
+        let maxFront=
+
+        Math.max(
+
+            ...Object.values(frontCount)
+
+        );
+
+
+
+
+
+
+
+        let maxBack=
+
+        Math.max(
+
+            ...Object.values(backCount)
+
+        );
+
+
+
+
+
+
+
+        this.front=
+
+        Object.keys(frontCount)
+
+        .map(num=>({
+
+
+
+            number:Number(num),
+
+
+
+            score:
+
+            Number(
+
+                (
+
+                frontCount[num]
+
+                /
+
+                maxFront
+
+                *
+
+                100
+
+                )
+
+                .toFixed(2)
+
+            )
+
+
+
+        }))
+
+        .sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
+
+
+
+
+
+
+
+
+        this.back=
+
+        Object.keys(backCount)
+
+        .map(num=>({
+
+
+
+            number:Number(num),
+
+
+
+            score:
+
+            Number(
+
+                (
+
+                backCount[num]
+
+                /
+
+                maxBack
+
+                *
+
+                100
+
+                )
+
+                .toFixed(2)
+
+            )
+
+
+
+        }))
+
+        .sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
+
+
+
+
+
+
+        return true;
 
 
     }
@@ -338,9 +277,32 @@ class FrequencyModel {
 
 
 
+
+
+    analyze(){
+
+
+
+        return {
+
+
+
+            front:this.front,
+
+
+
+            back:this.back
+
+
+
+        };
+
+
+    }
+
+
+
 }
-
-
 
 
 

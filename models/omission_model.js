@@ -3,11 +3,7 @@
 //
 // 遗漏模型
 //
-// 分析:
-// 当前遗漏
-// 平均遗漏
-// 最大遗漏
-// 回补周期
+// 分析号码遗漏周期
 
 
 class OmissionModel {
@@ -16,17 +12,10 @@ class OmissionModel {
     constructor(){
 
 
-        this.name = "omission";
+        this.front=[];
 
 
-        this.frontOmission = {};
-
-        this.backOmission = {};
-
-        this.frontHistory = {};
-
-        this.backHistory = {};
-
+        this.back=[];
 
 
     }
@@ -36,105 +25,34 @@ class OmissionModel {
 
 
 
-
-    // ======================
-    // 训练
-    // ======================
 
     train(history){
 
 
 
-        for(
-
-            let i=1;
-
-            i<=35;
-
-            i++
-
-        ){
-
-
-
-            this.frontHistory[i]=[];
-
-
-        }
-
-
-
-
-
-
-        for(
-
-            let i=1;
-
-            i<=12;
-
-            i++
-
-        ){
-
-
-
-            this.backHistory[i]=[];
-
-
-        }
-
-
-
-
-
-
-
-        history.forEach(item=>{
-
-
-
-            item.front.forEach(num=>{
-
-
-                this.frontHistory[num]
-
-                .push(1);
-
-
-
-            });
-
-
-
-
-
-
-
-            item.back.forEach(num=>{
-
-
-                this.backHistory[num]
-
-                .push(1);
-
-
-
-            });
-
-
-
-        });
-
-
-
-
-
-
+        this.front=
 
         this.calculate(
 
-            history
+            history,
+
+            35,
+
+            "front"
+
+        );
+
+
+
+        this.back=
+
+        this.calculate(
+
+            history,
+
+            12,
+
+            "back"
 
         );
 
@@ -142,7 +60,7 @@ class OmissionModel {
 
 
 
-        return this;
+        return true;
 
 
     }
@@ -155,168 +73,19 @@ class OmissionModel {
 
 
 
-    // ======================
-    // 计算遗漏
-    // ======================
+    calculate(
 
-    calculate(history){
+        history,
 
+        maxNum,
 
-
-        for(
-
-            let num=1;
-
-            num<=35;
-
-            num++
-
-        ){
-
-
-
-            let miss=0;
-
-
-
-            for(
-
-                let i=history.length-1;
-
-                i>=0;
-
-                i--
-
-            ){
-
-
-
-                if(
-
-                    history[i]
-
-                    .front
-
-                    .includes(num)
-
-                )
-
-                    break;
-
-
-
-                miss++;
-
-
-
-            }
-
-
-
-
-
-
-            this.frontOmission[num]=miss;
-
-
-
-        }
-
-
-
-
-
-
-
-
-        for(
-
-            let num=1;
-
-            num<=12;
-
-            num++
-
-        ){
-
-
-
-            let miss=0;
-
-
-
-            for(
-
-                let i=history.length-1;
-
-                i>=0;
-
-                i--
-
-            ){
-
-
-
-                if(
-
-                    history[i]
-
-                    .back
-
-                    .includes(num)
-
-                )
-
-                    break;
-
-
-
-                miss++;
-
-
-
-            }
-
-
-
-
-
-
-            this.backOmission[num]=miss;
-
-
-
-        }
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 遗漏评分
-    // ======================
-
-    score(
-
-        omission,
-
-        max
+        type
 
     ){
 
 
 
-        if(max===0)
-
-            return 0;
+        let result=[];
 
 
 
@@ -324,26 +93,211 @@ class OmissionModel {
 
 
 
-        return Number(
+        for(
+
+            let num=1;
+
+            num<=maxNum;
+
+            num++
+
+        ){
 
 
 
-            (
+            let currentGap=0;
 
-            omission
 
-            /
 
-            max
+            let gaps=[];
+
+
+
+
+
+            for(
+
+                let i=0;
+
+                i<history.length;
+
+                i++
+
+            ){
+
+
+
+                let hit=
+
+                history[i][type]
+
+                .includes(num);
+
+
+
+
+
+
+
+                if(hit){
+
+
+
+                    gaps.push(
+
+                        currentGap
+
+                    );
+
+
+
+                    currentGap=0;
+
+
+
+                }
+
+                else{
+
+
+
+                    currentGap++;
+
+
+
+                }
+
+
+
+            }
+
+
+
+
+
+
+
+            let average=
+
+            gaps.length
+
+            ?
+
+            gaps.reduce(
+
+                (a,b)=>
+
+                a+b,
+
+                0
 
             )
 
-            .toFixed(4)
+            /
+
+            gaps.length
+
+            :
+
+            1;
 
 
+
+
+
+
+
+            // 当前遗漏越接近平均周期
+
+            // 得分越高
+
+            let deviation=
+
+            Math.abs(
+
+                currentGap-average
+
+            );
+
+
+
+
+
+
+
+            let score=
+
+            100
+
+            /
+
+            (
+
+                1+
+
+                deviation
+
+            );
+
+
+
+
+
+
+
+            result.push({
+
+
+
+                number:num,
+
+
+
+                omission:
+
+                currentGap,
+
+
+
+                average:
+
+                Number(
+
+                    average.toFixed(2)
+
+                ),
+
+
+
+                score:
+
+                Number(
+
+                    score.toFixed(2)
+
+                )
+
+
+
+            });
+
+
+
+        }
+
+
+
+
+
+
+
+        return result.sort(
+
+            (a,b)=>
+
+            b.score-a.score
 
         );
-
 
 
     }
@@ -356,176 +310,19 @@ class OmissionModel {
 
 
 
-    // ======================
-    // 输出分析
-    // ======================
-
     analyze(){
-
-
-
-        let maxFront =
-
-        Math.max(
-
-            ...
-
-            Object.values(
-
-                this.frontOmission
-
-            )
-
-        );
-
-
-
-        let maxBack =
-
-        Math.max(
-
-            ...
-
-            Object.values(
-
-                this.backOmission
-
-            )
-
-        );
-
-
-
-
-
-
-
-        let front=[];
-
-
-        let back=[];
-
-
-
-
-
-
-
-        for(
-
-            let i=1;
-
-            i<=35;
-
-            i++
-
-        ){
-
-
-
-            front.push({
-
-
-
-                number:i,
-
-
-
-                omission:
-
-                this.frontOmission[i],
-
-
-
-                score:
-
-                this.score(
-
-                    this.frontOmission[i],
-
-                    maxFront
-
-                )
-
-
-
-            });
-
-
-
-        }
-
-
-
-
-
-
-
-
-        for(
-
-            let i=1;
-
-            i<=12;
-
-            i++
-
-        ){
-
-
-
-            back.push({
-
-
-
-                number:i,
-
-
-
-                omission:
-
-                this.backOmission[i],
-
-
-
-                score:
-
-                this.score(
-
-                    this.backOmission[i],
-
-                    maxBack
-
-                )
-
-
-
-            });
-
-
-
-        }
-
-
-
-
 
 
 
         return {
 
 
-            model:
 
-            this.name,
-
-
-
-            front,
+            front:this.front,
 
 
 
-            back
+            back:this.back
 
 
 

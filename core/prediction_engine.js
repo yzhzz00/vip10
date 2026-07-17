@@ -1,13 +1,14 @@
 // DLT-AI-CORE VIP
 // core/prediction_engine.js
 //
-// 预测引擎升级版
+// 预测引擎 V2
 //
-// 功能:
-// 1.融合模型评分
-// 2.生成号码池
-// 3.蒙特卡罗组合
-// 4.输出候选结果
+// 增加:
+// 1.三区过滤
+// 2.奇偶过滤
+// 3.和值约束
+// 4.连号控制
+// 5.后区结构控制
 
 
 import CONFIG from "../config.js";
@@ -17,11 +18,10 @@ import CONFIG from "../config.js";
 class PredictionEngine {
 
 
+
     constructor(){
 
-
         this.result=[];
-
 
     }
 
@@ -29,13 +29,6 @@ class PredictionEngine {
 
 
 
-
-
-
-
-    // ======================
-    // 生成预测
-    // ======================
 
     generate(
 
@@ -47,7 +40,7 @@ class PredictionEngine {
 
 
 
-        let frontPool=
+        let frontPool =
 
         this.buildPool(
 
@@ -60,10 +53,7 @@ class PredictionEngine {
 
 
 
-
-
-
-        let backPool=
+        let backPool =
 
         this.buildPool(
 
@@ -76,12 +66,7 @@ class PredictionEngine {
 
 
 
-
-
-
         let candidates=[];
-
-
 
 
 
@@ -99,7 +84,7 @@ class PredictionEngine {
 
 
 
-            let front=
+            let front =
 
             this.randomPick(
 
@@ -113,9 +98,7 @@ class PredictionEngine {
 
 
 
-
-
-            let back=
+            let back =
 
             this.randomPick(
 
@@ -129,11 +112,53 @@ class PredictionEngine {
 
 
 
+            front.sort(
+
+                (a,b)=>a-b
+
+            );
 
 
-            let score=
 
-            this.score(
+            back.sort(
+
+                (a,b)=>a-b
+
+            );
+
+
+
+
+
+
+            if(
+
+                !this.checkFront(front)
+
+            )
+
+                continue;
+
+
+
+
+
+            if(
+
+                !this.checkBack(back)
+
+            )
+
+                continue;
+
+
+
+
+
+
+            let score =
+
+            this.calculateScore(
 
                 front,
 
@@ -153,24 +178,10 @@ class PredictionEngine {
 
 
 
-                front:
-
-                front.sort(
-
-                    (a,b)=>a-b
-
-                ),
+                front,
 
 
-
-                back:
-
-                back.sort(
-
-                    (a,b)=>a-b
-
-                ),
-
+                back,
 
 
                 score
@@ -188,8 +199,7 @@ class PredictionEngine {
 
 
 
-
-        this.result=
+        this.result =
 
         this.unique(
 
@@ -217,8 +227,6 @@ class PredictionEngine {
 
 
 
-
-
         return this.result;
 
 
@@ -231,10 +239,6 @@ class PredictionEngine {
 
 
 
-
-    // ======================
-    // 建立评分池
-    // ======================
 
     buildPool(
 
@@ -252,71 +256,62 @@ class PredictionEngine {
 
 
 
-
-
         Object.values(models)
 
         .forEach(model=>{
 
 
 
-            let list=
-
-            model[type];
-
-
-
-
-
-
-
             if(
 
-                Array.isArray(list)
+                !Array.isArray(
 
-            ){
+                    model[type]
 
+                )
 
+            )
 
-                list.forEach(item=>{
-
-
-
-                    if(
-
-                        item.number
-
-                    ){
+            return;
 
 
 
-                        map[item.number]=
-
-                        (
-
-                            map[item.number]
-
-                            ||
-
-                            0
-
-                        )
-
-                        +
-
-                        item.score;
 
 
 
-                    }
+            model[type]
+
+            .forEach(item=>{
 
 
 
-                });
+                if(item.number){
 
 
 
-            }
+                    map[item.number]=
+
+                    (
+
+                        map[item.number]
+
+                        ||
+
+                        0
+
+                    )
+
+                    +
+
+                    item.score;
+
+
+
+                }
+
+
+
+            });
 
 
 
@@ -330,17 +325,14 @@ class PredictionEngine {
 
         return Object.keys(map)
 
-        .map(n=>({
+        .map(num=>({
 
 
 
-            number:Number(n),
+            number:Number(num),
 
 
-
-            score:
-
-            map[n]
+            score:map[num]
 
 
 
@@ -362,14 +354,13 @@ class PredictionEngine {
 
             ?
 
-            25
+            30
 
             :
 
-            10
+            12
 
         );
-
 
 
     }
@@ -382,10 +373,6 @@ class PredictionEngine {
 
 
 
-    // ======================
-    // 随机抽取
-    // ======================
-
     randomPick(
 
         pool,
@@ -396,15 +383,10 @@ class PredictionEngine {
 
 
 
-        let arr=
-
-        [...pool];
-
+        let copy=[...pool];
 
 
         let result=[];
-
-
 
 
 
@@ -418,27 +400,15 @@ class PredictionEngine {
 
 
 
-            let index=
+            let total=
 
-            Math.floor(
+            copy.reduce(
 
-                Math.random()
+                (a,b)=>
 
-                *
+                a+b.score,
 
-                arr.length
-
-            );
-
-
-
-
-
-
-
-            result.push(
-
-                arr[index].number
+                0
 
             );
 
@@ -446,22 +416,72 @@ class PredictionEngine {
 
 
 
+            let r=
+
+            Math.random()
+
+            *
+
+            total;
 
 
-            arr.splice(
 
-                index,
 
-                1
 
-            );
+            for(
+
+                let i=0;
+
+                i<copy.length;
+
+                i++
+
+            ){
+
+
+
+                r-=copy[i].score;
+
+
+
+                if(
+
+                    r<=0
+
+                ){
+
+
+
+                    result.push(
+
+                        copy[i].number
+
+                    );
+
+
+
+                    copy.splice(
+
+                        i,
+
+                        1
+
+                    );
+
+
+
+                    break;
+
+
+                }
+
+
+
+            }
 
 
 
         }
-
-
-
 
 
 
@@ -479,11 +499,232 @@ class PredictionEngine {
 
 
 
-    // ======================
-    // 综合评分
-    // ======================
+    // =====================
+    // 前区结构过滤
+    // =====================
 
-    score(
+    checkFront(nums){
+
+
+
+        let zone=[0,0,0];
+
+        let odd=0;
+
+
+
+
+
+
+        nums.forEach(n=>{
+
+
+
+            if(n<=12)
+
+                zone[0]++;
+
+
+            else if(n<=24)
+
+                zone[1]++;
+
+
+            else
+
+                zone[2]++;
+
+
+
+
+
+            if(n%2)
+
+                odd++;
+
+
+
+        });
+
+
+
+
+
+
+        //三区不能极端
+
+        if(
+
+            Math.max(...zone)>=4
+
+        )
+
+        return false;
+
+
+
+
+
+        //奇偶控制
+
+        if(
+
+            odd===0
+
+            ||
+
+            odd===5
+
+        )
+
+        return false;
+
+
+
+
+
+
+        let sum=
+
+        nums.reduce(
+
+            (a,b)=>a+b,
+
+            0
+
+        );
+
+
+
+
+
+        if(
+
+            sum<60
+
+            ||
+
+            sum>150
+
+        )
+
+        return false;
+
+
+
+
+
+
+        //最多两个连号
+
+        let link=0;
+
+
+
+        for(
+
+            let i=1;
+
+            i<nums.length;
+
+            i++
+
+        ){
+
+
+
+            if(
+
+                nums[i]-nums[i-1]===1
+
+            )
+
+            link++;
+
+
+
+        }
+
+
+
+        if(
+
+            link>2
+
+        )
+
+        return false;
+
+
+
+
+
+
+        return true;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // =====================
+    // 后区过滤
+    // =====================
+
+    checkBack(nums){
+
+
+
+        if(
+
+            nums[0]===nums[1]
+
+        )
+
+        return false;
+
+
+
+
+
+        // 避免长期极端小号
+
+        if(
+
+            nums[0]<=3
+
+            &&
+
+            nums[1]<=3
+
+        )
+
+        return false;
+
+
+
+
+
+        return true;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    calculateScore(
 
         front,
 
@@ -497,6 +738,8 @@ class PredictionEngine {
 
         let score=0;
 
+
+        let max=0;
 
 
 
@@ -515,55 +758,54 @@ class PredictionEngine {
 
 
 
-                let list=
-
-                model[type];
-
-
-
-
-
-
-
                 if(
 
-                    Array.isArray(list)
+                    !Array.isArray(
 
-                ){
+                        model[type]
 
+                    )
 
+                )
 
-                    list.forEach(item=>{
-
-
-
-                        if(
-
-                            front.includes(item.number)
-
-                            ||
-
-                            back.includes(item.number)
-
-                        ){
+                return;
 
 
 
-                            score+=
-
-                            item.score || 0;
 
 
 
-                        }
+                model[type]
+
+                .forEach(item=>{
 
 
 
-                    });
+                    max +=
+
+                    item.score || 0;
 
 
 
-                }
+
+
+                    if(
+
+                        front.includes(item.number)
+
+                        ||
+
+                        back.includes(item.number)
+
+                    )
+
+                    score +=
+
+                    item.score || 0;
+
+
+
+                });
 
 
 
@@ -579,9 +821,24 @@ class PredictionEngine {
 
 
 
+        if(max===0)
+
+            return 0;
+
+
+
+
+
+
         return Number(
 
-            score.toFixed(4)
+            (
+
+            score/max*100
+
+            )
+
+            .toFixed(2)
 
         );
 
@@ -596,20 +853,14 @@ class PredictionEngine {
 
 
 
-    // ======================
-    // 去重
-    // ======================
-
     unique(list){
 
 
 
         let map={};
 
+
         let result=[];
-
-
-
 
 
 
@@ -620,7 +871,7 @@ class PredictionEngine {
 
             let key=
 
-            item.front.join(",")
+            item.front.join("-")
 
             +
 
@@ -628,9 +879,7 @@ class PredictionEngine {
 
             +
 
-            item.back.join(",");
-
-
+            item.back.join("-");
 
 
 
@@ -656,8 +905,6 @@ class PredictionEngine {
 
 
         });
-
-
 
 
 
