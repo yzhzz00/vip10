@@ -1,0 +1,191 @@
+// DLT-AI-CORE V11 FINAL
+// core/system.js
+// 系统管理模块
+
+
+import fs from "fs";
+import path from "path";
+
+
+class System {
+
+
+    constructor(){
+
+        this.version = "V11 FINAL";
+
+        this.name = "DLT-AI-CORE";
+
+        this.startTime = new Date();
+
+
+        this.logFile =
+        "./logs/system.log";
+
+
+        this.status =
+        "starting";
+
+
+        this.init();
+
+
+    }
+
+
+
+
+
+    init(){
+
+
+        const dir =
+        path.dirname(
+            this.logFile
+        );
+
+
+        if(
+            !fs.existsSync(dir)
+        ){
+
+            fs.mkdirSync(
+                dir,
+                {
+                    recursive:true
+                }
+            );
+
+        }
+
+
+        this.write(
+            "SYSTEM START"
+        );
+
+
+        this.status =
+        "running";
+
+
+    }
+
+
+
+
+
+
+    write(message){
+
+
+        const text =
+
+
+        `[${new Date().toISOString()}] ${message}\n`;
+
+
+
+        try{
+
+
+            fs.appendFileSync(
+
+                this.logFile,
+
+                text
+
+            );
+
+
+        }
+
+        catch(error){
+
+            console.log(
+                error.message
+            );
+
+        }
+
+
+    }
+
+
+
+
+
+
+
+    error(error){
+
+
+        this.write(
+
+            "ERROR: "
+
+            +
+
+            error.message
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+    info(message){
+
+
+        this.write(
+
+            "INFO: "
+
+            +
+
+            message
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+    getStatus(){
+
+
+        return {
+
+
+            name:this.name,
+
+
+            version:this.version,
+
+
+            status:this.status,
+
+
+            startTime:this.startTime
+
+
+        };
+
+
+    }
+
+
+
+}
+
+
+export default System;

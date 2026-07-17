@@ -1,0 +1,383 @@
+/* 
+DLT-AI-CORE V11 FINAL
+public/style.css
+前端样式
+*/
+
+
+*{
+
+    box-sizing:border-box;
+
+}
+
+
+
+body{
+
+
+    margin:0;
+
+
+    padding:0;
+
+
+    background:#f2f4f8;
+
+
+    font-family:
+
+    Arial,
+    "Microsoft YaHei",
+    sans-serif;
+
+
+    color:#222;
+
+
+}
+
+
+
+
+
+.container{
+
+
+    width:95%;
+
+
+    max-width:900px;
+
+
+    margin:20px auto;
+
+
+}
+
+
+
+
+
+
+
+h1{
+
+
+    text-align:center;
+
+
+    color:#1d4ed8;
+
+
+    margin-bottom:5px;
+
+
+}
+
+
+
+h2{
+
+
+    text-align:center;
+
+
+    font-size:18px;
+
+
+    color:#555;
+
+
+}
+
+
+
+
+
+
+.card{
+
+
+    background:white;
+
+
+    border-radius:12px;
+
+
+    padding:20px;
+
+
+    margin-top:15px;
+
+
+    box-shadow:
+
+    0 3px 10px
+
+    rgba(0,0,0,0.08);
+
+
+}
+
+
+
+
+
+
+
+.card h3{
+
+
+    margin-top:0;
+
+
+    color:#111827;
+
+
+}
+
+
+
+
+
+
+button{
+
+
+    width:100%;
+
+
+    padding:14px;
+
+
+    margin-top:10px;
+
+
+    border:none;
+
+
+    border-radius:8px;
+
+
+    background:#2563eb;
+
+
+    color:white;
+
+
+    font-size:16px;
+
+
+    cursor:pointer;
+
+
+}
+
+
+
+button:hover{
+
+
+    background:#1d4ed8;
+
+
+}
+
+
+
+
+
+
+
+
+#status,
+
+
+#result,
+
+
+#learning,
+
+
+#backtestResult,
+
+
+#loading{
+
+
+    margin-top:15px;
+
+
+    padding:12px;
+
+
+    background:#f8fafc;
+
+
+    border-radius:8px;
+
+
+    min-height:40px;
+
+
+    line-height:1.6;
+
+
+}
+
+
+
+
+
+
+
+.progress-box{
+
+
+    margin-top:15px;
+
+
+    height:35px;
+
+
+    background:#e5e7eb;
+
+
+    border-radius:20px;
+
+
+    overflow:hidden;
+
+
+}
+
+
+
+
+#progress{
+
+
+    height:100%;
+
+
+    width:100%;
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+    justify-content:center;
+
+
+    background:#22c55e;
+
+
+    color:white;
+
+
+    font-weight:bold;
+
+
+}
+
+
+
+
+
+
+pre{
+
+
+    white-space:pre-wrap;
+
+
+    word-break:break-all;
+
+
+    font-size:13px;
+
+
+}
+
+
+
+
+
+strong{
+
+
+    color:#dc2626;
+
+
+    font-size:20px;
+
+
+}
+
+
+
+
+
+
+ul{
+
+
+    padding-left:20px;
+
+
+}
+
+
+
+li{
+
+
+    margin:8px 0;
+
+
+}
+
+
+
+
+
+
+@media(max-width:600px){
+
+
+
+    .container{
+
+
+        width:92%;
+
+
+    }
+
+
+
+    h1{
+
+
+        font-size:22px;
+
+
+    }
+
+
+
+    .card{
+
+
+        padding:15px;
+
+
+    }
+
+
+
+}
