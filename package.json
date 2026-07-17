@@ -1,0 +1,32 @@
+{
+  "name": "dlt-ai-core-vip",
+  "version": "1.0.0",
+  "description": "DLT-AI-CORE VIP 大乐透智能分析核心系统",
+  "type": "module",
+
+  "main": "server.js",
+
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  },
+
+  "keywords": [
+    "dlt",
+    "lottery",
+    "ai",
+    "prediction",
+    "bayes",
+    "markov",
+    "machine-learning"
+  ],
+
+  "author": "DLT-AI-CORE VIP",
+
+  "license": "MIT"
+}
