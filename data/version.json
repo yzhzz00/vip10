@@ -1,0 +1,43 @@
+{
+  "system": {
+
+    "name": "DLT-AI-CORE",
+
+    "version": "V11 FINAL",
+
+    "release": "production"
+
+
+  },
+
+
+  "data": {
+
+    "history_version": "1.0",
+
+    "source": "dlt_history.txt",
+
+    "periods": 0
+
+
+  },
+
+
+  "models": {
+
+    "version": "1.0",
+
+    "last_training": null
+
+  },
+
+
+  "update": {
+
+    "last_time": null,
+
+    "auto_update": true
+
+  }
+
+}

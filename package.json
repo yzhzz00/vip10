@@ -1,0 +1,53 @@
+{
+  "name": "dlt-ai-core",
+  "version": "11.0.0",
+  "description": "DLT-AI-CORE V11 FINAL 大乐透智能分析核心系统",
+  "type": "module",
+  "main": "startup.js",
+
+  "scripts": {
+
+    "start": "node startup.js",
+
+    "server": "node server.js",
+
+    "dev": "node --watch server.js"
+
+  },
+
+
+  "dependencies": {
+
+    "express": "^5.1.0",
+
+    "sqlite3": "^5.1.7",
+
+    "dotenv": "^16.4.7"
+
+  },
+
+
+  "keywords": [
+
+    "dlt",
+
+    "lottery",
+
+    "ai",
+
+    "prediction",
+
+    "montecarlo",
+
+    "markov",
+
+    "bayes"
+
+  ],
+
+
+  "author": "DLT-AI-CORE",
+
+  "license": "MIT"
+
+}

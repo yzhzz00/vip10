@@ -1,0 +1,200 @@
+// DLT-AI-CORE V11 FINAL
+// core/experiment.js
+// 自动实验管理系统
+
+
+class ExperimentEngine {
+
+
+    constructor(){
+
+
+        this.experiments =
+        [];
+
+
+        this.id =
+        0;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    create(
+        name,
+        config
+    ){
+
+
+        const experiment = {
+
+
+            id:
+            ++this.id,
+
+
+            name,
+
+
+            config,
+
+
+            result:
+            null,
+
+
+            status:
+            "created"
+
+
+
+        };
+
+
+
+        this.experiments.push(
+            experiment
+        );
+
+
+
+        return experiment;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    run(
+        id,
+        executor
+    ){
+
+
+        const exp =
+        this.find(
+            id
+        );
+
+
+
+        if(
+            !exp
+        ){
+
+
+            throw new Error(
+                "Experiment not found"
+            );
+
+
+        }
+
+
+
+        exp.status =
+        "running";
+
+
+
+        exp.result =
+        executor(
+            exp.config
+        );
+
+
+
+        exp.status =
+        "completed";
+
+
+
+        return exp;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    find(id){
+
+
+        return this.experiments
+        .find(
+            e=>
+            e.id===id
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    ranking(){
+
+
+        return this.experiments
+        .filter(
+            e=>
+            e.result
+        )
+        .sort(
+            (a,b)=>
+
+            b.result.score
+            -
+            a.result.score
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    all(){
+
+
+        return this.experiments;
+
+
+    }
+
+
+
+}
+
+
+
+export default ExperimentEngine;
