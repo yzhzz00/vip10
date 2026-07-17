@@ -1,70 +1,10 @@
 // DLT-AI-CORE V11 FINAL
 // public/app.js
-// 前端交互
-
-
-const statusBox =
-
-document.getElementById(
-    "status"
-);
+// 前端接口控制
 
 
 
-const resultBox =
-
-document.getElementById(
-    "result"
-);
-
-
-
-const loadingBox =
-
-document.getElementById(
-    "loading"
-);
-
-
-
-const progressBox =
-
-document.getElementById(
-    "progress"
-);
-
-
-
-const learningBox =
-
-document.getElementById(
-    "learning"
-);
-
-
-
-const backtestBox =
-
-document.getElementById(
-    "backtestResult"
-);
-
-
-
-
-
-
-
-// =====================
-// 检测系统
-// =====================
-
-
-document
-
-.getElementById("check")
-
-.onclick = async()=>{
+async function checkStatus(){
 
 
     try{
@@ -73,8 +13,11 @@ document
         const res =
 
         await fetch(
+
             "/api/status"
+
         );
+
 
 
         const data =
@@ -83,27 +26,23 @@ document
 
 
 
-        statusBox.innerHTML =
+
+        document.getElementById(
+
+            "status"
+
+        ).innerHTML =
 
 
         `
 
-        <p>
-        系统状态:
-        ${data.ready ? "运行中":"未启动"}
-        </p>
+        系统状态: ${data.status}<br>
 
+        历史数据: ${data.history} 期<br>
 
-        <p>
-        历史数据:
-        ${data.history} 期
-        </p>
-
-
-        <p>
         模型:
+
         ${data.models.join(",")}
-        </p>
 
         `;
 
@@ -115,15 +54,21 @@ document
     catch(error){
 
 
-        statusBox.innerHTML =
+        document.getElementById(
 
-        "连接失败";
+            "status"
+
+        ).innerHTML =
+
+
+        "检测失败: "+error.message;
 
 
     }
 
 
-};
+
+}
 
 
 
@@ -132,36 +77,112 @@ document
 
 
 
-// =====================
-// 开始预测
-// =====================
+
+async function predict(){
 
 
-document
 
-.getElementById("predict")
+    const bar =
 
-.onclick = async()=>{
+    document.getElementById(
+
+        "bar"
+
+    );
+
+
+
+    const loading =
+
+    document.getElementById(
+
+        "loading"
+
+    );
+
+
+
+    const result =
+
+    document.getElementById(
+
+        "result"
+
+    );
+
+
+
+
 
 
     try{
 
 
-        loadingBox.innerHTML =
+
+        loading.innerHTML =
 
         "正在计算...";
 
 
 
-        progressBox.innerHTML =
+        bar.style.width="10%";
 
-        "计算中";
+        bar.innerHTML="10%";
 
 
 
-        resultBox.innerHTML =
 
-        "AI模型运行中...";
+
+
+        const timer =
+
+        setInterval(()=>{
+
+
+            let value =
+
+            parseInt(
+
+                bar.style.width
+
+                ||
+
+                0
+
+            );
+
+
+
+            if(
+                value < 90
+            ){
+
+
+
+                value += 5;
+
+
+
+                bar.style.width=
+
+                value+"%";
+
+
+
+                bar.innerHTML=
+
+                value+"%";
+
+
+
+            }
+
+
+
+        },300);
+
+
+
 
 
 
@@ -177,12 +198,17 @@ document
 
                 method:"POST",
 
+
                 headers:{
 
+
                     "Content-Type":
+
                     "application/json"
 
+
                 },
+
 
                 body:
 
@@ -194,6 +220,9 @@ document
 
 
 
+
+
+
         const data =
 
         await res.json();
@@ -202,13 +231,45 @@ document
 
 
 
+        clearInterval(timer);
+
+
+
+
+
+        bar.style.width="100%";
+
+        bar.innerHTML="100%";
+
+
+
+
+
+
+        loading.innerHTML=
+
+        "分析完成";
+
+
+
+
+
+
         if(data.error){
 
 
-            throw new Error(
-                data.error
-            );
 
+            result.innerHTML=
+
+            "分析失败: "
+
+            +
+
+            data.error;
+
+
+
+            return;
 
         }
 
@@ -217,72 +278,35 @@ document
 
 
 
-        resultBox.innerHTML =
+
+        result.innerHTML =
+
 
 
         `
 
-        <h4>
-        推荐号码
-        </h4>
+        <h4>推荐号码</h4>
 
-
-        <p>
 
         前区:
 
-        <strong>
-
         ${data.front.join(" ")}
 
-        </strong>
+        <br><br>
 
-        </p>
-
-
-
-        <p>
 
         后区:
 
-        <strong>
-
         ${data.back.join(" ")}
 
-        </strong>
+
+        <h4>模型状态</h4>
 
 
-        </p>
-
-
-
-        <h4>
-        模型状态
-        </h4>
-
-
-        <pre>
-
-${JSON.stringify(
-    data.models,
-    null,
-    2
-)}
-
-        </pre>
+        ${Object.keys(data.models).join(",")}
 
         `;
 
-
-
-        loadingBox.innerHTML =
-
-        "分析完成";
-
-
-        progressBox.innerHTML =
-
-        "100%";
 
 
 
@@ -293,7 +317,8 @@ ${JSON.stringify(
     catch(error){
 
 
-        resultBox.innerHTML =
+
+        result.innerHTML=
 
         "分析失败: "
 
@@ -303,15 +328,12 @@ ${JSON.stringify(
 
 
 
-        loadingBox.innerHTML =
-
-        "错误";
-
-
     }
 
 
-};
+
+
+}
 
 
 
@@ -320,34 +342,71 @@ ${JSON.stringify(
 
 
 
-// =====================
-// 回测
-// =====================
+
+async function backtest(){
 
 
-document
 
-.getElementById("backtest")
+    const box =
 
-.onclick = async()=>{
+    document.getElementById(
 
+        "backtest"
 
-    backtestBox.innerHTML =
-
-    "正在回测...";
+    );
 
 
 
     try{
 
 
+
+        box.innerHTML=
+
+        "正在回测...";
+
+
+
+
+
+
         const res =
 
         await fetch(
 
-            "/api/backtest"
+            "/api/backtest",
+
+            {
+
+
+                method:"POST",
+
+
+                headers:{
+
+
+                    "Content-Type":
+
+                    "application/json"
+
+
+                },
+
+
+                body:
+
+                JSON.stringify({
+
+                    limit:100
+
+                })
+
+            }
 
         );
+
+
+
 
 
 
@@ -358,20 +417,45 @@ document
 
 
 
-        backtestBox.innerHTML =
+
+
+        box.innerHTML =
 
 
         `
 
-        <pre>
+        回测期数:
 
-${JSON.stringify(
-    data,
-    null,
-    2
-)}
+        ${data.period || 0}
 
-        </pre>
+        <br>
+
+
+        前区3个命中率:
+
+        ${data.front3Rate || 0}%
+
+        <br>
+
+
+        前区4个命中率:
+
+        ${data.front4Rate || 0}%
+
+        <br>
+
+
+        前区5个命中率:
+
+        ${data.front5Rate || 0}%
+
+        <br>
+
+
+        后区2个命中率:
+
+        ${data.back2Rate || 0}%
+
 
         `;
 
@@ -383,16 +467,21 @@ ${JSON.stringify(
     catch(error){
 
 
-        backtestBox.innerHTML =
+        box.innerHTML=
 
-        "回测失败";
+        "回测失败: "
+
+        +
+
+        error.message;
+
 
 
     }
 
 
 
-};
+}
 
 
 
@@ -401,15 +490,13 @@ ${JSON.stringify(
 
 
 
-// =====================
-// 学习状态
-// =====================
 
+async function learning(){
 
-async function loadLearning(){
 
 
     try{
+
 
 
         const res =
@@ -428,26 +515,36 @@ async function loadLearning(){
 
 
 
-        learningBox.innerHTML =
+
+
+        document.getElementById(
+
+            "learning"
+
+        ).innerHTML =
+
 
 
         `
 
-        <p>
         学习次数:
-        ${data.total}
-        </p>
+
+        ${data.times || 0}
 
 
-        <pre>
+        <br><br>
 
-${JSON.stringify(
-    data.performance,
-    null,
-    2
-)}
 
-        </pre>
+        ${JSON.stringify(
+
+            data.committee,
+
+            null,
+
+            2
+
+        )}
+
 
         `;
 
@@ -459,12 +556,19 @@ ${JSON.stringify(
     catch(error){
 
 
-        learningBox.innerHTML =
 
-        "等待学习";
+        document.getElementById(
+
+            "learning"
+
+        ).innerHTML=
+
+        error.message;
+
 
 
     }
+
 
 
 }
@@ -473,4 +577,15 @@ ${JSON.stringify(
 
 
 
-loadLearning();
+
+
+window.onload=function(){
+
+
+    checkStatus();
+
+
+    learning();
+
+
+};

@@ -1,6 +1,6 @@
 // DLT-AI-CORE V11 FINAL
 // server.js
-// 后端服务器入口
+// 主服务器入口
 
 
 import express from "express";
@@ -8,6 +8,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import Engine from "./core/engine.js";
+import System from "./core/system.js";
 
 
 
@@ -27,6 +28,8 @@ path.dirname(
 
 
 
+
+
 const app =
 
 express();
@@ -40,7 +43,11 @@ process.env.PORT || 3000;
 
 
 
+
+// =====================
 // 中间件
+// =====================
+
 
 app.use(
 
@@ -55,8 +62,11 @@ app.use(
     express.static(
 
         path.join(
+
             __dirname,
+
             "public"
+
         )
 
     )
@@ -66,7 +76,19 @@ app.use(
 
 
 
-// 初始化引擎
+
+
+
+// =====================
+// 系统初始化
+// =====================
+
+
+const system =
+
+new System();
+
+
 
 const engine =
 
@@ -75,71 +97,88 @@ new Engine();
 
 
 
-async function start(){
-
-
-    try{
-
-
-        await engine.init();
 
 
 
-        console.log(
-            "DLT-AI-CORE initialized"
-        );
-
-
-
-    }
-
-
-    catch(error){
-
-
-        console.error(
-
-            "Engine init failed:",
-
-            error
-
-        );
-
-
-        process.exit(1);
-
-
-    }
-
-
-
-}
-
-
-
-start();
-
-
-
-
-
-// =========================
-// 系统状态
-// =========================
+// =====================
+// 状态接口
+// =====================
 
 
 app.get(
 
     "/api/status",
 
-    (req,res)=>{
+    async(req,res)=>{
 
 
-        res.json(
+        try{
 
-            engine.status()
 
-        );
+            res.json({
+
+
+                status:
+
+                "running",
+
+
+
+                version:
+
+                "V11 FINAL",
+
+
+
+                history:
+
+                engine.history.length,
+
+
+
+                models:
+
+                [
+
+                    "frequency",
+
+                    "trend",
+
+                    "bayes",
+
+                    "markov",
+
+                    "montecarlo"
+
+                ]
+
+
+
+            });
+
+
+
+        }
+
+        catch(error){
+
+
+            system.error(error);
+
+
+
+            res.status(500)
+
+            .json({
+
+                error:
+
+                error.message
+
+            });
+
+
+        }
 
 
     }
@@ -151,9 +190,11 @@ app.get(
 
 
 
-// =========================
-// 开始预测
-// =========================
+
+
+// =====================
+// 智能预测
+// =====================
 
 
 app.post(
@@ -172,14 +213,21 @@ app.post(
 
 
 
-            res.json(result);
+            res.json(
 
+                result
+
+            );
 
 
         }
 
 
         catch(error){
+
+
+            system.error(error);
+
 
 
             res.status(500)
@@ -192,14 +240,15 @@ app.post(
                 error.message
 
 
+
             });
 
 
         }
 
 
-
     }
+
 
 );
 
@@ -208,12 +257,14 @@ app.post(
 
 
 
-// =========================
+
+
+// =====================
 // 历史回测
-// =========================
+// =====================
 
 
-app.get(
+app.post(
 
     "/api/backtest",
 
@@ -225,12 +276,15 @@ app.get(
 
             const result =
 
-            await engine.runBacktest();
+            await engine.backtest();
 
 
 
-            res.json(result);
+            res.json(
 
+                result
+
+            );
 
 
         }
@@ -239,15 +293,17 @@ app.get(
         catch(error){
 
 
+            system.error(error);
+
+
+
             res.status(500)
 
             .json({
 
-
                 error:
 
                 error.message
-
 
             });
 
@@ -255,7 +311,6 @@ app.get(
         }
 
 
-
     }
 
 );
@@ -265,23 +320,57 @@ app.get(
 
 
 
-// =========================
+
+
+// =====================
 // AI学习状态
-// =========================
+// =====================
 
 
 app.get(
 
     "/api/learning",
 
-    (req,res)=>{
+    async(req,res)=>{
 
 
-        res.json(
+        try{
 
-            engine.feedback.getReport()
 
-        );
+            const result =
+
+            await engine.learning();
+
+
+
+            res.json(
+
+                result
+
+            );
+
+
+        }
+
+        catch(error){
+
+
+            system.error(error);
+
+
+
+            res.status(500)
+
+            .json({
+
+                error:
+
+                error.message
+
+            });
+
+
+        }
 
 
     }
@@ -293,25 +382,18 @@ app.get(
 
 
 
-// =========================
-// 前端路由
-// Express 5不能使用 *
-// =========================
+
+
+// =====================
+// 前端页面
+// Express 5兼容写法
+// 不使用 app.get("*")
+// =====================
 
 
 app.use(
 
-    (req,res,next)=>{
-
-
-        if(
-            req.method !== "GET"
-        ){
-
-            return next();
-
-        }
-
+    (req,res)=>{
 
 
         res.sendFile(
@@ -338,6 +420,13 @@ app.use(
 
 
 
+
+
+// =====================
+// 启动
+// =====================
+
+
 app.listen(
 
     PORT,
@@ -347,7 +436,7 @@ app.listen(
 
         console.log(
 
-            "DLT-AI-CORE running on port "
+            "DLT-AI-CORE V11 FINAL running on port "
 
             +
 

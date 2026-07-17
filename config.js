@@ -6,196 +6,7 @@
 const config = {
 
 
-    // =====================
-    // 数据配置
-    // =====================
-
-    data:{
-
-
-        file:
-
-        "./data/dlt_history.txt",
-
-
-        frontMax:35,
-
-
-        backMax:12
-
-
-    },
-
-
-
-
-
-    // =====================
-    // 蒙特卡罗配置
-    // =====================
-
-    montecarlo:{
-
-
-        simulations:
-
-        100000,
-
-
-        batchSize:
-
-        5000
-
-
-    },
-
-
-
-
-
-
-
-    // =====================
-    // 模型权重
-    // =====================
-
-    models:{
-
-
-        frequency:{
-
-
-            weight:0.20
-
-
-        },
-
-
-        trend:{
-
-
-            weight:0.20
-
-
-        },
-
-
-        bayes:{
-
-
-            weight:0.25
-
-
-        },
-
-
-        markov:{
-
-
-            weight:0.20
-
-
-        },
-
-
-        montecarlo:{
-
-
-            weight:0.15
-
-
-        }
-
-
-    },
-
-
-
-
-
-
-
-    // =====================
-    // AI学习配置
-    // =====================
-
-    learning:{
-
-
-        adjustRate:
-
-        0.01,
-
-
-
-        minModelWeight:
-
-        0.05,
-
-
-
-        maxModelWeight:
-
-        0.50,
-
-
-
-        eliminateThreshold:
-
-        0.03
-
-
-    },
-
-
-
-
-
-
-
-
-    // =====================
-    // 回测配置
-    // =====================
-
-    backtest:{
-
-
-        periods:[
-
-
-            100,
-
-
-            500,
-
-
-            1000
-
-
-        ]
-
-
-    },
-
-
-
-
-
-
-
-
-    // =====================
-    // 系统
-    // =====================
-
-    system:{
-
-
-        version:
-
-        "V11 FINAL",
-
+    system: {
 
 
         name:
@@ -203,16 +14,277 @@ const config = {
         "DLT-AI-CORE",
 
 
+        version:
 
-        debug:
+        "V11 FINAL",
 
-        false
+
+        game:
+
+        "大乐透"
+
+
+
+    },
+
+
+
+
+
+    data: {
+
+
+        file:
+
+        "./data/dlt_history.txt",
+
+
+
+        frontCount:
+
+        5,
+
+
+
+        backCount:
+
+        2,
+
+
+
+        frontMax:
+
+        35,
+
+
+
+        backMax:
+
+        12
+
+
+
+    },
+
+
+
+
+
+
+
+    models: {
+
+
+        frequency: {
+
+
+            enabled:
+
+            true,
+
+
+            weight:
+
+            1.0
+
+
+        },
+
+
+
+        trend: {
+
+
+            enabled:
+
+            true,
+
+
+            weight:
+
+            0.9
+
+
+        },
+
+
+
+        bayes: {
+
+
+            enabled:
+
+            true,
+
+
+            weight:
+
+            1.0
+
+
+        },
+
+
+
+        markov: {
+
+
+            enabled:
+
+            true,
+
+
+            weight:
+
+            0.9
+
+
+        },
+
+
+
+        montecarlo: {
+
+
+            enabled:
+
+            true,
+
+
+            weight:
+
+            0.8
+
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+    theory: {
+
+
+        zone: {
+
+
+            one:
+
+            [1,12],
+
+
+
+            two:
+
+            [13,24],
+
+
+
+            three:
+
+            [25,35]
+
+
+
+        },
+
+
+
+        sumRange:
+
+
+        [50,160],
+
+
+
+        maxConsecutive:
+
+        3
+
+
+
+    },
+
+
+
+
+
+
+
+
+    ai: {
+
+
+        committee:
+
+
+        true,
+
+
+
+        learning:
+
+
+        true,
+
+
+
+        feedback:
+
+
+        true
+
+
+
+    },
+
+
+
+
+
+
+
+
+    compute: {
+
+
+        batchSize:
+
+        200,
+
+
+
+        montecarloTimes:
+
+        100000,
+
+
+
+        cache:
+
+
+        true
+
 
 
     }
 
 
+
+
+
+
 };
+
+
 
 
 
