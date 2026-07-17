@@ -1,7 +1,0 @@
-{
-  "frequency": 1,
-  "trend": 0.9,
-  "bayes": 1,
-  "markov": 0.9,
-  "montecarlo": 0.8
-}
