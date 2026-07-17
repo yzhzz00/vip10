@@ -1,8 +1,0 @@
-{
-  "frequency": 1.0,
-  "trend": 1.0,
-  "bayes": 1.0,
-  "markov": 1.0,
-  "omission": 1.0,
-  "cycle": 1.0
-}
