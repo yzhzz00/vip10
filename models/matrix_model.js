@@ -1,13 +1,12 @@
 // DLT-AI-CORE VIP
 // models/matrix_model.js
 //
-// 矩阵模型
+// 矩阵模型 V2
 //
-// 分析号码之间共现关系
+// 号码共现关系矩阵
 
 
 class MatrixModel {
-
 
 
     constructor(){
@@ -15,9 +14,7 @@ class MatrixModel {
 
         this.front=[];
 
-
         this.back=[];
-
 
         this.matrix={};
 
@@ -30,10 +27,7 @@ class MatrixModel {
 
 
 
-
-
     train(history){
-
 
 
         this.matrix={};
@@ -42,37 +36,18 @@ class MatrixModel {
 
 
 
+        // 初始化35号码矩阵
 
-        for(
-
-            let i=1;
-
-            i<=35;
-
-            i++
-
-        ){
-
+        for(let i=1;i<=35;i++){
 
 
             this.matrix[i]={};
 
 
-
-            for(
-
-                let j=1;
-
-                j<=35;
-
-                j++
-
-            ){
-
+            for(let j=1;j<=35;j++){
 
 
                 this.matrix[i][j]=0;
-
 
 
             }
@@ -85,16 +60,46 @@ class MatrixModel {
 
 
 
-
-
-
         history.forEach(item=>{
+
+
+
+            if(
+
+                !item.front
+
+                ||
+
+                !Array.isArray(item.front)
+
+            )
+
+            return;
+
+
+
+
 
 
 
             let nums=
 
-            item.front;
+            item.front
+
+            .map(Number)
+
+            .filter(
+
+                n=>
+
+                n>=1
+
+                &&
+
+                n<=35
+
+            );
+
 
 
 
@@ -128,8 +133,86 @@ class MatrixModel {
 
                     let a=nums[i];
 
-
                     let b=nums[j];
+
+
+
+
+
+
+                    // 防止异常
+
+                    if(
+
+                        !this.matrix[a]
+
+                    ){
+
+
+
+                        this.matrix[a]={};
+
+
+
+                    }
+
+
+
+
+
+
+
+                    if(
+
+                        !this.matrix[a][b]
+
+                    ){
+
+
+
+                        this.matrix[a][b]=0;
+
+
+                    }
+
+
+
+
+
+
+                    if(
+
+                        !this.matrix[b]
+
+                    ){
+
+
+
+                        this.matrix[b]={};
+
+
+
+                    }
+
+
+
+
+
+
+
+                    if(
+
+                        !this.matrix[b][a]
+
+                    ){
+
+
+
+                        this.matrix[b][a]=0;
+
+
+
+                    }
 
 
 
@@ -147,12 +230,12 @@ class MatrixModel {
                 }
 
 
-
             }
 
 
 
         });
+
 
 
 
@@ -205,7 +288,7 @@ class MatrixModel {
 
 
 
-            let total=
+            score[num]=
 
             Object.values(
 
@@ -225,14 +308,6 @@ class MatrixModel {
 
 
 
-
-
-
-
-            score[num]=total;
-
-
-
         });
 
 
@@ -245,7 +320,9 @@ class MatrixModel {
 
         Math.max(
 
-            ...Object.values(score)
+            ...Object.values(score),
+
+            1
 
         );
 
@@ -300,6 +377,7 @@ class MatrixModel {
         );
 
 
+
     }
 
 
@@ -310,13 +388,11 @@ class MatrixModel {
 
 
 
-    // 组合评分
-
     combinationScore(nums){
 
 
 
-        let score=0;
+        let total=0;
 
 
 
@@ -348,13 +424,34 @@ class MatrixModel {
 
 
 
-                score +=
+                let a=Number(nums[i]);
 
-                this.matrix
+                let b=Number(nums[j]);
 
-                [nums[i]]
 
-                [nums[j]];
+
+
+
+
+                if(
+
+                    this.matrix[a]
+
+                    &&
+
+                    this.matrix[a][b]
+
+                ){
+
+
+
+                    total +=
+
+                    this.matrix[a][b];
+
+
+
+                }
 
 
 
@@ -370,7 +467,7 @@ class MatrixModel {
 
 
 
-        return score;
+        return total;
 
 
     }
