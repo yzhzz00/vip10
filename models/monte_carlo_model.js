@@ -1,13 +1,13 @@
 // DLT-AI-CORE VIP
 // models/monte_carlo_model.js
 //
-// 蒙特卡罗模型
+// 蒙特卡罗模型 V2.1
 //
-// 随机模拟组合概率
+// 启动轻量化
+// 分析时增强模拟
 
 
 class MonteCarloModel {
-
 
 
     constructor(){
@@ -15,16 +15,12 @@ class MonteCarloModel {
 
         this.front=[];
 
-
         this.back=[];
 
-
-        this.times=100000;
-
+        this.times=10000;
 
 
     }
-
 
 
 
@@ -37,8 +33,50 @@ class MonteCarloModel {
 
 
 
-        let frontCount={};
+        // 启动阶段使用轻量模拟
 
+        return this.simulate(
+
+            10000
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+    run(times=1000000){
+
+
+
+        return this.simulate(
+
+            times
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    simulate(times){
+
+
+
+        let frontCount={};
 
         let backCount={};
 
@@ -47,21 +85,10 @@ class MonteCarloModel {
 
 
 
-
-        for(
-
-            let i=1;
-
-            i<=35;
-
-            i++
-
-        ){
-
+        for(let i=1;i<=35;i++){
 
 
             frontCount[i]=0;
-
 
 
         }
@@ -71,21 +98,10 @@ class MonteCarloModel {
 
 
 
-
-        for(
-
-            let i=1;
-
-            i<=12;
-
-            i++
-
-        ){
-
+        for(let i=1;i<=12;i++){
 
 
             backCount[i]=0;
-
 
 
         }
@@ -100,7 +116,7 @@ class MonteCarloModel {
 
             let i=0;
 
-            i<this.times;
+            i<times;
 
             i++
 
@@ -117,10 +133,6 @@ class MonteCarloModel {
                 5
 
             );
-
-
-
-
 
 
 
@@ -143,9 +155,7 @@ class MonteCarloModel {
             front.forEach(num=>{
 
 
-
                 frontCount[num]++;
-
 
 
             });
@@ -159,9 +169,7 @@ class MonteCarloModel {
             back.forEach(num=>{
 
 
-
                 backCount[num]++;
-
 
 
             });
@@ -169,8 +177,6 @@ class MonteCarloModel {
 
 
         }
-
-
 
 
 
@@ -190,7 +196,6 @@ class MonteCarloModel {
 
 
 
-
         this.back=
 
         this.normalize(
@@ -204,9 +209,17 @@ class MonteCarloModel {
 
 
 
+        return {
 
 
-        return true;
+            front:this.front,
+
+
+            back:this.back
+
+
+
+        };
 
 
     }
@@ -219,21 +232,14 @@ class MonteCarloModel {
 
 
 
-    pick(
+    pick(max,count){
 
-        max,
-
-        count
-
-    ){
-
-
-
-        let arr=[];
 
 
         let pool=[];
 
+
+        let result=[];
 
 
 
@@ -251,9 +257,7 @@ class MonteCarloModel {
         ){
 
 
-
             pool.push(i);
-
 
 
         }
@@ -266,7 +270,7 @@ class MonteCarloModel {
 
         while(
 
-            arr.length<count
+            result.length<count
 
         ){
 
@@ -289,13 +293,11 @@ class MonteCarloModel {
 
 
 
-
-            arr.push(
+            result.push(
 
                 pool[index]
 
             );
-
 
 
 
@@ -311,7 +313,6 @@ class MonteCarloModel {
             );
 
 
-
         }
 
 
@@ -319,8 +320,7 @@ class MonteCarloModel {
 
 
 
-
-        return arr;
+        return result;
 
 
     }
@@ -341,7 +341,9 @@ class MonteCarloModel {
 
         Math.max(
 
-            ...Object.values(data)
+            ...Object.values(data),
+
+            1
 
         );
 
@@ -361,21 +363,19 @@ class MonteCarloModel {
 
 
 
-            score:
-
-            Number(
+            score:Number(
 
                 (
 
-                data[num]
+                    data[num]
 
-                /
+                    /
 
-                max
+                    max
 
-                *
+                    *
 
-                100
+                    100
 
                 )
 
@@ -396,7 +396,6 @@ class MonteCarloModel {
         );
 
 
-
     }
 
 
@@ -414,9 +413,7 @@ class MonteCarloModel {
         return {
 
 
-
             front:this.front,
-
 
 
             back:this.back

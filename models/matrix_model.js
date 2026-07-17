@@ -1,9 +1,13 @@
 // DLT-AI-CORE VIP
 // models/matrix_model.js
 //
-// 矩阵模型 V2
+// 矩阵关系模型 V2.1
 //
-// 号码共现关系矩阵
+// 功能:
+// 1.号码共现矩阵
+// 2.号码关联评分
+// 3.组合关系评分
+// 4.防止异常数据导致启动失败
 
 
 class MatrixModel {
@@ -11,17 +15,13 @@ class MatrixModel {
 
     constructor(){
 
+        this.front = [];
 
-        this.front=[];
+        this.back = [];
 
-        this.back=[];
-
-        this.matrix={};
-
+        this.matrix = {};
 
     }
-
-
 
 
 
@@ -30,32 +30,32 @@ class MatrixModel {
     train(history){
 
 
-        this.matrix={};
+        this.matrix = {};
 
 
 
+        // 初始化前区35号码矩阵
 
+        for(let i = 1; i <= 35; i++){
 
-        // 初始化35号码矩阵
+            this.matrix[i] = {};
 
-        for(let i=1;i<=35;i++){
+            for(let j = 1; j <= 35; j++){
 
-
-            this.matrix[i]={};
-
-
-            for(let j=1;j<=35;j++){
-
-
-                this.matrix[i][j]=0;
-
+                this.matrix[i][j] = 0;
 
             }
-
 
         }
 
 
+
+
+        if(!Array.isArray(history)){
+
+            return false;
+
+        }
 
 
 
@@ -63,167 +63,96 @@ class MatrixModel {
         history.forEach(item=>{
 
 
-
             if(
-
-                !item.front
-
-                ||
-
+                !item ||
                 !Array.isArray(item.front)
-
-            )
-
-            return;
-
-
-
-
-
-
-
-            let nums=
-
-            item.front
-
-            .map(Number)
-
-            .filter(
-
-                n=>
-
-                n>=1
-
-                &&
-
-                n<=35
-
-            );
-
-
-
-
-
-
-
-
-            for(
-
-                let i=0;
-
-                i<nums.length;
-
-                i++
-
             ){
 
+                return;
 
-
-                for(
-
-                    let j=i+1;
-
-                    j<nums.length;
-
-                    j++
-
-                ){
+            }
 
 
 
-                    let a=nums[i];
-
-                    let b=nums[j];
-
-
-
-
-
-
-                    // 防止异常
-
-                    if(
-
-                        !this.matrix[a]
-
-                    ){
+            let nums = item.front
+                .map(Number)
+                .filter(
+                    n =>
+                    Number.isInteger(n)
+                    &&
+                    n >= 1
+                    &&
+                    n <= 35
+                );
 
 
 
-                        this.matrix[a]={};
+            if(nums.length < 2){
+
+                return;
+
+            }
 
 
 
-                    }
+            for(let i = 0; i < nums.length; i++){
+
+
+                for(let j = i + 1; j < nums.length; j++){
 
 
 
+                    let a = nums[i];
+
+                    let b = nums[j];
 
 
 
+                    // 双向初始化保护
 
-                    if(
+                    if(!this.matrix[a]){
 
-                        !this.matrix[a][b]
-
-                    ){
-
-
-
-                        this.matrix[a][b]=0;
-
+                        this.matrix[a] = {};
 
                     }
 
 
 
-
-
-
                     if(
-
-                        !this.matrix[b]
-
+                        typeof this.matrix[a][b]
+                        !==
+                        "number"
                     ){
 
-
-
-                        this.matrix[b]={};
-
-
+                        this.matrix[a][b] = 0;
 
                     }
 
 
 
+                    if(!this.matrix[b]){
 
-
-
-
-                    if(
-
-                        !this.matrix[b][a]
-
-                    ){
-
-
-
-                        this.matrix[b][a]=0;
-
-
+                        this.matrix[b] = {};
 
                     }
 
 
 
+                    if(
+                        typeof this.matrix[b][a]
+                        !==
+                        "number"
+                    ){
+
+                        this.matrix[b][a] = 0;
+
+                    }
 
 
 
+                    this.matrix[a][b] += 1;
 
-                    this.matrix[a][b]++;
-
-
-                    this.matrix[b][a]++;
+                    this.matrix[b][a] += 1;
 
 
 
@@ -239,17 +168,7 @@ class MatrixModel {
 
 
 
-
-
-
-
-        this.front=
-
-        this.calculate();
-
-
-
-
+        this.front = this.calculate();
 
 
 
@@ -264,47 +183,41 @@ class MatrixModel {
 
 
 
-
-
     calculate(){
 
 
 
-        let score={};
+        let score = {};
 
 
 
-
-
-
-
-        Object.keys(
-
-            this.matrix
-
-        )
-
+        Object.keys(this.matrix)
         .forEach(num=>{
 
 
 
-            score[num]=
+            let total = 0;
 
-            Object.values(
 
-                this.matrix[num]
 
-            )
+            Object.values(this.matrix[num])
+            .forEach(v=>{
 
-            .reduce(
 
-                (a,b)=>
+                if(
+                    typeof v === "number"
+                ){
 
-                a+b,
+                    total += v;
 
-                0
+                }
 
-            );
+
+            });
+
+
+
+            score[num] = total;
 
 
 
@@ -315,10 +228,7 @@ class MatrixModel {
 
 
 
-
-        let max=
-
-        Math.max(
+        let max = Math.max(
 
             ...Object.values(score),
 
@@ -331,39 +241,29 @@ class MatrixModel {
 
 
 
-
         return Object.keys(score)
 
         .map(num=>({
 
 
-
             number:Number(num),
 
 
-
-            score:
-
-            Number(
+            score:Number(
 
                 (
 
-                score[num]
-
-                /
-
-                max
-
-                *
-
-                100
+                    score[num]
+                    /
+                    max
+                    *
+                    100
 
                 )
 
                 .toFixed(2)
 
             )
-
 
 
         }))
@@ -375,7 +275,6 @@ class MatrixModel {
             b.score-a.score
 
         );
-
 
 
     }
@@ -392,44 +291,29 @@ class MatrixModel {
 
 
 
-        let total=0;
+        if(!Array.isArray(nums)){
+
+            return 0;
+
+        }
+
+
+
+        let total = 0;
 
 
 
 
+        for(let i = 0; i < nums.length; i++){
+
+
+            for(let j = i + 1; j < nums.length; j++){
 
 
 
-        for(
+                let a = Number(nums[i]);
 
-            let i=0;
-
-            i<nums.length;
-
-            i++
-
-        ){
-
-
-
-            for(
-
-                let j=i+1;
-
-                j<nums.length;
-
-                j++
-
-            ){
-
-
-
-                let a=Number(nums[i]);
-
-                let b=Number(nums[j]);
-
-
-
+                let b = Number(nums[j]);
 
 
 
@@ -439,16 +323,14 @@ class MatrixModel {
 
                     &&
 
-                    this.matrix[a][b]
+                    typeof this.matrix[a][b]
+                    ===
+                    "number"
 
                 ){
 
 
-
-                    total +=
-
-                    this.matrix[a][b];
-
+                    total += this.matrix[a][b];
 
 
                 }
@@ -458,10 +340,7 @@ class MatrixModel {
             }
 
 
-
         }
-
-
 
 
 
@@ -478,18 +357,13 @@ class MatrixModel {
 
 
 
-
-
     analyze(){
-
 
 
         return {
 
 
-
             front:this.front,
-
 
 
             back:this.back

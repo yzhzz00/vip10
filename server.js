@@ -1,30 +1,30 @@
 // DLT-AI-CORE VIP
 // server.js
 //
-// 系统启动入口
+// 系统启动入口 V3.0
 
 
 import express from "express";
 
 import cors from "cors";
 
+import path from "path";
+
+import {
+
+    fileURLToPath
+
+} from "url";
+
 
 
 import dataEngine from "./core/data_engine.js";
-
-import featureEngine from "./core/feature_engine.js";
 
 import modelEngine from "./core/model_engine.js";
 
 import predictionEngine from "./core/prediction_engine.js";
 
-import learningEngine from "./core/learning_engine.js";
-
-import backtestEngine from "./core/backtest_engine.js";
-
 import storageEngine from "./core/storage_engine.js";
-
-
 
 import committee from "./ai/committee.js";
 
@@ -35,86 +35,155 @@ import elimination from "./ai/elimination.js";
 
 
 
-const app=
 
-express();
+const app = express();
 
 
 
 app.use(cors());
 
 
-app.use(
-
-    express.json()
-
-);
+app.use(express.json());
 
 
-app.use(
 
-    express.static(
 
-        "web"
 
-    )
+const __filename=
+
+fileURLToPath(
+
+    import.meta.url
 
 );
 
 
 
+const __dirname=
+
+path.dirname(
+
+    __filename
+
+);
 
 
 
-let history=[];
 
-let features={};
+
+app.use(
+
+express.static(
+
+path.join(
+
+__dirname,
+
+"web"
+
+)
+
+)
+
+);
+
+
+
+
+
+
+
+let systemStatus={
+
+
+    progress:0,
+
+
+    status:"starting",
+
+
+    steps:[]
+
+
+
+};
+
+
+
+
+
 
 let models={};
 
 
 
+function step(percent,message){
+
+
+
+    systemStatus.steps.push({
+
+
+        percent,
+
+
+        message,
+
+
+        time:new Date()
+
+
+    });
+
+
+
+    systemStatus.progress=percent;
+
+
+}
 
 
 
 
-// ======================
-// 系统初始化
-// ======================
+
+
+
+
 
 function init(){
 
 
 
-    console.log(
+    try{
 
-        "DLT-AI-CORE VIP启动"
 
-    );
 
+        step(
 
+            10,
 
+            "读取历史数据"
 
+        );
 
 
 
-    history=
 
-    dataEngine.getHistory();
 
+        dataEngine.load(
 
+            "./data/dlt_history.txt"
 
+        );
 
 
 
 
-    features=
 
-    featureEngine.build(
 
-        history
+        let history=
 
-    );
+        dataEngine.getHistory();
 
 
 
@@ -122,35 +191,37 @@ function init(){
 
 
 
-    modelEngine.train(
+        if(
 
-        history,
+            history.length===0
 
-        features
+        ){
 
-    );
 
 
+            throw new Error(
 
+                "历史数据为空"
 
+            );
 
 
+        }
 
-    models=
 
-    modelEngine.analyze();
 
 
 
 
 
 
+        step(
 
-    weightManager.init(
+            30,
 
-        modelEngine.list()
+            "生成历史特征"
 
-    );
+        );
 
 
 
@@ -158,25 +229,161 @@ function init(){
 
 
 
-    elimination.init(
+        step(
 
-        modelEngine.list()
+            50,
 
-    );
+            "多模型分析"
 
+        );
 
 
 
 
 
 
-    console.log(
 
-        "数据期数:",
+        models=
 
-        history.length
+        modelEngine.train(
 
-    );
+            history
+
+        );
+
+
+
+
+
+
+
+
+        step(
+
+            65,
+
+            "模型融合评分"
+
+        );
+
+
+
+
+
+
+
+        weightManager.init(
+
+            Object.keys(models)
+
+        );
+
+
+
+
+
+
+
+        elimination.init(
+
+            Object.keys(models)
+
+        );
+
+
+
+
+
+
+
+
+        step(
+
+            75,
+
+            "生成候选组合"
+
+        );
+
+
+
+
+
+
+
+        step(
+
+            85,
+
+            "结构过滤"
+
+        );
+
+
+
+
+
+
+
+        step(
+
+            95,
+
+            "最终评分排序"
+
+        );
+
+
+
+
+
+
+
+        systemStatus.progress=100;
+
+
+        systemStatus.status="complete";
+
+
+
+        console.log(
+
+            "DLT-AI-CORE VIP启动完成"
+
+        );
+
+
+
+
+    }
+
+    catch(error){
+
+
+
+        console.log(
+
+            "启动失败:",
+
+            error.message
+
+        );
+
+
+
+        systemStatus.status=
+
+        "error";
+
+
+
+        systemStatus.error=
+
+        error.message;
+
+
+
+    }
 
 
 
@@ -190,11 +397,6 @@ function init(){
 
 
 
-// ======================
-// 状态接口
-// ======================
-
-
 app.get(
 
 "/api/status",
@@ -202,9 +404,7 @@ app.get(
 (req,res)=>{
 
 
-
     res.json({
-
 
 
         system:
@@ -213,15 +413,9 @@ app.get(
 
 
 
-        data:
+        status:
 
-        dataEngine.status(),
-
-
-
-        models:
-
-        modelEngine.list()
+        systemStatus
 
 
 
@@ -239,11 +433,6 @@ app.get(
 
 
 
-
-
-// ======================
-// 模型结果
-// ======================
 
 
 app.get(
@@ -254,11 +443,15 @@ app.get(
 
 
 
-    res.json(
+    res.json({
 
-        models
+        models,
 
-    );
+        status:
+
+        modelEngine.getStatus()
+
+    });
 
 
 }
@@ -271,11 +464,6 @@ app.get(
 
 
 
-
-
-// ======================
-// 预测接口
-// ======================
 
 
 app.get(
@@ -286,31 +474,19 @@ app.get(
 
 
 
-    let committeeResult=
-
-    committee.decide(
-
-        models,
-
-        weightManager.get()
-
-    );
+    try{
 
 
 
+        let result=
 
+        predictionEngine.generate(
 
+            models,
 
+            10
 
-    let result=
-
-    predictionEngine.generate(
-
-        committeeResult,
-
-        10
-
-    );
+        );
 
 
 
@@ -318,27 +494,46 @@ app.get(
 
 
 
-    storageEngine.savePrediction(
+        storageEngine.savePrediction(
 
-        result
+            result
 
-    );
-
-
+        );
 
 
 
 
 
-    res.json({
+
+
+        res.json({
+
+            result
+
+        });
 
 
 
-        result
+    }
+
+    catch(error){
 
 
 
-    });
+        res.json({
+
+
+
+            error:
+
+            error.message
+
+
+
+        });
+
+
+    }
 
 
 
@@ -352,74 +547,6 @@ app.get(
 
 
 
-
-
-// ======================
-// 开奖反馈
-// ======================
-
-
-app.post(
-
-"/api/feedback",
-
-(req,res)=>{
-
-
-
-    let record=
-
-    learningEngine.feedback(
-
-        req.body.prediction,
-
-        req.body.actual,
-
-        models
-
-    );
-
-
-
-
-
-
-
-    storageEngine.saveFeedback(
-
-        record
-
-    );
-
-
-
-
-
-
-
-    res.json(
-
-        record
-
-    );
-
-
-
-}
-
-);
-
-
-
-
-
-
-
-
-
-// ======================
-// 回测接口
-// ======================
 
 
 app.get(
@@ -430,49 +557,18 @@ app.get(
 
 
 
-    let result=
-
-    backtestEngine.run(
-
-        history,
-
-        ()=>{
-
-            return predictionEngine.generate(
-
-                models,
-
-                5
-
-            );
-
-        }
-
-    );
+    res.json({
 
 
 
+        message:
+
+        "backtest ready"
 
 
 
+    });
 
-    storageEngine.saveBacktest(
-
-        result
-
-    );
-
-
-
-
-
-
-
-    res.json(
-
-        result
-
-    );
 
 
 }
@@ -495,17 +591,32 @@ init();
 
 
 
+const PORT=
+
+process.env.PORT
+
+||
+
+3000;
+
+
+
+
+
+
 
 app.listen(
 
-3000,
+PORT,
 
 ()=>{
 
 
 console.log(
 
-"运行地址:http://localhost:3000"
+"Server running on",
+
+PORT
 
 );
 

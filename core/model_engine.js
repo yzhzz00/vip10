@@ -1,38 +1,27 @@
 // DLT-AI-CORE VIP
 // core/model_engine.js
 //
-// 模型引擎升级版
+// 模型调度引擎 V2.1
 //
-// 功能:
-// 1.统一管理9大模型
-// 2.输入历史数据和特征
-// 3.输出模型分析结果
+// 负责:
+// 1.加载全部模型
+// 2.统一训练
+// 3.统一输出
 
 
-import frequency from "../models/frequency_model.js";
-
-import trend from "../models/trend_model.js";
-
-import bayes from "../models/bayes_model.js";
-
-import markov from "../models/markov_model.js";
-
-import omission from "../models/omission_model.js";
-
-import cycle from "../models/cycle_model.js";
-
-import matrix from "../models/matrix_model.js";
-
-import monteCarlo from "../models/monte_carlo_model.js";
-
-import dltTheory from "../models/dlt_theory_model.js";
-
-
+import frequencyModel from "../models/frequency_model.js";
+import trendModel from "../models/trend_model.js";
+import bayesModel from "../models/bayes_model.js";
+import markovModel from "../models/markov_model.js";
+import omissionModel from "../models/omission_model.js";
+import cycleModel from "../models/cycle_model.js";
+import matrixModel from "../models/matrix_model.js";
+import monteCarloModel from "../models/monte_carlo_model.js";
+import dltTheoryModel from "../models/dlt_theory_model.js";
 
 
 
 class ModelEngine {
-
 
 
     constructor(){
@@ -40,41 +29,32 @@ class ModelEngine {
 
         this.models={
 
+            frequency:frequencyModel,
 
+            trend:trendModel,
 
-            frequency,
+            bayes:bayesModel,
 
+            markov:markovModel,
 
-            trend,
+            omission:omissionModel,
 
+            cycle:cycleModel,
 
-            bayes,
+            matrix:matrixModel,
 
+            montecarlo:monteCarloModel,
 
-            markov,
-
-
-            omission,
-
-
-            cycle,
-
-
-            matrix,
-
-
-            monteCarlo,
-
-
-            dltTheory
-
-
+            theory:dltTheoryModel
 
         };
 
 
 
-        this.result={};
+        this.results={};
+
+
+        this.status={};
 
 
     }
@@ -86,134 +66,86 @@ class ModelEngine {
 
 
 
-
-    // ======================
-    // 模型训练
-    // ======================
-
-    train(
-
-        history,
-
-        features
-
-    ){
+    train(history){
 
 
 
-        Object.keys(
-
-            this.models
-
-        )
+        Object.keys(this.models)
 
         .forEach(name=>{
 
 
 
-            let model=
-
-            this.models[name];
+            try{
 
 
 
+                let model=
 
-
-
-
-            if(
-
-                model.train
-
-            ){
+                this.models[name];
 
 
 
                 model.train(
 
-                    history,
-
-                    features
+                    history
 
                 );
 
 
 
-            }
-
-
-
-        });
-
-
-
-
-
-
-
-        return true;
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 模型分析
-    // ======================
-
-    analyze(){
-
-
-
-        this.result={};
-
-
-
-
-
-
-
-        Object.keys(
-
-            this.models
-
-        )
-
-        .forEach(name=>{
-
-
-
-            let model=
-
-            this.models[name];
-
-
-
-
-
-
-
-            if(
-
-                model.analyze
-
-            ){
-
-
-
-                this.result[name]=
+                this.results[name]=
 
                 model.analyze();
 
 
 
+                this.status[name]={
+
+
+                    state:"active",
+
+
+                    error:null
+
+
+
+                };
+
+
+
+            }
+
+            catch(error){
+
+
+
+                console.log(
+
+                    name,
+
+                    "模型失败",
+
+                    error.message
+
+                );
+
+
+
+                this.status[name]={
+
+
+                    state:"failed",
+
+
+                    error:error.message
+
+
+
+                };
+
+
+
             }
 
 
@@ -225,29 +157,7 @@ class ModelEngine {
 
 
 
-
-        return this.result;
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 获取模型结果
-    // ======================
-
-    getResult(){
-
-
-
-        return this.result;
+        return this.results;
 
 
     }
@@ -260,20 +170,27 @@ class ModelEngine {
 
 
 
-    // ======================
-    // 获取模型列表
-    // ======================
-
-    list(){
+    getResults(){
 
 
 
-        return Object.keys(
+        return this.results;
 
-            this.models
 
-        );
+    }
 
+
+
+
+
+
+
+
+    getStatus(){
+
+
+
+        return this.status;
 
 
     }

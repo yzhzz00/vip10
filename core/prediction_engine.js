@@ -1,17 +1,14 @@
 // DLT-AI-CORE VIP
 // core/prediction_engine.js
 //
-// 预测引擎 V2
+// 预测引擎 V3.0
 //
-// 增加:
-// 1.三区过滤
-// 2.奇偶过滤
-// 3.和值约束
-// 4.连号控制
-// 5.后区结构控制
+// 模型融合后的最终选号生成
 
 
-import CONFIG from "../config.js";
+import matrixModel from "../models/matrix_model.js";
+
+import dltTheoryModel from "../models/dlt_theory_model.js";
 
 
 
@@ -21,9 +18,14 @@ class PredictionEngine {
 
     constructor(){
 
+
         this.result=[];
 
+
     }
+
+
+
 
 
 
@@ -40,9 +42,9 @@ class PredictionEngine {
 
 
 
-        let frontPool =
+        let frontPool=
 
-        this.buildPool(
+        this.pool(
 
             modelResult,
 
@@ -53,9 +55,12 @@ class PredictionEngine {
 
 
 
-        let backPool =
 
-        this.buildPool(
+
+
+        let backPool=
+
+        this.pool(
 
             modelResult,
 
@@ -66,7 +71,17 @@ class PredictionEngine {
 
 
 
+
+
         let candidates=[];
+
+
+
+
+
+
+        let times=50000;
+
 
 
 
@@ -76,7 +91,7 @@ class PredictionEngine {
 
             let i=0;
 
-            i<CONFIG.MONTE_CARLO_TIMES;
+            i<times;
 
             i++
 
@@ -84,9 +99,9 @@ class PredictionEngine {
 
 
 
-            let front =
+            let front=
 
-            this.randomPick(
+            this.pick(
 
                 frontPool,
 
@@ -98,15 +113,19 @@ class PredictionEngine {
 
 
 
-            let back =
 
-            this.randomPick(
+
+            let back=
+
+            this.pick(
 
                 backPool,
 
                 2
 
             );
+
+
 
 
 
@@ -131,40 +150,16 @@ class PredictionEngine {
 
 
 
-            if(
 
-                !this.checkFront(front)
+            let theory=
 
-            )
+            dltTheoryModel
 
-                continue;
-
-
-
-
-
-            if(
-
-                !this.checkBack(back)
-
-            )
-
-                continue;
-
-
-
-
-
-
-            let score =
-
-            this.calculateScore(
+            .combinationScore(
 
                 front,
 
-                back,
-
-                modelResult
+                back
 
             );
 
@@ -174,21 +169,84 @@ class PredictionEngine {
 
 
 
-            candidates.push({
+
+            let matrix=
+
+            matrixModel
+
+            .combinationScore(
+
+                front
+
+            );
 
 
 
-                front,
-
-
-                back,
-
-
-                score
 
 
 
-            });
+
+
+            let score=
+
+            (
+
+                theory
+
+                +
+
+                matrix
+
+            )
+
+            /
+
+            2;
+
+
+
+
+
+
+
+
+            if(
+
+                this.valid(
+
+                    front,
+
+                    back
+
+                )
+
+            ){
+
+
+
+                candidates.push({
+
+
+
+                    front,
+
+
+                    back,
+
+
+                    score:Number(
+
+                        score.toFixed(2)
+
+                    )
+
+
+
+                });
+
+
+
+            }
 
 
 
@@ -199,7 +257,7 @@ class PredictionEngine {
 
 
 
-        this.result =
+        this.result=
 
         this.unique(
 
@@ -227,6 +285,7 @@ class PredictionEngine {
 
 
 
+
         return this.result;
 
 
@@ -240,7 +299,7 @@ class PredictionEngine {
 
 
 
-    buildPool(
+    pool(
 
         models,
 
@@ -256,6 +315,8 @@ class PredictionEngine {
 
 
 
+
+
         Object.values(models)
 
         .forEach(model=>{
@@ -264,15 +325,12 @@ class PredictionEngine {
 
             if(
 
-                !Array.isArray(
-
-                    model[type]
-
-                )
+                !model[type]
 
             )
 
             return;
+
 
 
 
@@ -285,29 +343,41 @@ class PredictionEngine {
 
 
 
-                if(item.number){
+                let n=
+
+                Number(
+
+                    item.number
+
+                );
 
 
 
-                    map[item.number]=
-
-                    (
-
-                        map[item.number]
-
-                        ||
-
-                        0
-
-                    )
-
-                    +
-
-                    item.score;
 
 
 
-                }
+
+                if(!map[n])
+
+                    map[n]=0;
+
+
+
+
+
+
+
+                map[n]+=
+
+                Number(
+
+                    item.score
+
+                    ||
+
+                    0
+
+                );
 
 
 
@@ -323,16 +393,17 @@ class PredictionEngine {
 
 
 
+
         return Object.keys(map)
 
-        .map(num=>({
+        .map(n=>({
 
 
 
-            number:Number(num),
+            number:Number(n),
 
 
-            score:map[num]
+            score:map[n]
 
 
 
@@ -354,11 +425,11 @@ class PredictionEngine {
 
             ?
 
-            30
+            25
 
             :
 
-            12
+            10
 
         );
 
@@ -373,7 +444,7 @@ class PredictionEngine {
 
 
 
-    randomPick(
+    pick(
 
         pool,
 
@@ -392,6 +463,7 @@ class PredictionEngine {
 
 
 
+
         while(
 
             result.length<size
@@ -400,15 +472,15 @@ class PredictionEngine {
 
 
 
-            let total=
+            let index=
 
-            copy.reduce(
+            Math.floor(
 
-                (a,b)=>
+                Math.random()
 
-                a+b.score,
+                *
 
-                0
+                copy.length
 
             );
 
@@ -416,72 +488,34 @@ class PredictionEngine {
 
 
 
-            let r=
-
-            Math.random()
-
-            *
-
-            total;
 
 
+            result.push(
+
+                copy[index].number
+
+            );
 
 
 
-            for(
-
-                let i=0;
-
-                i<copy.length;
-
-                i++
-
-            ){
 
 
 
-                r-=copy[i].score;
 
+            copy.splice(
 
+                index,
 
-                if(
+                1
 
-                    r<=0
-
-                ){
-
-
-
-                    result.push(
-
-                        copy[i].number
-
-                    );
-
-
-
-                    copy.splice(
-
-                        i,
-
-                        1
-
-                    );
-
-
-
-                    break;
-
-
-                }
-
-
-
-            }
+            );
 
 
 
         }
+
+
+
 
 
 
@@ -499,73 +533,31 @@ class PredictionEngine {
 
 
 
-    // =====================
-    // 前区结构过滤
-    // =====================
+    valid(
 
-    checkFront(nums){
+        front,
 
+        back
 
-
-        let zone=[0,0,0];
-
-        let odd=0;
+    ){
 
 
 
+        let odd=
 
+        front.filter(
 
-
-        nums.forEach(n=>{
-
-
-
-            if(n<=12)
-
-                zone[0]++;
-
-
-            else if(n<=24)
-
-                zone[1]++;
-
-
-            else
-
-                zone[2]++;
-
-
-
-
-
-            if(n%2)
-
-                odd++;
-
-
-
-        });
-
-
-
-
-
-
-        //三区不能极端
-
-        if(
-
-            Math.max(...zone)>=4
+            n=>n%2
 
         )
 
-        return false;
+        .length;
 
 
 
 
 
-        //奇偶控制
+
 
         if(
 
@@ -584,11 +576,14 @@ class PredictionEngine {
 
 
 
+
         let sum=
 
-        nums.reduce(
+        front.reduce(
 
-            (a,b)=>a+b,
+            (a,b)=>
+
+            a+b,
 
             0
 
@@ -598,13 +593,15 @@ class PredictionEngine {
 
 
 
+
+
         if(
 
-            sum<60
+            sum<70
 
             ||
 
-            sum>150
+            sum>140
 
         )
 
@@ -615,9 +612,13 @@ class PredictionEngine {
 
 
 
-        //最多两个连号
 
-        let link=0;
+
+        let repeat=0;
+
+
+
+
 
 
 
@@ -625,7 +626,7 @@ class PredictionEngine {
 
             let i=1;
 
-            i<nums.length;
+            i<front.length;
 
             i++
 
@@ -635,11 +636,17 @@ class PredictionEngine {
 
             if(
 
-                nums[i]-nums[i-1]===1
+                front[i]
+
+                -
+
+                front[i-1]
+
+                ===1
 
             )
 
-            link++;
+            repeat++;
 
 
 
@@ -647,13 +654,18 @@ class PredictionEngine {
 
 
 
+
+
+
+
         if(
 
-            link>2
+            repeat>2
 
         )
 
         return false;
+
 
 
 
@@ -661,186 +673,6 @@ class PredictionEngine {
 
 
         return true;
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // =====================
-    // 后区过滤
-    // =====================
-
-    checkBack(nums){
-
-
-
-        if(
-
-            nums[0]===nums[1]
-
-        )
-
-        return false;
-
-
-
-
-
-        // 避免长期极端小号
-
-        if(
-
-            nums[0]<=3
-
-            &&
-
-            nums[1]<=3
-
-        )
-
-        return false;
-
-
-
-
-
-        return true;
-
-
-    }
-
-
-
-
-
-
-
-
-
-    calculateScore(
-
-        front,
-
-        back,
-
-        models
-
-    ){
-
-
-
-        let score=0;
-
-
-        let max=0;
-
-
-
-
-
-
-        Object.values(models)
-
-        .forEach(model=>{
-
-
-
-            ["front","back"]
-
-            .forEach(type=>{
-
-
-
-                if(
-
-                    !Array.isArray(
-
-                        model[type]
-
-                    )
-
-                )
-
-                return;
-
-
-
-
-
-
-                model[type]
-
-                .forEach(item=>{
-
-
-
-                    max +=
-
-                    item.score || 0;
-
-
-
-
-
-                    if(
-
-                        front.includes(item.number)
-
-                        ||
-
-                        back.includes(item.number)
-
-                    )
-
-                    score +=
-
-                    item.score || 0;
-
-
-
-                });
-
-
-
-            });
-
-
-
-        });
-
-
-
-
-
-
-
-        if(max===0)
-
-            return 0;
-
-
-
-
-
-
-        return Number(
-
-            (
-
-            score/max*100
-
-            )
-
-            .toFixed(2)
-
-        );
 
 
     }
@@ -860,7 +692,10 @@ class PredictionEngine {
         let map={};
 
 
-        let result=[];
+        let arr=[];
+
+
+
 
 
 
@@ -871,7 +706,7 @@ class PredictionEngine {
 
             let key=
 
-            item.front.join("-")
+            item.front.join(",")
 
             +
 
@@ -879,7 +714,9 @@ class PredictionEngine {
 
             +
 
-            item.back.join("-");
+            item.back.join(",");
+
+
 
 
 
@@ -896,7 +733,7 @@ class PredictionEngine {
                 map[key]=true;
 
 
-                result.push(item);
+                arr.push(item);
 
 
 
@@ -910,7 +747,9 @@ class PredictionEngine {
 
 
 
-        return result;
+
+
+        return arr;
 
 
     }
