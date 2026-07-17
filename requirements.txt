@@ -1,5 +1,9 @@
 text
 
-streamlit
+--force-reinstall
 
-numpy
+--extra-index-url https://pypi.tuna.tsinghua.edu.cn/simple(https://pypi.tuna.tsinghua.edu.cn/simple)
+
+pandas==1.5.3
+
+--only-binary :all:
