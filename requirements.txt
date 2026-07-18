@@ -1,8 +1,0 @@
---extra-index-url https://pypi.tuna.tsinghua.edu.cn/simple
-streamlit==1.32.0
-numpy==1.24.3
-pandas==1.5.3
-scipy==1.10.1
-
-
-
