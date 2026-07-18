@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from core import load_data, get_ai_prediction, feedback_learning
 
 st.set_page_config(page_title="DLT-AI-CORE V10.2", layout="wide")
@@ -40,14 +41,16 @@ with tab2:
     back_inputs = [col.number_input(f"后区{i+1}", 1, 12, 1, key=f"b{i}") for i, col in enumerate(back_cols)]
     
     if st.button("✅ 录入并更新权重", type="secondary", use_container_width=True):
-        if len(set(front_inputs + back_inputs)) != 7:
-            st.error("号码重复！")
+        all_inputs = front_inputs + back_inputs
+        if len(set(all_inputs)) != 7:
+            st.error("❌ 号码不能重复！")
         elif not 78 <= sum(front_inputs) <= 112:
-            st.warning("和值超出范围！")
+            st.warning(f"⚠️ 前区和值{sum(front_inputs)}超出范围(78-112)，请确认！")
         else:
             hit_counts, _ = feedback_learning(mem_mgr, int(issue), sorted(front_inputs), sorted(back_inputs))
-            st.success("学习完成！")
-            st.write("本期命中数：", hit_counts)
+            st.success("🎉 学习完成！AI权重已更新。")
+            st.write("本期各模型命中数：", hit_counts)
             st.rerun()
 
+st.divider()
 st.caption("⚠️ 免责声明：本系统为统计学研究工具，不构成购彩建议。请理性对待，切勿沉迷。")

@@ -28,8 +28,15 @@ class MemoryManager:
         self.memory = self._load_or_init_memory()
 
     def _load_full_data(self):
+        # 关键：header=None（无表头）+ sep='\s+'（空格分隔）+ names手动指定列名
         cols = ['issue','date','f1','f2','f3','f4','f5','b1','b2']
-        df = pd.read_csv(self.data_path, header=0, names=cols, usecols=range(9))
+        df = pd.read_csv(
+            self.data_path,
+            sep='\s+',       # 任意数量空格都当分隔符
+            header=None,     # 明确无表头，第一行直接当数据读
+            names=cols,      # 手动指定9列的列名
+            usecols=range(9) # 只取前9列，避免多余空格干扰
+        )
         df['front'] = df[['f1','f2','f3','f4','f5']].apply(lambda x: sorted(x.tolist()), axis=1)
         df['back'] = df[['b1','b2']].apply(lambda x: sorted(x.tolist()), axis=1)
         return df
@@ -41,11 +48,11 @@ class MemoryManager:
         return self._pretrain()
 
     def _pretrain(self):
-        print("首次运行：执行2800期全量预训练...")
+        print("首次运行：执行全量预训练...")
         df = self.df
         hist_front = df['front'].tolist()
         flat_front = [n for draw in hist_front for n in draw]
-        self.freq_front = Counter(flat_front)
+        freq_front = Counter(flat_front)
         
         weights = {name: 1.0/len(MODEL_NAMES) for name in MODEL_NAMES}
         memory = {
@@ -53,14 +60,14 @@ class MemoryManager:
             "rolling_front": hist_front[-ROLLING_WINDOW:],
             "rolling_back": df['back'].tolist()[-ROLLING_WINDOW:],
             "total_issues": len(df),
-            "freq_front": {str(k):v for k,v in self.freq_front.items()},
+            "freq_front": {str(k):v for k,v in freq_front.items()},
             "history_hits": [],
             "model_hit_history": {name: [] for name in MODEL_NAMES},
             "model_top20": {name: [] for name in MODEL_NAMES}
         }
         with open(self.memory_path, "w") as f:
             json.dump(memory, f)
-        print("预训练完成！")
+        print(f"预训练完成！共加载{len(df)}期历史数据")
         return memory
 
     def update_rolling_window(self, new_front, new_back):
@@ -71,13 +78,11 @@ class MemoryManager:
             self.memory["rolling_back"].pop(0)
 
     def update_weights_and_hits(self, hit_counts):
-        # 更新命中历史
         for name in MODEL_NAMES:
             self.memory["model_hit_history"][name].append(hit_counts[name])
             if len(self.memory["model_hit_history"][name]) > 5:
                 self.memory["model_hit_history"][name].pop(0)
         
-        # 淘汰与解冻机制
         for name in MODEL_NAMES:
             hit_hist = self.memory["model_hit_history"][name]
             current_weight = self.memory["weights"][name]
@@ -88,7 +93,6 @@ class MemoryManager:
             elif len(hit_hist) >= 3 and current_weight < 0.07:
                 self.memory["weights"][name] *= 0.9
 
-        # 动态权重调整
         total_hits = sum(hit_counts.values())
         lr = 0.05 if total_hits >= 3 else 0.2
         current_weights = np.array([self.memory["weights"][name] for name in MODEL_NAMES])
@@ -259,7 +263,7 @@ class MonteCarloSampler:
             sample = sorted(sample_idx + 1)
             if not self.model._validate_structure(sample):
                 continue
-            if self._calc_crowd_score(sample) >= 0.8:  # 反人类过滤
+            if self._calc_crowd_score(sample) >= 0.8:
                 continue
             if len(set(sample) & self.cold_nums) < 1:
                 continue
