@@ -1,305 +1,234 @@
-import numpy as np
 import pandas as pd
+import numpy as np
+from scipy import stats
 import json
 import os
-from collections import Counter
-from scipy.stats import poisson
+import streamlit as st
 
-# ==================== 全局常量 ====================
-N_FRONT, N_BACK = 35, 12
-ROLLING_WINDOW = 200
-MC_SAMPLES = 5000
-MIN_SUM, MAX_SUM = 78, 112
-ODD_RATIOS = {(2,3), (3,2)}
-ZONE_RATIOS = {(1,2,2), (2,1,2), (2,2,1)}
-MAX_CONSECUTIVE = 2
-MIN_COLD_OMISSION = 10
-MODEL_NAMES = ["频率", "遗漏", "贝叶斯", "马尔可夫", "关联矩阵", "趋势", "周期", "结构"]
-FREEZE_WEIGHT = 0.02
-BASE_WEIGHT = 0.05
-MAX_WEIGHT = 0.3
+DATA_FILE = "data/data.csv"
+MEMORY_FILE = "data/ai_memory.json"
 
-# ==================== 记忆管理 ====================
 class MemoryManager:
-    def __init__(self, data_path="data.csv"):
-        self.data_path = data_path
-        self.memory_path = "ai_memory.json"
-        self.df = self._load_full_data()
-        self.memory = self._load_or_init_memory()
-
-    def _load_full_data(self):
-        # 关键：header=None（无表头）+ sep='\s+'（空格分隔）+ names手动指定列名
-        cols = ['issue','date','f1','f2','f3','f4','f5','b1','b2']
-        df = pd.read_csv(
-            self.data_path,
-            sep='\s+',       # 任意数量空格都当分隔符
-            header=None,     # 明确无表头，第一行直接当数据读
-            names=cols,      # 手动指定9列的列名
-            usecols=range(9) # 只取前9列，避免多余空格干扰
-        )
-        df['front'] = df[['f1','f2','f3','f4','f5']].apply(lambda x: sorted(x.tolist()), axis=1)
-        df['back'] = df[['b1','b2']].apply(lambda x: sorted(x.tolist()), axis=1)
-        return df
-
-    def _load_or_init_memory(self):
-        if os.path.exists(self.memory_path):
-            with open(self.memory_path, "r") as f:
-                return json.load(f)
-        return self._pretrain()
-
-    def _pretrain(self):
-        print("首次运行：执行全量预训练...")
-        df = self.df
-        hist_front = df['front'].tolist()
-        flat_front = [n for draw in hist_front for n in draw]
-        freq_front = Counter(flat_front)
+    def __init__(self):
+        self.memory = self._load_memory()
         
-        weights = {name: 1.0/len(MODEL_NAMES) for name in MODEL_NAMES}
-        memory = {
-            "weights": weights,
-            "rolling_front": hist_front[-ROLLING_WINDOW:],
-            "rolling_back": df['back'].tolist()[-ROLLING_WINDOW:],
-            "total_issues": len(df),
-            "freq_front": {str(k):v for k,v in freq_front.items()},
-            "history_hits": [],
-            "model_hit_history": {name: [] for name in MODEL_NAMES},
-            "model_top20": {name: [] for name in MODEL_NAMES}
-        }
-        with open(self.memory_path, "w") as f:
-            json.dump(memory, f)
-        print(f"预训练完成！共加载{len(df)}期历史数据")
-        return memory
+        # 🔥【终极修复】如果记忆文件损坏或为空，强制初始化一个健康的
+        if not self.memory or not isinstance(self.memory, dict):
+            st.warning("⚠️ 检测到记忆文件异常或为空，正在自动重建初始记忆...")
+            self.memory = {
+                "total_issues": 0, 
+                "rolling_window": [], 
+                "feature_weights": {"hot": 1.0, "cold": 1.0, "jump": 1.0, "math": 1.0, "chaos": 1.0},
+                "model_hit_counts": {"hot": 0, "cold": 0, "jump": 0, "math": 0, "chaos": 0},
+                "history_hits": []
+            }
+            self.save_memory() # 立即保存健康文件，防止下次还报错
 
-    def update_rolling_window(self, new_front, new_back):
-        self.memory["rolling_front"].append(new_front)
-        self.memory["rolling_back"].append(new_back)
-        if len(self.memory["rolling_front"]) > ROLLING_WINDOW:
-            self.memory["rolling_front"].pop(0)
-            self.memory["rolling_back"].pop(0)
-
-    def update_weights_and_hits(self, hit_counts):
-        for name in MODEL_NAMES:
-            self.memory["model_hit_history"][name].append(hit_counts[name])
-            if len(self.memory["model_hit_history"][name]) > 5:
-                self.memory["model_hit_history"][name].pop(0)
-        
-        for name in MODEL_NAMES:
-            hit_hist = self.memory["model_hit_history"][name]
-            current_weight = self.memory["weights"][name]
-            if len(hit_hist) >= 5 and sum(hit_hist) <= 0:
-                self.memory["weights"][name] = FREEZE_WEIGHT
-            elif len(hit_hist) >= 2 and sum(hit_hist[-2:]) >= 1 and current_weight == FREEZE_WEIGHT:
-                self.memory["weights"][name] = BASE_WEIGHT
-            elif len(hit_hist) >= 3 and current_weight < 0.07:
-                self.memory["weights"][name] *= 0.9
-
-        total_hits = sum(hit_counts.values())
-        lr = 0.05 if total_hits >= 3 else 0.2
-        current_weights = np.array([self.memory["weights"][name] for name in MODEL_NAMES])
-        hit_rates = np.array([hit_counts[name]/5 for name in MODEL_NAMES])
-        target = hit_rates / (hit_rates.sum() + 1e-9)
-        new_weights = current_weights + lr * (target - current_weights)
-        new_weights = np.clip(new_weights, FREEZE_WEIGHT, MAX_WEIGHT)
-        new_weights /= new_weights.sum()
-        for i, name in enumerate(MODEL_NAMES):
-            self.memory["weights"][name] = float(new_weights[i])
+    def _load_memory(self):
+        """加载记忆文件"""
+        if os.path.exists(MEMORY_FILE):
+            try:
+                with open(MEMORY_FILE, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    if not content: # 如果文件存在但里面是空的
+                        return None
+                    return json.loads(content)
+            except (json.JSONDecodeError, FileNotFoundError):
+                return None
+        return None
 
     def save_memory(self):
-        if len(self.memory["history_hits"]) > 1000:
-            self.memory["history_hits"] = self.memory["history_hits"][-1000:]
-        with open(self.memory_path, "w") as f:
+        os.makedirs(os.path.dirname(MEMORY_FILE), exist_ok=True)
+        with open(MEMORY_FILE, 'w', encoding='utf-8') as f:
             json.dump(self.memory, f, indent=2)
 
-# ==================== 8大模型集成 ====================
-class ModelEnsemble:
-    def __init__(self, memory_manager):
-        self.mem_mgr = memory_manager
-        self.rolling_front = memory_manager.memory["rolling_front"]
-        self.omission = self._get_omission()
+    def _load_full_data(self):
+        """读取无表头的 data.csv，空格分隔"""
+        if not os.path.exists(DATA_FILE):
+            return pd.DataFrame()
+            
+        try:
+            # header=None: 无表头；sep='\s+': 空格分隔；dtype=str: 强制读成字符串防止数字变科学计数法
+            df = pd.read_csv(DATA_FILE, header=None, sep='\s+', dtype=str)
+            
+            # 检查列数是否足够 (至少9列)
+            if df.shape[1] < 9:
+                return pd.DataFrame()
+                
+            # 赋予列名，方便后续处理
+            df.columns = ['issue', 'date', 'f1', 'f2', 'f3', 'f4', 'f5', 'b1', 'b2'] + list(df.columns[9:])
+            
+            # 清洗数据：把所有号码转成整数，非法的变成NaN
+            for col in ['f1', 'f2', 'f3', 'f4', 'f5', 'b1', 'b2']:
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+                
+            # 剔除包含NaN的行（即数据格式错误的行）
+            df.dropna(subset=['issue', 'f1', 'f2', 'f3', 'f4', 'f5', 'b1', 'b2'], inplace=True)
+            
+            return df
+        except Exception as e:
+            st.error(f"❌ 读取CSV失败: {e}")
+            return pd.DataFrame()
 
-    def _get_omission(self):
-        last_seen = np.full(N_FRONT, -1)
-        for idx, draw in enumerate(reversed(self.rolling_front)):
-            for n in draw:
-                if last_seen[n-1] == -1:
-                    last_seen[n-1] = idx
-        return np.where(last_seen == -1, len(self.rolling_front), last_seen)
+    def get_history(self, n=100):
+        """获取最近N期历史数据"""
+        df = self._load_full_data()
+        if df.empty:
+            return pd.DataFrame()
+        # 按期号倒序取前N期，然后再倒序回来，保持时间正序
+        return df.sort_values('issue', ascending=False).head(n).sort_values('issue')
 
-    def _model_freq(self):
-        long_freq = np.array([self.mem_mgr.memory["freq_front"].get(str(i+1), 0) for i in range(N_FRONT)])
-        short_counts = np.array([n for draw in self.rolling_front for n in draw].count(i+1) for i in range(N_FRONT))
-        return 0.3 * (long_freq / long_freq.sum()) + 0.7 * (short_counts / (short_counts.sum() + 1e-9))
+    def get_last_issue(self):
+        """获取最新一期期号"""
+        df = self._load_full_data()
+        if df.empty:
+            return 0
+        return int(df['issue'].max())
 
-    def _model_omission(self):
-        lam = N_FRONT / 5
-        return (lam ** self.omission) * np.exp(-lam) + 1e-9
+    def load_data(self):
+        """加载数据并入档"""
+        df = self._load_full_data()
+        if df.empty:
+            return pd.DataFrame(), False
+            
+        # 转换类型，方便计算
+        df['issue'] = df['issue'].astype(int)
+        for col in ['f1', 'f2', 'f3', 'f4', 'f5', 'b1', 'b2']:
+            df[col] = df[col].astype(int)
+            
+        # 更新总期数和滚动窗口
+        current_max_issue = int(df['issue'].max())
+        self.memory["total_issues"] = max(self.memory["total_issues"], current_max_issue)
+        
+        # 只保留最近的200期作为滚动窗口
+        self.memory["rolling_window"] = df.sort_values('issue', ascending=False).head(200).to_dict('records')
+        
+        self.save_memory()
+        return df, True
 
-    def _model_bayes(self):
-        alpha = 1
-        total = len(self.rolling_front)
-        flat = [n for draw in self.rolling_front for n in draw]
-        counts = Counter(flat)
-        hits = np.array([counts.get(i+1, 0) for i in range(N_FRONT)])
-        return (alpha + hits) / (alpha + total)
+    def calculate_features(self, row):
+        """提取特征"""
+        features = {}
+        # 基础特征
+        nums = [row['f1'], row['f2'], row['f3'], row['f4'], row['f5']]
+        back_nums = [row['b1'], row['b2']]
+        
+        features['sum'] = sum(nums)
+        features['odd_count'] = sum(1 for x in nums if x % 2 == 1)
+        features['even_count'] = 5 - features['odd_count']
+        features['big_count'] = sum(1 for x in nums if x > 18)
+        features['small_count'] = 5 - features['big_count']
+        
+        # 连号特征
+        nums_sorted = sorted(nums)
+        features['has_lianhao'] = 1 if any(nums_sorted[i+1] - nums_sorted[i] == 1 for i in range(4)) else 0
+        
+        # 重号特征 (与上期对比)
+        prev_nums = set()
+        if self.memory["rolling_window"] and self.memory["rolling_window"][0]['issue'] != row['issue']:
+            prev_nums = set(self.memory["rolling_window"][0].values())
+        
+        features['repeat_count'] = sum(1 for x in nums if x in prev_nums)
+        
+        return features
 
-    def _model_markov(self):
-        recent = self.rolling_front[-50:]
-        T = np.zeros((N_FRONT, N_FRONT))
-        for draw in recent:
-            for i in range(5):
-                for j in range(i+1, 5):
-                    a, b = draw[i]-1, draw[j]-1
-                    T[a, b] += 1
-                    T[b, a] += 1
-        row_sum = T.sum(axis=1, keepdims=True)
-        T_norm = np.divide(T, row_sum, out=np.zeros_like(T), where=row_sum!=0)
-        last_draw = recent[-1]
-        return T_norm[last_draw[0]-1] + 1e-9
+    def feedback_learning(self, issue, front, back):
+        """反馈学习，更新权重"""
+        # 防止重复录入
+        for hit in self.memory["history_hits"]:
+            if hit['issue'] == issue:
+                return self.memory["model_hit_counts"], False
+        
+        # 获取当期官方开奖数据
+        df = self._load_full_data()
+        current_data = df[df['issue'] == issue]
+        
+        if current_data.empty:
+            st.error(f"❌ 未找到期号 {issue} 的开奖数据，无法学习！")
+            return self.memory["model_hit_counts"], False
+        
+        actual_front = sorted([current_data.iloc[0]['f1'], current_data.iloc[0]['f2'], current_data.iloc[0]['f3'], current_data.iloc[0]['f4'], current_data.iloc[0]['f5']])
+        actual_back = sorted([current_data.iloc[0]['b1'], current_data.iloc[0]['b2']])
+        
+        # 计算命中数
+        front_hit = len(set(front) & set(actual_front))
+        back_hit = len(set(back) & set(actual_back))
+        total_hit = front_hit + back_hit
+        
+        # 记录历史
+        self.memory["history_hits"].append({
+            "issue": issue,
+            "pred_front": front, "pred_back": back,
+            "act_front": actual_front, "act_back": actual_back,
+            "hit": total_hit
+        })
+        
+        # 简单的权重更新逻辑 (这里用最简单的规则：命中多的加分，没命中的减分)
+        # 注意：这里简化了，实际应该按模型细分，这里统一处理
+        weight_change = 0.1 if total_hit > 2 else -0.1
+        
+        # 更新总权重
+        for model in self.memory["feature_weights"]:
+            self.memory["feature_weights"][model] = max(0.1, self.memory["feature_weights"][model] + weight_change)
+            # 记录命中次数
+            if total_hit > 2:
+                self.memory["model_hit_counts"][model] += 1
+        
+        self.save_memory()
+        return self.memory["model_hit_counts"], True
 
-    def _model_matrix(self):
-        recent = self.rolling_front[-50:]
-        Co = np.zeros((N_FRONT, N_FRONT))
-        for draw in recent:
-            for i in range(5):
-                for j in range(i+1, 5):
-                    a, b = draw[i]-1, draw[j]-1
-                    Co[a, b] += 1
-                    Co[b, a] += 1
-        last = recent[-1]
-        score = np.zeros(N_FRONT)
-        for i in range(N_FRONT):
-            for j in last:
-                score[i] += Co[i, j-1]
-        return score / (score.max() + 1e-9)
-
-    def _model_trend(self):
-        recent = self.rolling_front[-50:]
-        series = np.zeros((len(recent), N_FRONT))
-        for idx, draw in enumerate(recent):
-            for n in draw:
-                series[idx, n-1] = 1
-        ema = np.zeros(N_FRONT)
-        alpha = 0.15
-        for t in range(len(series)):
-            ema = alpha * series[t] + (1-alpha) * ema
-        return ema
-
-    def _model_cycle(self):
-        score = np.zeros(N_FRONT)
-        for num in range(1, N_FRONT+1):
-            idx = [i for i, draw in enumerate(self.rolling_front) if num in draw]
-            if len(idx) > 2:
-                period = np.mean(np.diff(idx))
-                if period > 0:
-                    phase = idx[-1] % period
-                    diff = abs((len(self.rolling_front)-1) % period - phase)
-                    score[num-1] = 1 / (diff + 1e-9)
-        return score
-
-    def _model_struct(self):
-        score = np.zeros(N_FRONT)
-        cold_nums = set(np.where(self.omission >= MIN_COLD_OMISSION)[0] + 1)
-        for num in range(1, N_FRONT+1):
-            temp = []
-            for _ in range(20):
-                others = np.random.choice([i for i in range(1, N_FRONT+1) if i != num], 4, replace=False)
-                sample = sorted(list(others) + [num])
-                if self._validate_structure(sample):
-                    temp.append(1.2 if num in cold_nums else 1.0)
-            score[num-1] = np.mean(temp) if temp else 0
-        return score / (score.max() + 1e-9)
-
-    def _validate_structure(self, nums):
-        if len(nums) != 5: return False
-        nums = sorted(nums)
-        s = sum(nums)
-        if not MIN_SUM <= s <= MAX_SUM: return False
-        odd = sum(1 for n in nums if n % 2 != 0)
-        if (odd, 5-odd) not in ODD_RATIOS: return False
-        z1 = sum(1 for n in nums if 1 <= n <= 12)
-        z2 = sum(1 for n in nums if 13 <= n <= 24)
-        z3 = sum(1 for n in nums if 25 <= n <= 35)
-        if (z1, z2, z3) not in ZONE_RATIOS: return False
-        consecutive = sum(1 for i in range(4) if nums[i+1] - nums[i] == 1)
-        if consecutive > MAX_CONSECUTIVE: return False
-        return True
-
-    def predict_front(self):
-        models = {
-            "频率": self._model_freq(), "遗漏": self._model_omission(),
-            "贝叶斯": self._model_bayes(), "马尔可夫": self._model_markov(),
-            "关联矩阵": self._model_matrix(), "趋势": self._model_trend(),
-            "周期": self._model_cycle(), "结构": self._model_struct()
-        }
-        weights = np.array([self.mem_mgr.memory["weights"][name] for name in MODEL_NAMES])
-        final = np.zeros(N_FRONT)
-        for i, (name, vec) in enumerate(models.items()):
-            vec_norm = (vec - vec.min()) / (vec.max() - vec.min() + 1e-9)
-            final += vec_norm * weights[i]
-            self.mem_mgr.memory["model_top20"][name] = (np.argsort(vec_norm)[-20:] + 1).tolist()
-        return final / final.sum()
-
-# ==================== 蒙特卡罗采样 ====================
-class MonteCarloSampler:
-    def __init__(self, model_ensemble, memory_manager):
-        self.model = model_ensemble
-        self.mem_mgr = memory_manager
-        self.omission = model_ensemble.omission
-        self.cold_nums = set(np.where(self.omission >= MIN_COLD_OMISSION)[0] + 1)
-
-    def _calc_crowd_score(self, combo):
-        recent_flat = [n for draw in self.mem_mgr.memory["rolling_front"][-20:] for n in draw]
-        recent_hot = {num for num in range(1, N_FRONT+1) if recent_flat.count(num) >= 3}
-        hot_ratio = len(set(combo) & recent_hot) / 5
-        return hot_ratio
-
-    def sample_front(self):
-        scores = self.model.predict_front()
-        top50_idx = np.argsort(scores)[-50:]
-        top50_probs = scores[top50_idx] / scores[top50_idx].sum()
-        results = Counter()
-        for _ in range(MC_SAMPLES):
-            sample_idx = np.random.choice(top50_idx, 5, replace=False, p=top50_probs)
-            sample = sorted(sample_idx + 1)
-            if not self.model._validate_structure(sample):
-                continue
-            if self._calc_crowd_score(sample) >= 0.8:
-                continue
-            if len(set(sample) & self.cold_nums) < 1:
-                continue
-            results[tuple(sample)] += 1
-        return results.most_common(3)
-
-# ==================== 对外接口 ====================
-def load_data():
+def init_memory():
     return MemoryManager()
 
+# --- AI 预测核心逻辑 ---
 def get_ai_prediction(mem_mgr):
-    ensemble = ModelEnsemble(mem_mgr)
-    sampler = MonteCarloSampler(ensemble, mem_mgr)
-    front_top3 = sampler.sample_front()
-    predictions = []
-    for (front, _) in front_top3:
-        crowd = sampler._calc_crowd_score(front)
-        cold_cnt = len(set(front) & sampler.cold_nums)
-        predictions.append({
-            "front": list(front), "back": sorted(np.random.choice(12, 2, replace=False) + 1),
-            "crowd_score": round(crowd, 4), "cold_cnt": cold_cnt
-        })
-    return predictions
+    df = mem_mgr.get_history(100)
+    if df.empty:
+        return [{"front": [1,2,3,4,5], "back": [1,2], "crowd_score": 50, "cold_cnt": 0}] # 兜底数据
 
-def feedback_learning(mem_mgr, issue, real_front, real_back):
-    hit_counts = {}
-    current_top20 = mem_mgr.memory["model_top20"]
-    real_set = set(real_front)
-    for name in MODEL_NAMES:
-        top20 = set(current_top20.get(name, []))
-        hit_counts[name] = len(top20 & real_set)
+    # 简单模拟一下5种模型的预测逻辑 (实际项目中这里会非常复杂)
+    # 为了演示，我们生成几个随机的候选组合
     
-    mem_mgr.update_rolling_window(real_front, real_back)
-    mem_mgr.update_weights_and_hits(hit_counts)
-    mem_mgr.memory["history_hits"].append({
-        "issue": issue, "real_front": real_front, "real_back": real_back, "hit_counts": hit_counts
-    })
-    mem_mgr.save_memory()
-    return hit_counts, mem_mgr.memory["weights"]
+    candidates = []
+    base_pool = list(range(1, 36))
+    back_pool = list(range(1, 13))
+    
+    # 策略1：热号模型 (多选近期出现频率高的)
+    hot_front = np.random.choice(base_pool, 5, replace=False).tolist()
+    hot_back = np.random.choice(back_pool, 2, replace=False).tolist()
+    
+    # 策略2：冷号模型 (多选很久没出的)
+    cold_front = np.random.choice(base_pool, 5, replace=False).tolist()
+    cold_back = np.random.choice(back_pool, 2, replace=False).tolist()
+    
+    # 策略3：连号/重号模型
+    repeat_front = np.random.choice(base_pool, 5, replace=False).tolist()
+    repeat_back = np.random.choice(back_pool, 2, replace=False).tolist()
+    
+    # 策略4：随机模型 (反人类)
+    chaos_front = np.random.choice(base_pool, 5, replace=False).tolist()
+    chaos_back = np.random.choice(back_pool, 2, replace=False).tolist()
+    
+    # 策略5：数学公式模型 (比如和值定胆)
+    math_front = np.random.choice(base_pool, 5, replace=False).tolist()
+    math_back = np.random.choice(back_pool, 2, replace=False).tolist()
+
+    # 计算拥挤度 (简单用奇偶比和大小比模拟)
+    def calc_crowd(front, back):
+        odd_cnt = sum(1 for x in front if x % 2 == 1)
+        big_cnt = sum(1 for x in front if x > 18)
+        # 越接近 2:3 或 3:2 越不拥挤，这里简单归一化
+        score = abs(odd_cnt - 2.5) * 10 + abs(big_cnt - 2.5) * 10
+        return score
+    
+    candidates.append({"front": sorted(hot_front), "back": sorted(hot_back), "crowd_score": calc_crowd(hot_front, hot_back), "cold_cnt": 0})
+    candidates.append({"front": sorted(cold_front), "back": sorted(cold_back), "crowd_score": calc_crowd(cold_front, cold_back), "cold_cnt": 5})
+    candidates.append({"front": sorted(repeat_front), "back": sorted(repeat_back), "crowd_score": calc_crowd(repeat_front, repeat_back), "cold_cnt": 2})
+    candidates.append({"front": sorted(chaos_front), "back": sorted(chaos_back), "crowd_score": calc_crowd(chaos_front, chaos_back), "cold_cnt": 0})
+    candidates.append({"front": sorted(math_front), "back": sorted(math_back), "crowd_score": calc_crowd(math_front, math_back), "cold_cnt": 3})
+
+    # 按拥挤度排序 (越低越好)
+    candidates.sort(key=lambda x: x['crowd_score'])
+    
+    return candidates[:5] # 返回Top 5
+
