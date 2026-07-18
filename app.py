@@ -1,32 +1,95 @@
 import streamlit as st
 import pandas as pd
-from core import load_data, get_ai_prediction, feedback_learning
+import numpy as np
+from datetime import datetime
+from core import init_memory, get_ai_prediction
 
-st.set_page_config(page_title="DLT-AI-CORE V10.2", layout="wide")
-st.title("🧠 DLT-AI-CORE | V10.2 反人类预测系统")
+# --- 学习反馈逻辑 (放在这里，避免循环导入) ---
+def feedback_learning(mem_mgr, issue, front_nums, back_nums):
+    df = mem_mgr.get_history(500)
+    if df.empty:
+        return {}, False
 
-@st.cache_resource
-def init_memory():
-    return load_data()
+    # 找到最新一期历史数据作为基准
+    latest_row = df.iloc[-1]
+    latest_f = sorted([int(latest_row[f'f{i}']) for i in range(1, 6)])
+    latest_b = sorted([int(latest_row[f'b{i}']) for i in range(1, 3)])
+    
+    # 计算命中数
+    hit_f = len(set(front_nums) & set(latest_f))
+    hit_b = len(set(back_nums) & set(latest_b))
+    total_hit = hit_f + hit_b
+    
+    # 动态调整权重 (简单的强化学习)
+    models = ["hot", "cold", "jump", "math", "chaos"]
+    if total_hit > 2:
+        # 命中多，给正向反馈
+        for model in models:
+            mem_mgr.memory["feature_weights"][model] = min(1.0, mem_mgr.memory["feature_weights"].get(model, 0.2) + 0.05)
+            if total_hit >= 4: # 大爆发
+                mem_mgr.memory["model_hit_counts"][model] += 1
+    else:
+        # 命中少，给负向反馈
+        for model in models:
+            mem_mgr.memory["feature_weights"][model] = max(0.05, mem_mgr.memory["feature_weights"].get(model, 0.2) - 0.02)
 
-mem_mgr = init_memory()
+    # 记录历史
+    mem_mgr.memory["history_hits"].append({
+        "issue": int(issue), "hit": total_hit, "pred": front_nums + back_nums
+    })
+    
+    # 保持记录长度
+    if len(mem_mgr.memory["history_hits"]) > 100:
+        mem_mgr.memory["history_hits"].pop(0)
+        
+    # 更新滚动窗口
+    current_features = {
+        "front_std": float(np.std(front_nums)),
+        "back_sum": sum(back_nums),
+        "span": max(front_nums) - min(front_nums)
+    }
+    mem_mgr.memory["rolling_window"].append(current_features)
+    if len(mem_mgr.memory["rolling_window"]) > 50:
+        mem_mgr.memory["rolling_window"].pop(0)
+        
+    mem_mgr.save_memory()
+    return mem_mgr.memory["model_hit_counts"], (total_hit >= 3)
 
+# --- 页面配置 ---
+st.set_page_config(page_title="🧠 DLT-AI-CORE", layout="wide")
+st.title("🧠 DLT-AI-CORE | V10.3 终极修复版")
+
+# 初始化内存
+if 'mem_mgr' not in st.session_state:
+    st.session_state.mem_mgr = init_memory()
+
+mem_mgr = st.session_state.mem_mgr
+
+# --- 侧边栏：数据与权重 ---
 with st.sidebar:
-    st.header("📊 AI实时状态")
+    st.header("📊 系统状态")
     st.metric("总期数", mem_mgr.memory["total_issues"])
-    st.metric("滚动窗口", f"最近{len(mem_mgr.memory['rolling_front'])}期")
-    st.subheader("🧠 模型权重")
-    weights_df = pd.DataFrame([{"模型": k, "权重": v, "状态": "冷冻" if v == 0.02 else "正常"} for k, v in mem_mgr.memory["weights"].items()])
-    st.dataframe(weights_df, hide_index=True, use_container_width=True)
+    
+    st.subheader("⚖️ 模型权重")
+    weights = mem_mgr.memory.get("feature_weights", {})
+    if not weights:
+        weights = {m: 0.2 for m in ["hot", "cold", "jump", "math", "chaos"]}
+        
+    for model, w in weights.items():
+        st.progress(w, text=f"{model.upper()}: {w:.2f}")
 
-tab1, tab2 = st.tabs(["🎯 预测", "📝 反馈学习"])
+# --- 主界面：预测与录入 ---
+tab1, tab2 = st.tabs(["🔮 AI 预测", "📝 人工录入"])
 
 with tab1:
-    if st.button("🚀 启动AI委员会投票", type="primary", use_container_width=True):
-        st.session_state.predictions = get_ai_prediction(mem_mgr)
-        st.success("预测完成！")
+    st.subheader("🚀 下一期智能推荐 Top 5")
     
-    if "predictions" in st.session_state:
+    if st.button("🔄 立即生成预测", type="primary", use_container_width=True):
+        with st.spinner("AI正在深度计算..."):
+            preds = get_ai_prediction(mem_mgr)
+            st.session_state.predictions = preds
+            
+    if 'predictions' in st.session_state:
         for i, pred in enumerate(st.session_state.predictions):
             st.container(border=True)
             st.write(f"**第{i+1}候选**：前区 {pred['front']} | 后区 {pred['back']}")
