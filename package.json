@@ -1,0 +1,10 @@
+{
+  "name": "dlt-ai-core-v21.5",
+  "version": "21.5.0",
+  "description": "大乐透+排列五智能分析系统",
+  "type": "module",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {}
+}
