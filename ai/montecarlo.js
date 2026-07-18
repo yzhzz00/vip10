@@ -1,21 +1,31 @@
 import {
 
-    validCombination
+parseDLT
 
-} from "./filter.js";
-
-
+} from "../core/data.js";
 
 
 
-function create(pool,count){
+
+
+let cache = null;
+
+let cacheTime = 0;
 
 
 
-    const temp=[...pool];
+
+
+
+
+function randomSelect(arr,count){
+
+
+
+    const pool=[...arr];
+
 
     const result=[];
-
 
 
 
@@ -25,7 +35,7 @@ function create(pool,count){
 
         &&
 
-        temp.length>0
+        pool.length>0
 
     ){
 
@@ -39,25 +49,21 @@ function create(pool,count){
 
             *
 
-            temp.length
+            pool.length
 
         );
-
-
 
 
 
         result.push(
 
-            temp[index]
+            pool[index]
 
         );
 
 
 
-
-
-        temp.splice(
+        pool.splice(
 
             index,
 
@@ -66,15 +72,431 @@ function create(pool,count){
         );
 
 
-
     }
-
 
 
 
     return result.sort(
 
         (a,b)=>a-b
+
+    );
+
+}
+
+
+
+
+
+
+
+
+
+function buildPool(){
+
+
+
+    const history=
+
+    parseDLT();
+
+
+
+    const set=
+
+    new Set();
+
+
+
+    history.forEach(item=>{
+
+
+        item.front.forEach(num=>{
+
+
+            set.add(num);
+
+
+        });
+
+
+    });
+
+
+
+
+
+    return Array.from(set);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function validStructure(numbers){
+
+
+
+    const odd=
+
+    numbers.filter(
+
+        n=>n%2!==0
+
+    ).length;
+
+
+
+    const sum=
+
+    numbers.reduce(
+
+        (a,b)=>a+b,
+
+        0
+
+    );
+
+
+
+
+
+
+
+    if(
+
+        odd===0
+
+        ||
+
+        odd===5
+
+    ){
+
+        return false;
+
+    }
+
+
+
+
+
+
+    if(
+
+        sum<40
+
+        ||
+
+        sum>170
+
+    ){
+
+        return false;
+
+    }
+
+
+
+
+
+    return true;
+
+
+}
+
+
+
+
+
+
+
+
+
+function runSimulation(
+    times=10000
+){
+
+
+
+    const now=
+
+    Date.now();
+
+
+
+    if(
+
+        cache
+
+        &&
+
+        now-cacheTime
+
+        <
+
+        60000
+
+    ){
+
+
+        return cache;
+
+
+    }
+
+
+
+
+
+
+
+    const pool=
+
+    buildPool();
+
+
+
+
+
+    const result={};
+
+
+
+
+
+    for(
+
+        let i=0;
+
+        i<times;
+
+        i++
+
+    ){
+
+
+
+        const numbers=
+
+        randomSelect(
+
+            pool,
+
+            5
+
+        );
+
+
+
+
+
+        if(
+
+            !validStructure(numbers)
+
+        ){
+
+            continue;
+
+        }
+
+
+
+
+
+        const key=
+
+        numbers.join(",");
+
+
+
+
+
+        result[key]=
+
+        (
+
+        result[key]
+
+        ||
+
+        0
+
+        )
+
+        +
+
+        1;
+
+
+
+    }
+
+
+
+
+
+
+
+    cache =
+
+
+    Object.entries(
+
+        result
+
+    )
+
+    .map(item=>{
+
+
+        return {
+
+
+            numbers:
+
+            item[0]
+
+            .split(",")
+
+            .map(Number),
+
+
+
+            frequency:
+
+            item[1]
+
+
+        };
+
+
+    })
+
+    .sort(
+
+        (a,b)=>
+
+        b.frequency-a.frequency
+
+    );
+
+
+
+
+
+
+    cacheTime=
+
+    now;
+
+
+
+    return cache;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function monteCarloScore(numbers){
+
+
+
+    const list=
+
+    runSimulation(
+
+        10000
+
+    );
+
+
+
+    const key=
+
+    numbers.join(",");
+
+
+
+
+
+    const item=
+
+    list.find(
+
+        x=>
+
+        x.numbers.join(",")
+
+        ===
+
+        key
+
+    );
+
+
+
+
+
+
+    if(!item){
+
+
+
+        return 0;
+
+
+    }
+
+
+
+
+
+    return item.frequency;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function getSimulationTop(){
+
+
+
+    return runSimulation(
+
+        10000
+
+    )
+
+    .slice(
+
+        0,
+
+        20
 
     );
 
@@ -88,156 +510,18 @@ function create(pool,count){
 
 
 
-function runSimulation(
-
-    pool,
-
-    times=5000
-
-){
-
-
-
-    const result=[];
-
-
-
-    let attempts=0;
-
-
-
-    const maxAttempts=
-
-    times*20;
-
-
-
-
-
-
-
-    while(
-
-        result.length<times
-
-        &&
-
-        attempts<maxAttempts
-
-    ){
-
-
-
-        const combo=
-
-        create(
-
-            pool,
-
-            5
-
-        );
-
-
-
-
-        if(
-
-            validCombination(
-
-                combo
-
-            )
-
-        ){
-
-
-
-            result.push(
-
-                combo
-
-            );
-
-
-
-        }
-
-
-
-
-
-        attempts++;
-
-
-
-    }
-
-
-
-
-
-
-
-    // 如果过滤不足
-
-    // 返回已有结果
-
-    if(
-
-        result.length===0
-
-    ){
-
-
-
-        for(
-
-            let i=0;
-
-            i<100;
-
-            i++
-
-        ){
-
-
-
-            result.push(
-
-                create(
-
-                    pool,
-
-                    5
-
-                )
-
-            );
-
-
-        }
-
-
-    }
-
-
-
-
-
-    return result;
-
-
-
-}
-
-
-
-
 
 
 export {
 
-    runSimulation
+
+    runSimulation,
+
+
+    monteCarloScore,
+
+
+    getSimulationTop
+
 
 };

@@ -1,10 +1,21 @@
 {
   "name": "dlt-ai-core-v21.5",
   "version": "21.5.0",
-  "description": "大乐透+排列五智能分析系统",
+  "description": "DLT-AI-CORE V21.5 大乐透 + 排列五智能分析系统",
   "type": "module",
+  "main": "main.js",
   "scripts": {
     "start": "node main.js"
   },
+  "keywords": [
+    "dlt",
+    "lottery",
+    "ai",
+    "bayesian",
+    "markov",
+    "montecarlo"
+  ],
+  "author": "",
+  "license": "MIT",
   "dependencies": {}
 }

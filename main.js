@@ -1,71 +1,170 @@
 import http from "http";
+
 import fs from "fs";
+
 import path from "path";
+
 import {
-fileURLToPath
+    fileURLToPath
 } from "url";
 
 
 import {
-apiHandler
+    apiHandler
 } from "./api/api.js";
 
 
 
+
+
 const __filename =
-fileURLToPath(import.meta.url);
+
+fileURLToPath(
+    import.meta.url
+);
+
 
 
 const __dirname =
-path.dirname(__filename);
+
+path.dirname(
+    __filename
+);
+
+
+
+
 
 
 
 const PORT =
+
 process.env.PORT || 3000;
 
 
 
-const mime={
 
 
-".html":
-"text/html;charset=utf-8",
 
 
-".js":
-"application/javascript;charset=utf-8",
+function sendFile(
+    res,
+    file,
+    type
+){
 
 
-".css":
-"text/css;charset=utf-8",
+    const filepath =
+
+    path.join(
+
+        __dirname,
+
+        file
+
+    );
 
 
-".json":
-"application/json;charset=utf-8"
 
 
-};
+    if(
+
+        !fs.existsSync(filepath)
+
+    ){
+
+
+
+        res.statusCode=404;
+
+
+
+        res.end(
+
+            "file not found"
+
+        );
+
+
+
+        return;
+
+
+    }
+
+
+
+
+
+    res.writeHead(
+
+        200,
+
+        {
+
+        "Content-Type":
+
+        type
+
+        }
+
+    );
+
+
+
+
+    fs.createReadStream(
+
+        filepath
+
+    )
+
+    .pipe(res);
+
+
+
+}
+
+
+
+
 
 
 
 
 
 const server =
+
 http.createServer(
+
 (req,res)=>{
+
 
 
     // API接口
 
+
     if(
-        req.url.startsWith("/api/")
+
+        req.url.startsWith(
+
+            "/api/"
+
+        )
+
     ){
 
+
+
         apiHandler(
+
             req,
+
             res
+
         );
+
+
 
         return;
 
@@ -73,99 +172,157 @@ http.createServer(
 
 
 
-    let filePath;
 
 
 
-    if(req.url==="/"){
 
-        filePath=
-        path.join(
-            __dirname,
-            "index.html"
+    // 首页
+
+
+    if(
+
+        req.url==="/"
+
+        ||
+
+        req.url==="/index.html"
+
+    ){
+
+
+
+        sendFile(
+
+            res,
+
+            "index.html",
+
+            "text/html;charset=utf-8"
+
         );
 
 
-    }else{
 
+        return;
 
-        filePath=
-        path.join(
-            __dirname,
-            req.url
-        );
 
     }
 
 
 
 
-    fs.readFile(
-        filePath,
-        (err,data)=>{
-
-
-            if(err){
-
-
-                res.writeHead(404);
-
-                res.end(
-                    "404"
-                );
-
-                return;
-
-            }
 
 
 
-            const ext =
-            path.extname(
-                filePath
-            );
+
+    // css
+
+
+    if(
+
+        req.url==="/style.css"
+
+    ){
 
 
 
-            res.writeHead(
-                200,
-                {
+        sendFile(
 
-                "Content-Type":
-                mime[ext]
-                ||
-                "text/plain"
+            res,
 
-                }
+            "style.css",
 
-            );
+            "text/css"
+
+        );
 
 
 
-            res.end(data);
+        return;
 
 
-        }
+    }
+
+
+
+
+
+
+
+
+    // js
+
+
+    if(
+
+        req.url==="/app.js"
+
+    ){
+
+
+
+        sendFile(
+
+            res,
+
+            "app.js",
+
+            "application/javascript"
+
+        );
+
+
+
+        return;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    res.statusCode=404;
+
+
+    res.end(
+
+        "not found"
 
     );
 
 
-});
+
+}
+
+);
+
+
+
+
 
 
 
 
 
 server.listen(
-PORT,
-()=>{
+
+    PORT,
+
+    ()=>{
 
 
-console.log(
-"DLT-AI-CORE V21.5 API RUNNING:"
-+
-PORT
+        console.log(
+
+        `DLT-AI-CORE V21.5 running on ${PORT}`
+
+        );
+
+
+    }
+
 );
-
-
-});

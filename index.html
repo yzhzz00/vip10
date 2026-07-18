@@ -8,47 +8,361 @@
 
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>DLT-AI-CORE V21.5</title>
+
+<title>
+DLT-AI-CORE V21.5
+</title>
 
 
-<link rel="stylesheet" href="./style.css">
+<link rel="stylesheet" href="style.css">
+
 
 </head>
+
 
 
 <body>
 
 
-<div class="container">
+<header class="header">
 
 
 <h1>
+
 DLT-AI-CORE V21.5
+
 </h1>
 
 
 <p>
+
 大乐透 + 排列五智能分析系统
+
+</p>
+
+
+</header>
+
+
+
+
+
+<div class="dashboard">
+
+
+
+
+
+
+
+<section class="panel">
+
+
+<h2>
+数据中心
+</h2>
+
+
+
+<div class="item">
+
+大乐透历史：
+
+<span id="dlt-count">
+0
+</span>
+
+期
+
+</div>
+
+
+
+<div class="item">
+
+排列五历史：
+
+<span id="pl5-count">
+0
+</span>
+
+期
+
+</div>
+
+
+
+<div class="item">
+
+系统状态：
+
+<span id="status">
+等待运行
+</span>
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<section class="panel">
+
+
+<h2>
+AI会议中心
+</h2>
+
+
+
+<div id="ai-room">
+
+
+<div class="model">
+
+贝叶斯模型
+
+等待
+
+</div>
+
+
+
+<div class="model">
+
+马尔可夫模型
+
+等待
+
+</div>
+
+
+
+<div class="model">
+
+蒙特卡罗模型
+
+等待
+
+</div>
+
+
+
+<div class="model">
+
+遗传优化
+
+等待
+
+</div>
+
+
+
+<div class="model">
+
+融合决策
+
+等待
+
+</div>
+
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<section class="panel">
+
+
+<h2>
+模型状态
+</h2>
+
+
+
+<div id="model-score">
+
+
+<div class="model">
+
+Bayesian
+
+25%
+
+</div>
+
+
+
+<div class="model">
+
+Markov
+
+20%
+
+</div>
+
+
+
+<div class="model">
+
+MonteCarlo
+
+20%
+
+</div>
+
+
+
+<div class="model">
+
+Genetic
+
+15%
+
+</div>
+
+
+
+<div class="model">
+
+Fusion
+
+20%
+
+</div>
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<section class="panel">
+
+
+<h2>
+AI计算进度
+</h2>
+
+
+
+<div class="progress">
+
+
+<div id="bar">
+
+</div>
+
+
+</div>
+
+
+
+<p id="progress-text">
+
+等待分析
+
 </p>
 
 
 
-<div class="card">
+</section>
 
 
-<select id="lottery">
-
-<option value="dlt">
-超级大乐透
-</option>
 
 
-<option value="pl5">
-排列五
-</option>
 
 
-</select>
+
+
+
+<section class="panel">
+
+
+<h2>
+历史开奖滚动
+</h2>
+
+
+
+<div id="history" class="scroll">
+
+等待加载
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<section class="panel">
+
+
+<h2>
+号码趋势分析
+</h2>
+
+
+
+<div id="trend">
+
+等待分析
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<section class="panel full">
+
+
+<h2>
+预测结果中心
+</h2>
 
 
 
@@ -59,38 +373,11 @@ DLT-AI-CORE V21.5
 </button>
 
 
-</div>
-
-
-
-
-<div class="card">
-
-<h3>
-系统状态
-</h3>
-
-<div id="status">
-
-等待运行
-
-</div>
-
-
-</div>
-
-
-
-
-<div class="card">
-
-
-<h3>
-预测结果
-</h3>
-
 
 <div id="result">
+
+
+<div class="empty">
 
 暂无结果
 
@@ -101,13 +388,23 @@ DLT-AI-CORE V21.5
 
 
 
+</section>
 
-<div class="card">
 
 
-<h3>
+
+
+
+
+
+
+<section class="panel">
+
+
+<h2>
 开奖反馈
-</h3>
+</h2>
+
 
 
 <input
@@ -124,16 +421,53 @@ placeholder="输入开奖号码">
 </button>
 
 
+
+</section>
+
+
+
+
+
+
+
+
+
+<section class="panel">
+
+
+<h2>
+AI学习状态
+</h2>
+
+
+
+<div id="learning">
+
+等待反馈数据
+
 </div>
 
 
+
+</section>
+
+
+
+
+
+
+
+
 </div>
 
 
 
-<script type="module" src="./app.js"></script>
+
+
+<script src="app.js"></script>
 
 
 </body>
+
 
 </html>

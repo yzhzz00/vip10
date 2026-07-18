@@ -1,56 +1,174 @@
-function bayesianScore(history){
+import {
+    parseDLT
+} from "../core/data.js";
 
 
-    const count={};
 
 
-    history.forEach(n=>{
+
+function buildFrequency(){
 
 
-        count[n]=(count[n]||0)+1;
+    const history =
+    parseDLT();
+
+
+
+    const frequency={};
+
+
+
+    history.forEach(item=>{
+
+
+        item.front.forEach(num=>{
+
+
+            frequency[num] =
+
+            (frequency[num] || 0)
+
+            +
+
+            1;
+
+
+        });
 
 
     });
 
 
 
-    const total=history.length;
+
+    return {
+
+
+        frequency,
+
+
+        total:
+
+        history.length
+
+
+    };
+
+}
 
 
 
-    const score={};
 
 
 
-    Object.keys(count)
-    .forEach(n=>{
 
-
-        score[n]=
-
-        count[n]/total;
+function bayesianScore(number){
 
 
 
-    });
+    const data =
+    buildFrequency();
 
 
 
-    return score;
+    if(
+        !data.total
+    ){
+
+        return 0;
+
+    }
+
+
+
+
+    const count =
+
+    data.frequency[number]
+
+    ||
+
+    0;
+
+
+
+
+
+
+    // 平滑贝叶斯概率
+
+    const probability =
+
+
+    (count + 1)
+
+    /
+
+    (
+
+    data.total + 1
+
+    );
+
+
+
+
+
+
+
+    return Number(
+
+        (
+
+        probability
+
+        *
+
+        100
+
+        )
+
+        .toFixed(3)
+
+    );
+
 
 
 }
 
 
 
-function rank(score){
 
 
-    return Object.entries(score)
+
+
+
+function bayesianRank(numbers){
+
+
+
+    return numbers.map(
+
+        n=>({
+
+
+            number:n,
+
+
+            score:
+
+            bayesianScore(n)
+
+
+        })
+
+    )
 
     .sort(
 
-        (a,b)=>b[1]-a[1]
+        (a,b)=>
+
+        b.score-a.score
 
     );
 
@@ -59,11 +177,18 @@ function rank(score){
 
 
 
+
+
+
+
+
 export {
 
 
     bayesianScore,
 
-    rank
+    bayesianRank,
+
+    buildFrequency
 
 };
