@@ -1,7 +1,8 @@
 /**
  * DLT-AI-CORE VIP
- * UI Style V2.0
+ * Style V3.0 FINAL
  */
+
 
 
 *{
@@ -21,17 +22,24 @@ body{
     padding:0;
 
 
-    background:#0b1220;
-
-
-    color:#ffffff;
+    background:#f2f4f8;
 
 
     font-family:
 
-    "Microsoft YaHei",
+    -apple-system,
+
+    BlinkMacSystemFont,
+
+    "Segoe UI",
+
     Arial,
+
     sans-serif;
+
+
+
+    color:#222;
 
 
 }
@@ -43,15 +51,16 @@ body{
 .container{
 
 
-    width:95%;
+    width:100%;
 
 
     max-width:900px;
 
 
-    margin:
+    margin:auto;
 
-    20px auto;
+
+    padding:15px;
 
 
 }
@@ -60,19 +69,33 @@ body{
 
 
 
-h1{
+
+
+header{
 
 
     text-align:center;
+
+
+    padding:20px 0;
+
+
+}
+
+
+
+
+
+header h1{
+
+
+    margin:0;
 
 
     font-size:28px;
 
 
-    margin-bottom:5px;
-
-
-    color:#00e5ff;
+    color:#1565c0;
 
 
 }
@@ -80,19 +103,21 @@ h1{
 
 
 
-.subtitle{
+
+header p{
 
 
-    text-align:center;
+    margin-top:8px;
 
 
-    color:#aaa;
-
-
-    margin-bottom:25px;
+    color:#666;
 
 
 }
+
+
+
+
 
 
 
@@ -101,40 +126,23 @@ h1{
 .card{
 
 
-    background:
-
-    linear-gradient(
-
-    145deg,
-
-    #172033,
-
-    #111827
-
-    );
+    background:white;
 
 
-    border-radius:18px;
+    border-radius:15px;
 
 
-    padding:20px;
+    padding:18px;
 
 
-    margin-bottom:20px;
+    margin-bottom:15px;
 
 
     box-shadow:
 
-    0 10px 30px
+    0 3px 12px
 
-    rgba(0,0,0,0.35);
-
-
-    border:
-
-    1px solid
-
-    rgba(255,255,255,0.08);
+    rgba(0,0,0,.08);
 
 
 }
@@ -149,7 +157,7 @@ h1{
     margin-top:0;
 
 
-    color:#00e5ff;
+    color:#1565c0;
 
 
     font-size:20px;
@@ -161,66 +169,30 @@ h1{
 
 
 
-.info{
-
-
-    line-height:1.8;
-
-
-    color:#dbeafe;
-
-
-    font-size:16px;
-
-
-}
-
-
-
 
 
 button{
 
 
-    width:100%;
+    border:0;
 
 
-    margin:
-
-    8px 0;
+    padding:12px 18px;
 
 
-    padding:
-
-    14px;
+    margin:5px;
 
 
-    border:none;
+    border-radius:10px;
 
 
-    border-radius:12px;
-
-
-    background:
-
-    linear-gradient(
-
-    135deg,
-
-    #06b6d4,
-
-    #2563eb
-
-    );
+    background:#1565c0;
 
 
     color:white;
 
 
-    font-size:16px;
-
-
-    font-weight:bold;
+    font-size:15px;
 
 
     cursor:pointer;
@@ -231,11 +203,10 @@ button{
 
 
 
-
 button:hover{
 
 
-    opacity:0.85;
+    opacity:.85;
 
 
 }
@@ -246,35 +217,71 @@ button:hover{
 
 
 
-input{
+
+
+.progress-box{
+
+
+    margin-top:20px;
+
+
+}
+
+
+
+
+
+
+.progress{
 
 
     width:100%;
 
 
-    padding:
-
-    13px;
+    height:28px;
 
 
-    margin:
-
-    8px 0;
+    background:#ddd;
 
 
-    border-radius:10px;
+    border-radius:20px;
 
 
-    border:none;
+    overflow:hidden;
 
 
-    background:#0f172a;
+    margin-top:10px;
+
+
+}
+
+
+
+
+
+
+#progressBar{
+
+
+    height:100%;
+
+
+    width:0%;
+
+
+    background:#2196f3;
 
 
     color:white;
 
 
-    font-size:15px;
+    text-align:center;
+
+
+    line-height:28px;
+
+
+    transition:.3s;
 
 
 }
@@ -283,14 +290,10 @@ input{
 
 
 
-.result-card{
+#processText{
 
 
-    border:
-
-    1px solid
-
-    #00e5ff;
+    color:#555;
 
 
 }
@@ -299,28 +302,66 @@ input{
 
 
 
-.result{
 
 
-    background:#020617;
 
 
-    padding:18px;
+#prediction,
 
 
-    border-radius:12px;
+#aiMeeting,
 
 
-    color:#22c55e;
+#learning,
 
 
-    font-size:18px;
+#backtest,
+
+
+#status,
+
+
+#history,
+
+
+#learnResult{
+
+
+    background:#fafafa;
+
+
+    padding:15px;
+
+
+    border-radius:10px;
 
 
     line-height:1.8;
 
 
-    white-space:pre-line;
+}
+
+
+
+
+
+
+
+
+
+.ai-item{
+
+
+    padding:10px;
+
+
+    margin-bottom:8px;
+
+
+    background:#eef6ff;
+
+
+    border-radius:8px;
 
 
 }
@@ -329,22 +370,90 @@ input{
 
 
 
-.footer{
+
+
+
+.numbers{
+
+
+    display:flex;
+
+
+    gap:8px;
+
+
+    flex-wrap:wrap;
+
+
+}
+
+
+
+
+
+
+
+
+.numbers input{
+
+
+    width:45px;
+
+
+    height:45px;
+
+
+    border-radius:50%;
+
+
+    border:2px solid #1565c0;
 
 
     text-align:center;
 
 
-    color:#64748b;
-
-
-    margin-top:30px;
-
-
-    padding-bottom:20px;
+    font-size:18px;
 
 
 }
+
+
+
+
+
+
+
+
+.input-area h3{
+
+
+    margin-bottom:8px;
+
+
+}
+
+
+
+
+
+
+
+
+
+footer{
+
+
+    text-align:center;
+
+
+    padding:20px;
+
+
+    color:#777;
+
+
+}
+
 
 
 
@@ -360,20 +469,22 @@ input{
     .container{
 
 
-        width:94%;
+        padding:10px;
 
 
     }
 
 
 
-    h1{
+
+    header h1{
 
 
-        font-size:22px;
+        font-size:23px;
 
 
     }
+
 
 
 
@@ -381,17 +492,36 @@ input{
     .card{
 
 
-        padding:16px;
+        padding:14px;
 
 
     }
 
 
 
-    .result{
 
 
-        font-size:16px;
+    button{
+
+
+        width:100%;
+
+
+        margin:5px 0;
+
+
+    }
+
+
+
+
+    .numbers input{
+
+
+        width:42px;
+
+
+        height:42px;
 
 
     }

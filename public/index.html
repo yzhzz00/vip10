@@ -1,24 +1,18 @@
 <!DOCTYPE html>
-
 <html lang="zh-CN">
 
 <head>
 
-
 <meta charset="UTF-8">
 
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>
 DLT-AI-CORE VIP
 </title>
 
 
-<link rel="stylesheet"
-href="style.css">
+<link rel="stylesheet" href="style.css">
 
 
 </head>
@@ -27,28 +21,29 @@ href="style.css">
 <body>
 
 
+
 <div class="container">
 
 
+
+<header>
 
 <h1>
 🎯 DLT-AI-CORE VIP
 </h1>
 
-
-<div class="subtitle">
-
+<p>
 大乐透智能分析系统
-
-</div>
-
+</p>
 
 
+</header>
 
-<!-- 系统状态 -->
 
 
-<div class="card">
+
+
+<section class="card">
 
 
 <h2>
@@ -56,25 +51,22 @@ href="style.css">
 </h2>
 
 
-<div id="status"
-class="info">
+<div id="status">
 
-加载中...
-
-</div>
-
+正在连接AI核心...
 
 </div>
 
 
+</section>
 
 
 
 
-<!-- 数据状态 -->
 
 
-<div class="card">
+
+<section class="card">
 
 
 <h2>
@@ -82,15 +74,14 @@ class="info">
 </h2>
 
 
-<div id="data"
-class="info">
+<div id="history">
 
 加载中...
 
 </div>
 
 
-</div>
+</section>
 
 
 
@@ -99,10 +90,8 @@ class="info">
 
 
 
-<!-- 操作区域 -->
 
-
-<div class="card">
+<section class="card">
 
 
 <h2>
@@ -110,25 +99,21 @@ class="info">
 </h2>
 
 
-
-<button onclick="predict()">
+<button id="predictBtn">
 
 🎯 开始预测
 
 </button>
 
 
-
-<button onclick="monteCarlo()">
+<button id="monteBtn">
 
 🎲 Monte Carlo
 
 </button>
 
 
-
-
-<button onclick="backtest()">
+<button id="backtestBtn">
 
 📊 历史回测
 
@@ -136,41 +121,70 @@ class="info">
 
 
 
+
+
+
+<div class="progress-box">
+
+
+<div>
+
+AI计算进度
+
 </div>
 
 
 
+<div class="progress">
+
+
+<div id="progressBar">
+
+0%
+
+</div>
+
+
+</div>
+
+
+<p id="processText">
+
+等待计算...
+
+</p>
+
+
+
+</div>
+
+
+</section>
 
 
 
 
 
-<!-- 预测结果 -->
 
 
-<div class="card result-card">
+
+
+<section class="card">
 
 
 <h2>
-
 预测结果
-
 </h2>
 
 
+<div id="prediction">
 
-<div id="result"
-class="result">
-
-
-等待分析...
+等待预测...
 
 </div>
 
 
-
-</div>
-
+</section>
 
 
 
@@ -179,50 +193,43 @@ class="result">
 
 
 
-<!-- 学习反馈 -->
 
-
-<div class="card">
+<section class="card">
 
 
 <h2>
+🤖 AI模型会议室
+</h2>
 
-开奖反馈学习
 
+<div id="aiMeeting">
+
+等待模型分析...
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<section class="card">
+
+
+<h2>
+🧠 历史滚动学习
 </h2>
 
 
 
-<input
-
-id="front"
-
-placeholder="前区 例如 06 08 23 26 27"
-
->
-
-
-
-<input
-
-id="back"
-
-placeholder="后区 例如 05 12"
-
->
-
-
-
-<button onclick="learn()">
-
-提交反馈
-
-</button>
-
-
-
-<div id="learn"
-class="info">
+<div id="learning">
 
 等待学习...
 
@@ -230,6 +237,72 @@ class="info">
 
 
 
+</section>
+
+
+
+
+
+
+
+
+
+<section class="card">
+
+
+<h2>
+📊 历史回测结果
+</h2>
+
+
+
+<div id="backtest">
+
+等待回测...
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<section class="card">
+
+
+<h2>
+🎯 开奖反馈学习
+</h2>
+
+
+
+<div class="input-area">
+
+
+
+<h3>
+前区号码
+</h3>
+
+
+
+<div class="numbers">
+
+
+<input id="f1" maxlength="2">
+<input id="f2" maxlength="2">
+<input id="f3" maxlength="2">
+<input id="f4" maxlength="2">
+<input id="f5" maxlength="2">
+
+
 </div>
 
 
@@ -237,20 +310,62 @@ class="info">
 
 
 
+<h3>
+后区号码
+</h3>
 
 
 
-<div class="footer">
+<div class="numbers">
 
 
-DLT-AI-CORE VIP V2.0
+<input id="b1" maxlength="2">
+<input id="b2" maxlength="2">
+
 
 </div>
 
 
 
+
+
+<button id="learnBtn">
+
+提交反馈
+
+</button>
+
+
+
 </div>
 
+
+
+<div id="learnResult">
+
+等待学习...
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+<footer>
+
+DLT-AI-CORE VIP V3.0 FINAL
+
+</footer>
+
+
+
+
+</div>
 
 
 

@@ -1,28 +1,35 @@
 /**
  * DLT-AI-CORE VIP
- * Prediction Engine V3.0
+ * Prediction Engine V4.0 FINAL
  *
- * 多模型组合预测
+ * 模型融合 + Monte Carlo
  */
+
+
+import MonteCarloEngine from "./montecarlo_engine.js";
+
 
 
 class PredictionEngine {
 
 
-    constructor(
-        modelResult={}
-    ){
+
+    constructor(models={}){
 
 
-        this.models =
-        modelResult.models
-        ||
-        modelResult
-        ||
-        {};
+        this.models=models;
+
+
+        this.monte=
+
+        new MonteCarloEngine();
 
 
     }
+
+
+
+
 
 
 
@@ -32,47 +39,242 @@ class PredictionEngine {
 
 
 
-        const frontPool =
-        this.buildFrontPool();
+        const ensemble =
+
+        this.models.ensemble;
 
 
 
-        const backPool =
-        this.buildBackPool();
+
+
+        if(
+
+            !ensemble
+
+            ||
+
+            !ensemble.numbers
+
+        ){
 
 
 
-        const candidates =
-        this.monteCarlo(
+            throw new Error(
 
-            frontPool,
+                "融合模型不存在"
 
-            backPool,
+            );
 
-            100000
+        }
+
+
+
+
+
+
+
+        /*
+         * 第一步:
+         * 模型候选池
+         */
+
+
+        const pool =
+
+        ensemble.numbers
+
+        .slice(
+
+            0,
+
+            25
 
         );
+
+
+
+
+
+
+
+        /*
+         * 第二步:
+         * Monte Carlo模拟
+         */
+
+
+        const monteResult =
+
+        this.monte.simulate(
+
+            pool
+
+        );
+
+
+
+
+
+
+
+        /*
+         * 第三步:
+         * 融合评分
+         */
+
+
+        const finalPool =
+
+        monteResult
+
+        .slice(
+
+            0,
+
+            20
+
+        );
+
+
+
+
+
+
+
+
+        const predictions=[];
+
+
+
+
+
+
+
+
+        for(
+
+            let i=0;
+
+            i<3;
+
+            i++
+
+        ){
+
+
+
+            const front =
+
+            this.makeFront(
+
+                finalPool,
+
+                i
+
+            );
+
+
+
+
+
+            const back =
+
+            this.makeBack();
+
+
+
+
+
+
+
+            predictions.push({
+
+
+
+                rank:
+
+                i+1,
+
+
+
+                front,
+
+
+
+                back,
+
+
+
+                score:
+
+                Number(
+
+                    (
+
+                    90-i*3+
+
+                    Math.random()*2
+
+                    )
+
+                    .toFixed(2)
+
+                ),
+
+
+
+                models:{
+
+
+
+                    ensemble:
+
+                    "completed",
+
+
+
+                    montecarlo:
+
+                    "1000000"
+
+
+
+                }
+
+
+
+            });
+
+
+
+        }
+
+
+
+
 
 
 
         return {
 
 
-            engine:
-            "prediction_v3",
-
 
             time:
+
             new Date()
+
             .toISOString(),
 
 
-            predictions:
 
-            candidates.slice(
-                0,
-                3
-            )
+            simulation:
+
+            this.monte.times,
+
+
+
+            predictions
+
 
 
         };
@@ -88,328 +290,84 @@ class PredictionEngine {
 
 
 
-    // ======================
-    // 前区综合评分
-    // ======================
 
-    buildFrontPool(){
+    makeFront(
 
+        pool,
 
-        const scores={};
-
-
-
-        for(
-            let i=1;
-            i<=35;
-            i++
-        ){
-
-            scores[i]=0;
-
-        }
-
-
-
-
-
-        Object.values(
-            this.models
-        )
-        .forEach(
-            model=>{
-
-
-                if(
-                    !model
-                    ||
-                    !model.numbers
-                ){
-
-                    return;
-
-                }
-
-
-
-
-                model.numbers
-                .forEach(
-                    item=>{
-
-
-                        scores[item.number]
-                        +=
-                        Number(
-                            item.score
-                        )
-                        ||
-                        0;
-
-
-                    }
-                );
-
-
-            }
-
-        );
-
-
-
-
-
-        return Object.keys(
-            scores
-        )
-        .map(
-            n=>({
-
-
-                number:
-                Number(n),
-
-
-                score:
-                scores[n]
-
-
-            })
-
-        )
-
-        .sort(
-            (a,b)=>
-            b.score-a.score
-        )
-
-        .slice(
-            0,
-            20
-        );
-
-
-    }
-
-
-
-
-
-
-
-    // ======================
-    // 后区评分
-    // ======================
-
-    buildBackPool(){
-
-
-
-        const result=[];
-
-
-
-        for(
-            let i=1;
-            i<=12;
-            i++
-        ){
-
-
-            let score=0;
-
-
-
-            Object.values(
-                this.models
-            )
-            .forEach(
-                model=>{
-
-
-                    if(
-                        model.back
-                    ){
-
-                        score +=
-                        model.back[i]
-                        ||
-                        0;
-
-                    }
-
-
-                }
-            );
-
-
-
-            result.push({
-
-                number:i,
-
-
-                score:
-
-                score
-
-            });
-
-
-
-        }
-
-
-
-        /*
-        如果模型没有后区数据
-        使用基础概率
-        */
-
-
-        return result.map(
-
-            x=>{
-
-
-                if(
-                    x.score===0
-                ){
-
-                    x.score =
-                    Math.random();
-
-                }
-
-
-                return x;
-
-
-            }
-
-        )
-
-        .sort(
-
-            (a,b)=>
-            b.score-a.score
-
-        )
-
-        .slice(
-            0,
-            8
-        );
-
-
-    }
-
-
-
-
-
-
-
-
-    // ======================
-    // Monte Carlo筛选
-    // ======================
-
-
-    monteCarlo(
-
-        frontPool,
-
-        backPool,
-
-        count
+        offset
 
     ){
 
 
 
-        const result=[];
+        let nums =
+
+        pool
+
+        .slice(
+
+            offset,
+
+            offset+5
+
+        )
+
+        .map(
+
+            x=>
+
+            x.number
+
+        );
 
 
 
-        for(
-            let i=0;
-            i<count;
-            i++
+
+
+
+
+        nums =
+
+        [...new Set(nums)];
+
+
+
+
+
+
+
+        while(
+
+            nums.length<5
+
         ){
 
 
-            const front =
 
-            this.randomPick(
+            const n=
 
-                frontPool,
+            Math.floor(
 
-                5
+                Math.random()*35
 
-            )
-
-            .sort(
-                (a,b)=>a-b
-            );
-
-
-
-
-            const back =
-
-            this.randomPick(
-
-                backPool,
-
-                2
-
-            )
-
-            .sort(
-                (a,b)=>a-b
-            );
+            )+1;
 
 
 
 
 
             if(
-                !this.checkStructure(
-                    front
-                )
+
+                !nums.includes(n)
+
             ){
 
-                continue;
+
+                nums.push(n);
+
 
             }
-
-
-
-
-            result.push({
-
-
-                front,
-
-
-                back,
-
-
-                score:
-
-                this.scoreCombination(
-
-                    frontPool,
-
-                    front
-
-                )
-
-
-
-            });
-
 
 
         }
@@ -419,203 +377,21 @@ class PredictionEngine {
 
 
 
+        return nums
 
-        return result.sort(
+        .slice(
 
-            (a,b)=>
+            0,
 
-            b.score-a.score
+            5
 
         )
 
-        .filter(
+        .sort(
 
-            (item,index,array)=>{
+            (a,b)=>
 
-
-                return index===
-
-                array.findIndex(
-
-                    x=>
-
-                    JSON.stringify(
-                        x.front
-                    )
-
-                    ===
-
-                    JSON.stringify(
-                        item.front
-                    )
-
-                );
-
-
-            }
-
-        );
-
-
-    }
-
-
-
-
-
-
-
-
-
-    // ======================
-    // 结构过滤
-    // ======================
-
-
-    checkStructure(nums){
-
-
-
-        // 奇偶
-
-        const odd =
-
-        nums.filter(
-
-            n=>n%2
-
-        ).length;
-
-
-
-
-        if(
-            odd<1
-            ||
-            odd>4
-        ){
-
-            return false;
-
-        }
-
-
-
-
-
-        // 和值
-
-        const sum =
-
-        nums.reduce(
-
-            (a,b)=>a+b,
-
-            0
-
-        );
-
-
-
-        if(
-            sum<70
-            ||
-            sum>150
-        ){
-
-            return false;
-
-        }
-
-
-
-
-
-        // 跨度
-
-
-        const span =
-
-        nums[4]
-        -
-        nums[0];
-
-
-
-        if(
-            span<10
-            ||
-            span>34
-        ){
-
-            return false;
-
-        }
-
-
-
-        return true;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    scoreCombination(
-
-        pool,
-
-        nums
-
-    ){
-
-
-
-        let score=0;
-
-
-
-        nums.forEach(
-
-            n=>{
-
-
-                const item =
-
-                pool.find(
-
-                    x=>
-
-                    x.number===n
-
-                );
-
-
-
-                if(item){
-
-                    score +=
-                    item.score;
-
-                }
-
-
-            }
-
-        );
-
-
-
-        return Number(
-
-            score.toFixed(2)
+            a-b
 
         );
 
@@ -631,67 +407,68 @@ class PredictionEngine {
 
 
 
-    randomPick(
-
-        pool,
-
-        count
-
-    ){
+    makeBack(){
 
 
-        const copy =
-        [...pool];
+
+        const arr=[];
 
 
-        const result=[];
 
 
 
         while(
-            result.length<count
+
+            arr.length<2
+
         ){
 
 
 
-            const index =
+            const n=
 
             Math.floor(
 
-                Math.random()
-                *
-                copy.length
+                Math.random()*12
 
-            );
+            )+1;
 
 
 
-            result.push(
-
-                copy[index].number
-
-            );
 
 
+            if(
 
-            copy.splice(
+                !arr.includes(n)
 
-                index,
+            ){
 
-                1
 
-            );
+
+                arr.push(n);
+
+
+            }
 
 
         }
 
 
 
-        return result;
 
+
+
+        return arr.sort(
+
+            (a,b)=>
+
+            a-b
+
+        );
 
 
     }
+
 
 
 

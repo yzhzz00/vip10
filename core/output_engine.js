@@ -1,10 +1,9 @@
 /**
  * DLT-AI-CORE VIP
- * Output Engine V2.0
+ * Output Engine V3.0 FINAL
  *
- * 输出格式控制
+ * 输出格式整理
  */
-
 
 
 class OutputEngine {
@@ -15,10 +14,12 @@ class OutputEngine {
 
 
         this.version =
-        "DLT-AI-CORE VIP V2.0";
+
+        "V3.0 FINAL";
 
 
     }
+
 
 
 
@@ -40,15 +41,16 @@ class OutputEngine {
         return {
 
 
+
             system:
 
+            "DLT-AI-CORE VIP",
+
+
+
+            version:
+
             this.version,
-
-
-
-            type:
-
-            "prediction",
 
 
 
@@ -61,90 +63,165 @@ class OutputEngine {
 
 
 
-            count:
-
-            predictions.length,
 
 
-
-
-
-            predictions:
-
-            predictions.map(
-
-                (item,index)=>{
-
-
-                    return {
-
-
-                        rank:
-
-                        index+1,
-
-
-
-                        front:
-
-                        item.front
-                        .sort(
-
-                            (a,b)=>
-                            a-b
-
-                        ),
-
-
-
-                        back:
-
-                        item.back
-                        .sort(
-
-                            (a,b)=>
-                            a-b
-
-                        ),
+            predictions,
 
 
 
 
-                        score:
-
-                        Number(
-
-                            item.score
-                            ||
-                            0
-
-                        .toFixed(2)
-
-                        ),
 
 
+            meeting:
 
+            this.buildMeeting(
 
-                        confidence:
-
-                        this.confidence(
-
-                            item.score
-
-                        )
-
-
-
-                    };
-
-
-                }
+                models
 
             )
 
 
 
         };
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    buildMeeting(
+
+        models={}
+
+    ){
+
+
+
+        const result=[];
+
+
+
+
+
+
+
+        const names=[
+
+
+            "statistics",
+
+
+            "bayesian",
+
+
+            "markov",
+
+
+            "matrix",
+
+
+            "structure",
+
+
+            "ensemble"
+
+
+
+        ];
+
+
+
+
+
+
+
+
+        names.forEach(
+
+            name=>{
+
+
+
+                const model =
+
+                models[name];
+
+
+
+
+
+
+                if(
+
+                    model
+
+                ){
+
+
+
+                    result.push({
+
+
+
+                        model:name,
+
+
+
+                        status:
+
+                        "completed",
+
+
+
+
+                        topNumbers:
+
+                        model.numbers
+
+                        ?
+
+                        model.numbers
+
+                        .slice(
+
+                            0,
+
+                            5
+
+                        )
+
+                        :
+
+                        []
+
+
+
+                    });
+
+
+
+                }
+
+
+
+            }
+
+        );
+
+
+
+
+
+
+
+        return result;
 
 
 
@@ -160,7 +237,7 @@ class OutputEngine {
 
     backtest(
 
-        data={}
+        result
 
     ){
 
@@ -169,89 +246,23 @@ class OutputEngine {
         return {
 
 
-            system:
-
-            this.version,
-
-
 
             type:
 
-            "backtest",
+            "history_backtest",
 
 
 
-            time:
+            data:
 
-            new Date()
-
-            .toISOString(),
+            result,
 
 
 
-            result:data
+            status:
 
+            "completed"
 
-
-        };
-
-
-    }
-
-
-
-
-
-
-
-
-
-    montecarlo(
-
-        data=[],
-
-        times=1000000
-
-    ){
-
-
-
-        return {
-
-
-            system:
-
-            this.version,
-
-
-
-            type:
-
-            "montecarlo",
-
-
-
-            simulation:
-
-            times,
-
-
-
-            count:
-
-            data.length,
-
-
-
-            top:
-
-            data.slice(
-
-                0,
-
-                10
-
-            )
 
 
         };
@@ -270,7 +281,7 @@ class OutputEngine {
 
     learning(
 
-        result={}
+        result
 
     ){
 
@@ -279,84 +290,33 @@ class OutputEngine {
         return {
 
 
-            system:
-
-            this.version,
-
-
 
             type:
 
-            "learning",
+            "ai_learning",
+
+
+
+            learned:
+
+            result.total,
+
+
+
+            weights:
+
+            result.weights,
 
 
 
             status:
 
             result.status
-            ||
-            "complete",
-
-
-
-            totalLearning:
-
-            result.totalLearning
-            ||
-            0,
-
-
-
-            weights:
-
-            result.weights
-            ||
-            {}
 
 
 
         };
 
-
-    }
-
-
-
-
-
-
-
-
-
-    confidence(
-
-        score=0
-
-    ){
-
-
-
-        if(
-            score>=5000
-        ){
-
-            return "high";
-
-
-        }
-
-
-        if(
-            score>=3000
-        ){
-
-            return "medium";
-
-
-        }
-
-
-        return "normal";
 
 
     }
@@ -366,8 +326,6 @@ class OutputEngine {
 
 
 }
-
-
 
 
 

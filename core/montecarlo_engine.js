@@ -1,10 +1,9 @@
 /**
  * DLT-AI-CORE VIP
- * Monte Carlo Engine V2.0
+ * Monte Carlo Engine V3.0 FINAL
  *
- * 大乐透组合模拟引擎
+ * 蒙特卡罗模拟核心
  */
-
 
 
 class MonteCarloEngine {
@@ -14,8 +13,7 @@ class MonteCarloEngine {
     constructor(){
 
 
-        this.defaultTimes =
-        1000000;
+        this.times = 1000000;
 
 
     }
@@ -28,121 +26,25 @@ class MonteCarloEngine {
 
 
 
-    run(
+    simulate(
 
-        frontPool=[],
+        numbers=[],
 
-        backPool=[],
-
-        times=this.defaultTimes
+        backNumbers=[]
 
     ){
 
 
 
-        const results=[];
+        if(
 
-
-
-        for(
-
-            let i=0;
-
-            i<times;
-
-            i++
+            !numbers.length
 
         ){
 
 
 
-            const front =
-
-            this.weightPick(
-
-                frontPool,
-
-                5
-
-            )
-
-            .sort(
-
-                (a,b)=>a-b
-
-            );
-
-
-
-
-
-
-            const back =
-
-            this.weightPick(
-
-                backPool,
-
-                2
-
-            )
-
-            .sort(
-
-                (a,b)=>a-b
-
-            );
-
-
-
-
-
-
-
-            if(
-
-                !this.checkStructure(
-
-                    front
-
-                )
-
-            ){
-
-                continue;
-
-            }
-
-
-
-
-
-
-
-            results.push({
-
-
-                front,
-
-
-                back,
-
-
-                score:
-
-                this.score(
-
-                    frontPool,
-
-                    front
-
-                )
-
-
-
-            });
-
-
+            return [];
 
         }
 
@@ -152,15 +54,57 @@ class MonteCarloEngine {
 
 
 
-        return this.rank(
+        const result = {};
 
-            results
+
+
+
+
+
+
+        /*
+         * 初始化号码权重
+         */
+
+
+        numbers.forEach(
+
+            item=>{
+
+
+                result[item.number]=0;
+
+
+            }
 
         );
 
 
 
-    }
+
+
+
+
+
+        /*
+         * 模拟次数
+
+         *
+         * 采用批处理
+         * 防止网页卡死
+         */
+
+
+        const batch = 10000;
+
+
+        const rounds =
+
+        Math.floor(
+
+            this.times / batch
+
+        );
 
 
 
@@ -169,87 +113,15 @@ class MonteCarloEngine {
 
 
 
+        for(
 
-    // =====================
-    // 权重随机
-    // =====================
+            let r=0;
 
+            r<rounds;
 
-    weightPick(
-
-        pool,
-
-        count
-
-    ){
-
-
-
-        const result=[];
-
-
-
-        const copy =
-        [...pool];
-
-
-
-
-
-        while(
-
-            result.length<count
+            r++
 
         ){
-
-
-
-            const total =
-
-            copy.reduce(
-
-                (
-
-                    sum,
-
-                    item
-
-                )=>
-
-                    sum +
-
-                    Math.max(
-
-                        item.score,
-
-                        0.1
-
-                    ),
-
-                0
-
-            );
-
-
-
-
-
-
-            let random =
-
-            Math.random()
-
-            *
-
-            total;
-
-
-
-
-
-            let index=0;
-
-
 
 
 
@@ -257,7 +129,7 @@ class MonteCarloEngine {
 
                 let i=0;
 
-                i<copy.length;
+                i<batch;
 
                 i++
 
@@ -265,59 +137,35 @@ class MonteCarloEngine {
 
 
 
-                random -=
+                const pick =
 
-                Math.max(
+                this.randomPick(
 
-                    copy[i].score,
+                    numbers,
 
-                    0.1
+                    5
 
                 );
 
 
 
-                if(
-
-                    random<=0
-
-                ){
 
 
-                    index=i;
 
-                    break;
+                pick.forEach(
+
+                    n=>{
 
 
-                }
+                        result[n]++;
+
+                    }
+
+                );
+
 
 
             }
-
-
-
-
-
-
-
-            result.push(
-
-                copy[index].number
-
-            );
-
-
-
-
-
-            copy.splice(
-
-                index,
-
-                1
-
-            );
-
 
 
 
@@ -327,290 +175,34 @@ class MonteCarloEngine {
 
 
 
-        return result;
 
 
 
-    }
+        return Object.keys(
 
-
-
-
-
-
-
-
-
-    // =====================
-    // 结构过滤
-    // =====================
-
-
-    checkStructure(
-
-        nums
-
-    ){
-
-
-
-        const odd =
-
-        nums.filter(
-
-            n=>n%2
+            result
 
         )
 
-        .length;
+        .map(
 
+            n=>({
 
 
 
+                number:
 
-        if(
+                Number(n),
 
-            odd<1
 
-            ||
 
-            odd>4
+                score:
 
-        ){
+                result[n]
 
-            return false;
 
-        }
 
-
-
-
-
-
-        const sum =
-
-        nums.reduce(
-
-            (a,b)=>a+b,
-
-            0
-
-        );
-
-
-
-
-
-
-        if(
-
-            sum<70
-
-            ||
-
-            sum>160
-
-        ){
-
-            return false;
-
-        }
-
-
-
-
-
-
-
-        const span =
-
-        nums[4]
-
-        -
-
-        nums[0];
-
-
-
-
-
-        if(
-
-            span<10
-
-            ||
-
-            span>34
-
-        ){
-
-            return false;
-
-        }
-
-
-
-
-
-
-
-        return true;
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    score(
-
-        pool,
-
-        nums
-
-    ){
-
-
-
-        let score=0;
-
-
-
-
-
-        nums.forEach(
-
-            n=>{
-
-
-
-                const item=
-
-                pool.find(
-
-                    x=>
-
-                    x.number===n
-
-                );
-
-
-
-
-                if(item){
-
-                    score +=
-
-                    item.score;
-
-
-                }
-
-
-
-
-            }
-
-        );
-
-
-
-
-
-
-        return Number(
-
-            score.toFixed(3)
-
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    rank(
-
-        list
-
-    ){
-
-
-
-        const map={};
-
-
-
-
-        list.forEach(
-
-            item=>{
-
-
-                const key =
-
-                JSON.stringify(
-
-                    item.front
-
-                )
-
-                +
-
-                JSON.stringify(
-
-                    item.back
-
-                );
-
-
-
-
-
-                if(
-
-                    !map[key]
-
-                    ||
-
-                    map[key].score
-
-                    <
-
-                    item.score
-
-                ){
-
-                    map[key]=item;
-
-                }
-
-
-
-            }
-
-        );
-
-
-
-
-
-        return Object.values(
-
-            map
+            })
 
         )
 
@@ -620,16 +212,125 @@ class MonteCarloEngine {
 
             b.score-a.score
 
-        )
+        );
 
-        .slice(
 
-            0,
 
-            50
+    }
+
+
+
+
+
+
+
+
+
+    randomPick(
+
+        pool,
+
+        count
+
+    ){
+
+
+
+        const temp =
+
+        [...pool];
+
+
+
+        const arr=[];
+
+
+
+
+
+
+
+        while(
+
+            arr.length<count
+
+        ){
+
+
+
+            const index =
+
+            Math.floor(
+
+                Math.random()
+
+                *
+
+                temp.length
+
+            );
+
+
+
+
+
+            arr.push(
+
+                temp[index]
+
+                .number
+
+            );
+
+
+
+
+
+            temp.splice(
+
+                index,
+
+                1
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+        return arr.sort(
+
+            (a,b)=>
+
+            a-b
 
         );
 
+
+
+    }
+
+
+
+
+
+
+
+
+
+    setTimes(
+
+        value
+
+    ){
+
+
+        this.times=value;
 
 
     }

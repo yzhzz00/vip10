@@ -1,20 +1,9 @@
 /**
  * DLT-AI-CORE VIP
- * Backtest Engine V3.0
+ * Backtest Engine V3.0 FINAL
  *
- * 滚动训练回测
+ * 历史滚动回测系统
  */
-
-
-import ModelEngine
-from "./model_engine.js";
-
-
-import PredictionEngine
-from "./prediction_engine.js";
-
-
-
 
 
 class BacktestEngine {
@@ -24,10 +13,14 @@ class BacktestEngine {
     constructor(){
 
 
-        this.logs=[];
+        this.name =
+
+        "backtest";
+
 
 
     }
+
 
 
 
@@ -47,19 +40,24 @@ class BacktestEngine {
 
 
         if(
+
             history.length <= periods
+
         ){
+
 
 
             return {
 
 
                 error:
+
                 "历史数据不足"
 
 
 
             };
+
 
 
         }
@@ -70,19 +68,21 @@ class BacktestEngine {
 
 
 
+
         let total=0;
 
 
-        let frontHits=0;
+        let match3=0;
 
 
-        let backHits=0;
+        let match4=0;
 
 
-        let fiveHit=0;
+        let match5=0;
 
 
-        let sevenHit=0;
+        let frontHit=0;
+
 
 
 
@@ -93,8 +93,12 @@ class BacktestEngine {
         const start =
 
         history.length
+
         -
+
         periods;
+
+
 
 
 
@@ -105,7 +109,7 @@ class BacktestEngine {
 
             let i=start;
 
-            i<history.length;
+            i<history.length-1;
 
             i++
 
@@ -113,54 +117,26 @@ class BacktestEngine {
 
 
 
-
-
-
-            const trainHistory =
-
-            history.slice(
-
-                0,
-
-                i
-
-            );
-
-
-
-
-
-
             const real =
 
-            history[i];
-
-
+            history[i+1];
 
 
 
 
 
             /*
-             * 每一期重新训练
+             * 使用历史前面数据
              */
 
 
-            const modelEngine =
+            const trainData =
 
-            new ModelEngine();
+            history.slice(
 
+                0,
 
-
-
-
-            const models =
-
-            await modelEngine.train(
-
-                trainHistory,
-
-                {}
+                i+1
 
             );
 
@@ -170,11 +146,11 @@ class BacktestEngine {
 
 
 
-            const predictor =
+            const predict =
 
-            new PredictionEngine(
+            this.simplePredict(
 
-                models
+                trainData
 
             );
 
@@ -184,33 +160,17 @@ class BacktestEngine {
 
 
 
-            const prediction =
 
-            await predictor.predict();
+            const hit =
 
+            this.compare(
 
+                predict,
 
+                real.front
 
+            );
 
-
-
-            const best =
-
-            prediction
-            .predictions[0];
-
-
-
-
-
-
-            if(
-                !best
-            ){
-
-                continue;
-
-            }
 
 
 
@@ -225,52 +185,27 @@ class BacktestEngine {
 
 
 
-            const fhit =
+            if(
 
-            this.hitCount(
+                hit>=3
 
-                best.front,
+            ){
 
-                real.front
+                match3++;
 
-            );
-
-
-
-
-
-
-            const bhit =
-
-            this.hitCount(
-
-                best.back,
-
-                real.back
-
-            );
-
-
-
-
-
-
-
-            frontHits += fhit;
-
-
-            backHits += bhit;
-
+            }
 
 
 
 
 
             if(
-                fhit>=5
+
+                hit>=4
+
             ){
 
-                fiveHit++;
+                match4++;
 
             }
 
@@ -280,12 +215,12 @@ class BacktestEngine {
 
 
             if(
-                fhit>=5
-                &&
-                bhit>=2
+
+                hit===5
+
             ){
 
-                sevenHit++;
+                match5++;
 
             }
 
@@ -293,35 +228,7 @@ class BacktestEngine {
 
 
 
-
-
-            this.logs.push({
-
-
-                issue:
-                real.issue,
-
-
-                predict:
-                best,
-
-
-                result:
-                real,
-
-
-                frontHit:
-                fhit,
-
-
-                backHit:
-                bhit
-
-
-
-            });
-
-
+            frontHit += hit;
 
 
 
@@ -333,61 +240,60 @@ class BacktestEngine {
 
 
 
-
         return {
 
 
 
+            model:
+
+            this.name,
+
+
+
+            period:
+
             periods,
 
 
-            samples:
+
+            tests:
+
             total,
 
 
 
-            frontHits,
+            hit3:
 
-
-            backHits,
-
-
-
-            fiveHit,
-
-
-            sevenHit,
+            match3,
 
 
 
-            frontAccuracy:
+            hit4:
 
-            this.rate(
-
-                frontHits,
-
-                total*5
-
-            ),
+            match4,
 
 
 
-            backAccuracy:
+            hit5:
 
-            this.rate(
-
-                backHits,
-
-                total*2
-
-            ),
+            match5,
 
 
 
-            detail:
+            averageHit:
 
-            this.logs.slice(
-                -10
+            Number(
+
+                (
+
+                frontHit /
+
+                total
+
+                )
+
+                .toFixed(3)
+
             )
 
 
@@ -406,17 +312,140 @@ class BacktestEngine {
 
 
 
-    hitCount(
+    simplePredict(
 
-        predict=[],
-
-        real=[]
+        history
 
     ){
 
 
 
-        let count=0;
+        const count={};
+
+
+
+
+
+        for(
+
+            let i=1;
+
+            i<=35;
+
+            i++
+
+        ){
+
+
+            count[i]=0;
+
+
+        }
+
+
+
+
+
+
+
+
+        history.forEach(
+
+            item=>{
+
+
+
+                item.front
+
+                .forEach(
+
+                    n=>{
+
+
+                        count[n]++;
+
+
+                    }
+
+                );
+
+
+
+            }
+
+        );
+
+
+
+
+
+
+
+        return Object.keys(
+
+            count
+
+        )
+
+        .sort(
+
+            (a,b)=>
+
+            count[b]
+
+            -
+
+            count[a]
+
+        )
+
+        .slice(
+
+            0,
+
+            5
+
+        )
+
+        .map(
+
+            Number
+
+        )
+
+        .sort(
+
+            (a,b)=>
+
+            a-b
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    compare(
+
+        predict,
+
+        real
+
+    ){
+
+
+
+        let hit=0;
+
+
 
 
 
@@ -425,11 +454,16 @@ class BacktestEngine {
             n=>{
 
 
+
                 if(
+
                     real.includes(n)
+
                 ){
 
-                    count++;
+
+                    hit++;
+
 
                 }
 
@@ -440,62 +474,19 @@ class BacktestEngine {
 
 
 
-        return count;
+
+
+        return hit;
+
 
 
     }
 
-
-
-
-
-
-
-
-    rate(
-
-        hit,
-
-        total
-
-    ){
-
-
-        if(
-            total===0
-        ){
-
-            return 0;
-
-        }
-
-
-
-        return Number(
-
-            (
-
-            hit
-            /
-            total
-            *
-            100
-
-            )
-
-            .toFixed(2)
-
-        );
-
-
-    }
 
 
 
 
 }
-
-
 
 
 

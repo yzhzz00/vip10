@@ -1,14 +1,12 @@
 /**
  * DLT-AI-CORE VIP
- * Learning Engine V2.0
+ * Learning Engine V3.0 FINAL
  *
- * 反馈学习模块
+ * 开奖反馈学习系统
  */
 
 
 import fs from "fs";
-
-
 
 
 
@@ -20,11 +18,15 @@ class LearningEngine {
 
 
         this.file =
+
         "./data/learn_history.json";
 
 
+
         this.weightFile =
+
         "./data/model_weight.json";
+
 
 
     }
@@ -35,70 +37,40 @@ class LearningEngine {
 
 
 
+
+
     parseInput(
 
-        front="",
+        front=[],
 
-        back=""
+        back=[]
 
     ){
-
-
-
-        const f =
-
-        front
-
-        .split(/\s+/)
-
-        .filter(Boolean)
-
-        .map(Number);
-
-
-
-
-
-        const b =
-
-        back
-
-        .split(/\s+/)
-
-        .filter(Boolean)
-
-        .map(Number);
-
-
-
-
-
-
-        if(
-            f.length!==5
-            ||
-            b.length!==2
-        ){
-
-            throw new Error(
-                "开奖号码格式错误"
-            );
-
-
-        }
-
-
-
 
 
 
         return {
 
 
-            front:f,
+
+            front:
+
+            front.map(
+
+                Number
+
+            ),
 
 
-            back:b,
+
+            back:
+
+            back.map(
+
+                Number
+
+            ),
+
 
 
             time:
@@ -133,56 +105,19 @@ class LearningEngine {
 
 
 
-        let history=[];
+        const history =
 
-
-
-        try{
-
-
-            history =
-
-            JSON.parse(
-
-                fs.readFileSync(
-
-                    this.file,
-
-                    "utf-8"
-
-                )
-
-            );
-
-
-        }catch(e){
-
-
-            history=[];
-
-
-        }
+        this.loadHistory();
 
 
 
 
 
+        history.push(
 
+            result
 
-        history.push({
-
-            ...result,
-
-
-            models:
-
-            Object.keys(
-                models
-            )
-
-
-        });
-
+        );
 
 
 
@@ -213,7 +148,13 @@ class LearningEngine {
 
         const weights =
 
-        this.updateWeights();
+        this.updateWeights(
+
+            models,
+
+            result
+
+        );
 
 
 
@@ -243,17 +184,18 @@ class LearningEngine {
 
 
 
+
         return {
 
 
 
             status:
 
-            "learning_complete",
+            "learning_completed",
 
 
 
-            totalLearning:
+            total:
 
             history.length,
 
@@ -267,6 +209,67 @@ class LearningEngine {
 
 
 
+    }
+
+
+
+
+
+
+
+
+
+    loadHistory(){
+
+
+
+        if(
+
+            !fs.existsSync(
+
+                this.file
+
+            )
+
+        ){
+
+
+
+            return [];
+
+        }
+
+
+
+
+
+
+        try{
+
+
+
+            return JSON.parse(
+
+                fs.readFileSync(
+
+                    this.file,
+
+                    "utf-8"
+
+                )
+
+            );
+
+
+
+        }catch(e){
+
+
+
+            return [];
+
+        }
+
 
     }
 
@@ -278,47 +281,69 @@ class LearningEngine {
 
 
 
-    updateWeights(){
+    updateWeights(
+
+        models,
+
+        result
+
+    ){
 
 
 
-        let weights={
+        const weights={
 
 
 
             statistics:
-            0.20,
+
+            0.25,
 
 
 
             bayesian:
+
             0.20,
 
 
 
             markov:
+
             0.15,
 
 
 
             matrix:
+
             0.15,
 
 
 
             structure:
+
             0.15,
 
 
 
             ensemble:
-            0.15
+
+            0.10
 
 
 
         };
 
 
+
+
+
+
+
+        /*
+         * 后续根据命中情况调整
+         *
+         * 当前保持稳定基线
+         */
 
 
 
@@ -336,39 +361,39 @@ class LearningEngine {
 
 
 
-    getHistory(){
+    getLearningStatus(){
 
 
 
-        try{
+        const history=
+
+        this.loadHistory();
 
 
-            return JSON.parse(
-
-                fs.readFileSync(
-
-                    this.file,
-
-                    "utf-8"
-
-                )
-
-            );
 
 
-        }catch(e){
+
+        return {
 
 
-            return [];
+
+            learned:
+
+            history.length,
 
 
-        }
+
+            status:
+
+            "active"
+
+
+
+        };
 
 
 
     }
-
-
 
 
 

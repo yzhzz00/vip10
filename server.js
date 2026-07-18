@@ -1,44 +1,30 @@
 /**
  * DLT-AI-CORE VIP
- * Server V3.0 FINAL
+ * Server V4.0 FINAL
  */
 
 
 import express from "express";
-import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
 
-
-import DataEngine
-from "./core/data_engine.js";
-
-
-import FeatureEngine
-from "./core/feature_engine.js";
-
-
-import ModelEngine
-from "./core/model_engine.js";
+import DataEngine from "./core/data_engine.js";
+import FeatureEngine from "./core/feature_engine.js";
+import ModelEngine from "./core/model_engine.js";
+import PredictionEngine from "./core/prediction_engine.js";
+import BacktestEngine from "./core/backtest_engine.js";
+import LearningEngine from "./core/learning_engine.js";
+import OutputEngine from "./core/output_engine.js";
 
 
-import PredictionEngine
-from "./core/prediction_engine.js";
 
 
-import BacktestEngine
-from "./core/backtest_engine.js";
+const app = express();
 
 
-import LearningEngine
-from "./core/learning_engine.js";
-
-
-import OutputEngine
-from "./core/output_engine.js";
-
-
+const PORT =
+process.env.PORT || 3000;
 
 
 
@@ -53,16 +39,9 @@ path.dirname(__filename);
 
 
 
-const app =
-express();
-
-
-
-
 app.use(
 express.json()
 );
-
 
 
 
@@ -88,25 +67,13 @@ __dirname,
 
 
 
-
-const PORT =
-process.env.PORT || 3000;
-
-
-
-
-
-
-
-
-// ========================
-// 初始化
-// ========================
-
-
 let history=[];
 
+let features={};
+
 let models={};
+
+
 
 
 
@@ -126,15 +93,21 @@ async function init(){
 
 
 
+
+
     const featureEngine =
     new FeatureEngine();
 
 
 
-    const features =
+    features =
     await featureEngine.build(
+
         history
+
     );
+
+
 
 
 
@@ -142,7 +115,6 @@ async function init(){
 
     const modelEngine =
     new ModelEngine();
-
 
 
 
@@ -158,9 +130,12 @@ async function init(){
 
 
 
+
+
+
     console.log(
 
-        "DLT-AI-CORE VIP初始化完成"
+        "DLT-AI-CORE VIP启动完成"
 
     );
 
@@ -184,9 +159,12 @@ async function init(){
 
 
 
-// ========================
-// 状态接口
-// ========================
+
+
+
+// =====================
+// 状态
+// =====================
 
 
 app.get(
@@ -205,6 +183,12 @@ app.get(
 
 
 
+        status:
+
+        "running",
+
+
+
         history:
 
         history.length,
@@ -214,16 +198,10 @@ app.get(
         models:
 
         Object.keys(
+
             models
-        ),
 
-
-
-        timestamp:
-
-        new Date()
-
-        .toISOString()
+        )
 
 
 
@@ -242,9 +220,9 @@ app.get(
 
 
 
-// ========================
-// 数据接口
-// ========================
+// =====================
+// 数据
+// =====================
 
 
 app.get(
@@ -266,7 +244,9 @@ app.get(
         latest:
 
         history[
+
             history.length-1
+
         ]
 
 
@@ -285,9 +265,9 @@ app.get(
 
 
 
-// ========================
-// 预测接口
-// ========================
+// =====================
+// 预测
+// =====================
 
 
 app.get(
@@ -295,7 +275,6 @@ app.get(
 "/api/predict",
 
 async(req,res)=>{
-
 
 
     try{
@@ -312,6 +291,7 @@ async(req,res)=>{
 
 
 
+
         const result =
 
         await engine.predict();
@@ -319,9 +299,12 @@ async(req,res)=>{
 
 
 
+
         const output =
 
         new OutputEngine();
+
+
 
 
 
@@ -348,9 +331,11 @@ async(req,res)=>{
 
         .json({
 
+
             error:
 
             e.message
+
 
         });
 
@@ -359,7 +344,6 @@ async(req,res)=>{
     }
 
 
-
 }
 
 );
@@ -372,51 +356,9 @@ async(req,res)=>{
 
 
 
-// ========================
-// Monte Carlo
-// ========================
-
-
-app.get(
-
-"/api/montecarlo",
-
-(req,res)=>{
-
-
-    res.json({
-
-
-        status:
-
-        "ready",
-
-
-
-        message:
-
-        "Monte Carlo引擎已连接"
-
-
-
-    });
-
-
-}
-
-);
-
-
-
-
-
-
-
-
-
-// ========================
+// =====================
 // 回测
-// ========================
+// =====================
 
 
 app.get(
@@ -424,7 +366,6 @@ app.get(
 "/api/backtest",
 
 async(req,res)=>{
-
 
 
     try{
@@ -437,87 +378,86 @@ async(req,res)=>{
 
 
 
-        const result100 =
 
-        await engine.run(
-
-            history,
-
-            100
-
-        );
-
-
-
-        const result500 =
-
-        await engine.run(
-
-            history,
-
-            500
-
-        );
-
-
-
-        const result1000 =
-
-        await engine.run(
-
-            history,
-
-            1000
-
-        );
-
-
-
-
-
-        res.json({
+        const result={
 
 
 
             "100期":
 
-            result100,
+            await engine.run(
+
+                history,
+
+                100
+
+            ),
 
 
 
             "500期":
 
-            result500,
+            await engine.run(
+
+                history,
+
+                500
+
+            ),
 
 
 
             "1000期":
 
-            result1000
+            await engine.run(
+
+                history,
+
+                1000
+
+            )
 
 
 
-        });
+        };
 
 
+
+
+        const output =
+
+        new OutputEngine();
+
+
+
+
+        res.json(
+
+            output.backtest(
+
+                result
+
+            )
+
+        );
 
 
 
     }catch(e){
 
 
-
         res.status(500)
 
         .json({
 
-            error:e.message
+            error:
+
+            e.message
 
         });
 
 
     }
-
 
 
 
@@ -533,9 +473,9 @@ async(req,res)=>{
 
 
 
-// ========================
+// =====================
 // 学习反馈
-// ========================
+// =====================
 
 
 app.post(
@@ -553,6 +493,7 @@ async(req,res)=>{
         const engine =
 
         new LearningEngine();
+
 
 
 
@@ -585,7 +526,22 @@ async(req,res)=>{
 
 
 
-        res.json(result);
+        const output =
+
+        new OutputEngine();
+
+
+
+
+        res.json(
+
+            output.learning(
+
+                result
+
+            )
+
+        );
 
 
 
@@ -610,7 +566,6 @@ async(req,res)=>{
 
 
 
-
 }
 
 );
@@ -622,11 +577,6 @@ async(req,res)=>{
 
 
 
-
-
-// ========================
-// 启动
-// ========================
 
 
 init()
@@ -643,9 +593,9 @@ init()
 
             console.log(
 
-                "服务器运行端口:",
+            "PORT:",
 
-                PORT
+            PORT
 
             );
 

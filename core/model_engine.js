@@ -1,30 +1,17 @@
 /**
  * DLT-AI-CORE VIP
- * Model Engine V2.0
+ * Model Engine V3.0 FINAL
  *
- * 六模型统一管理
+ * 六模型管理核心
  */
 
 
-
-import StatisticsModel
-from "../models/statistics_model.js";
-
-import BayesianModel
-from "../models/bayesian_model.js";
-
-import MarkovModel
-from "../models/markov_model.js";
-
-import MatrixModel
-from "../models/matrix_model.js";
-
-import StructureModel
-from "../models/structure_model.js";
-
-import EnsembleModel
-from "../models/ensemble_model.js";
-
+import StatisticsModel from "../models/statistics_model.js";
+import BayesianModel from "../models/bayesian_model.js";
+import MarkovModel from "../models/markov_model.js";
+import MatrixModel from "../models/matrix_model.js";
+import StructureModel from "../models/structure_model.js";
+import EnsembleModel from "../models/ensemble_model.js";
 
 
 
@@ -36,9 +23,7 @@ class ModelEngine {
     constructor(){
 
 
-
-        this.models={
-
+        this.models = {
 
 
             statistics:
@@ -80,7 +65,6 @@ class ModelEngine {
         };
 
 
-
     }
 
 
@@ -106,6 +90,8 @@ class ModelEngine {
 
 
 
+
+        // 五个基础模型训练
 
 
         result.statistics =
@@ -136,6 +122,7 @@ class ModelEngine {
 
 
 
+
         result.markov =
 
         this.models.markov.train(
@@ -150,6 +137,7 @@ class ModelEngine {
 
 
 
+
         result.matrix =
 
         this.models.matrix.train(
@@ -159,6 +147,7 @@ class ModelEngine {
             features
 
         );
+
 
 
 
@@ -181,9 +170,7 @@ class ModelEngine {
 
 
 
-        /*
-         * 集成模型最后执行
-         */
+        // 集成模型
 
 
         result.ensemble =
@@ -193,6 +180,7 @@ class ModelEngine {
             result
 
         );
+
 
 
 
@@ -213,11 +201,16 @@ class ModelEngine {
 
 
 
+    getModelNames(){
 
-    getModels(){
 
 
-        return this.models;
+        return Object.keys(
+
+            this.models
+
+        );
+
 
 
     }
@@ -229,22 +222,12 @@ class ModelEngine {
 
 
 
-    status(){
+
+    getModels(){
 
 
 
-        return {
-
-
-            models:
-
-            Object.keys(
-                this.models
-            )
-
-
-
-        };
+        return this.models;
 
 
 
@@ -255,6 +238,9 @@ class ModelEngine {
 
 
 }
+
+
+
 
 
 
