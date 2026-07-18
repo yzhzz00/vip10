@@ -1,136 +1,125 @@
-import {
-
-runDLT,
-
-runPL5
-
-} from "./core/runner.js";
-
-
-import {
-
-renderDLT,
-
-renderPL5
-
-} from "./web/result.js";
-
-
-
-
-const btn=
-
+const btn =
 document.getElementById(
 "analyze"
 );
 
 
 
-const type=
-
+const type =
 document.getElementById(
 "lottery"
 );
 
 
 
-const status=
-
+const status =
 document.getElementById(
 "status"
 );
 
 
 
-const result=
-
+const result =
 document.getElementById(
 "result"
 );
 
 
 
-btn.onclick=()=>{
+
+
+btn.onclick=async()=>{
 
 
     status.innerHTML=
-    "AI模型运行中...";
-
-
-    let data;
+    "AI模型计算中...";
 
 
 
-    if(type.value==="dlt"){
+    try{
 
 
-        data=runDLT();
+        let url;
+
+
+
+        if(
+            type.value==="dlt"
+        ){
+
+            url="/api/dlt";
+
+        }else{
+
+
+            url="/api/pl5";
+
+        }
+
+
+
+
+        const res =
+        await fetch(url);
+
+
+
+        const data =
+        await res.json();
+
+
+
+
+        status.innerHTML=
+
+        `
+
+        分析完成<br>
+
+        数据期数:
+
+        ${data.periods}
+
+        `;
+
 
 
 
         result.innerHTML=
 
-        renderDLT(data);
+
+        `
+
+        <pre>
+
+        ${
+        JSON.stringify(
+            data,
+            null,
+            2
+        )
+        }
+
+        </pre>
+
+        `;
+
 
 
     }
 
-    else{
+    catch(e){
 
 
-        data=runPL5();
-
+        status.innerHTML=
+        "运行失败";
 
 
         result.innerHTML=
-
-        renderPL5(data);
+        e.message;
 
 
     }
-
-
-
-    status.innerHTML=
-
-    `
-
-    数据期数:
-
-    ${data.periods}
-
-    <br>
-
-    模型:
-
-    Bayesian ✓
-
-    Markov ✓
-
-    MonteCarlo ✓
-
-    Genetic ✓
-
-    Fusion ✓
-
-    `;
-
-
-
-};
-
-
-
-
-
-document
-.getElementById("save")
-.onclick=()=>{
-
-
-alert(
-"反馈已保存，学习模块将在后续接入"
-);
 
 
 };

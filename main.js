@@ -1,7 +1,15 @@
 import http from "http";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
+import {
+fileURLToPath
+} from "url";
+
+
+import {
+apiHandler
+} from "./api/api.js";
+
 
 
 const __filename =
@@ -18,19 +26,28 @@ process.env.PORT || 3000;
 
 
 
-const mime = {
+const mime={
 
-    ".html":"text/html",
 
-    ".js":"application/javascript",
+".html":
+"text/html;charset=utf-8",
 
-    ".css":"text/css",
 
-    ".json":"application/json",
+".js":
+"application/javascript;charset=utf-8",
 
-    ".txt":"text/plain"
+
+".css":
+"text/css;charset=utf-8",
+
+
+".json":
+"application/json;charset=utf-8"
+
 
 };
+
+
 
 
 
@@ -39,26 +56,47 @@ http.createServer(
 (req,res)=>{
 
 
-    let filePath =
-    path.join(
-        __dirname,
-        req.url===" /"
-        ?
-        "index.html"
-        :
-        req.url
-    );
+    // API接口
+
+    if(
+        req.url.startsWith("/api/")
+    ){
+
+        apiHandler(
+            req,
+            res
+        );
+
+        return;
+
+    }
+
+
+
+    let filePath;
+
 
 
     if(req.url==="/"){
 
-        filePath =
+        filePath=
         path.join(
             __dirname,
             "index.html"
         );
 
+
+    }else{
+
+
+        filePath=
+        path.join(
+            __dirname,
+            req.url
+        );
+
     }
+
 
 
 
@@ -73,9 +111,8 @@ http.createServer(
                 res.writeHead(404);
 
                 res.end(
-                    "404 Not Found"
+                    "404"
                 );
-
 
                 return;
 
@@ -84,17 +121,23 @@ http.createServer(
 
 
             const ext =
-            path.extname(filePath);
+            path.extname(
+                filePath
+            );
 
 
 
             res.writeHead(
                 200,
                 {
-                    "Content-Type":
-                    mime[ext] ||
-                    "text/plain"
+
+                "Content-Type":
+                mime[ext]
+                ||
+                "text/plain"
+
                 }
+
             );
 
 
@@ -112,13 +155,16 @@ http.createServer(
 
 
 
+
 server.listen(
 PORT,
 ()=>{
 
 
 console.log(
-`DLT-AI-CORE V21.5 running on ${PORT}`
+"DLT-AI-CORE V21.5 API RUNNING:"
++
+PORT
 );
 
 
