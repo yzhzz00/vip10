@@ -1,0 +1,132 @@
+{
+  "version": "v21.5",
+
+  "system": "dlt-ai-core",
+
+
+  "models": {
+
+
+    "bayesian": {
+
+      "name": "贝叶斯评分模型",
+
+      "enabled": true,
+
+      "weight": 0.25,
+
+      "status": "active"
+
+    },
+
+
+    "markov": {
+
+      "name": "马尔可夫转移模型",
+
+      "enabled": true,
+
+      "weight": 0.20,
+
+      "status": "active"
+
+    },
+
+
+    "montecarlo": {
+
+      "name": "蒙特卡罗模拟模型",
+
+      "enabled": true,
+
+      "weight": 0.20,
+
+      "status": "active"
+
+    },
+
+
+    "genetic": {
+
+      "name": "遗传优化模型",
+
+      "enabled": true,
+
+      "weight": 0.15,
+
+      "status": "active"
+
+    },
+
+
+    "structure": {
+
+      "name": "结构过滤模型",
+
+      "enabled": true,
+
+      "weight": 0.10,
+
+      "status": "active"
+
+    },
+
+
+    "fusion": {
+
+      "name": "融合决策模型",
+
+      "enabled": true,
+
+      "weight": 0.10,
+
+      "status": "active"
+
+    }
+
+
+  },
+
+
+  "prediction": {
+
+
+    "dlt": {
+
+      "front_count": 5,
+
+      "back_count": 2,
+
+      "top_output": 10
+
+    },
+
+
+    "pl5": {
+
+      "digit_count": 5,
+
+      "top_output": 10
+
+    }
+
+
+  },
+
+
+  "training": {
+
+
+    "feedback_learning": true,
+
+    "history_update": true,
+
+    "backtest": true
+
+
+  },
+
+
+  "last_update": null
+
+}

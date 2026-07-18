@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>DLT-AI-CORE V21.5</title>
+
+
+<link rel="stylesheet" href="./style.css">
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<h1>
+DLT-AI-CORE V21.5
+</h1>
+
+
+<p>
+大乐透 + 排列五智能分析系统
+</p>
+
+
+
+<div class="card">
+
+
+<select id="lottery">
+
+<option value="dlt">
+超级大乐透
+</option>
+
+
+<option value="pl5">
+排列五
+</option>
+
+
+</select>
+
+
+
+<button id="analyze">
+
+开始智能分析
+
+</button>
+
+
+</div>
+
+
+
+
+<div class="card">
+
+<h3>
+系统状态
+</h3>
+
+<div id="status">
+
+等待运行
+
+</div>
+
+
+</div>
+
+
+
+
+<div class="card">
+
+
+<h3>
+预测结果
+</h3>
+
+
+<div id="result">
+
+暂无结果
+
+</div>
+
+
+</div>
+
+
+
+
+<div class="card">
+
+
+<h3>
+开奖反馈
+</h3>
+
+
+<input
+
+id="feedback"
+
+placeholder="输入开奖号码">
+
+
+<button id="save">
+
+保存反馈
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+<script type="module" src="./app.js"></script>
+
+
+</body>
+
+</html>
