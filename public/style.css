@@ -1,0 +1,270 @@
+/**
+ * DLT-AI-CORE VIP
+ * 页面样式
+ */
+
+
+*{
+
+    box-sizing:border-box;
+
+}
+
+
+
+body{
+
+
+    margin:0;
+
+
+    padding:0;
+
+
+    background:#f5f6fa;
+
+
+    font-family:
+
+    Arial,
+    "Microsoft YaHei",
+    sans-serif;
+
+
+    color:#222;
+
+
+}
+
+
+
+
+.container{
+
+
+    width:95%;
+
+
+    max-width:900px;
+
+
+    margin:20px auto;
+
+
+}
+
+
+
+
+h1{
+
+
+    text-align:center;
+
+
+    color:#1a237e;
+
+
+}
+
+
+
+
+
+.card{
+
+
+    background:white;
+
+
+    border-radius:12px;
+
+
+    padding:20px;
+
+
+    margin-bottom:20px;
+
+
+    box-shadow:
+
+    0 3px 10px
+
+    rgba(0,0,0,0.08);
+
+
+}
+
+
+
+
+
+.card h2{
+
+
+    margin-top:0;
+
+
+    color:#333;
+
+
+}
+
+
+
+
+button{
+
+
+    border:none;
+
+
+    background:#1565c0;
+
+
+    color:white;
+
+
+    padding:
+
+    12px 18px;
+
+
+    margin:5px;
+
+
+    border-radius:8px;
+
+
+    cursor:pointer;
+
+
+    font-size:15px;
+
+
+}
+
+
+
+
+button:hover{
+
+
+    opacity:0.85;
+
+
+}
+
+
+
+
+
+input{
+
+
+    width:100%;
+
+
+    padding:12px;
+
+
+    margin:
+
+    8px 0;
+
+
+    border-radius:8px;
+
+
+    border:1px solid #ddd;
+
+
+    font-size:15px;
+
+
+}
+
+
+
+
+
+pre{
+
+
+    background:#111;
+
+
+    color:#00ff88;
+
+
+    padding:15px;
+
+
+    border-radius:8px;
+
+
+    overflow:auto;
+
+
+    white-space:pre-wrap;
+
+
+}
+
+
+
+
+
+#status{
+
+
+    color:#1565c0;
+
+
+    font-weight:bold;
+
+
+}
+
+
+
+
+
+@media(max-width:600px){
+
+
+
+    .container{
+
+
+        width:96%;
+
+
+    }
+
+
+
+    h1{
+
+
+        font-size:22px;
+
+
+    }
+
+
+
+    button{
+
+
+        width:100%;
+
+
+        margin-top:8px;
+
+
+    }
+
+
+
+}
