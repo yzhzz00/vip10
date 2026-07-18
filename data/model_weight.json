@@ -1,8 +1,0 @@
-{
-  "statistics":0.20,
-  "bayesian":0.20,
-  "markov":0.15,
-  "matrix":0.15,
-  "structure":0.15,
-  "ensemble":0.15
-}
