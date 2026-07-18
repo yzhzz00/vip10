@@ -32,11 +32,20 @@ btn.onclick=async()=>{
 
 
     status.innerHTML=
-    "AI模型计算中...";
+
+    "AI模型启动...";
+
+
+
+    result.innerHTML=
+
+    "计算中，请等待...";
+
 
 
 
     try{
+
 
 
         let url;
@@ -49,7 +58,9 @@ btn.onclick=async()=>{
 
             url="/api/dlt";
 
-        }else{
+        }
+
+        else{
 
 
             url="/api/pl5";
@@ -59,13 +70,82 @@ btn.onclick=async()=>{
 
 
 
-        const res =
-        await fetch(url);
+
+
+        const controller =
+
+        new AbortController();
+
+
+
+
+        const timer =
+
+        setTimeout(
+
+            ()=>controller.abort(),
+
+            60000
+
+        );
+
+
+
+
+
+
+        const response =
+
+        await fetch(
+
+            url,
+
+            {
+
+            signal:
+
+            controller.signal
+
+            }
+
+        );
+
+
+
+
+
+        clearTimeout(timer);
+
+
+
+
+
+        if(
+            !response.ok
+        ){
+
+
+            throw new Error(
+
+            "API错误: "
+
+            +
+
+            response.status
+
+            );
+
+
+        }
+
+
 
 
 
         const data =
-        await res.json();
+
+        await response.json();
+
 
 
 
@@ -85,19 +165,26 @@ btn.onclick=async()=>{
 
 
 
-        result.innerHTML=
 
+
+        result.innerHTML=
 
         `
 
         <pre>
 
         ${
+
         JSON.stringify(
+
             data,
+
             null,
+
             2
+
         )
+
         }
 
         </pre>
@@ -106,17 +193,24 @@ btn.onclick=async()=>{
 
 
 
+
+
     }
 
-    catch(e){
+    catch(error){
+
 
 
         status.innerHTML=
+
         "运行失败";
 
 
+
         result.innerHTML=
-        e.message;
+
+        error.message;
+
 
 
     }

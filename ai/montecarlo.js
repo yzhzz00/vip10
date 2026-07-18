@@ -1,6 +1,6 @@
 import {
 
-validCombination
+    validCombination
 
 } from "./filter.js";
 
@@ -11,38 +11,74 @@ validCombination
 function create(pool,count){
 
 
+
     const temp=[...pool];
 
     const result=[];
 
 
 
-    while(result.length<count){
+
+    while(
+
+        result.length<count
+
+        &&
+
+        temp.length>0
+
+    ){
+
 
 
         const index=
 
         Math.floor(
-            Math.random()*temp.length
+
+            Math.random()
+
+            *
+
+            temp.length
+
         );
+
+
 
 
 
         result.push(
+
             temp[index]
+
         );
 
 
-        temp.splice(index,1);
+
+
+
+        temp.splice(
+
+            index,
+
+            1
+
+        );
+
 
 
     }
 
 
 
+
     return result.sort(
+
         (a,b)=>a-b
+
     );
+
+
 
 }
 
@@ -50,36 +86,134 @@ function create(pool,count){
 
 
 
+
+
 function runSimulation(
-pool,
-times=100000
+
+    pool,
+
+    times=5000
+
 ){
+
 
 
     const result=[];
 
 
 
-    let i=0;
+    let attempts=0;
 
 
 
-    while(i<times){
+    const maxAttempts=
+
+    times*20;
+
+
+
+
+
+
+
+    while(
+
+        result.length<times
+
+        &&
+
+        attempts<maxAttempts
+
+    ){
+
 
 
         const combo=
 
-        create(pool,5);
+        create(
+
+            pool,
+
+            5
+
+        );
 
 
 
-        if(validCombination(combo)){
+
+        if(
+
+            validCombination(
+
+                combo
+
+            )
+
+        ){
 
 
-            result.push(combo);
+
+            result.push(
+
+                combo
+
+            );
 
 
-            i++;
+
+        }
+
+
+
+
+
+        attempts++;
+
+
+
+    }
+
+
+
+
+
+
+
+    // 如果过滤不足
+
+    // 返回已有结果
+
+    if(
+
+        result.length===0
+
+    ){
+
+
+
+        for(
+
+            let i=0;
+
+            i<100;
+
+            i++
+
+        ){
+
+
+
+            result.push(
+
+                create(
+
+                    pool,
+
+                    5
+
+                )
+
+            );
 
 
         }
@@ -89,7 +223,10 @@ times=100000
 
 
 
+
+
     return result;
+
 
 
 }
@@ -98,8 +235,9 @@ times=100000
 
 
 
+
 export {
 
-runSimulation
+    runSimulation
 
 };
