@@ -1,10 +1,9 @@
 /**
  * DLT-AI-CORE VIP
- * 预测生成引擎
+ * Prediction Engine V2.0
+ *
+ * 模型驱动预测
  */
-
-
-import ScoringEngine from "./scoring_engine.js";
 
 
 class PredictionEngine {
@@ -14,13 +13,12 @@ class PredictionEngine {
         modelResult={}
     ){
 
-        this.modelResult =
-        modelResult;
-
-
-        this.scoring =
-        new ScoringEngine();
-
+        this.models =
+        modelResult.models
+        ||
+        modelResult
+        ||
+        {};
 
     }
 
@@ -28,63 +26,27 @@ class PredictionEngine {
 
 
 
-    /**
-     * 主预测入口
-     */
     async predict(){
 
 
-        const front =
-        this.generateFront();
-
-
-        const back =
-        this.generateBack();
+        const frontPool =
+        this.buildFrontPool();
 
 
 
-        const results=[];
+        const backPool =
+        this.buildBackPool();
 
 
 
-        for(
-            let i=0;
-            i<3;
-            i++
-        ){
+        const predictions =
+        this.generateCombination(
 
-            results.push({
+            frontPool,
 
-                rank:
-                i+1,
+            backPool
 
-
-                front:
-                front[i],
-
-
-                back:
-                back[i],
-
-
-                score:
-                Number(
-                    (
-                    Math.random()
-                    *
-                    100
-                    )
-                    .toFixed(2)
-                ),
-
-
-                models:
-                this.modelResult
-
-            });
-
-
-        }
+        );
 
 
 
@@ -96,8 +58,12 @@ class PredictionEngine {
             .toISOString(),
 
 
-            predictions:
-            results
+            engine:
+            "prediction_v2",
+
+
+            predictions
+
 
 
         };
@@ -109,13 +75,14 @@ class PredictionEngine {
 
 
 
+
     /**
-     * 前区生成
+     * 前区候选池
      */
-    generateFront(){
+    buildFrontPool(){
 
 
-        const pool=[];
+        const scoreMap={};
 
 
 
@@ -125,164 +92,42 @@ class PredictionEngine {
             i++
         ){
 
-            pool.push(i);
+            scoreMap[i]=0;
 
         }
 
 
 
-        const result=[];
 
 
+        Object.keys(
+            this.models
+        )
+        .forEach(
+            model=>{
 
-        for(
-            let i=0;
-            i<3;
-            i++
-        ){
 
+                const data =
+                this.models[model];
 
-            const arr =
-            this.randomPick(
-                pool,
-                5
-            );
 
 
-            result.push(
-                arr.sort(
-                    (a,b)=>a-b
-                )
-            );
+                if(
+                    !data
+                    ||
+                    !data.numbers
+                ){
 
+                    return;
 
-        }
+                }
 
 
 
-        return result;
+                data.numbers
+                .forEach(
+                    item=>{
 
 
-    }
-
-
-
-
-
-    /**
-     * 后区生成
-     */
-    generateBack(){
-
-
-        const pool=[];
-
-
-
-        for(
-            let i=1;
-            i<=12;
-            i++
-        ){
-
-            pool.push(i);
-
-        }
-
-
-
-        const result=[];
-
-
-
-        for(
-            let i=0;
-            i<3;
-            i++
-        ){
-
-
-            const arr =
-            this.randomPick(
-                pool,
-                2
-            );
-
-
-            result.push(
-                arr.sort(
-                    (a,b)=>a-b
-                )
-            );
-
-
-        }
-
-
-
-        return result;
-
-
-    }
-
-
-
-
-
-    /**
-     * 随机选择
-     */
-    randomPick(
-        pool,
-        count
-    ){
-
-
-        const copy =
-        [...pool];
-
-
-        const result=[];
-
-
-
-        while(
-            result.length<count
-        ){
-
-
-            const index =
-            Math.floor(
-                Math.random()
-                *
-                copy.length
-            );
-
-
-            result.push(
-                copy[index]
-            );
-
-
-            copy.splice(
-                index,
-                1
-            );
-
-
-        }
-
-
-
-        return result;
-
-
-    }
-
-
-
-}
-
-
-
-export default PredictionEngine;
+                        scoreMap[item.number]
+                        +=
