@@ -7,11 +7,18 @@ export class MonteCarloEngine {
     constructor(){
 
 
-        this.iterations =
-            1000000;
+        this.total =
+        1000000;
+
+
+        this.batch =
+        5000;
 
 
         this.results=[];
+
+
+        this.running=false;
 
 
         this.progress=0;
@@ -21,9 +28,11 @@ export class MonteCarloEngine {
 
 
 
-    // =========================
-    // 随机整数
-    // =========================
+
+
+    // =====================
+    // 随机数
+    // =====================
 
     random(
         min,
@@ -40,7 +49,8 @@ export class MonteCarloEngine {
             )
 
         )
-        +min;
+        +
+        min;
 
 
     }
@@ -48,15 +58,16 @@ export class MonteCarloEngine {
 
 
 
-    // =========================
+
+    // =====================
     // 生成前区
-    // =========================
+    // =====================
 
     createFront(){
 
 
         let set =
-            new Set();
+        new Set();
 
 
 
@@ -79,11 +90,7 @@ export class MonteCarloEngine {
 
 
 
-        return [
-
-            ...set
-
-        ]
+        return [...set]
         .sort(
             (a,b)=>
             a-b
@@ -96,15 +103,15 @@ export class MonteCarloEngine {
 
 
 
-    // =========================
+    // =====================
     // 生成后区
-    // =========================
+    // =====================
 
     createBack(){
 
 
         let set =
-            new Set();
+        new Set();
 
 
 
@@ -127,11 +134,7 @@ export class MonteCarloEngine {
 
 
 
-        return [
-
-            ...set
-
-        ]
+        return [...set]
         .sort(
             (a,b)=>
             a-b
@@ -144,9 +147,9 @@ export class MonteCarloEngine {
 
 
 
-    // =========================
+    // =====================
     // 候选生成
-    // =========================
+    // =====================
 
     generate(){
 
@@ -158,8 +161,10 @@ export class MonteCarloEngine {
             this.createFront(),
 
 
+
             back:
             this.createBack()
+
 
 
         };
@@ -171,14 +176,14 @@ export class MonteCarloEngine {
 
 
 
-    // =========================
-    // 模型综合评分
-    // =========================
+    // =====================
+    // 评分
+    // =====================
 
     evaluate(
         candidate,
         models,
-        context={}
+        theory
     ){
 
 
@@ -187,31 +192,50 @@ export class MonteCarloEngine {
 
 
         models.forEach(
-            model=>{
+        model=>{
 
 
-                let result =
-                    model.predict(
-                        candidate,
-                        context
-                    );
-
-
-
-                score +=
-                    result.score
-                    ||
-                    0;
-
-
-            }
-        );
+            let result =
+            model.predict(
+                candidate
+            );
 
 
 
-        return score
-        /
-        models.length;
+            score +=
+
+            result.score
+            ||
+            0;
+
+
+
+        });
+
+
+
+
+
+        if(theory){
+
+
+            score +=
+
+            theory.score(
+                candidate
+            )
+            *
+            10;
+
+
+
+        }
+
+
+
+
+        return score;
+
 
 
     }
@@ -220,79 +244,151 @@ export class MonteCarloEngine {
 
 
 
-    // =========================
-    // 开始模拟
-    // =========================
+    // =====================
+    // 异步运行
+    // =====================
 
     run(
-        models=[],
-        context={},
-        callback=null
+        models,
+        theory,
+        onProgress,
+        onFinish
     ){
 
 
         this.results=[];
 
 
-
-        for(
-            let i=0;
-
-            i<this.iterations;
-
-            i++
-        ){
+        this.running=true;
 
 
-            let candidate =
+        let current=0;
+
+
+
+        const loop=()=>{
+
+
+            let count=0;
+
+
+
+            while(
+                count<this.batch
+                &&
+                current<this.total
+            ){
+
+
+                let candidate =
                 this.generate();
 
 
 
-            let score =
+                let score =
+
                 this.evaluate(
                     candidate,
                     models,
-                    context
+                    theory
                 );
 
 
 
-            this.results.push({
+                this.results.push({
+
+                    candidate,
+
+                    score
 
 
-                candidate,
-
-
-                score
+                });
 
 
 
-            });
+                current++;
+
+                count++;
+
+
+            }
+
+
+
+
+
+            this.progress =
+
+            (
+                current
+                /
+                this.total
+            )
+            *
+            100;
+
+
+
+            if(onProgress){
+
+
+                onProgress(
+                    this.progress
+                );
+
+
+            }
+
+
 
 
 
             if(
-                i%10000===0
+                current<this.total
             ){
 
 
-                this.progress =
-                (
-                    i
-                    /
-                    this.iterations
+                setTimeout(
+                    loop,
+                    0
+                );
+
+
+            }
+            else{
+
+
+                this.running=false;
+
+
+
+                let result =
+
+                this.results
+
+                .sort(
+                (a,b)=>
+
+                    b.score
+                    -
+                    a.score
+
                 )
-                *
-                100;
+
+                .slice(
+                    0,
+                    50
+                );
 
 
 
-                if(callback){
+                if(onFinish){
 
-                    callback(
-                        this.progress
+
+                    onFinish(
+                        result
                     );
+
 
                 }
 
@@ -300,11 +396,13 @@ export class MonteCarloEngine {
             }
 
 
-        }
+
+        };
 
 
 
-        return this.rank();
+        loop();
+
 
 
     }
@@ -312,39 +410,6 @@ export class MonteCarloEngine {
 
 
 
-
-    // =========================
-    // 排序
-    // =========================
-
-    rank(){
-
-
-        return this.results
-
-        .sort(
-
-            (a,b)=>
-
-            b.score-a.score
-
-        )
-
-        .slice(
-            0,
-            50
-        );
-
-
-    }
-
-
-
-
-
-    // =========================
-    // 状态
-    // =========================
 
     status(){
 
@@ -352,12 +417,20 @@ export class MonteCarloEngine {
         return {
 
 
+            running:
+
+            this.running,
+
+
             progress:
+
             this.progress,
 
 
             count:
+
             this.results.length
+
 
 
         };

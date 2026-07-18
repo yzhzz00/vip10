@@ -4,94 +4,30 @@
 export class AICommittee {
 
 
-    constructor(models=[]){
-
-
-        this.models =
-            models;
-
-
-        this.results=[];
-
-
-    }
-
-
-
-    // =========================
-    // 模型预测竞争
-    // =========================
-
-    compete(
-        candidate,
-        context={}
+    constructor(
+        models
     ){
 
 
-        this.results=[];
+        this.models =
+        models;
 
 
-
-        this.models.forEach(
-            model=>{
-
-
-                let result =
-                    model.predict(
-                        candidate,
-                        context
-                    );
-
-
-
-                this.results.push({
-
-                    model:
-                        model.name,
-
-
-                    score:
-                        result.score
-
-
-                });
-
-
-            }
-        );
-
-
-
-        return this.rank();
+        this.name =
+        "ai_committee";
 
 
     }
 
 
 
-    // =========================
-    // 排名
-    // =========================
-
-    rank(){
 
 
-        return this.results
-        .sort(
-            (a,b)=>
-            b.score-a.score
-        );
+    // =====================
+    // 单候选评分
+    // =====================
 
-
-    }
-
-
-
-    // =========================
-    // 综合评分
-    // =========================
-
-    combine(
+    evaluate(
         candidate,
         weights={}
     ){
@@ -100,34 +36,70 @@ export class AICommittee {
         let total=0;
 
 
+        let detail=[];
 
-        this.models.forEach(
-            model=>{
-
-
-                let result =
-                    model.predict(
-                        candidate
-                    );
 
 
 
-                let weight =
-                    weights[model.name]
-                    ||
-                    1;
+        this.models.forEach(
+        model=>{
+
+
+            let result =
+
+            model.predict(
+                candidate
+            );
 
 
 
-                total +=
-                    result.score
-                    *
-                    weight;
+            let weight =
+
+            weights[
+                model.name
+            ]
+            ||
+            1;
 
 
 
-            }
-        );
+            let value =
+
+            result.score
+            *
+            weight;
+
+
+
+            total += value;
+
+
+
+            detail.push({
+
+
+                model:
+                model.name,
+
+
+                score:
+                result.score,
+
+
+                weight,
+
+
+                value
+
+
+
+            });
+
+
+
+        });
+
+
 
 
 
@@ -138,7 +110,11 @@ export class AICommittee {
 
 
             score:
-                total
+            total,
+
+
+            detail
+
 
 
         };
@@ -148,9 +124,11 @@ export class AICommittee {
 
 
 
-    // =========================
-    // 最终预测
-    // =========================
+
+
+    // =====================
+    // 批量竞争
+    // =====================
 
     predict(
         candidates,
@@ -158,24 +136,34 @@ export class AICommittee {
     ){
 
 
-        let ranking =
-            candidates.map(
-                c=>
 
-                this.combine(
-                    c,
-                    weights
-                )
+        let results =
 
+        candidates.map(
+        candidate=>{
+
+
+            return this.evaluate(
+                candidate,
+                weights
             );
 
 
+        });
 
-        return ranking
+
+
+        return results
+
         .sort(
-            (a,b)=>
-            b.score-a.score
+        (a,b)=>
+
+            b.score
+            -
+            a.score
+
         )
+
         .slice(
             0,
             3

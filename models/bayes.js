@@ -8,27 +8,40 @@ export class BayesModel {
 
 
         this.name =
-            "bayes";
+        "bayes";
 
 
-        this.frontProbability={};
+        this.frontProb={};
 
 
-        this.backProbability={};
+        this.backProb={};
 
 
-        this.alpha=1;
+        this.total=0;
 
 
     }
 
 
 
-    // =========================
-    // 初始化先验
-    // =========================
 
-    init(){
+
+    // =====================
+    // 训练
+    // =====================
+
+    train(history){
+
+
+        this.frontProb={};
+
+
+        this.backProb={};
+
+
+        this.total =
+        history.length;
+
 
 
         for(
@@ -38,9 +51,7 @@ export class BayesModel {
         ){
 
 
-            this.frontProbability[i]
-                =
-                this.alpha;
+            this.frontProb[i]=1;
 
 
         }
@@ -54,50 +65,32 @@ export class BayesModel {
         ){
 
 
-            this.backProbability[i]
-                =
-                this.alpha;
+            this.backProb[i]=1;
 
 
         }
 
 
-    }
-
-
-
-    // =========================
-    // 贝叶斯训练
-    // =========================
-
-    train(history){
-
-
-        this.init();
 
 
 
         history.forEach(item=>{
 
 
-            item.front
-            .forEach(n=>{
+            item.front.forEach(n=>{
 
 
-                this.frontProbability[n]
-                +=1;
+                this.frontProb[n]++;
 
 
             });
 
 
 
-            item.back
-            .forEach(n=>{
+            item.back.forEach(n=>{
 
 
-                this.backProbability[n]
-                +=1;
+                this.backProb[n]++;
 
 
             });
@@ -108,89 +101,48 @@ export class BayesModel {
 
 
 
-        this.normalize();
-
-
-
-        return 1;
-
-
     }
 
 
 
-    // =========================
-    // 概率归一化
-    // =========================
-
-    normalize(){
 
 
+    // =====================
+    // 概率计算
+    // =====================
 
-        let frontTotal =
-            Object.values(
-                this.frontProbability
-            )
-            .reduce(
-                (a,b)=>a+b,
-                0
+    probability(
+        n,
+        type
+    ){
+
+
+        if(type==="front"){
+
+
+            return (
+
+                this.frontProb[n]
+                /
+                (
+                    this.total*5+35
+                )
+
             );
-
-
-
-        for(
-            let n in this.frontProbability
-        ){
-
-
-            this.frontProbability[n]
-            /=
-            frontTotal;
 
 
         }
 
-
-
-        let backTotal =
-            Object.values(
-                this.backProbability
-            )
-            .reduce(
-                (a,b)=>a+b,
-                0
-            );
-
-
-
-        for(
-            let n in this.backProbability
-        ){
-
-
-            this.backProbability[n]
-            /=
-            backTotal;
-
-
-        }
-
-
-    }
-
-
-
-    // =========================
-    // 单号码概率
-    // =========================
-
-    frontScore(number){
 
 
         return (
-            this.frontProbability[number]
-            ||
-            0
+
+            this.backProb[n]
+            /
+            (
+                this.total*2+12
+            )
+
         );
 
 
@@ -198,23 +150,11 @@ export class BayesModel {
 
 
 
-    backScore(number){
 
 
-        return (
-            this.backProbability[number]
-            ||
-            0
-        );
-
-
-    }
-
-
-
-    // =========================
-    // 组合预测评分
-    // =========================
+    // =====================
+    // 候选评分
+    // =====================
 
     predict(candidate){
 
@@ -223,27 +163,36 @@ export class BayesModel {
 
 
 
-        candidate.front
-        .forEach(n=>{
+        candidate.front.forEach(n=>{
 
 
             score +=
-            this.frontScore(n);
+
+            this.probability(
+                n,
+                "front"
+            );
 
 
         });
 
 
 
-        candidate.back
-        .forEach(n=>{
+
+        candidate.back.forEach(n=>{
 
 
             score +=
-            this.backScore(n);
+
+            this.probability(
+                n,
+                "back"
+            );
 
 
         });
+
+
 
 
 
@@ -251,34 +200,15 @@ export class BayesModel {
 
 
             model:
-                this.name,
+            this.name,
 
 
             score:
-                score/7
+            score*1000
+
 
 
         };
-
-
-    }
-
-
-
-    // =========================
-    // 获取概率排序
-    // =========================
-
-    ranking(){
-
-
-        return Object.entries(
-            this.frontProbability
-        )
-        .sort(
-            (a,b)=>
-            b[1]-a[1]
-        );
 
 
     }

@@ -20,7 +20,10 @@ body{
 margin:0;
 
 
-background:#f1f5f9;
+padding:0;
+
+
+background:#f3f6fa;
 
 
 font-family:
@@ -34,6 +37,7 @@ color:#1f2937;
 
 
 }
+
 
 
 
@@ -52,10 +56,10 @@ background:#111827;
 color:white;
 
 
-padding:25px;
-
-
 text-align:center;
+
+
+padding:25px 15px;
 
 
 }
@@ -68,7 +72,7 @@ text-align:center;
 margin:0;
 
 
-font-size:30px;
+font-size:28px;
 
 
 }
@@ -90,8 +94,10 @@ opacity:.8;
 
 
 
+
+
 /* =====================
-   容器
+   主容器
 ===================== */
 
 
@@ -117,6 +123,7 @@ gap:20px;
 
 
 }
+
 
 
 
@@ -150,6 +157,7 @@ rgba(0,0,0,.08);
 
 
 
+
 .card h2{
 
 
@@ -159,12 +167,12 @@ margin-top:0;
 font-size:20px;
 
 
+padding-bottom:10px;
+
+
 border-bottom:
 
 1px solid #e5e7eb;
-
-
-padding-bottom:10px;
 
 
 }
@@ -184,13 +192,13 @@ button{
 width:100%;
 
 
-padding:14px;
+height:48px;
 
 
-border:none;
+border:0;
 
 
-border-radius:10px;
+border-radius:12px;
 
 
 background:#2563eb;
@@ -202,14 +210,11 @@ color:white;
 font-size:16px;
 
 
-cursor:pointer;
-
-
 }
 
 
 
-button:hover{
+button:active{
 
 
 background:#1d4ed8;
@@ -221,8 +226,10 @@ background:#1d4ed8;
 
 
 
+
+
 /* =====================
-   AI面板
+   数据面板
 ===================== */
 
 
@@ -232,10 +239,10 @@ background:#1d4ed8;
 background:#f8fafc;
 
 
+padding:12px;
+
+
 border-radius:10px;
-
-
-padding:15px;
 
 
 margin-top:10px;
@@ -245,12 +252,10 @@ margin-top:10px;
 
 
 
-
-
 .panel div{
 
 
-padding:8px;
+padding:6px 0;
 
 
 border-bottom:
@@ -275,6 +280,9 @@ border-bottom:
 height:28px;
 
 
+width:100%;
+
+
 background:#e5e7eb;
 
 
@@ -284,11 +292,10 @@ border-radius:20px;
 overflow:hidden;
 
 
-margin-top:10px;
+margin-top:15px;
 
 
 }
-
 
 
 
@@ -325,12 +332,13 @@ transition:.3s;
 
 
 
+
 /* =====================
    Top3结果
 ===================== */
 
 
-.result{
+.result-item{
 
 
 background:#eff6ff;
@@ -342,31 +350,53 @@ border-radius:12px;
 padding:15px;
 
 
-margin-top:10px;
+margin-top:12px;
+
+
+border-left:
+
+5px solid #2563eb;
+
+
+font-size:15px;
+
+
+line-height:1.8;
 
 
 }
 
 
 
-.result-item{
 
 
-background:white;
 
 
-border-radius:10px;
+/* =====================
+   AI大屏
+===================== */
 
 
-padding:15px;
+#dashboard{
 
 
-margin-bottom:10px;
+min-height:100px;
 
 
-border-left:
+}
 
-5px solid #2563eb;
+
+
+#monitor{
+
+
+min-height:100px;
+
+
+max-height:400px;
+
+
+overflow:auto;
 
 
 }
@@ -376,7 +406,7 @@ border-left:
 
 
 /* =====================
-   移动端
+   手机适配
 ===================== */
 
 
@@ -414,10 +444,10 @@ padding:15px;
 
 
 
-body{
+.card h2{
 
 
-font-size:14px;
+font-size:18px;
 
 
 }

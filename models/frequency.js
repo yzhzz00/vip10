@@ -6,86 +6,60 @@ export class FrequencyModel {
 
     constructor(){
 
+        this.name = "frequency";
 
-        this.name =
-            "frequency";
+        this.frontScore = {};
 
-
-        this.frontFreq={};
-
-
-        this.backFreq={};
-
+        this.backScore = {};
 
     }
 
 
 
-    // =========================
-    // 初始化
-    // =========================
-
-    init(){
-
-
-        for(
-            let i=1;
-            i<=35;
-            i++
-        ){
-
-            this.frontFreq[i]=0;
-
-        }
-
-
-
-        for(
-            let i=1;
-            i<=12;
-            i++
-        ){
-
-            this.backFreq[i]=0;
-
-        }
-
-
-    }
-
-
-
-    // =========================
-    // 训练历史数据
-    // =========================
+    // =====================
+    // 训练
+    // =====================
 
     train(history){
 
 
-        this.init();
+        this.frontScore = {};
+
+        this.backScore = {};
+
+
+
+        for(let i=1;i<=35;i++){
+
+            this.frontScore[i]=0;
+
+        }
+
+
+
+        for(let i=1;i<=12;i++){
+
+            this.backScore[i]=0;
+
+        }
+
 
 
 
         history.forEach(item=>{
 
 
-            item.front
-            .forEach(n=>{
+            item.front.forEach(n=>{
 
-
-                this.frontFreq[n]++;
-
+                this.frontScore[n]++;
 
             });
 
 
 
-            item.back
-            .forEach(n=>{
+            item.back.forEach(n=>{
 
-
-                this.backFreq[n]++;
-
+                this.backScore[n]++;
 
             });
 
@@ -95,113 +69,71 @@ export class FrequencyModel {
 
 
 
-        return this.score();
-
-
     }
 
 
 
-    // =========================
-    // 频率标准化
-    // =========================
-
-    normalize(value,max){
 
 
-        if(max===0){
+    // =====================
+    // 单号码评分
+    // =====================
 
-            return 0;
+    scoreNumber(
+        n,
+        type="front"
+    ){
+
+
+        if(type==="front"){
+
+            return this.frontScore[n] || 0;
 
         }
 
 
-        return value/max;
+        return this.backScore[n] || 0;
 
 
     }
 
 
 
-    // =========================
-    // 获取号码评分
-    // =========================
-
-    frontScore(number){
 
 
-        let max =
-            Math.max(
-                ...Object.values(
-                    this.frontFreq
-                )
-            );
-
-
-
-        return this.normalize(
-            this.frontFreq[number] || 0,
-            max
-        );
-
-
-    }
-
-
-
-    backScore(number){
-
-
-        let max =
-            Math.max(
-                ...Object.values(
-                    this.backFreq
-                )
-            );
-
-
-
-        return this.normalize(
-            this.backFreq[number] || 0,
-            max
-        );
-
-
-    }
-
-
-
-    // =========================
-    // 候选组合评分
-    // =========================
+    // =====================
+    // 候选评分
+    // =====================
 
     predict(candidate){
 
 
-        let frontScore=0;
-
-        let backScore=0;
+        let score=0;
 
 
 
-        candidate.front
-        .forEach(n=>{
+        candidate.front.forEach(n=>{
 
 
-            frontScore +=
-                this.frontScore(n);
+            score +=
+            this.scoreNumber(
+                n,
+                "front"
+            );
 
 
         });
 
 
 
-        candidate.back
-        .forEach(n=>{
+        candidate.back.forEach(n=>{
 
 
-            backScore +=
-                this.backScore(n);
+            score +=
+            this.scoreNumber(
+                n,
+                "back"
+            );
 
 
         });
@@ -211,17 +143,12 @@ export class FrequencyModel {
         return {
 
 
-            model:
-                this.name,
+            model:this.name,
 
 
             score:
-                (
-                    frontScore/5
-                    +
-                    backScore/2
-                )
-                /2
+            score
+
 
 
         };
@@ -229,62 +156,6 @@ export class FrequencyModel {
 
     }
 
-
-
-    // =========================
-    // 模型状态
-    // =========================
-
-    getHot(){
-
-
-        return Object.entries(
-            this.frontFreq
-        )
-        .sort(
-            (a,b)=>b[1]-a[1]
-        )
-        .slice(0,10);
-
-
-    }
-
-
-
-    getCold(){
-
-
-        return Object.entries(
-            this.frontFreq
-        )
-        .sort(
-            (a,b)=>a[1]-b[1]
-        )
-        .slice(0,10);
-
-
-    }
-
-
-
-    score(){
-
-
-        return {
-
-
-            hot:
-                this.getHot(),
-
-
-            cold:
-                this.getCold()
-
-
-        };
-
-
-    }
 
 
 }

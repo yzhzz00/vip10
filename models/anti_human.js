@@ -8,20 +8,100 @@ export class AntiHumanModel {
 
 
         this.name =
-            "anti_human";
+        "anti_human";
+
+
+        this.frequency={};
+
+
+        this.recent=[];
 
 
     }
 
 
 
-    // =========================
-    // 热门规避
-    // =========================
 
-    hotNumberPenalty(
-        numbers,
-        frequency={}
+
+    // =====================
+    // 训练
+    // =====================
+
+    train(history){
+
+
+        this.frequency={};
+
+
+
+        history.forEach(item=>{
+
+
+            item.front.forEach(n=>{
+
+
+                if(
+                    !this.frequency[n]
+                ){
+
+                    this.frequency[n]=0;
+
+                }
+
+
+                this.frequency[n]++;
+
+
+            });
+
+
+        });
+
+
+
+
+        this.recent =
+        history.slice(-20);
+
+
+
+    }
+
+
+
+
+
+    // =====================
+    // 热号惩罚
+    // =====================
+
+    hotPenalty(
+        number
+    ){
+
+
+        let count =
+        this.frequency[number]
+        ||
+        0;
+
+
+
+        return count * 0.05;
+
+
+    }
+
+
+
+
+
+    // =====================
+    // 重复结构惩罚
+    // =====================
+
+    repeatPenalty(
+        candidate
     ){
 
 
@@ -29,26 +109,33 @@ export class AntiHumanModel {
 
 
 
-        numbers.forEach(n=>{
+        this.recent.forEach(item=>{
 
 
-            let count =
-                frequency[n] || 0;
+            let same =
+            candidate.front.filter(
+                n=>
+                item.front.includes(n)
+            )
+            .length;
 
 
 
-            // 高频号码降低权重
+            if(
+                same>=4
+            ){
 
-            if(count>450){
-
-                penalty += 0.15;
+                penalty += 5;
 
             }
-            else if(count>400){
+            else if(
+                same>=3
+            ){
 
-                penalty += 0.08;
+                penalty += 2;
 
             }
+
 
 
         });
@@ -62,76 +149,47 @@ export class AntiHumanModel {
 
 
 
-    // =========================
-    // 生日号规避
-    // 01-31过度集中
-    // =========================
-
-    birthdayPenalty(numbers){
 
 
-        let count =
-            numbers.filter(
-                n=>n<=31
-            )
-            .length;
+    // =====================
+    // 人类常见模式惩罚
+    // =====================
 
-
-
-        if(count===5){
-
-
-            return 0.1;
-
-
-        }
-
-
-        return 0;
-
-
-
-    }
-
-
-
-    // =========================
-    // 规则型选号惩罚
-    // =========================
-
-    patternPenalty(numbers){
+    patternPenalty(
+        candidate
+    ){
 
 
         let penalty=0;
 
 
 
-        let arr =
-            [...numbers]
-            .sort(
-                (a,b)=>a-b
-            );
+        let front =
+        candidate.front;
 
 
 
-        // 五连递增
+        // 连号过多
 
-        let consecutive=0;
+        let serial=0;
 
 
 
         for(
             let i=1;
-            i<arr.length;
+            i<front.length;
             i++
         ){
 
 
             if(
-                arr[i]-arr[i-1]===1
+                front[i]
+                -
+                front[i-1]
+                ===1
             ){
 
-                consecutive++;
+                serial++;
 
             }
 
@@ -140,38 +198,38 @@ export class AntiHumanModel {
 
 
 
-        if(consecutive>=3){
+        if(
+            serial>=3
+        ){
 
-            penalty+=0.15;
+            penalty+=3;
+
+        }
+
+
+
+
+
+        // 五个号码过于平均
+
+        let span =
+        front[
+            front.length-1
+        ]
+        -
+        front[0];
+
+
+
+        if(
+            span<10
+        ){
+
+            penalty+=3;
 
         }
 
 
-
-        // 尾号过于一致
-
-
-        let tails =
-            arr.map(
-                n=>n%10
-            );
-
-
-
-        let same =
-            tails.filter(
-                n=>
-                n===tails[0]
-            )
-            .length;
-
-
-
-        if(same>=3){
-
-            penalty+=0.1;
-
-        }
 
 
 
@@ -182,99 +240,68 @@ export class AntiHumanModel {
 
 
 
-    // =========================
-    // 人类偏好检测
-    // =========================
-
-    humanBiasScore(numbers,frequency){
 
 
-        let penalty=0;
+    // =====================
+    // 候选评分
+    // =====================
+
+    predict(candidate){
+
+
+        let score=0;
 
 
 
-        penalty +=
-            this.hotNumberPenalty(
-                numbers,
-                frequency
+        candidate.front.forEach(n=>{
+
+
+            score -=
+
+            this.hotPenalty(
+                n
             );
 
 
-
-        penalty +=
-            this.birthdayPenalty(
-                numbers
-            );
+        });
 
 
 
-        penalty +=
-            this.patternPenalty(
-                numbers
-            );
+
+        score -=
+
+        this.repeatPenalty(
+            candidate
+        );
 
 
 
-        let score =
-            1-penalty;
+        score -=
+
+        this.patternPenalty(
+            candidate
+        );
 
 
 
-        if(score<0){
-
-            score=0;
-
-        }
-
-
-
-        return score;
-
-
-    }
-
-
-
-    // =========================
-    // 模型接口
-    // =========================
-
-    predict(candidate,context={}){
 
 
         return {
 
 
             model:
-                this.name,
+            this.name,
 
 
-            score:
-                this.humanBiasScore(
-                    candidate.front,
-                    context.frequency || {}
-                )
+            score
+
 
         };
 
 
-    }
-
-
-
-    train(history){
-
-
-        /*
-          后续由 learning.js
-          输入历史反馈优化
-        */
-
-
-        return 0.5;
-
 
     }
+
 
 
 }

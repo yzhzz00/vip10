@@ -8,16 +8,18 @@ export class FeatureEngine {
 
 
         this.name =
-            "feature_engine";
+        "feature_engine";
 
 
     }
 
 
 
-    // =========================
+
+
+    // =====================
     // 奇偶特征
-    // =========================
+    // =====================
 
     oddEven(
         numbers
@@ -26,31 +28,29 @@ export class FeatureEngine {
 
         let odd=0;
 
-
         let even=0;
 
 
 
         numbers.forEach(
-            n=>{
+        n=>{
 
 
-                if(
-                    n%2===0
-                ){
+            if(
+                n%2===0
+            ){
 
-                    even++;
-
-                }
-                else{
-
-                    odd++;
-
-                }
-
+                even++;
 
             }
-        );
+            else{
+
+                odd++;
+
+            }
+
+
+        });
 
 
 
@@ -59,7 +59,11 @@ export class FeatureEngine {
 
             odd,
 
-            even
+            even,
+
+            ratio:
+
+            `${odd}:${even}`
 
 
         };
@@ -70,9 +74,10 @@ export class FeatureEngine {
 
 
 
-    // =========================
+
+    // =====================
     // 大小特征
-    // =========================
+    // =====================
 
     bigSmall(
         numbers
@@ -81,31 +86,29 @@ export class FeatureEngine {
 
         let big=0;
 
-
         let small=0;
 
 
 
         numbers.forEach(
-            n=>{
+        n=>{
 
 
-                if(
-                    n>=18
-                ){
+            if(
+                n>=18
+            ){
 
-                    big++;
-
-                }
-                else{
-
-                    small++;
-
-                }
-
+                big++;
 
             }
-        );
+            else{
+
+                small++;
+
+            }
+
+
+        });
 
 
 
@@ -126,17 +129,16 @@ export class FeatureEngine {
 
 
 
-    // =========================
+    // =====================
     // 和值
-    // =========================
+    // =====================
 
     sum(
         numbers
     ){
 
 
-        return numbers
-        .reduce(
+        return numbers.reduce(
             (a,b)=>
             a+b,
             0
@@ -149,33 +151,32 @@ export class FeatureEngine {
 
 
 
-    // =========================
+    // =====================
     // 跨度
-    // =========================
+    // =====================
 
     span(
         numbers
     ){
 
 
-        let sort =
-            [
-                ...numbers
-            ]
-            .sort(
-                (a,b)=>
-                a-b
-            );
+        let arr=[
+
+            ...numbers
+
+        ]
+        .sort(
+            (a,b)=>
+            a-b
+        );
 
 
 
         return (
 
-            sort[
-                sort.length-1
-            ]
+            arr[arr.length-1]
             -
-            sort[0]
+            arr[0]
 
         );
 
@@ -186,9 +187,9 @@ export class FeatureEngine {
 
 
 
-    // =========================
-    // 三区分布
-    // =========================
+    // =====================
+    // 三区
+    // =====================
 
     zones(
         numbers
@@ -200,32 +201,31 @@ export class FeatureEngine {
 
 
         numbers.forEach(
-            n=>{
+        n=>{
 
 
-                if(
-                    n<=12
-                ){
+            if(
+                n<=12
+            ){
 
-                    zone[0]++;
-
-                }
-                else if(
-                    n<=24
-                ){
-
-                    zone[1]++;
-
-                }
-                else{
-
-                    zone[2]++;
-
-                }
-
+                zone[0]++;
 
             }
-        );
+            else if(
+                n<=24
+            ){
+
+                zone[1]++;
+
+            }
+            else{
+
+                zone[2]++;
+
+            }
+
+
+        });
 
 
 
@@ -238,9 +238,9 @@ export class FeatureEngine {
 
 
 
-    // =========================
-    // 遗漏统计
-    // =========================
+    // =====================
+    // 遗漏
+    // =====================
 
     omission(
         history,
@@ -270,9 +270,7 @@ export class FeatureEngine {
 
             ){
 
-
                 break;
-
 
             }
 
@@ -294,9 +292,9 @@ export class FeatureEngine {
 
 
 
-    // =========================
-    // 单期特征生成
-    // =========================
+    // =====================
+    // 单期特征
+    // =====================
 
     build(
         item,
@@ -307,10 +305,12 @@ export class FeatureEngine {
         return {
 
 
-            front:item.front,
+            front:
+            item.front,
 
 
-            back:item.back,
+            back:
+            item.back,
 
 
 
@@ -353,7 +353,6 @@ export class FeatureEngine {
             )
 
 
-
         };
 
 
@@ -363,9 +362,9 @@ export class FeatureEngine {
 
 
 
-    // =========================
-    // 批量生成
-    // =========================
+    // =====================
+    // 批量转换
+    // =====================
 
     transform(
         history

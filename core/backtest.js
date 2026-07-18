@@ -14,91 +14,102 @@ export class BacktestEngine {
 
 
 
-    // =========================
-    // 单期回测
-    // =========================
 
-    testOne(
-        trainData,
+
+    // =====================
+    // 单期测试
+    // =====================
+
+    test(
         target,
-        system
+        predictions
     ){
 
 
-        let prediction =
-            system.predict();
+        let best =
+        predictions[0];
 
 
 
-        let top3 =
-            prediction.slice(
-                0,
-                3
-            );
+        if(
+            !best
+        ){
+
+            return {
+
+
+                hit:false,
+
+
+                front:0,
+
+
+                back:0
+
+
+            };
+
+        }
 
 
 
-        let hit=0;
+
+
+        let frontHit =
+
+        best.candidate.front
+        .filter(
+            n=>
+
+            target.front
+            .includes(n)
+
+        )
+        .length;
 
 
 
-        top3.forEach(
-            item=>{
+        let backHit =
+
+        best.candidate.back
+        .filter(
+            n=>
+
+            target.back
+            .includes(n)
+
+        )
+        .length;
 
 
-                let frontHit =
-                    item.candidate.front
-                    .filter(
-                        n=>
-                        target.front
-                        .includes(n)
-                    )
-                    .length;
-
-
-
-                let backHit =
-                    item.candidate.back
-                    .filter(
-                        n=>
-                        target.back
-                        .includes(n)
-                    )
-                    .length;
-
-
-
-                if(
-                    frontHit>=3 ||
-                    backHit>=1
-                ){
-
-                    hit++;
-
-                }
-
-
-
-            }
-        );
 
 
 
         return {
 
 
-            period:
-                target,
+            hit:
+
+            frontHit>=3
+            ||
+            backHit>=1,
 
 
-            hit,
+
+            front:
+
+            frontHit,
 
 
-            prediction:
-                top3
+
+            back:
+
+            backHit
+
 
 
         };
+
 
 
     }
@@ -107,14 +118,14 @@ export class BacktestEngine {
 
 
 
-    // =========================
+    // =====================
     // 滚动回测
-    // =========================
+    // =====================
 
-    rolling(
+    run(
         history,
-        trainSize,
-        system
+        predictor,
+        start=100
     ){
 
 
@@ -123,49 +134,59 @@ export class BacktestEngine {
 
 
         for(
-            let i=trainSize;
+            let i=start;
+
             i<history.length;
+
             i++
         ){
 
 
+
             let train =
-                history.slice(
-                    0,
-                    i
-                );
+
+            history.slice(
+                0,
+                i
+            );
 
 
 
             let target =
-                history[i];
+
+            history[i];
 
 
 
-            if(
-                system.train
-            ){
 
-                system.train(
-                    train
-                );
 
-            }
+            let predictions =
+
+            predictor(
+                train
+            );
 
 
 
             let result =
-                this.testOne(
-                    train,
-                    target,
-                    system
-                );
 
-
-
-            this.results.push(
-                result
+            this.test(
+                target,
+                predictions
             );
+
+
+
+            this.results.push({
+
+                period:i,
+
+
+                result
+
+
+            });
+
 
 
         }
@@ -181,25 +202,55 @@ export class BacktestEngine {
 
 
 
-    // =========================
+    // =====================
     // 报告
-    // =========================
+    // =====================
 
     report(){
 
 
         let total =
-            this.results.length;
+
+        this.results.length;
 
 
 
         let hit =
-            this.results
-            .filter(
-                r=>
-                r.hit>0
-            )
-            .length;
+
+        this.results
+        .filter(
+            x=>
+            x.result.hit
+        )
+        .length;
+
+
+
+        let avgFront=0;
+
+        let avgBack=0;
+
+
+
+        this.results.forEach(
+        x=>{
+
+
+            avgFront +=
+
+            x.result.front;
+
+
+
+            avgBack +=
+
+            x.result.back;
+
+
+
+        });
+
+
 
 
 
@@ -213,21 +264,52 @@ export class BacktestEngine {
 
 
             rate:
-            total===0
+
+            total
             ?
-            0
-            :
             (
-                hit/total
+                hit/total*100
             )
-            .toFixed(4),
+            .toFixed(2)
+            :
+            0,
+
+
+
+            avgFront:
+
+            total
+            ?
+            (
+                avgFront/total
+            )
+            .toFixed(2)
+            :
+            0,
+
+
+
+            avgBack:
+
+            total
+            ?
+            (
+                avgBack/total
+            )
+            .toFixed(2)
+            :
+            0,
+
 
 
             details:
-                this.results
+
+            this.results
+
 
 
         };
+
 
 
     }

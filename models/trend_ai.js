@@ -8,189 +8,226 @@ export class TrendAIModel {
 
 
         this.name =
-            "trend_ai";
+        "trend_ai";
 
 
         this.window =
-            100;
+        50;
 
 
-        this.history=[];
+        this.trend={};
+
+
+        this.omission={};
 
 
     }
 
 
 
-    // =========================
+
+
+    // =====================
     // 训练
-    // =========================
+    // =====================
 
     train(history){
 
 
-        this.history =
-            history.slice(
-                -this.window
-            );
+        this.trend={};
+
+
+        this.omission={};
 
 
 
-        return 1;
+        let data =
+
+        history.slice(
+            -this.window
+        );
 
 
-    }
-
-
-
-    // =========================
-    // 遗漏计算
-    // =========================
-
-    omission(
-        number,
-        type="front"
-    ){
-
-
-        let count=0;
 
 
 
         for(
-            let i=this.history.length-1;
-            i>=0;
-            i--
+            let i=1;
+            i<=35;
+            i++
         ){
 
 
-            let list =
-                type==="front"
-                ?
-                this.history[i].front
-                :
-                this.history[i].back;
+            this.trend[i]=0;
 
-
-
-            if(
-                list.includes(number)
-            ){
-
-                break;
-
-            }
-
-
-
-            count++;
+            this.omission[i]=0;
 
 
         }
 
 
 
-        return count;
 
 
-    }
+        // 近期趋势
+
+        data.forEach(
+        (item,index)=>{
 
 
-
-    // =========================
-    // 近期热度
-    // =========================
-
-    recentScore(
-        number
-    ){
-
-
-        let count=0;
+            let weight =
+            index+1;
 
 
 
-        this.history.forEach(
-            item=>{
+            item.front.forEach(n=>{
+
+
+                this.trend[n]
+                +=
+                weight;
+
+
+
+            });
+
+
+
+        });
+
+
+
+
+
+        // 当前遗漏
+
+        for(
+            let n=1;
+            n<=35;
+            n++
+        ){
+
+
+            let miss=0;
+
+
+
+            for(
+                let i=
+                history.length-1;
+
+                i>=0;
+
+                i--
+            ){
 
 
                 if(
-                    item.front
-                    .includes(number)
+
+                    history[i]
+                    .front
+                    .includes(n)
+
                 ){
 
-                    count++;
+                    break;
 
                 }
 
 
-            }
-        );
 
+                miss++;
+
+
+            }
+
+
+
+            this.omission[n]=miss;
+
+
+
+        }
+
+
+
+    }
+
+
+
+
+
+    // =====================
+    // 趋势评分
+    // =====================
+
+    trendScore(
+        n
+    ){
 
 
         return (
-            count /
-            this.history.length
+
+            this.trend[n]
+            ||
+            0
+
         );
 
-
     }
 
 
 
-    // =========================
-    // 趋势评分
-    // =========================
-
-    numberScore(number){
 
 
-        let recent =
-            this.recentScore(
-                number
-            );
+    // =====================
+    // 遗漏恢复评分
+    // =====================
+
+    omissionScore(
+        n
+    ){
 
 
-
-        let omit =
-            this.omission(
-                number
-            );
+        let miss =
+        this.omission[n]
+        ||
+        0;
 
 
 
-        /*
-          避免简单追热
+        if(
+            miss>=10
+        ){
 
-          近期热度 +
-          适度遗漏修正
-        */
+            return 5;
 
-
-
-        let score =
-            recent*0.7
-            +
-            Math.min(
-                omit/30,
-                1
-            )
-            *
-            0.3;
+        }
 
 
 
-        return score;
+        if(
+            miss>=5
+        ){
+
+            return 2;
+
+        }
+
+
+
+        return 0;
 
 
     }
 
 
 
-    // =========================
+
+
+    // =====================
     // 候选评分
-    // =========================
+    // =====================
 
     predict(candidate){
 
@@ -199,27 +236,27 @@ export class TrendAIModel {
 
 
 
-        candidate.front
-        .forEach(n=>{
+        candidate.front.forEach(n=>{
 
 
             score +=
-                this.numberScore(n);
+
+            this.trendScore(
+                n
+            );
+
+
+            score +=
+
+            this.omissionScore(
+                n
+            );
+
 
 
         });
 
 
-
-        candidate.back
-        .forEach(n=>{
-
-
-            score +=
-                this.numberScore(n);
-
-
-        });
 
 
 
@@ -227,14 +264,15 @@ export class TrendAIModel {
 
 
             model:
-                this.name,
+            this.name,
 
 
-            score:
-                score/7
+            score
+
 
 
         };
+
 
 
     }

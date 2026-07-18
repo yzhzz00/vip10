@@ -5,6 +5,10 @@ import {DataLoader}
 from "./core/data.js";
 
 
+import {TheoryEngine}
+from "./core/theories.js";
+
+
 import {MonteCarloEngine}
 from "./core/montecarlo.js";
 
@@ -55,13 +59,68 @@ from "./visual/monitor.js";
 
 
 
-// =========================
-// 启动系统
-// =========================
+
+let history=[];
+
+let models=[];
+
+let weights;
+
+let monitor;
+
+let dashboard;
+
+
+
+
+
+function log(text){
+
+
+    if(monitor){
+
+        monitor.addLog(text);
+
+    }
+
+
+}
+
+
+
 
 
 async function start(){
 
+
+
+monitor =
+new LearningMonitor(
+"monitor"
+);
+
+
+
+dashboard =
+new Dashboard(
+"dashboard"
+);
+
+
+
+
+
+log(
+"系统启动"
+);
+
+
+
+
+
+// =====================
+// 数据读取
+// =====================
 
 
 const loader =
@@ -69,9 +128,11 @@ new DataLoader();
 
 
 
-const history =
+history =
 await loader.load(
+
 "./data/dlt_history.txt"
+
 );
 
 
@@ -80,7 +141,9 @@ document
 .getElementById("data")
 .innerHTML =
 
+
 `
+
 历史数据:
 
 ${history.length}
@@ -95,13 +158,20 @@ DLT-AI-CORE V11 已加载
 
 
 
+log(
+"历史数据加载完成"
+);
 
-// =========================
-// 模型初始化
-// =========================
 
 
-const models=[
+
+
+// =====================
+// 模型
+// =====================
+
+
+models=[
 
 
 new FrequencyModel(),
@@ -122,22 +192,25 @@ new TrendAIModel()
 
 
 
-// =========================
-// 训练
-// =========================
-
 
 models.forEach(
 model=>{
 
 
-if(model.train){
+log(
+
+"训练:"
++
+model.name
+
+);
+
+
 
 model.train(
 history
 );
 
-}
 
 
 });
@@ -146,7 +219,12 @@ history
 
 
 
-const weights =
+// =====================
+// 权重
+// =====================
+
+
+weights =
 new WeightManager();
 
 
@@ -167,20 +245,35 @@ model.name
 
 
 const learning =
+
 new LearningEngine(
-models,
 weights
 );
 
 
 
 
-// =========================
+
+// =====================
+// 理论
+// =====================
+
+
+const theory =
+
+new TheoryEngine();
+
+
+
+
+
+// =====================
 // AI委员会
-// =========================
+// =====================
 
 
 const committee =
+
 new AICommittee(
 models
 );
@@ -189,20 +282,22 @@ models
 
 
 
-// =========================
-// 蒙特卡罗核心
-// =========================
+// =====================
+// 蒙特卡罗
+// =====================
 
 
 const monte =
+
 new MonteCarloEngine();
 
 
 
-const monitor =
-new LearningMonitor(
-"monitor"
+log(
+"开始百万模拟"
 );
+
+
 
 
 
@@ -210,49 +305,40 @@ monte.run(
 
 models,
 
-{history},
+theory,
+
 
 (progress)=>{
 
 
 monitor.updateProgress(
+
 progress.toFixed(2)
-);
-
-
-monitor.addLog(
-
-"蒙特卡罗模拟进度 "
-+
-progress.toFixed(2)
-+
-"%"
-
-);
-
-
-}
 
 );
 
 
 
-
-// =========================
-// 最终Top3
-// =========================
-
-
-const pool =
-monte.rank();
+},
 
 
 
-const results =
+(result)=>{
+
+
+log(
+"模拟完成"
+);
+
+
+
+let top =
+
 committee.predict(
 
-pool.map(
-x=>x.candidate
+result.map(
+x=>
+x.candidate
 ),
 
 weights.getWeights()
@@ -262,32 +348,23 @@ weights.getWeights()
 
 
 
-// =========================
-// 展示
-// =========================
-
-
-const dashboard =
-new Dashboard(
-"dashboard"
-);
-
-
 
 dashboard.render({
 
+
 models:
 
+
 models.map(
-m=>({
+m=>
+({
 
-name:m.name,
-
-score:1
+name:m.name
 
 })
 
 ),
+
 
 
 weights:
@@ -295,41 +372,88 @@ weights:
 weights.getWeights(),
 
 
-results
+
+results:
+
+top
+
 
 
 });
 
 
 
-monitor.addLog(
-"AI委员会完成竞争"
-);
 
 
+document
+.getElementById(
+"result"
+)
+.innerHTML =
 
-monitor.addLog(
-"最终预测生成完成"
-);
+top.map(
+
+(item,index)=>
 
 
+`
 
-monitor.render({
+<div class="result-item">
 
-models:
+第${index+1}注
 
-models.map(
-m=>({
+<br>
 
-name:m.name,
+前区:
 
-score:1
+${
 
-})
+item.candidate.front.join(" ")
+
+}
+
+<br>
+
+后区:
+
+${
+
+item.candidate.back.join(" ")
+
+}
+
+<br>
+
+评分:
+
+${
+
+item.score.toFixed(2)
+
+}
+
+
+</div>
+
+
+`
 
 )
+.join("");
 
-});
+
+
+log(
+"Top3生成完成"
+);
+
+
+
+}
+
+
+
+);
 
 
 
@@ -338,5 +462,20 @@ score:1
 
 
 
+
 window.onload =
+()=>{
+
+
+document
+
+.getElementById(
+"start"
+)
+
+.onclick =
 start;
+
+
+
+};

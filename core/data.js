@@ -14,27 +14,29 @@ export class DataLoader {
 
 
 
-    // =========================
-    // 加载数据文件
-    // =========================
+
+
+    // =====================
+    // 加载数据
+    // =====================
 
     async load(
         path
     ){
 
 
-        let response =
-            await fetch(path);
+        const res =
+        await fetch(path);
 
 
 
-        let text =
-            await response.text();
+        const text =
+        await res.text();
 
 
 
         this.history =
-            this.parse(text);
+        this.parse(text);
 
 
 
@@ -45,21 +47,33 @@ export class DataLoader {
 
 
 
-    // =========================
-    // 解析大乐透数据
-    // 格式:
-    // 01 05 12 23 34 + 03 08
-    // =========================
 
-    parse(text){
+
+    // =====================
+    // 数据解析
+    // 支持:
+
+    // 01 05 12 23 33 + 03 08
+    // 或
+    // 0105122333+0308
+
+    // =====================
+
+    parse(
+        text
+    ){
 
 
         let lines =
-            text
-            .split("\n")
-            .filter(
-                x=>x.trim()
-            );
+
+        text
+        .split(/\r?\n/)
+        .map(
+            x=>x.trim()
+        )
+        .filter(
+            x=>x
+        );
 
 
 
@@ -67,34 +81,82 @@ export class DataLoader {
 
 
 
+
         lines.forEach(
-            line=>{
+        line=>{
 
 
-                let nums =
-                    line
-                    .match(
-                        /\d+/g
-                    );
+            let nums =
 
-
-
-                if(
-                    !nums ||
-                    nums.length<7
-                ){
-
-                    return;
-
-                }
+            line.match(
+                /\d+/g
+            );
 
 
 
-                nums =
-                    nums.map(
-                        Number
-                    );
+            if(
+                !nums
+                ||
+                nums.length<7
+            ){
 
+                return;
+
+            }
+
+
+
+            nums =
+
+            nums.map(
+                Number
+            );
+
+
+
+            let front =
+
+            nums.slice(
+                0,
+                5
+            );
+
+
+
+            let back =
+
+            nums.slice(
+                5,
+                7
+            );
+
+
+
+
+
+            // 数据合法检查
+
+            if(
+
+                front.length===5
+                &&
+                back.length===2
+                &&
+                front.every(
+                    n=>
+                    n>=1
+                    &&
+                    n<=35
+                )
+                &&
+                back.every(
+                    n=>
+                    n>=1
+                    &&
+                    n<=12
+                )
+
+            ){
 
 
                 result.push({
@@ -102,20 +164,20 @@ export class DataLoader {
 
                     front:
 
-                    nums
-                    .slice(
-                        0,
-                        5
+
+                    front.sort(
+                        (a,b)=>
+                        a-b
                     ),
 
 
 
                     back:
 
-                    nums
-                    .slice(
-                        5,
-                        7
+
+                    back.sort(
+                        (a,b)=>
+                        a-b
                     )
 
 
@@ -125,28 +187,33 @@ export class DataLoader {
 
 
             }
-        );
+
+
+
+        });
 
 
 
         return result;
 
 
+
     }
 
 
 
-    // =========================
-    // 获取最近多少期
-    // =========================
+
+
+    // =====================
+    // 最近多少期
+    // =====================
 
     recent(
         count
     ){
 
 
-        return this.history
-        .slice(
+        return this.history.slice(
             -count
         );
 
@@ -155,9 +222,11 @@ export class DataLoader {
 
 
 
-    // =========================
-    // 数据数量
-    // =========================
+
+
+    // =====================
+    // 总期数
+    // =====================
 
     size(){
 
@@ -166,6 +235,8 @@ export class DataLoader {
 
 
     }
+
+
 
 
 

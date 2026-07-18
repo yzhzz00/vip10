@@ -8,284 +8,99 @@ export class MonteModel {
 
 
         this.name =
-            "monte";
+        "monte";
 
 
-        this.simulations =
-            1000000;
-
-
-        this.samples=[];
+        this.historySize=0;
 
 
     }
 
 
 
-    // =========================
-    // 随机整数
-    // =========================
-
-    randomInt(
-        min,
-        max
-    ){
 
 
-        return Math.floor(
-            Math.random()
-            *
-            (max-min+1)
-        )
-        +min;
+    // =====================
+    // 训练
+    // =====================
+
+    train(history){
+
+
+        this.historySize =
+        history.length;
 
 
     }
 
 
 
-    // =========================
-    // 生成前区
-    // =========================
-
-    randomFront(){
 
 
-        let set =
-            new Set();
+    // =====================
+    // 随机概率评分
+    // =====================
+
+    randomScore(){
 
 
-
-        while(
-            set.size<5
-        ){
-
-
-            set.add(
-                this.randomInt(
-                    1,
-                    35
-                )
-            );
-
-
-        }
-
-
-
-        return [
-            ...set
-        ]
-        .sort(
-            (a,b)=>a-b
-        );
+        return Math.random();
 
 
     }
 
 
 
-    // =========================
-    // 生成后区
-    // =========================
 
-    randomBack(){
 
+    // =====================
+    // 候选评分
+    // =====================
 
-        let set =
-            new Set();
+    predict(candidate){
 
 
 
-        while(
-            set.size<2
-        ){
+        let base = 0;
 
 
-            set.add(
-                this.randomInt(
-                    1,
-                    12
-                )
-            );
 
+        /*
+        
+        蒙特卡罗模型特点：
 
-        }
+        不判断热冷
 
+        不固定规律
 
+        提供随机采样权重
 
-        return [
-            ...set
-        ]
-        .sort(
-            (a,b)=>a-b
-        );
 
+        */
 
-    }
 
 
+        candidate.front.forEach(()=>{
 
-    // =========================
-    // 单组合评分
-    // 结合委员会模型
-    // =========================
 
-    scoreCandidate(
-        candidate,
-        models=[]
-    ){
+            base +=
+            this.randomScore();
 
 
-        let score=0;
+        });
 
 
 
-        models.forEach(
-            model=>{
+        candidate.back.forEach(()=>{
 
 
-                let result =
-                    model.predict(
-                        candidate
-                    );
+            base +=
+            this.randomScore();
 
 
+        });
 
-                score +=
-                    result.score;
 
-
-            }
-        );
-
-
-
-        return score;
-
-
-    }
-
-
-
-    // =========================
-    // 蒙特卡罗模拟
-    // =========================
-
-    simulate(
-        models=[]
-    ){
-
-
-        this.samples=[];
-
-
-
-        for(
-            let i=0;
-            i<this.simulations;
-            i++
-        ){
-
-
-            let candidate={
-
-
-                front:
-                    this.randomFront(),
-
-
-                back:
-                    this.randomBack()
-
-
-            };
-
-
-
-            let score =
-                this.scoreCandidate(
-                    candidate,
-                    models
-                );
-
-
-
-            this.samples.push({
-
-
-                candidate,
-
-
-                score
-
-
-            });
-
-
-
-        }
-
-
-
-        return this.rank();
-
-
-    }
-
-
-
-    // =========================
-    // 排序
-    // =========================
-
-    rank(){
-
-
-        return this.samples
-        .sort(
-            (a,b)=>
-            b.score-a.score
-        )
-        .slice(
-            0,
-            20
-        );
-
-
-    }
-
-
-
-    // =========================
-    // 模型预测接口
-    // =========================
-
-    predict(){
-
-
-        let result =
-            this.samples[0];
-
-
-
-        if(!result){
-
-
-            return {
-
-
-                model:
-                    this.name,
-
-
-                score:0
-
-
-            };
-
-
-        }
 
 
 
@@ -293,18 +108,16 @@ export class MonteModel {
 
 
             model:
-                this.name,
+            this.name,
 
 
             score:
-                result.score,
+            base
 
-
-            candidate:
-                result.candidate
 
 
         };
+
 
 
     }

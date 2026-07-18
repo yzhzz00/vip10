@@ -5,276 +5,248 @@ export class Dashboard {
 
 
     constructor(
-        containerId
+        id
     ){
 
 
-        this.container =
-            document.getElementById(
-                containerId
-            );
+        this.el =
+        document.getElementById(id);
 
 
     }
 
 
 
-    // =========================
-    // 渲染标题
-    // =========================
-
-    title(){
 
 
-        return `
+    // =====================
+    // 渲染
+    // =====================
 
-        <div class="dashboard-title">
-
-        DLT-AI-CORE V11
-        智能分析中心
-
-        </div>
-
-        `;
-
-
-    }
-
-
-
-    // =========================
-    // 模型状态
-    // =========================
-
-    modelPanel(
-        models
+    render(
+        data
     ){
 
 
-        let html =
+        if(
+            !this.el
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+        let models =
+
+        data.models
+        ||
+        [];
+
+
+
+        let weights =
+
+        data.weights
+        ||
+        {};
+
+
+
+        let results =
+
+        data.results
+        ||
+        [];
+
+
+
+
+
+
+
+        this.el.innerHTML =
+
+
         `
 
+
         <div class="panel">
+
 
         <h3>
         AI模型竞争状态
         </h3>
 
-        `;
 
 
+        ${
+            models.map(
+            m=>
 
-        models.forEach(
-            m=>{
+            `
 
+            <div>
 
-                html +=`
+            ${m.name}
 
-                <div>
+            :
 
-                ${m.name}
+            运行中
 
-                :
+            </div>
 
-                ${m.score.toFixed(4)}
+            `
 
-                </div>
-
-                `;
-
-
-            }
-        );
-
+            )
+            .join("")
+        }
 
 
-        html+=`
 
         </div>
 
-        `;
 
 
 
-        return html;
-
-
-    }
-
-
-
-    // =========================
-    // 权重显示
-    // =========================
-
-    weightPanel(
-        weights
-    ){
-
-
-        let html=
-
-        `
 
         <div class="panel">
+
 
         <h3>
         模型权重
         </h3>
 
-        `;
 
 
+        ${
+            Object.keys(weights)
 
-        Object.entries(
-            weights
-        )
-        .forEach(
-            ([name,value])=>{
+            .map(
 
+            key=>
 
-                html +=`
+            `
 
-                <div>
+            <div>
 
-                ${name}
+            ${key}
 
-                :
+            :
 
-                ${value.toFixed(3)}
+            ${weights[key]}
 
-                </div>
-
-                `;
+            </div>
 
 
-            }
-        );
+            `
 
+            )
 
+            .join("")
 
-        html+=`
+        }
+
 
         </div>
 
-        `;
 
 
 
-        return html;
 
-
-    }
-
-
-
-    // =========================
-    // Top3结果
-    // =========================
-
-    resultPanel(
-        results
-    ){
-
-
-        let html=
-
-        `
 
         <div class="panel">
 
+
         <h3>
-        最终预测 Top3
+
+        AI委员会 Top3
+
         </h3>
 
-        `;
 
 
 
-        results.forEach(
-            (r,i)=>{
+        ${
+
+        results.map(
+
+        (item,index)=>
+
+        `
 
 
-                html +=`
-
-                <div>
-
-                NO.${i+1}
-
-                <br>
+        <div class="result-item">
 
 
-                前区:
-
-                ${r.candidate.front.join(" ")}
+        第 ${index+1} 注
 
 
-                <br>
+        <br>
 
 
-                后区:
+        前区:
 
-                ${r.candidate.back.join(" ")}
+        ${
 
+        item.candidate.front
+        .join(" ")
 
-                </div>
-
-                `;
-
-
-            }
-        );
+        }
 
 
+        <br>
 
-        html+=`
+
+        后区:
+
+        ${
+
+        item.candidate.back
+        .join(" ")
+
+        }
+
+
+        <br>
+
+
+        综合评分:
+
+        ${
+
+        item.score.toFixed
+        ?
+        item.score.toFixed(2)
+        :
+        item.score
+
+        }
+
 
         </div>
 
+
+
+        `
+
+        )
+        .join("")
+
+
+        }
+
+
+
+        </div>
+
+
+
         `;
 
-
-
-        return html;
-
-
-    }
-
-
-
-    // =========================
-    // 总渲染
-    // =========================
-
-    render(data){
-
-
-        if(!this.container)
-        return;
-
-
-
-        this.container.innerHTML =
-
-        this.title()
-
-        +
-
-        this.modelPanel(
-            data.models
-        )
-
-        +
-
-        this.weightPanel(
-            data.weights
-        )
-
-        +
-
-        this.resultPanel(
-            data.results
-        );
 
 
     }

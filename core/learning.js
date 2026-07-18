@@ -5,17 +5,12 @@ export class LearningEngine {
 
 
     constructor(
-        models,
-        weightManager
+        weights
     ){
 
 
-        this.models =
-            models;
-
-
         this.weights =
-            weightManager;
+        weights;
 
 
         this.logs=[];
@@ -25,27 +20,38 @@ export class LearningEngine {
 
 
 
-    // =========================
-    // 记录学习日志
-    // =========================
 
-    log(
-        message
+
+    // =====================
+    // 日志
+    // =====================
+
+    addLog(
+        text
     ){
 
 
         this.logs.push({
 
-
             time:
             new Date()
-            .toLocaleString(),
+            .toLocaleTimeString(),
 
 
-            message
+            text
 
 
         });
+
+
+
+        if(
+            this.logs.length>100
+        ){
+
+            this.logs.shift();
+
+        }
 
 
     }
@@ -54,74 +60,93 @@ export class LearningEngine {
 
 
 
-    // =========================
-    // 开奖反馈学习
-    // =========================
+    // =====================
+    // 开奖反馈
+    // =====================
 
     feedback(
-        realResult,
+        result,
         predictions
     ){
 
 
-
         predictions.forEach(
-            item=>{
+        item=>{
 
 
-                let frontHit =
-                    item.candidate.front
-                    .filter(
-                        n=>
-                        realResult.front
-                        .includes(n)
-                    )
-                    .length;
+            let hitFront =
 
+            item.candidate.front
+            .filter(
+                n=>
 
+                result.front
+                .includes(n)
 
-                let backHit =
-                    item.candidate.back
-                    .filter(
-                        n=>
-                        realResult.back
-                        .includes(n)
-                    )
-                    .length;
+            )
+            .length;
 
 
 
-                let score =
-                    (
-                        frontHit/5
-                        +
-                        backHit/2
-                    )
-                    /
-                    2;
+            let hitBack =
 
+            item.candidate.back
+            .filter(
+                n=>
+
+                result.back
+                .includes(n)
+
+            )
+            .length;
+
+
+
+            let score =
+
+            (
+                hitFront/5
+                +
+                hitBack/2
+            )
+            /
+            2;
+
+
+
+            if(
+                item.model
+            ){
 
 
                 this.weights.record(
+
                     item.model,
+
                     score
-                );
-
-
-
-                this.log(
-
-                    item.model
-                    +
-                    "反馈评分:"
-                    +
-                    score.toFixed(3)
 
                 );
 
 
             }
-        );
+
+
+
+
+
+            this.addLog(
+
+                item.model
+                +
+                "反馈:"
+                +
+                score.toFixed(3)
+
+            );
+
+
+
+        });
 
 
 
@@ -135,44 +160,44 @@ export class LearningEngine {
 
 
 
-    // =========================
-    // 模型训练循环
-    // =========================
+    // =====================
+    // 训练记录
+    // =====================
 
     trainRound(
+        models,
         history
     ){
 
 
-        this.models.forEach(
-            model=>{
+        models.forEach(
+        model=>{
 
 
-                if(
-                    model.train
-                ){
+            if(
+                model.train
+            ){
 
 
-                    model.train(
-                        history
-                    );
+                model.train(
+                    history
+                );
 
 
 
-                    this.log(
+                this.addLog(
 
                     model.name
                     +
-                    "完成训练"
+                    "完成学习"
 
-                    );
-
-
-                }
+                );
 
 
             }
-        );
+
+
+        });
 
 
 
@@ -182,9 +207,9 @@ export class LearningEngine {
 
 
 
-    // =========================
-    // 获取学习状态
-    // =========================
+    // =====================
+    // 获取状态
+    // =====================
 
     status(){
 
@@ -192,14 +217,15 @@ export class LearningEngine {
         return {
 
 
-            weights:
-                this.weights.getWeights(),
-
-
             logs:
-                this.logs.slice(
-                    -20
-                )
+            this.logs,
+
+
+            weights:
+
+            this.weights
+            .getWeights()
+
 
 
         };

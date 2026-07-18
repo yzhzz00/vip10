@@ -8,127 +8,124 @@ export class MarkovModel {
 
 
         this.name =
-            "markov";
+        "markov";
 
 
-        this.frontMatrix={};
+        this.frontTransition={};
 
 
-        this.backMatrix={};
+        this.backTransition={};
 
 
-    }
-
-
-
-    // =========================
-    // 初始化转移矩阵
-    // =========================
-
-    init(){
-
-
-        this.frontMatrix={};
-
-
-        this.backMatrix={};
-
-
-
-        for(
-            let i=1;
-            i<=35;
-            i++
-        ){
-
-
-            this.frontMatrix[i]={};
-
-
-        }
-
-
-
-        for(
-            let i=1;
-            i<=12;
-            i++
-        ){
-
-
-            this.backMatrix[i]={};
-
-
-        }
+        this.last=null;
 
 
     }
 
 
 
-    // =========================
-    // 训练转移关系
-    // =========================
+
+
+    // =====================
+    // 训练
+    // =====================
 
     train(history){
 
 
-        this.init();
+        this.frontTransition={};
+
+
+        this.backTransition={};
 
 
 
         for(
-            let i=1;
-            i<history.length;
+            let i=0;
+            i<history.length-1;
             i++
         ){
 
 
-            let prev =
-                history[i-1];
+            let current =
+            history[i];
 
 
-            let curr =
-                history[i];
+            let next =
+            history[i+1];
 
 
 
-            prev.front
-            .forEach(a=>{
+            current.front.forEach(a=>{
 
 
-                curr.front
-                .forEach(b=>{
+                if(
+                    !this.frontTransition[a]
+                ){
+
+                    this.frontTransition[a]={};
+
+                }
 
 
-                    this.addFront(
-                        a,
-                        b
-                    );
+
+                next.front.forEach(b=>{
+
+
+                    if(
+                        !this.frontTransition[a][b]
+                    ){
+
+                        this.frontTransition[a][b]=0;
+
+                    }
+
+
+
+                    this.frontTransition[a][b]++;
 
 
                 });
+
 
 
             });
 
 
 
-            prev.back
-            .forEach(a=>{
 
 
-                curr.back
-                .forEach(b=>{
+            current.back.forEach(a=>{
 
 
-                    this.addBack(
-                        a,
-                        b
-                    );
+                if(
+                    !this.backTransition[a]
+                ){
+
+                    this.backTransition[a]={};
+
+                }
+
+
+
+                next.back.forEach(b=>{
+
+
+                    if(
+                        !this.backTransition[a][b]
+                    ){
+
+                        this.backTransition[a][b]=0;
+
+                    }
+
+
+
+                    this.backTransition[a][b]++;
 
 
                 });
+
 
 
             });
@@ -139,173 +136,105 @@ export class MarkovModel {
 
 
 
-        this.normalize();
+        if(history.length){
 
+            this.last =
+            history[
+                history.length-1
+            ];
 
+        }
 
-        return 1;
 
 
     }
 
 
 
-    // =========================
-    // 添加前区转移
-    // =========================
-
-    addFront(
-        from,
-        to
-    ){
 
 
-        if(
-            !this.frontMatrix[from][to]
-        ){
-
-            this.frontMatrix[from][to]=0;
-
-        }
-
-
-
-        this.frontMatrix[from][to]++;
-
-
-    }
-
-
-
-    // =========================
-    // 添加后区转移
-    // =========================
-
-    addBack(
-        from,
-        to
-    ){
-
-
-        if(
-            !this.backMatrix[from][to]
-        ){
-
-            this.backMatrix[from][to]=0;
-
-        }
-
-
-
-        this.backMatrix[from][to]++;
-
-
-    }
-
-
-
-    // =========================
-    // 概率化
-    // =========================
-
-    normalize(){
-
-
-
-        for(
-            let from in this.frontMatrix
-        ){
-
-
-            let total =
-                Object.values(
-                    this.frontMatrix[from]
-                )
-                .reduce(
-                    (a,b)=>a+b,
-                    0
-                );
-
-
-
-            for(
-                let to in this.frontMatrix[from]
-            ){
-
-
-                this.frontMatrix[from][to]
-                /=
-                total;
-
-
-            }
-
-
-        }
-
-
-
-        for(
-            let from in this.backMatrix
-        ){
-
-
-            let total =
-                Object.values(
-                    this.backMatrix[from]
-                )
-                .reduce(
-                    (a,b)=>a+b,
-                    0
-                );
-
-
-
-            for(
-                let to in this.backMatrix[from]
-            ){
-
-
-                this.backMatrix[from][to]
-                /=
-                total;
-
-
-            }
-
-
-        }
-
-
-    }
-
-
-
-    // =========================
+    // =====================
     // 转移评分
-    // =========================
+    // =====================
 
-    predict(candidate,last){
+    transitionScore(
+        current,
+        next,
+        map
+    ){
+
+
+        if(
+            !map[current]
+        ){
+
+            return 0;
+
+        }
+
+
+
+        return (
+
+            map[current][next]
+            ||
+            0
+
+        );
+
+
+    }
+
+
+
+
+
+    // =====================
+    // 候选评分
+    // =====================
+
+    predict(candidate){
 
 
         let score=0;
 
 
 
-        last.front
-        .forEach(prev=>{
+        if(
+            !this.last
+        ){
+
+            return {
+
+                model:this.name,
+
+                score:0
+
+            };
+
+        }
 
 
-            candidate.front
-            .forEach(next=>{
+
+
+
+        this.last.front.forEach(a=>{
+
+
+            candidate.front.forEach(b=>{
 
 
                 score +=
-                this.frontMatrix
-                [prev]
-                [next]
-                ||
-                0;
+
+                this.transitionScore(
+
+                    a,
+
+                    b,
+
+                    this.frontTransition
+
+                );
 
 
             });
@@ -315,26 +244,33 @@ export class MarkovModel {
 
 
 
-        last.back
-        .forEach(prev=>{
 
 
-            candidate.back
-            .forEach(next=>{
+        this.last.back.forEach(a=>{
+
+
+            candidate.back.forEach(b=>{
 
 
                 score +=
-                this.backMatrix
-                [prev]
-                [next]
-                ||
-                0;
+
+                this.transitionScore(
+
+                    a,
+
+                    b,
+
+                    this.backTransition
+
+                );
 
 
             });
 
 
         });
+
+
 
 
 
@@ -342,11 +278,10 @@ export class MarkovModel {
 
 
             model:
-                this.name,
+            this.name,
 
 
-            score:
-                score/7
+            score
 
 
         };

@@ -10,63 +10,36 @@ export class WeightManager {
         this.weights={};
 
 
-        this.performance={};
-
-
-        this.minWeight =
-            0.05;
+        this.history={};
 
 
     }
 
 
 
-    // =========================
+
+
+    // =====================
     // 注册模型
-    // =========================
+    // =====================
 
     register(
-        modelName
+        name
     ){
 
 
         if(
-            !this.weights[modelName]
+            !this.weights[name]
         ){
 
 
-            this.weights[modelName]=1;
+            this.weights[name]=1;
 
 
-            this.performance[modelName]=[];
+            this.history[name]=[];
 
 
         }
-
-
-    }
-
-
-
-    // =========================
-    // 记录模型表现
-    // =========================
-
-    record(
-        modelName,
-        score
-    ){
-
-
-        this.register(
-            modelName
-        );
-
-
-
-        this.performance
-        [modelName]
-        .push(score);
 
 
 
@@ -74,40 +47,23 @@ export class WeightManager {
 
 
 
-    // =========================
-    // 计算平均表现
-    // =========================
 
-    average(
-        modelName
+
+    // =====================
+    // 获取权重
+    // =====================
+
+    getWeight(
+        name
     ){
-
-
-        let list =
-            this.performance
-            [modelName]
-            ||
-            [];
-
-
-
-        if(
-            list.length===0
-        ){
-
-            return 0.5;
-
-        }
-
 
 
         return (
-            list.reduce(
-                (a,b)=>a+b,
-                0
-            )
-            /
-            list.length
+
+            this.weights[name]
+            ||
+            0
+
         );
 
 
@@ -115,122 +71,7 @@ export class WeightManager {
 
 
 
-    // =========================
-    // 自动调整权重
-    // =========================
 
-    update(){
-
-
-
-        for(
-            let model in this.weights
-        ){
-
-
-            let score =
-                this.average(
-                    model
-                );
-
-
-
-            if(
-                score>0.6
-            ){
-
-
-                this.weights[model]
-                *=
-                1.1;
-
-
-            }
-            else if(
-                score<0.4
-            ){
-
-
-                this.weights[model]
-                *=
-                0.9;
-
-
-            }
-
-
-
-            if(
-                this.weights[model]
-                <
-                this.minWeight
-            ){
-
-
-                this.weights[model]
-                =
-                this.minWeight;
-
-
-            }
-
-
-        }
-
-
-
-        return this.weights;
-
-
-    }
-
-
-
-    // =========================
-    // 淘汰检测
-    // =========================
-
-    eliminate(){
-
-
-        let removed=[];
-
-
-
-        for(
-            let model in this.weights
-        ){
-
-
-            if(
-                this.average(model)
-                <
-                0.25
-            ){
-
-
-                removed.push(
-                    model
-                );
-
-
-            }
-
-
-        }
-
-
-
-        return removed;
-
-
-    }
-
-
-
-    // =========================
-    // 获取当前权重
-    // =========================
 
     getWeights(){
 
@@ -242,23 +83,139 @@ export class WeightManager {
 
 
 
-    // =========================
-    // 权重排行榜
-    // =========================
-
-    ranking(){
 
 
-        return Object.entries(
-            this.weights
-        )
-        .sort(
-            (a,b)=>
-            b[1]-a[1]
+    // =====================
+    // 记录反馈
+    // =====================
+
+    record(
+        name,
+        score
+    ){
+
+
+        if(
+            !this.history[name]
+        ){
+
+            this.history[name]=[];
+
+        }
+
+
+
+        this.history[name]
+        .push(
+            score
         );
 
 
     }
+
+
+
+
+
+    // =====================
+    // 权重更新
+    // =====================
+
+    update(){
+
+
+
+        Object.keys(
+            this.history
+        )
+        .forEach(
+        name=>{
+
+
+            let list =
+            this.history[name];
+
+
+
+            if(
+                list.length===0
+            ){
+
+                return;
+
+            }
+
+
+
+            let avg =
+
+            list.reduce(
+                (a,b)=>
+                a+b,
+                0
+            )
+            /
+            list.length;
+
+
+
+            /*
+            
+            表现越好
+            权重越高
+
+            表现差
+            自动降低
+            
+            */
+
+
+
+            this.weights[name]=
+
+            Number(
+                (
+                    0.5
+                    +
+                    avg
+                )
+                .toFixed(4)
+            );
+
+
+
+        });
+
+
+
+    }
+
+
+
+
+
+    // =====================
+    // 排名
+    // =====================
+
+    rank(){
+
+
+        return Object.keys(
+            this.weights
+        )
+        .sort(
+        (a,b)=>
+
+            this.weights[b]
+            -
+            this.weights[a]
+
+        );
+
+
+    }
+
 
 
 }
