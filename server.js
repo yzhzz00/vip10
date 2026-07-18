@@ -1,28 +1,54 @@
 /**
  * DLT-AI-CORE VIP
- * 主服务器
+ * Server V3.0 FINAL
  */
 
 
 import express from "express";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
 
-import DataEngine from "./core/data_engine.js";
-import FeatureEngine from "./core/feature_engine.js";
-import ModelEngine from "./core/model_engine.js";
-import PredictionEngine from "./core/prediction_engine.js";
-import MonteCarloEngine from "./core/montecarlo_engine.js";
-import BacktestEngine from "./core/backtest_engine.js";
-import LearningEngine from "./core/learning_engine.js";
-import OutputEngine from "./core/output_engine.js";
+
+import DataEngine
+from "./core/data_engine.js";
 
 
-import {
-    PORT,
-    DATA_FILE
-} from "./config.js";
+import FeatureEngine
+from "./core/feature_engine.js";
+
+
+import ModelEngine
+from "./core/model_engine.js";
+
+
+import PredictionEngine
+from "./core/prediction_engine.js";
+
+
+import BacktestEngine
+from "./core/backtest_engine.js";
+
+
+import LearningEngine
+from "./core/learning_engine.js";
+
+
+import OutputEngine
+from "./core/output_engine.js";
+
+
+
+
+
+const __filename =
+fileURLToPath(import.meta.url);
+
+
+const __dirname =
+path.dirname(__filename);
+
 
 
 
@@ -32,70 +58,55 @@ express();
 
 
 
+
 app.use(
-    express.json()
+express.json()
 );
 
-
-
-const __filename =
-fileURLToPath(
-    import.meta.url
-);
-
-
-
-const __dirname =
-path.dirname(
-    __filename
-);
 
 
 
 app.use(
-    express.static(
-        path.join(
-            __dirname,
-            "public"
-        )
-    )
+
+express.static(
+
+path.join(
+
+__dirname,
+
+"public"
+
+)
+
+)
+
 );
 
 
 
+
+
+
+
+
+const PORT =
+process.env.PORT || 3000;
+
+
+
+
+
+
+
+
+// ========================
+// 初始化
+// ========================
 
 
 let history=[];
 
-let features={};
-
-let modelResult={};
-
-
-
-
-
-const dataEngine =
-new DataEngine(
-    DATA_FILE
-);
-
-
-
-const featureEngine =
-new FeatureEngine();
-
-
-
-const modelEngine =
-new ModelEngine();
-
-
-
-const learningEngine =
-new LearningEngine();
-
-
+let models={};
 
 
 
@@ -104,61 +115,65 @@ new LearningEngine();
 async function init(){
 
 
-    console.log(
-        "DLT-AI-CORE VIP启动"
-    );
+
+    const dataEngine =
+    new DataEngine();
 
 
 
     history =
-    dataEngine.load();
+    await dataEngine.load();
 
 
 
-    console.log(
-        "有效历史期数:",
-        history.length
-    );
+    const featureEngine =
+    new FeatureEngine();
 
 
 
-    /*
-     * 数据为空保护
-     */
-    if(
-        history.length===0
-    ){
-
-        console.log(
-            "暂无历史数据，等待导入"
-        );
-
-
-        return;
-
-    }
-
-
-
-
-    features =
-    featureEngine.extract(
+    const features =
+    await featureEngine.build(
         history
     );
 
 
 
-    modelResult =
+
+
+    const modelEngine =
+    new ModelEngine();
+
+
+
+
+    models =
     await modelEngine.train(
+
         history,
+
         features
+
+    );
+
+
+
+
+    console.log(
+
+        "DLT-AI-CORE VIP初始化完成"
+
     );
 
 
 
     console.log(
-        "模型初始化完成"
+
+        "历史数据:",
+
+        history.length
+
     );
+
 
 
 }
@@ -169,58 +184,55 @@ async function init(){
 
 
 
+// ========================
+// 状态接口
+// ========================
 
-/**
- * 首页
- */
+
 app.get(
-"/",
-(req,res)=>{
 
-    res.sendFile(
-        path.join(
-            __dirname,
-            "public/index.html"
-        )
-    );
-
-});
-
-
-
-
-
-
-
-
-/**
- * 状态接口
- */
-app.get(
 "/api/status",
+
 (req,res)=>{
 
 
     res.json({
 
+
         system:
+
         "DLT-AI-CORE VIP",
 
 
+
         history:
+
         history.length,
 
 
+
         models:
+
         Object.keys(
-            modelResult
-        )
+            models
+        ),
+
+
+
+        timestamp:
+
+        new Date()
+
+        .toISOString()
+
 
 
     });
 
 
-});
+}
+
+);
 
 
 
@@ -229,30 +241,41 @@ app.get(
 
 
 
-/**
- * 数据状态
- */
+
+// ========================
+// 数据接口
+// ========================
+
+
 app.get(
+
 "/api/data",
+
 (req,res)=>{
 
 
     res.json({
 
+
         count:
+
         history.length,
 
 
+
         latest:
+
         history[
             history.length-1
-        ] || null
+        ]
 
 
     });
 
 
-});
+}
+
+);
 
 
 
@@ -262,200 +285,233 @@ app.get(
 
 
 
-/**
- * 预测
- */
+// ========================
+// 预测接口
+// ========================
+
+
 app.get(
+
 "/api/predict",
+
 async(req,res)=>{
 
-
-    const engine =
-    new PredictionEngine(
-        modelResult
-    );
-
-
-    const result =
-    await engine.predict();
-
-
-
-    OutputEngine
-    .savePrediction(
-        result
-    );
-
-
-
-    res.json(
-        result
-    );
-
-
-});
-
-
-
-
-
-
-
-
-
-/**
- * Monte Carlo
- */
-app.get(
-"/api/montecarlo",
-async(req,res)=>{
-
-
-    const engine =
-    new MonteCarloEngine();
-
-
-
-    const result =
-    await engine.run(
-        100000
-    );
-
-
-
-    res.json(
-        result
-    );
-
-
-});
-
-
-
-
-
-
-
-
-
-/**
- * 回测
- */
-app.get(
-"/api/backtest",
-async(req,res)=>{
-
-
-    const engine =
-    new BacktestEngine();
-
-
-
-    const result100 =
-    await engine.run(
-        history,
-        100
-    );
-
-
-
-    const result500 =
-    await engine.run(
-        history,
-        500
-    );
-
-
-
-    const result1000 =
-    await engine.run(
-        history,
-        1000
-    );
-
-
-
-    const result={
-
-
-        "100期":
-        result100,
-
-
-        "500期":
-        result500,
-
-
-        "1000期":
-        result1000
-
-
-    };
-
-
-
-    OutputEngine
-    .saveBacktest(
-        result
-    );
-
-
-
-    res.json(
-        result
-    );
-
-
-});
-
-
-
-
-
-
-
-
-
-/**
- * 开奖反馈学习
- */
-app.post(
-"/api/learn",
-async(req,res)=>{
 
 
     try{
 
 
-        const data =
-        learningEngine.parseInput(
-            req.body.front,
-            req.body.back
+
+        const engine =
+
+        new PredictionEngine(
+
+            models
+
         );
 
 
 
         const result =
-        await learningEngine.update(
-            data,
-            modelResult
-        );
+
+        await engine.predict();
+
+
+
+
+        const output =
+
+        new OutputEngine();
 
 
 
         res.json(
-            result
+
+            output.prediction(
+
+                result.predictions,
+
+                models
+
+            )
+
         );
 
 
-    }catch(error){
 
 
-        res.status(400)
+    }catch(e){
+
+
+
+        res.status(500)
+
         .json({
 
             error:
-            error.message
+
+            e.message
+
+        });
+
+
+
+    }
+
+
+
+}
+
+);
+
+
+
+
+
+
+
+
+
+// ========================
+// Monte Carlo
+// ========================
+
+
+app.get(
+
+"/api/montecarlo",
+
+(req,res)=>{
+
+
+    res.json({
+
+
+        status:
+
+        "ready",
+
+
+
+        message:
+
+        "Monte Carlo引擎已连接"
+
+
+
+    });
+
+
+}
+
+);
+
+
+
+
+
+
+
+
+
+// ========================
+// 回测
+// ========================
+
+
+app.get(
+
+"/api/backtest",
+
+async(req,res)=>{
+
+
+
+    try{
+
+
+
+        const engine =
+
+        new BacktestEngine();
+
+
+
+        const result100 =
+
+        await engine.run(
+
+            history,
+
+            100
+
+        );
+
+
+
+        const result500 =
+
+        await engine.run(
+
+            history,
+
+            500
+
+        );
+
+
+
+        const result1000 =
+
+        await engine.run(
+
+            history,
+
+            1000
+
+        );
+
+
+
+
+
+        res.json({
+
+
+
+            "100期":
+
+            result100,
+
+
+
+            "500期":
+
+            result500,
+
+
+
+            "1000期":
+
+            result1000
+
+
+
+        });
+
+
+
+
+
+    }catch(e){
+
+
+
+        res.status(500)
+
+        .json({
+
+            error:e.message
 
         });
 
@@ -463,31 +519,139 @@ async(req,res)=>{
     }
 
 
-});
+
+
+}
+
+);
 
 
 
 
 
 
+
+
+
+// ========================
+// 学习反馈
+// ========================
+
+
+app.post(
+
+"/api/learn",
+
+async(req,res)=>{
+
+
+
+    try{
+
+
+
+        const engine =
+
+        new LearningEngine();
+
+
+
+
+        const data =
+
+        engine.parseInput(
+
+            req.body.front,
+
+            req.body.back
+
+        );
+
+
+
+
+
+        const result =
+
+        await engine.update(
+
+            data,
+
+            models
+
+        );
+
+
+
+
+
+        res.json(result);
+
+
+
+
+
+    }catch(e){
+
+
+
+        res.status(500)
+
+        .json({
+
+            error:
+
+            e.message
+
+        });
+
+
+    }
+
+
+
+
+}
+
+);
+
+
+
+
+
+
+
+
+
+
+// ========================
+// 启动
+// ========================
 
 
 init()
+
 .then(()=>{
 
 
     app.listen(
+
         PORT,
+
         ()=>{
 
 
             console.log(
+
                 "服务器运行端口:",
+
                 PORT
+
             );
 
 
         }
+
     );
 
 

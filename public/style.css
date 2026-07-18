@@ -1,6 +1,6 @@
 /**
  * DLT-AI-CORE VIP
- * 页面样式
+ * UI Style V2.0
  */
 
 
@@ -21,20 +21,21 @@ body{
     padding:0;
 
 
-    background:#f5f6fa;
+    background:#0b1220;
+
+
+    color:#ffffff;
 
 
     font-family:
 
-    Arial,
     "Microsoft YaHei",
+    Arial,
     sans-serif;
 
 
-    color:#222;
-
-
 }
+
 
 
 
@@ -48,10 +49,13 @@ body{
     max-width:900px;
 
 
-    margin:20px auto;
+    margin:
+
+    20px auto;
 
 
 }
+
 
 
 
@@ -62,7 +66,30 @@ h1{
     text-align:center;
 
 
-    color:#1a237e;
+    font-size:28px;
+
+
+    margin-bottom:5px;
+
+
+    color:#00e5ff;
+
+
+}
+
+
+
+
+.subtitle{
+
+
+    text-align:center;
+
+
+    color:#aaa;
+
+
+    margin-bottom:25px;
 
 
 }
@@ -74,10 +101,20 @@ h1{
 .card{
 
 
-    background:white;
+    background:
+
+    linear-gradient(
+
+    145deg,
+
+    #172033,
+
+    #111827
+
+    );
 
 
-    border-radius:12px;
+    border-radius:18px;
 
 
     padding:20px;
@@ -88,9 +125,16 @@ h1{
 
     box-shadow:
 
-    0 3px 10px
+    0 10px 30px
 
-    rgba(0,0,0,0.08);
+    rgba(0,0,0,0.35);
+
+
+    border:
+
+    1px solid
+
+    rgba(255,255,255,0.08);
 
 
 }
@@ -105,10 +149,32 @@ h1{
     margin-top:0;
 
 
-    color:#333;
+    color:#00e5ff;
+
+
+    font-size:20px;
 
 
 }
+
+
+
+
+
+.info{
+
+
+    line-height:1.8;
+
+
+    color:#dbeafe;
+
+
+    font-size:16px;
+
+
+}
+
 
 
 
@@ -116,33 +182,52 @@ h1{
 button{
 
 
+    width:100%;
+
+
+    margin:
+
+    8px 0;
+
+
+    padding:
+
+    14px;
+
+
     border:none;
 
 
-    background:#1565c0;
+    border-radius:12px;
+
+
+    background:
+
+    linear-gradient(
+
+    135deg,
+
+    #06b6d4,
+
+    #2563eb
+
+    );
 
 
     color:white;
 
 
-    padding:
-
-    12px 18px;
+    font-size:16px;
 
 
-    margin:5px;
-
-
-    border-radius:8px;
+    font-weight:bold;
 
 
     cursor:pointer;
 
 
-    font-size:15px;
-
-
 }
+
 
 
 
@@ -159,13 +244,17 @@ button:hover{
 
 
 
+
+
 input{
 
 
     width:100%;
 
 
-    padding:12px;
+    padding:
+
+    13px;
 
 
     margin:
@@ -173,10 +262,16 @@ input{
     8px 0;
 
 
-    border-radius:8px;
+    border-radius:10px;
 
 
-    border:1px solid #ddd;
+    border:none;
+
+
+    background:#0f172a;
+
+
+    color:white;
 
 
     font-size:15px;
@@ -188,25 +283,14 @@ input{
 
 
 
-pre{
+.result-card{
 
 
-    background:#111;
+    border:
 
+    1px solid
 
-    color:#00ff88;
-
-
-    padding:15px;
-
-
-    border-radius:8px;
-
-
-    overflow:auto;
-
-
-    white-space:pre-wrap;
+    #00e5ff;
 
 
 }
@@ -215,16 +299,55 @@ pre{
 
 
 
-#status{
+.result{
 
 
-    color:#1565c0;
+    background:#020617;
 
 
-    font-weight:bold;
+    padding:18px;
+
+
+    border-radius:12px;
+
+
+    color:#22c55e;
+
+
+    font-size:18px;
+
+
+    line-height:1.8;
+
+
+    white-space:pre-line;
 
 
 }
+
+
+
+
+
+.footer{
+
+
+    text-align:center;
+
+
+    color:#64748b;
+
+
+    margin-top:30px;
+
+
+    padding-bottom:20px;
+
+
+}
+
+
+
 
 
 
@@ -237,7 +360,7 @@ pre{
     .container{
 
 
-        width:96%;
+        width:94%;
 
 
     }
@@ -254,13 +377,21 @@ pre{
 
 
 
-    button{
+
+    .card{
 
 
-        width:100%;
+        padding:16px;
 
 
-        margin-top:8px;
+    }
+
+
+
+    .result{
+
+
+        font-size:16px;
 
 
     }

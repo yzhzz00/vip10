@@ -1,33 +1,52 @@
 /**
  * DLT-AI-CORE VIP
- * 集成学习模型
+ * Ensemble Model V2.0
+ *
+ * 多模型融合
  */
+
 
 
 class EnsembleModel {
 
 
+
     constructor(){
+
+
+        this.name =
+        "ensemble";
+
 
 
         this.weights={
 
-            statistics:0.20,
 
-            bayesian:0.20,
+            statistics:
+            0.25,
 
-            markov:0.15,
 
-            matrix:0.15,
+            bayesian:
+            0.20,
 
-            structure:0.15,
 
-            ensemble:0.15
+            markov:
+            0.15,
+
+
+            matrix:
+            0.15,
+
+
+            structure:
+            0.15,
+
+
+            trend:
+            0.10
+
 
         };
-
-
-        this.result={};
 
 
     }
@@ -36,68 +55,79 @@ class EnsembleModel {
 
 
 
-    /**
-     * 训练融合模型
-     */
+
+
+
     train(
+
         models={}
+
     ){
 
 
-        this.result =
-        models;
 
-
-
-        return {
-
-
-            name:
-            "ensemble",
-
-
-
-            numbers:
-            this.rankNumbers()
-
-
-        };
-
-
-    }
+        const scoreMap={};
 
 
 
 
 
-    /**
-     * 综合评分
-     */
-    score(
-        number
-    ){
+
+        /*
+         * 初始化号码
+         */
 
 
-        let total=0;
+        for(
+
+            let i=1;
+
+            i<=35;
+
+            i++
+
+        ){
+
+
+            scoreMap[i]=0;
+
+
+        }
+
+
+
+
 
 
 
         Object.keys(
-            this.result
+
+            this.weights
+
         )
+
         .forEach(
-            model=>{
+
+            modelName=>{
 
 
-                const data =
-                this.result[model];
+
+                const model =
+
+                models[modelName];
+
+
 
 
 
                 if(
-                    !data
+
+                    !model
+
                     ||
-                    !data.numbers
+
+                    !model.numbers
+
                 ){
 
                     return;
@@ -106,129 +136,113 @@ class EnsembleModel {
 
 
 
-                const item =
-                data.numbers.find(
 
-                    x=>
-                    x.number===number
+
+
+
+                const weight =
+
+                this.weights[modelName];
+
+
+
+
+
+
+
+
+                model.numbers
+
+                .forEach(
+
+                    item=>{
+
+
+
+                        scoreMap[item.number]
+
+                        +=
+
+                        (
+
+                            Number(
+
+                                item.score
+
+                            )
+
+                            ||
+
+                            0
+
+                        )
+
+                        *
+
+                        weight;
+
+
+
+                    }
 
                 );
 
 
 
-                if(item){
-
-
-                    total +=
-
-                    item.score *
-
-                    (
-                    this.weights[model]
-                    ||
-                    0
-                    );
-
-
-                }
-
-
-
             }
 
         );
 
 
 
-        return Number(
-
-            total.toFixed(6)
-
-        );
-
-
-    }
 
 
 
 
-
-    /**
-     * 最终排名
-     */
-    rankNumbers(){
-
-
-        const result=[];
-
-
-
-        for(
-            let i=1;
-            i<=35;
-            i++
-        ){
-
-
-            result.push({
-
-                number:i,
-
-
-                score:
-                this.score(i)
-
-            });
-
-
-        }
-
-
-
-        return result.sort(
-
-            (a,b)=>
-            b.score-a.score
-
-        );
-
-
-    }
+        const numbers=[];
 
 
 
 
-
-    /**
-     * 模型竞争
-     */
-    compete(){
-
-
-        const ranking=[];
 
 
 
         Object.keys(
-            this.result
+
+            scoreMap
+
         )
+
         .forEach(
-            name=>{
+
+            n=>{
 
 
-                ranking.push({
 
-                    model:name,
+                numbers.push({
 
 
-                    top:
-                    this.result[name]
-                    ?.numbers
-                    ?.slice(0,5)
-                    ||
-                    []
+
+                    number:
+
+                    Number(n),
+
+
+
+                    score:
+
+                    Number(
+
+                        scoreMap[n]
+
+                        .toFixed(5)
+
+                    )
+
+
 
                 });
+
 
 
             }
@@ -237,58 +251,94 @@ class EnsembleModel {
 
 
 
-        return ranking;
 
 
-    }
-
-
-
-
-
-    /**
-     * 调整权重
-     */
-    updateWeights(
-        weights={}
-    ){
-
-
-        this.weights={
-
-            ...this.weights,
-
-            ...weights
-
-        };
-
-
-    }
-
-
-
-
-
-    status(){
 
 
         return {
 
 
-            type:
-            "ensemble",
+
+            name:this.name,
 
 
-            models:
-            Object.keys(
-                this.result
+
+            weights:this.weights,
+
+
+
+            numbers:
+
+            numbers.sort(
+
+                (a,b)=>
+
+                b.score-a.score
+
             )
+
 
 
         };
 
 
+
     }
+
+
+
+
+
+
+
+
+
+    predict(
+
+        models={}
+
+    ){
+
+
+
+        return this.train(
+
+            models
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+    updateWeight(
+
+        result={}
+
+    ){
+
+
+
+        /*
+         * 后续开奖反馈学习接口
+         */
+
+
+
+        return this.weights;
+
+
+
+    }
+
+
 
 
 

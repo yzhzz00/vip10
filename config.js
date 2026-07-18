@@ -1,40 +1,122 @@
 /**
  * DLT-AI-CORE VIP
- * 系统配置
+ * Config V1.0 FINAL
  */
 
 
-export const PORT =
-process.env.PORT || 3000;
+
+export default {
+
+
+    system:
+
+    "DLT-AI-CORE VIP",
 
 
 
-export const DATA_FILE =
-"./data/dlt_history.txt";
+    version:
+
+    "V1.0 FINAL",
 
 
 
-export const SYSTEM_NAME =
-"DLT-AI-CORE VIP";
+
+
+    data:{
+
+
+        history:
+
+        "./data/dlt_history.txt",
 
 
 
-export const VERSION =
-"1.0.0";
+        learning:
+
+        "./data/learn_history.json",
 
 
 
-export const MONTE_CARLO_COUNT =
-1000000;
+        weights:
+
+        "./data/model_weight.json",
 
 
 
-export const BACKTEST_PERIODS = [
+        prediction:
 
-    100,
+        "./data/prediction_history.json",
 
-    500,
 
-    1000
 
-];
+        backtest:
+
+        "./data/backtest_history.json"
+
+
+    },
+
+
+
+
+
+
+    model:{
+
+
+        simulation:
+
+        1000000,
+
+
+
+        predictionCount:
+
+        3,
+
+
+
+        frontMax:
+
+        35,
+
+
+
+        backMax:
+
+        12
+
+
+
+    },
+
+
+
+
+
+
+    backtest:{
+
+
+        periods:[
+
+
+            100,
+
+
+            500,
+
+
+            1000
+
+
+
+        ]
+
+    }
+
+
+
+
+
+};

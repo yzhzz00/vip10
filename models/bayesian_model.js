@@ -1,20 +1,21 @@
 /**
  * DLT-AI-CORE VIP
+ * Bayesian Model V2.0
+ *
  * 贝叶斯概率模型
  */
+
 
 
 class BayesianModel {
 
 
+
     constructor(){
 
 
-        this.prior = {};
-
-        this.posterior = {};
-
-        this.total = 0;
+        this.name =
+        "bayesian";
 
 
     }
@@ -23,228 +24,256 @@ class BayesianModel {
 
 
 
-    /**
-     * 模型训练
-     */
+
+
+
     train(
+
         history=[],
+
         features={}
+
     ){
 
-
-        this.total =
-        history.length;
-
-
-
-        const count={};
-
-
-
-        for(
-            let i=1;
-            i<=35;
-            i++
-        ){
-
-            count[i]=0;
-
-        }
-
-
-
-        history.forEach(
-            item=>{
-
-
-                item.front.forEach(
-                    n=>{
-
-                        count[n]++;
-
-                    }
-                );
-
-
-            }
-        );
-
-
-
-        /*
-         * 先验概率
-         */
-
-        for(
-            let i=1;
-            i<=35;
-            i++
-        ){
-
-
-            this.prior[i]
-            =
-            1/35;
-
-
-        }
-
-
-
-        /*
-         * 后验概率更新
-         *
-         * 拉普拉斯平滑
-         */
-
-        for(
-            let i=1;
-            i<=35;
-            i++
-        ){
-
-
-            this.posterior[i]
-            =
-
-            (
-                count[i]+1
-            )
-
-            /
-
-            (
-                this.total*5+35
-            );
-
-
-        }
-
-
-
-        return {
-
-
-            name:
-            "bayesian",
-
-
-            numbers:
-            this.rankNumbers()
-
-
-        };
-
-
-    }
-
-
-
-
-
-    /**
-     * 单号码概率
-     */
-    score(
-        number
-    ){
-
-
-        return Number(
-
-            (
-            this.posterior[number]
-            ||
-            0
-            )
-
-            .toFixed(8)
-
-        );
-
-
-    }
-
-
-
-
-
-    /**
-     * 排序
-     */
-    rankNumbers(){
 
 
         const result=[];
 
 
 
+        const totalDraws =
+
+        history.length || 1;
+
+
+
+
+
         for(
-            let i=1;
-            i<=35;
-            i++
+
+            let num=1;
+
+            num<=35;
+
+            num++
+
         ){
+
+
+
+            let count=0;
+
+
+            let recentCount=0;
+
+
+
+
+
+            history.forEach(
+
+                item=>{
+
+
+
+                    if(
+
+                        item.front
+
+                        .includes(num)
+
+                    ){
+
+
+                        count++;
+
+
+                    }
+
+
+
+                }
+
+            );
+
+
+
+
+
+
+
+            history
+
+            .slice(-100)
+
+            .forEach(
+
+                item=>{
+
+
+                    if(
+
+                        item.front
+
+                        .includes(num)
+
+                    ){
+
+
+                        recentCount++;
+
+
+                    }
+
+
+
+                }
+
+            );
+
+
+
+
+
+
+
+
+            /*
+             * 贝叶斯平滑
+             *
+             * P(num)
+             */
+
+
+            const prior =
+
+            (
+
+                count + 1
+
+            )
+
+            /
+
+            (
+
+                totalDraws + 35
+
+            );
+
+
+
+
+
+
+
+
+            /*
+             * 近期证据更新
+             */
+
+
+            const likelihood =
+
+
+            (
+
+                recentCount + 1
+
+            )
+
+            /
+
+            101;
+
+
+
+
+
+
+
+
+
+            const posterior =
+
+
+
+            prior
+
+            *
+
+            likelihood;
+
+
+
+
+
+
 
 
             result.push({
 
-                number:i,
+
+
+                number:num,
+
 
 
                 score:
-                this.score(i)
+
+                Number(
+
+                    posterior
+
+                    .toFixed(8)
+
+                )
+
+
 
             });
+
+
+
 
 
         }
 
 
 
-        return result.sort(
-
-            (a,b)=>
-            b.score-a.score
-
-        );
 
 
-    }
-
-
-
-
-
-    /**
-     * 获取后验概率
-     */
-    getPosterior(){
-
-        return this.posterior;
-
-    }
-
-
-
-
-    status(){
 
 
         return {
 
 
-            type:
-            "bayesian",
+
+            name:this.name,
 
 
-            samples:
-            this.total
+
+            numbers:
+
+            result.sort(
+
+                (a,b)=>
+
+                b.score-a.score
+
+            )
+
 
 
         };
 
 
+
     }
+
+
+
+
 
 
 }

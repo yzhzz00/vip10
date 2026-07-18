@@ -1,18 +1,20 @@
 /**
  * DLT-AI-CORE VIP
- * 马尔可夫转移模型
+ * Markov Model V2.0
+ *
+ * 一阶马尔可夫转移模型
  */
 
 
 class MarkovModel {
 
 
+
     constructor(){
 
 
-        this.transition = {};
-
-        this.history=[];
+        this.name =
+        "markov";
 
 
     }
@@ -21,79 +23,130 @@ class MarkovModel {
 
 
 
-    /**
-     * 训练模型
-     */
+
+
     train(
+
         history=[],
+
         features={}
+
     ){
 
 
-        this.history =
-        history;
+
+        const transition={};
 
 
 
-        this.transition={};
-
-
+        /*
+         * 初始化转移矩阵
+         */
 
         for(
-            let i=0;
-            i<history.length-1;
+
+            let i=1;
+
+            i<=35;
+
             i++
+
         ){
 
 
-            const current =
-            history[i].front;
+            transition[i]={};
+
+
+        }
+
+
+
+
+
+
+
+
+        /*
+         * 构建:
+         *
+         * 上一期号码
+         *
+         * ->
+         *
+         * 下一期号码
+         */
+
+
+        for(
+
+            let i=1;
+
+            i<history.length;
+
+            i++
+
+        ){
+
+
+
+            const prev =
+
+            history[i-1]
+            .front;
 
 
 
             const next =
-            history[i+1].front;
+
+            history[i]
+            .front;
 
 
 
 
-            current.forEach(
-                from=>{
+
+            prev.forEach(
+
+                p=>{
 
 
                     if(
-                        !this.transition[from]
+                        !transition[p]
                     ){
 
-                        this.transition[from]={};
+                        transition[p]={};
 
                     }
 
 
 
+
                     next.forEach(
-                        to=>{
+
+                        n=>{
 
 
                             if(
-                                !this.transition[from][to]
+                                !transition[p][n]
                             ){
 
-                                this.transition[from][to]
-                                =0;
+                                transition[p][n]=0;
 
                             }
 
 
-                            this.transition[from][to]++;
+                            transition[p][n]++;
+
 
 
                         }
+
                     );
 
 
 
                 }
+
             );
 
 
@@ -102,182 +155,202 @@ class MarkovModel {
 
 
 
-        return {
-
-
-            name:
-            "markov",
-
-
-
-            numbers:
-            this.rankNumbers()
-
-
-        };
-
-
-    }
 
 
 
 
-
-    /**
-     * 单号码转移评分
-     */
-    score(
-        number
-    ){
-
-
-        if(
-            !this.transition[number]
-        ){
-
-            return 0;
-
-        }
+        const scores=[];
 
 
 
-        const map =
-        this.transition[number];
-
-
-
-        const total =
-        Object.values(
-            map
-        )
-        .reduce(
-            (a,b)=>a+b,
-            0
-        );
-
-
-
-        if(
-            total===0
-        ){
-
-            return 0;
-
-        }
 
 
 
         /*
-         * 当前数字作为下一期出现概率
+         * 使用最近一期状态预测
          */
-        return Number(
-
-            (
-            (
-            map[number]
-            ||
-            0
-            )
-
-            /
-
-            total
-
-            )
-
-            .toFixed(6)
-
-            )
-
-        ;
 
 
+        const last =
 
-    }
+        history.length
+
+        ?
+
+        history[
+            history.length-1
+        ]
+
+        .front
+
+        :
+
+        [];
 
 
 
 
-
-    /**
-     * 转移概率排序
-     */
-    rankNumbers(){
-
-
-        const result=[];
 
 
 
         for(
-            let i=1;
-            i<=35;
-            i++
+
+            let num=1;
+
+            num<=35;
+
+            num++
+
         ){
 
 
-            result.push({
 
-                number:i,
+            let score=0;
+
+
+
+
+
+            last.forEach(
+
+                prev=>{
+
+
+                    const map =
+
+                    transition[prev];
+
+
+
+                    if(
+                        map
+                        &&
+                        map[num]
+                    ){
+
+
+                        score +=
+
+                        map[num];
+
+
+                    }
+
+
+
+                }
+
+            );
+
+
+
+
+
+
+
+            scores.push({
+
+
+
+                number:num,
+
 
 
                 score:
-                this.score(i)
+
+                Number(
+
+                    score
+
+                    .toFixed(3)
+
+                )
+
+
 
             });
+
 
 
         }
 
 
 
-        return result.sort(
 
-            (a,b)=>
-            b.score-a.score
+
+
+
+
+        /*
+         * 没有转移记录保护
+         */
+
+        const hasValue =
+
+        scores.some(
+
+            x=>
+
+            x.score>0
 
         );
 
 
-    }
+
+
+        if(
+            !hasValue
+        ){
+
+
+            scores.forEach(
+
+                x=>{
+
+                    x.score=1;
+
+                }
+
+            );
+
+
+        }
 
 
 
 
 
-    /**
-     * 获取转移矩阵
-     */
-    getMatrix(){
 
-        return this.transition;
-
-    }
-
-
-
-
-
-    status(){
 
 
         return {
 
 
-            type:
-            "markov",
+
+            name:this.name,
 
 
-            states:
-            Object.keys(
-                this.transition
-            ).length
+
+            numbers:
+
+            scores.sort(
+
+                (a,b)=>
+
+                b.score-a.score
+
+            )
+
 
 
         };
 
 
+
     }
+
+
+
 
 
 

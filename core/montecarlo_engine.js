@@ -1,200 +1,21 @@
 /**
  * DLT-AI-CORE VIP
- * Monte Carlo 模拟引擎
+ * Monte Carlo Engine V2.0
+ *
+ * 大乐透组合模拟引擎
  */
+
 
 
 class MonteCarloEngine {
 
 
+
     constructor(){
 
 
-        this.progress = 0;
-
-
-        this.result = null;
-
-
-    }
-
-
-
-
-
-    /**
-     * 执行模拟
-     */
-    async run(
-        total = 1000000,
-        callback = null
-    ){
-
-
-        const frontCount = {};
-
-        const backCount = {};
-
-
-        const batch = 10000;
-
-
-        let completed = 0;
-
-
-
-
-        while(
-            completed < total
-        ){
-
-
-            const current =
-            Math.min(
-                batch,
-                total-completed
-            );
-
-
-
-            for(
-                let i=0;
-                i<current;
-                i++
-            ){
-
-
-                const front =
-                this.randomNumbers(
-                    35,
-                    5
-                );
-
-
-                const back =
-                this.randomNumbers(
-                    12,
-                    2
-                );
-
-
-
-                front.forEach(
-                    n=>{
-
-                        frontCount[n]
-                        =
-                        (
-                        frontCount[n]
-                        ||
-                        0
-                        )
-                        +
-                        1;
-
-                    }
-                );
-
-
-
-                back.forEach(
-                    n=>{
-
-                        backCount[n]
-                        =
-                        (
-                        backCount[n]
-                        ||
-                        0
-                        )
-                        +
-                        1;
-
-                    }
-                );
-
-
-            }
-
-
-
-
-            completed += current;
-
-
-
-            this.progress =
-            Number(
-                (
-                completed / total
-                *
-                100
-                )
-                .toFixed(2)
-            );
-
-
-
-            if(callback){
-
-                callback(
-                    this.progress
-                );
-
-            }
-
-
-
-            /*
-             * 防止阻塞服务器
-             */
-            await new Promise(
-                resolve =>
-                setImmediate(
-                    resolve
-                )
-            );
-
-
-        }
-
-
-
-        this.result = {
-
-
-            simulation:
-
-            total,
-
-
-
-            progress:
-
-            100,
-
-
-
-            front:
-
-            this.sortResult(
-                frontCount
-            ),
-
-
-
-            back:
-
-            this.sortResult(
-                backCount
-            )
-
-
-        };
-
-
-
-        return this.result;
+        this.defaultTimes =
+        1000000;
 
 
     }
@@ -204,28 +25,163 @@ class MonteCarloEngine {
 
 
 
-    /**
-     * 随机号码
-     */
-    randomNumbers(
-        max,
-        count
+
+
+
+    run(
+
+        frontPool=[],
+
+        backPool=[],
+
+        times=this.defaultTimes
+
     ){
 
 
-        const pool=[];
+
+        const results=[];
 
 
 
         for(
-            let i=1;
-            i<=max;
+
+            let i=0;
+
+            i<times;
+
             i++
+
         ){
 
-            pool.push(i);
+
+
+            const front =
+
+            this.weightPick(
+
+                frontPool,
+
+                5
+
+            )
+
+            .sort(
+
+                (a,b)=>a-b
+
+            );
+
+
+
+
+
+
+            const back =
+
+            this.weightPick(
+
+                backPool,
+
+                2
+
+            )
+
+            .sort(
+
+                (a,b)=>a-b
+
+            );
+
+
+
+
+
+
+
+            if(
+
+                !this.checkStructure(
+
+                    front
+
+                )
+
+            ){
+
+                continue;
+
+            }
+
+
+
+
+
+
+
+            results.push({
+
+
+                front,
+
+
+                back,
+
+
+                score:
+
+                this.score(
+
+                    frontPool,
+
+                    front
+
+                )
+
+
+
+            });
+
+
 
         }
+
+
+
+
+
+
+
+        return this.rank(
+
+            results
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // =====================
+    // 权重随机
+    // =====================
+
+
+    weightPick(
+
+        pool,
+
+        count
+
+    ){
 
 
 
@@ -233,90 +189,458 @@ class MonteCarloEngine {
 
 
 
+        const copy =
+        [...pool];
+
+
+
+
+
         while(
+
             result.length<count
+
         ){
 
 
-            const index =
-            Math.floor(
-                Math.random()
-                *
-                pool.length
+
+            const total =
+
+            copy.reduce(
+
+                (
+
+                    sum,
+
+                    item
+
+                )=>
+
+                    sum +
+
+                    Math.max(
+
+                        item.score,
+
+                        0.1
+
+                    ),
+
+                0
+
             );
+
+
+
+
+
+
+            let random =
+
+            Math.random()
+
+            *
+
+            total;
+
+
+
+
+
+            let index=0;
+
+
+
+
+
+            for(
+
+                let i=0;
+
+                i<copy.length;
+
+                i++
+
+            ){
+
+
+
+                random -=
+
+                Math.max(
+
+                    copy[i].score,
+
+                    0.1
+
+                );
+
+
+
+                if(
+
+                    random<=0
+
+                ){
+
+
+                    index=i;
+
+                    break;
+
+
+                }
+
+
+            }
+
+
+
+
+
 
 
             result.push(
-                pool[index]
+
+                copy[index].number
+
             );
 
 
-            pool.splice(
+
+
+
+            copy.splice(
+
                 index,
+
                 1
+
             );
+
+
 
 
         }
 
 
 
+
+
         return result;
 
 
+
     }
 
 
 
 
 
-    /**
-     * 排序概率
-     */
-    sortResult(
-        obj={}
+
+
+
+
+    // =====================
+    // 结构过滤
+    // =====================
+
+
+    checkStructure(
+
+        nums
+
     ){
 
 
-        return Object.entries(
-            obj
+
+        const odd =
+
+        nums.filter(
+
+            n=>n%2
+
         )
 
-        .map(
-            ([number,count])=>({
-
-                number:
-                Number(number),
+        .length;
 
 
-                count
 
-            })
-        )
 
-        .sort(
-            (a,b)=>
-            b.count-a.count
+
+        if(
+
+            odd<1
+
+            ||
+
+            odd>4
+
+        ){
+
+            return false;
+
+        }
+
+
+
+
+
+
+        const sum =
+
+        nums.reduce(
+
+            (a,b)=>a+b,
+
+            0
+
         );
 
 
+
+
+
+
+        if(
+
+            sum<70
+
+            ||
+
+            sum>160
+
+        ){
+
+            return false;
+
+        }
+
+
+
+
+
+
+
+        const span =
+
+        nums[4]
+
+        -
+
+        nums[0];
+
+
+
+
+
+        if(
+
+            span<10
+
+            ||
+
+            span>34
+
+        ){
+
+            return false;
+
+        }
+
+
+
+
+
+
+
+        return true;
+
+
+
     }
 
 
 
 
 
-    /**
-     * 当前进度
-     */
-    getProgress(){
 
-        return this.progress;
+
+
+
+    score(
+
+        pool,
+
+        nums
+
+    ){
+
+
+
+        let score=0;
+
+
+
+
+
+        nums.forEach(
+
+            n=>{
+
+
+
+                const item=
+
+                pool.find(
+
+                    x=>
+
+                    x.number===n
+
+                );
+
+
+
+
+                if(item){
+
+                    score +=
+
+                    item.score;
+
+
+                }
+
+
+
+
+            }
+
+        );
+
+
+
+
+
+
+        return Number(
+
+            score.toFixed(3)
+
+        );
+
+
 
     }
+
+
+
+
+
+
+
+
+
+    rank(
+
+        list
+
+    ){
+
+
+
+        const map={};
+
+
+
+
+        list.forEach(
+
+            item=>{
+
+
+                const key =
+
+                JSON.stringify(
+
+                    item.front
+
+                )
+
+                +
+
+                JSON.stringify(
+
+                    item.back
+
+                );
+
+
+
+
+
+                if(
+
+                    !map[key]
+
+                    ||
+
+                    map[key].score
+
+                    <
+
+                    item.score
+
+                ){
+
+                    map[key]=item;
+
+                }
+
+
+
+            }
+
+        );
+
+
+
+
+
+        return Object.values(
+
+            map
+
+        )
+
+        .sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        )
+
+        .slice(
+
+            0,
+
+            50
+
+        );
+
+
+
+    }
+
+
+
 
 
 }
+
+
 
 
 

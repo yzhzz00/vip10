@@ -1,19 +1,20 @@
 /**
  * DLT-AI-CORE VIP
- * 数字矩阵模型
+ * Matrix Model V2.0
+ *
+ * 数字位置矩阵模型
  */
 
 
 class MatrixModel {
 
 
+
     constructor(){
 
 
-        this.matrix={};
-
-
-        this.history=[];
+        this.name =
+        "matrix";
 
 
     }
@@ -22,49 +23,75 @@ class MatrixModel {
 
 
 
-    /**
-     * 训练
-     */
+
+
+
     train(
+
         history=[],
+
         features={}
+
     ){
-
-
-        this.history =
-        history;
-
-
-        this.matrix={};
 
 
 
         /*
-         * 建立35×35数字关系矩阵
+         * 五个前区位置
+         *
+         * position[0-4]
+         *
          */
 
+
+        const matrix = [
+
+            {},
+
+            {},
+
+            {},
+
+            {},
+
+            {}
+
+        ];
+
+
+
+
+
+
+
         for(
-            let i=1;
-            i<=35;
-            i++
+
+            let pos=0;
+
+            pos<5;
+
+            pos++
+
         ){
-
-
-            this.matrix[i]={};
 
 
 
             for(
-                let j=1;
-                j<=35;
-                j++
+
+                let num=1;
+
+                num<=35;
+
+                num++
+
             ){
 
 
-                this.matrix[i][j]=0;
+                matrix[pos][num]=0;
 
 
             }
+
 
 
         }
@@ -73,214 +100,161 @@ class MatrixModel {
 
 
 
+
+
         /*
-         * 统计同期开出关系
+         * 建立位置矩阵
          */
+
+
         history.forEach(
+
             item=>{
 
 
-                const nums =
-                item.front;
+
+                item.front
+
+                .forEach(
+
+                    (num,index)=>{
 
 
-
-                for(
-                    let i=0;
-                    i<nums.length;
-                    i++
-                ){
-
-
-                    for(
-                        let j=0;
-                        j<nums.length;
-                        j++
-                    ){
-
-
-                        if(
-                            nums[i]!==nums[j]
-                        ){
-
-
-                            this.matrix
-                            [nums[i]]
-                            [nums[j]]++;
-
-
-                        }
+                        matrix[index][num]++;
 
 
                     }
 
+                );
 
-                }
 
 
             }
-        );
-
-
-
-        return {
-
-
-            name:
-            "matrix",
-
-
-
-            numbers:
-            this.rankNumbers()
-
-
-        };
-
-
-    }
-
-
-
-
-
-    /**
-     * 数字关联评分
-     */
-    score(
-        number
-    ){
-
-
-        if(
-            !this.matrix[number]
-        ){
-
-            return 0;
-
-        }
-
-
-
-        const row =
-        this.matrix[number];
-
-
-
-        const total =
-        Object.values(row)
-        .reduce(
-            (a,b)=>a+b,
-            0
-        );
-
-
-
-        /*
-         * 关联强度
-         */
-
-        return Number(
-
-            (
-            total /
-            (
-            this.history.length || 1
-            )
-
-            )
-
-            .toFixed(4)
 
         );
 
 
-    }
 
 
 
 
 
-    /**
-     * 排序
-     */
-    rankNumbers(){
+
+        const scores=[];
 
 
-        const result=[];
+
+
 
 
 
         for(
-            let i=1;
-            i<=35;
-            i++
+
+            let num=1;
+
+            num<=35;
+
+            num++
+
         ){
 
 
-            result.push({
 
-                number:i,
+            let score=0;
+
+
+
+
+
+            matrix.forEach(
+
+                position=>{
+
+
+                    score +=
+
+                    position[num]
+
+                    ||
+
+                    0;
+
+
+                }
+
+            );
+
+
+
+
+
+
+
+            scores.push({
+
+
+
+                number:num,
+
 
 
                 score:
-                this.score(i)
+
+                Number(
+
+                    score
+
+                    .toFixed(3)
+
+                )
+
+
 
             });
+
 
 
         }
 
 
 
-        return result.sort(
-
-            (a,b)=>
-            b.score-a.score
-
-        );
-
-
-    }
 
 
 
-
-
-    /**
-     * 获取矩阵
-     */
-    getMatrix(){
-
-        return this.matrix;
-
-    }
-
-
-
-
-
-    /**
-     * 状态
-     */
-    status(){
 
 
         return {
 
 
-            type:
-            "matrix",
+
+            name:this.name,
 
 
-            size:
-            35
+
+            matrix,
+
+
+
+            numbers:
+
+            scores.sort(
+
+                (a,b)=>
+
+                b.score-a.score
+
+            )
+
 
 
         };
 
 
+
     }
+
+
+
 
 
 

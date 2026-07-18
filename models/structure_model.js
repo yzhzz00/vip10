@@ -1,25 +1,21 @@
 /**
  * DLT-AI-CORE VIP
- * 大乐透结构模型
+ * Structure Model V2.0
+ *
+ * 大乐透结构分析模型
  */
-
-
-import {
-    buildStatistics
-} from "../utils/statistics.js";
 
 
 
 class StructureModel {
 
 
+
     constructor(){
 
 
-        this.structures=[];
-
-
-        this.history=[];
+        this.name =
+        "structure";
 
 
     }
@@ -28,83 +24,188 @@ class StructureModel {
 
 
 
-    /**
-     * 训练
-     */
+
+
+
+
     train(
+
         history=[],
+
         features={}
+
     ){
 
 
-        this.history =
-        history;
+
+        const stats={
 
 
+            odd:{
 
-        this.structures =
-        history.map(
+                min:0,
 
-            item=>
-            buildStatistics(
-                item.front
-            )
+                max:5,
 
-        );
+                avg:0
 
+            },
 
 
-        return {
+            zones:{
 
 
-            name:
-            "structure",
+                low:0,
+
+                mid:0,
+
+                high:0
 
 
-            numbers:
-            this.rankNumbers()
+            },
+
+
+            sum:{
+
+
+                avg:0
+
+
+            },
+
+
+            span:{
+
+
+                avg:0
+
+
+            }
+
 
 
         };
 
 
-    }
 
 
 
 
 
-    /**
-     * 单号码结构评分
-     */
-    score(
-        number
-    ){
+
+        let totalOdd=0;
 
 
-        let score=0;
+        let totalSum=0;
+
+
+        let totalSpan=0;
 
 
 
-        /*
-         * 根据历史结构
-         * 判断号码位置价值
-         */
 
 
-        this.history.forEach(
+
+
+        history.forEach(
 
             item=>{
 
 
-                if(
-                    item.front
-                    .includes(number)
-                ){
 
-                    score++;
+                const nums =
 
-                }
+                item.front;
+
+
+
+
+
+                const odd =
+
+                nums.filter(
+
+                    n=>n%2
+
+                )
+
+                .length;
+
+
+
+
+
+                totalOdd += odd;
+
+
+
+
+
+
+
+                const sum =
+
+                nums.reduce(
+
+                    (a,b)=>
+
+                    a+b,
+
+                    0
+
+                );
+
+
+
+                totalSum += sum;
+
+
+
+
+
+
+                totalSpan +=
+
+                nums[4]
+
+                -
+
+                nums[0];
+
+
+
+
+
+                nums.forEach(
+
+                    n=>{
+
+
+                        if(n<=12){
+
+                            stats.zones.low++;
+
+                        }
+
+                        else if(n<=24){
+
+                            stats.zones.mid++;
+
+                        }
+
+                        else{
+
+                            stats.zones.high++;
+
+                        }
+
+
+
+                    }
+
+                );
+
+
 
 
             }
@@ -113,218 +214,352 @@ class StructureModel {
 
 
 
-        return Number(
-
-            (
-            score /
-            (
-            this.history.length || 1
-            )
-
-            )
-
-            .toFixed(4)
-
-        );
-
-
-    }
 
 
 
 
+        if(
 
-    /**
-     * 排名
-     */
-    rankNumbers(){
+            history.length
 
-
-        const result=[];
-
-
-
-        for(
-            let i=1;
-            i<=35;
-            i++
         ){
 
 
-            result.push({
 
-                number:i,
+            stats.odd.avg =
+
+            totalOdd
+
+            /
+
+            history.length;
 
 
-                score:
-                this.score(i)
 
-            });
+
+
+            stats.sum.avg =
+
+            totalSum
+
+            /
+
+            history.length;
+
+
+
+
+
+            stats.span.avg =
+
+            totalSpan
+
+            /
+
+            history.length;
+
 
 
         }
 
 
 
-        return result.sort(
-
-            (a,b)=>
-            b.score-a.score
-
-        );
-
-
-    }
 
 
 
 
 
-    /**
-     * 判断结构匹配
-     */
-    match(
-        numbers=[]
-    ){
-
-
-        const current =
-        buildStatistics(
-            numbers
-        );
+        const numbers=[];
 
 
 
-        let best=0;
 
 
 
-        this.structures.forEach(
+        for(
 
-            item=>{
+            let num=1;
 
+            num<=35;
 
-                let score=0;
+            num++
 
-
-
-                if(
-                    item.oddEven.ratio
-                    ===
-                    current.oddEven.ratio
-                ){
-
-                    score++;
-
-                }
+        ){
 
 
 
-                if(
-                    item.bigSmall.ratio
-                    ===
-                    current.bigSmall.ratio
-                ){
-
-                    score++;
-
-                }
+            let score=50;
 
 
 
-                if(
-                    item.zones.zone1
-                    ===
-                    current.zones.zone1
-                ){
-
-                    score++;
-
-                }
 
 
-
-                if(
-                    item.zones.zone2
-                    ===
-                    current.zones.zone2
-                ){
-
-                    score++;
-
-                }
+            /*
+             * 高频结构奖励
+             */
 
 
+            if(
 
-                if(
-                    item.zones.zone3
-                    ===
-                    current.zones.zone3
-                ){
+                num<=12
 
-                    score++;
+            ){
 
-                }
+                score+=
 
+                stats.zones.low
 
+                /
 
-                if(
-                    score>best
-                ){
-
-                    best=score;
-
-                }
+                history.length;
 
 
             }
 
-        );
+            else if(
+
+                num<=24
+
+            ){
+
+                score+=
+
+                stats.zones.mid
+
+                /
+
+                history.length;
+
+
+            }
+
+            else{
+
+
+                score+=
+
+                stats.zones.high
+
+                /
+
+                history.length;
+
+
+            }
 
 
 
-        return Number(
-
-            (
-            best/5
-            )
-
-            .toFixed(4)
-
-        );
-
-
-    }
 
 
 
 
+            numbers.push({
 
-    /**
-     * 状态
-     */
-    status(){
+
+
+                number:num,
+
+
+
+                score:
+
+                Number(
+
+                    score
+
+                    .toFixed(3)
+
+                )
+
+
+
+            });
+
+
+
+
+
+        }
+
+
+
+
+
+
+
 
 
         return {
 
 
-            type:
-            "structure",
+
+            name:this.name,
 
 
-            samples:
-            this.structures.length
+
+            structure:stats,
+
+
+
+            numbers:
+
+            numbers.sort(
+
+                (a,b)=>
+
+                b.score-a.score
+
+            )
+
 
 
         };
+
 
 
     }
 
 
 
+
+
+
+
+
+
+    check(
+
+        nums=[]
+
+    ){
+
+
+
+        let score=0;
+
+
+
+
+
+        // 奇偶
+
+        const odd =
+
+        nums.filter(
+
+            n=>n%2
+
+        )
+
+        .length;
+
+
+
+
+
+        if(
+
+            odd>=2
+
+            &&
+
+            odd<=3
+
+        ){
+
+            score+=20;
+
+        }
+
+
+
+
+
+
+
+        // 和值
+
+        const sum =
+
+        nums.reduce(
+
+            (a,b)=>
+
+            a+b,
+
+            0
+
+        );
+
+
+
+
+
+        if(
+
+            sum>=90
+
+            &&
+
+            sum<=130
+
+        ){
+
+            score+=20;
+
+        }
+
+
+
+
+
+
+
+        // 跨度
+
+        const span =
+
+        nums[4]
+
+        -
+
+        nums[0];
+
+
+
+
+
+        if(
+
+            span>=15
+
+            &&
+
+            span<=30
+
+        ){
+
+            score+=20;
+
+        }
+
+
+
+
+
+
+        return score;
+
+
+
+    }
+
+
+
+
+
 }
+
 
 
 export default StructureModel;

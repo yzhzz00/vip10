@@ -1,19 +1,24 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 
 <head>
 
+
 <meta charset="UTF-8">
+
 
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0">
+
 
 <title>
 DLT-AI-CORE VIP
 </title>
 
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet"
+href="style.css">
 
 
 </head>
@@ -25,21 +30,38 @@ DLT-AI-CORE VIP
 <div class="container">
 
 
+
 <h1>
-大乐透智能分析系统 VIP
+🎯 DLT-AI-CORE VIP
 </h1>
 
 
+<div class="subtitle">
+
+大乐透智能分析系统
+
+</div>
+
+
+
+
+<!-- 系统状态 -->
+
+
 <div class="card">
+
 
 <h2>
 系统状态
 </h2>
 
 
-<p id="status">
-正在连接...
-</p>
+<div id="status"
+class="info">
+
+加载中...
+
+</div>
 
 
 </div>
@@ -48,17 +70,24 @@ DLT-AI-CORE VIP
 
 
 
+
+<!-- 数据状态 -->
+
+
 <div class="card">
 
 
 <h2>
-数据状态
+历史数据
 </h2>
 
 
-<p id="data">
-等待加载...
-</p>
+<div id="data"
+class="info">
+
+加载中...
+
+</div>
 
 
 </div>
@@ -67,54 +96,77 @@ DLT-AI-CORE VIP
 
 
 
+
+
+
+<!-- 操作区域 -->
+
+
 <div class="card">
 
 
 <h2>
-智能分析
+智能计算
 </h2>
+
 
 
 <button onclick="predict()">
 
-开始预测
+🎯 开始预测
 
 </button>
+
 
 
 <button onclick="monteCarlo()">
 
-100万次模拟
+🎲 Monte Carlo
 
 </button>
+
+
 
 
 <button onclick="backtest()">
 
-历史回测
+📊 历史回测
 
 </button>
 
 
+
 </div>
 
 
 
 
 
-<div class="card">
+
+
+
+<!-- 预测结果 -->
+
+
+<div class="card result-card">
 
 
 <h2>
+
 预测结果
+
 </h2>
 
 
-<pre id="result">
+
+<div id="result"
+class="result">
+
 
 等待分析...
 
-</pre>
+</div>
+
 
 
 </div>
@@ -124,61 +176,81 @@ DLT-AI-CORE VIP
 
 
 
+
+
+
+<!-- 学习反馈 -->
+
+
 <div class="card">
 
 
 <h2>
+
 开奖反馈学习
+
 </h2>
 
 
+
 <input
+
 id="front"
-placeholder="前区 例如 01 05 12 23 35"
-/>
+
+placeholder="前区 例如 06 08 23 26 27"
+
+>
+
 
 
 <input
+
 id="back"
-placeholder="后区 例如 03 11"
-/>
+
+placeholder="后区 例如 05 12"
+
+>
 
 
 
 <button onclick="learn()">
 
-提交学习
+提交反馈
 
 </button>
 
 
 
-</div>
+<div id="learn"
+class="info">
 
-
-
-
-
-<div class="card">
-
-
-<h2>
-学习状态
-</h2>
-
-
-<pre id="learn">
-
-等待反馈...
-
-</pre>
-
+等待学习...
 
 </div>
 
 
 
 </div>
+
+
+
+
+
+
+
+
+
+<div class="footer">
+
+
+DLT-AI-CORE VIP V2.0
+
+</div>
+
+
+
+</div>
+
 
 
 

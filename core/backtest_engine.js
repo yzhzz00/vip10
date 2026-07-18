@@ -1,19 +1,30 @@
 /**
  * DLT-AI-CORE VIP
- * 历史回测引擎
+ * Backtest Engine V3.0
+ *
+ * 滚动训练回测
  */
 
 
-import PredictionEngine from "./prediction_engine.js";
+import ModelEngine
+from "./model_engine.js";
+
+
+import PredictionEngine
+from "./prediction_engine.js";
+
+
+
 
 
 class BacktestEngine {
 
 
+
     constructor(){
 
 
-        this.results = [];
+        this.logs=[];
 
 
     }
@@ -22,152 +33,296 @@ class BacktestEngine {
 
 
 
-    /**
-     * 执行回测
-     */
+
+
+
     async run(
+
         history=[],
+
         periods=100
+
     ){
+
 
 
         if(
             history.length <= periods
         ){
 
-            periods =
-            history.length - 1;
+
+            return {
+
+
+                error:
+                "历史数据不足"
+
+
+
+            };
+
 
         }
 
 
 
-        let total = 0;
 
-        let frontHit = 0;
 
-        let backHit = 0;
 
-        let allHit = 0;
+
+        let total=0;
+
+
+        let frontHits=0;
+
+
+        let backHits=0;
+
+
+        let fiveHit=0;
+
+
+        let sevenHit=0;
+
+
+
+
 
 
 
         const start =
-        history.length - periods;
+
+        history.length
+        -
+        periods;
 
 
 
-        const detail=[];
 
 
 
         for(
+
             let i=start;
+
             i<history.length;
+
             i++
+
         ){
 
 
-            const trainData =
+
+
+
+
+            const trainHistory =
+
             history.slice(
+
                 0,
+
                 i
+
             );
 
 
 
-            const target =
+
+
+
+            const real =
+
             history[i];
 
 
 
-            const predictor =
-            new PredictionEngine(
+
+
+
+
+            /*
+             * 每一期重新训练
+             */
+
+
+            const modelEngine =
+
+            new ModelEngine();
+
+
+
+
+
+            const models =
+
+            await modelEngine.train(
+
+                trainHistory,
+
                 {}
+
             );
 
 
 
+
+
+
+
+            const predictor =
+
+            new PredictionEngine(
+
+                models
+
+            );
+
+
+
+
+
+
+
             const prediction =
+
             await predictor.predict();
 
 
 
+
+
+
+
             const best =
+
             prediction
             .predictions[0];
 
 
 
-            const front =
-            this.hitCount(
-                best.front,
-                target.front
-            );
 
 
 
-            const back =
-            this.hitCount(
-                best.back,
-                target.back
-            );
+            if(
+                !best
+            ){
+
+                continue;
+
+            }
+
+
+
 
 
 
             total++;
 
 
-            if(front>0){
-
-                frontHit++;
-
-            }
 
 
-            if(back>0){
 
-                backHit++;
 
-            }
+
+            const fhit =
+
+            this.hitCount(
+
+                best.front,
+
+                real.front
+
+            );
+
+
+
+
+
+
+            const bhit =
+
+            this.hitCount(
+
+                best.back,
+
+                real.back
+
+            );
+
+
+
+
+
+
+
+            frontHits += fhit;
+
+
+            backHits += bhit;
+
+
+
+
 
 
             if(
-                front>=2
-                &&
-                back>=1
+                fhit>=5
             ){
 
-                allHit++;
+                fiveHit++;
 
             }
 
 
 
 
-            detail.push({
+
+
+            if(
+                fhit>=5
+                &&
+                bhit>=2
+            ){
+
+                sevenHit++;
+
+            }
+
+
+
+
+
+
+
+            this.logs.push({
+
 
                 issue:
-                target.issue,
+                real.issue,
 
 
                 predict:
                 best,
 
 
-                actual:
-                target,
+                result:
+                real,
 
 
                 frontHit:
-                front,
+                fhit,
 
 
                 backHit:
-                back
+                bhit
+
 
 
             });
+
+
+
 
 
         }
@@ -176,46 +331,64 @@ class BacktestEngine {
 
 
 
-        const result={
 
 
-            periods:total,
+
+        return {
+
+
+
+            periods,
+
+
+            samples:
+            total,
+
+
+
+            frontHits,
+
+
+            backHits,
+
+
+
+            fiveHit,
+
+
+            sevenHit,
+
 
 
             frontAccuracy:
 
-            Number(
-                (
-                frontHit/total*100
-                )
-                .toFixed(2)
+            this.rate(
+
+                frontHits,
+
+                total*5
+
             ),
 
 
 
             backAccuracy:
 
-            Number(
-                (
-                backHit/total*100
-                )
-                .toFixed(2)
+            this.rate(
+
+                backHits,
+
+                total*2
+
             ),
 
 
 
-            effectiveHit:
+            detail:
 
-            Number(
-                (
-                allHit/total*100
-                )
-                .toFixed(2)
-            ),
-
-
-
-            detail
+            this.logs.slice(
+                -10
+            )
 
 
 
@@ -223,28 +396,24 @@ class BacktestEngine {
 
 
 
-        this.results.push(
-            result
-        );
-
-
-
-        return result;
-
-
     }
 
 
 
 
 
-    /**
-     * 命中数量
-     */
+
+
+
+
     hitCount(
+
         predict=[],
-        actual=[]
+
+        real=[]
+
     ){
+
 
 
         let count=0;
@@ -252,17 +421,21 @@ class BacktestEngine {
 
 
         predict.forEach(
+
             n=>{
 
+
                 if(
-                    actual.includes(n)
+                    real.includes(n)
                 ){
 
                     count++;
 
                 }
 
+
             }
+
         );
 
 
@@ -276,18 +449,53 @@ class BacktestEngine {
 
 
 
-    /**
-     * 历史记录
-     */
-    getResults(){
 
-        return this.results;
+
+
+    rate(
+
+        hit,
+
+        total
+
+    ){
+
+
+        if(
+            total===0
+        ){
+
+            return 0;
+
+        }
+
+
+
+        return Number(
+
+            (
+
+            hit
+            /
+            total
+            *
+            100
+
+            )
+
+            .toFixed(2)
+
+        );
+
 
     }
 
 
 
+
 }
+
+
 
 
 

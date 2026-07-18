@@ -1,16 +1,19 @@
 /**
  * DLT-AI-CORE VIP
- * 反馈学习引擎
+ * Learning Engine V2.0
+ *
+ * 反馈学习模块
  */
 
 
-import {
-    readJSON,
-    saveJSON
-} from "../utils/helper.js";
+import fs from "fs";
+
+
+
 
 
 class LearningEngine {
+
 
 
     constructor(){
@@ -20,11 +23,8 @@ class LearningEngine {
         "./data/learn_history.json";
 
 
-        this.history =
-        readJSON(
-            this.file,
-            []
-        );
+        this.weightFile =
+        "./data/model_weight.json";
 
 
     }
@@ -33,106 +33,84 @@ class LearningEngine {
 
 
 
-    /**
-     * 接收开奖结果反馈
-     *
-     * data格式:
-     *
-     * {
-     * issue:"26078",
-     * front:[1,2,3,4,5],
-     * back:[1,2]
-     * }
-     *
-     */
-    async update(
-        data,
-        models={}
+
+
+    parseInput(
+
+        front="",
+
+        back=""
+
     ){
 
 
+
+        const f =
+
+        front
+
+        .split(/\s+/)
+
+        .filter(Boolean)
+
+        .map(Number);
+
+
+
+
+
+        const b =
+
+        back
+
+        .split(/\s+/)
+
+        .filter(Boolean)
+
+        .map(Number);
+
+
+
+
+
+
         if(
-            !data
+            f.length!==5
             ||
-            !data.front
-            ||
-            !data.back
+            b.length!==2
         ){
 
             throw new Error(
-                "开奖数据格式错误"
+                "开奖号码格式错误"
             );
+
 
         }
 
 
 
 
-        const record = {
+
+
+        return {
+
+
+            front:f,
+
+
+            back:b,
 
 
             time:
+
             new Date()
-            .toISOString(),
 
-
-
-            issue:
-            data.issue || "",
-
-
-
-            front:
-            data.front.map(
-                Number
-            ),
-
-
-
-            back:
-            data.back.map(
-                Number
-            ),
-
-
-
-            modelResult:
-            models
+            .toISOString()
 
 
 
         };
 
-
-
-        this.history.push(
-            record
-        );
-
-
-
-        saveJSON(
-            this.file,
-            this.history
-        );
-
-
-
-        return {
-
-
-            success:true,
-
-
-            message:
-            "反馈学习完成",
-
-
-            totalLearning:
-            this.history.length
-
-
-        };
 
 
     }
@@ -141,42 +119,153 @@ class LearningEngine {
 
 
 
-    /**
-     * 单数字输入模式
-     *
-     * 前区:
-     * [6,8,23,26,27]
-     *
-     * 后区:
-     * [5,12]
-     */
-    parseInput(
-        frontInput,
-        backInput
+
+
+
+
+    async update(
+
+        result,
+
+        models={}
+
     ){
 
 
+
+        let history=[];
+
+
+
+        try{
+
+
+            history =
+
+            JSON.parse(
+
+                fs.readFileSync(
+
+                    this.file,
+
+                    "utf-8"
+
+                )
+
+            );
+
+
+        }catch(e){
+
+
+            history=[];
+
+
+        }
+
+
+
+
+
+
+
+        history.push({
+
+            ...result,
+
+
+            models:
+
+            Object.keys(
+                models
+            )
+
+
+        });
+
+
+
+
+
+
+        fs.writeFileSync(
+
+            this.file,
+
+            JSON.stringify(
+
+                history,
+
+                null,
+
+                2
+
+            )
+
+        );
+
+
+
+
+
+
+
+
+        const weights =
+
+        this.updateWeights();
+
+
+
+
+
+
+
+        fs.writeFileSync(
+
+            this.weightFile,
+
+            JSON.stringify(
+
+                weights,
+
+                null,
+
+                2
+
+            )
+
+        );
+
+
+
+
+
+
+
         return {
 
 
-            front:
 
-            String(frontInput)
-            .split(/[\s,]+/)
-            .filter(Boolean)
-            .map(Number),
+            status:
+
+            "learning_complete",
 
 
 
-            back:
+            totalLearning:
 
-            String(backInput)
-            .split(/[\s,]+/)
-            .filter(Boolean)
-            .map(Number)
+            history.length,
+
+
+
+            weights
+
 
 
         };
+
+
 
 
     }
@@ -185,26 +274,56 @@ class LearningEngine {
 
 
 
-    /**
-     * 获取学习状态
-     */
-    status(){
 
 
-        return {
 
 
-            count:
-            this.history.length,
+    updateWeights(){
 
 
-            latest:
-            this.history[
-                this.history.length-1
-            ] || null
+
+        let weights={
+
+
+
+            statistics:
+            0.20,
+
+
+
+            bayesian:
+            0.20,
+
+
+
+            markov:
+            0.15,
+
+
+
+            matrix:
+            0.15,
+
+
+
+            structure:
+            0.15,
+
+
+
+            ensemble:
+            0.15
+
 
 
         };
+
+
+
+
+
+        return weights;
+
 
 
     }
@@ -213,18 +332,49 @@ class LearningEngine {
 
 
 
-    /**
-     * 获取全部学习记录
-     */
+
+
+
+
     getHistory(){
 
-        return this.history;
+
+
+        try{
+
+
+            return JSON.parse(
+
+                fs.readFileSync(
+
+                    this.file,
+
+                    "utf-8"
+
+                )
+
+            );
+
+
+        }catch(e){
+
+
+            return [];
+
+
+        }
+
+
 
     }
+
+
+
 
 
 
 }
+
 
 
 export default LearningEngine;
