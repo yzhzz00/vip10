@@ -1,25 +1,32 @@
 /**
  * DLT-AI-CORE VIP
- * Backtest Engine V3.0 FINAL
  *
- * 历史滚动回测系统
+ * Backtest Engine V9.0 FINAL
+ *
+ * 历史回测系统
  */
+
+
+import MonteCarloEngine from "./montecarlo_engine.js";
+
+
 
 
 class BacktestEngine {
 
 
 
-    constructor(){
+constructor(
 
+models
 
-        this.name =
+){
 
-        "backtest";
 
+this.models=models;
 
 
-    }
+}
 
 
 
@@ -29,318 +36,305 @@ class BacktestEngine {
 
 
 
-    async run(
+async run(
 
-        history=[],
+history=[],
 
-        periods=100
+period=1000
 
-    ){
+){
 
 
 
-        if(
+const data=
 
-            history.length <= periods
+history.slice(
 
-        ){
+-history.length,
 
+-history.length+period
 
+);
 
-            return {
 
 
-                error:
 
-                "历史数据不足"
 
 
 
-            };
+const result={
 
 
 
-        }
+period,
 
 
+tests:0,
 
 
+hit3:0,
 
 
+hit4:0,
 
 
-        let total=0;
+hit5:0,
 
 
-        let match3=0;
+averageHit:0
 
 
-        let match4=0;
 
+};
 
-        let match5=0;
 
 
-        let frontHit=0;
 
 
 
 
 
+let totalHit=0;
 
 
 
-        const start =
 
-        history.length
 
-        -
 
-        periods;
 
 
 
+for(
 
+let i=0;
 
+i<data.length-1;
 
+i++
 
+){
 
-        for(
 
-            let i=start;
 
-            i<history.length-1;
+const trainData=
 
-            i++
+data.slice(
 
-        ){
+0,
 
+i+1
 
+);
 
-            const real =
 
-            history[i+1];
 
 
 
+const real=
 
+data[i+1];
 
-            /*
-             * 使用历史前面数据
-             */
 
 
-            const trainData =
 
-            history.slice(
 
-                0,
 
-                i+1
 
-            );
 
+const prediction=
 
+await this.predict();
 
 
 
 
 
-            const predict =
 
-            this.simplePredict(
 
-                trainData
 
-            );
 
+const hit=
 
+this.check(
 
+prediction,
 
+real
 
+);
 
 
 
-            const hit =
 
-            this.compare(
 
-                predict,
 
-                real.front
 
-            );
+result.tests++;
 
 
 
 
 
 
+totalHit+=hit;
 
-            total++;
 
 
 
 
 
 
+if(
 
-            if(
+hit>=3
 
-                hit>=3
+)
 
-            ){
+result.hit3++;
 
-                match3++;
 
-            }
 
 
 
+if(
 
+hit>=4
 
-            if(
+)
 
-                hit>=4
+result.hit4++;
 
-            ){
 
-                match4++;
 
-            }
 
 
+if(
 
+hit>=5
 
+)
 
+result.hit5++;
 
-            if(
 
-                hit===5
 
-            ){
 
-                match5++;
 
-            }
+}
 
 
 
 
 
-            frontHit += hit;
 
 
 
-        }
 
+result.averageHit=
 
+Number(
 
+(
 
+totalHit /
 
+result.tests
 
+)
 
-        return {
+.toFixed(3)
 
+);
 
 
-            model:
 
-            this.name,
 
 
 
-            period:
 
-            periods,
 
+return result;
 
 
-            tests:
 
-            total,
+}
 
 
 
-            hit3:
 
-            match3,
 
 
 
-            hit4:
 
-            match4,
 
+async predict(){
 
 
-            hit5:
 
-            match5,
+const monte=
 
+new MonteCarloEngine(
 
+this.models.ensemble,
 
-            averageHit:
+{
 
-            Number(
 
-                (
+times:10000
 
-                frontHit /
 
-                total
+}
 
-                )
+);
 
-                .toFixed(3)
 
-            )
 
 
 
-        };
+const result=
 
+await monte.run();
 
 
-    }
 
 
 
 
+return result[0];
 
 
 
+}
 
 
-    simplePredict(
 
-        history
 
-    ){
 
 
 
-        const count={};
 
 
+check(
 
+prediction,
 
+real
 
-        for(
+){
 
-            let i=1;
 
-            i<=35;
 
-            i++
+const front=
 
-        ){
+prediction.front.filter(
 
+n=>
 
-            count[i]=0;
+real.front.includes(n)
 
+)
 
-        }
+.length;
 
 
 
@@ -348,141 +342,29 @@ class BacktestEngine {
 
 
 
+const back=
 
-        history.forEach(
+prediction.back.filter(
 
-            item=>{
+n=>
 
+real.back.includes(n)
 
+)
 
-                item.front
+.length;
 
-                .forEach(
 
-                    n=>{
 
 
-                        count[n]++;
 
 
-                    }
 
-                );
+return front+back;
 
 
 
-            }
-
-        );
-
-
-
-
-
-
-
-        return Object.keys(
-
-            count
-
-        )
-
-        .sort(
-
-            (a,b)=>
-
-            count[b]
-
-            -
-
-            count[a]
-
-        )
-
-        .slice(
-
-            0,
-
-            5
-
-        )
-
-        .map(
-
-            Number
-
-        )
-
-        .sort(
-
-            (a,b)=>
-
-            a-b
-
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    compare(
-
-        predict,
-
-        real
-
-    ){
-
-
-
-        let hit=0;
-
-
-
-
-
-        predict.forEach(
-
-            n=>{
-
-
-
-                if(
-
-                    real.includes(n)
-
-                ){
-
-
-                    hit++;
-
-
-                }
-
-
-            }
-
-        );
-
-
-
-
-
-        return hit;
-
-
-
-    }
-
-
+}
 
 
 

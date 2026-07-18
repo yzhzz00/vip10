@@ -5,7 +5,9 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
+
 
 <title>
 DLT-AI-CORE VIP
@@ -21,16 +23,17 @@ DLT-AI-CORE VIP
 <body>
 
 
-
 <div class="container">
 
 
 
 <header>
 
+
 <h1>
 🎯 DLT-AI-CORE VIP
 </h1>
+
 
 <p>
 大乐透智能分析系统
@@ -43,7 +46,7 @@ DLT-AI-CORE VIP
 
 
 
-<section class="card">
+<section class="panel">
 
 
 <h2>
@@ -51,9 +54,28 @@ DLT-AI-CORE VIP
 </h2>
 
 
-<div id="status">
+<div class="status">
 
-正在连接AI核心...
+
+✅ 系统运行正常
+
+<br>
+
+
+历史数据：
+
+<span id="historyCount">
+2897期
+</span>
+
+
+<br>
+
+
+模型数量：
+
+6
+
 
 </div>
 
@@ -66,32 +88,7 @@ DLT-AI-CORE VIP
 
 
 
-<section class="card">
-
-
-<h2>
-历史数据
-</h2>
-
-
-<div id="history">
-
-加载中...
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<section class="card">
+<section class="panel">
 
 
 <h2>
@@ -99,21 +96,24 @@ DLT-AI-CORE VIP
 </h2>
 
 
-<button id="predictBtn">
+
+<button onclick="startPrediction()">
 
 🎯 开始预测
 
 </button>
 
 
-<button id="monteBtn">
+
+<button>
 
 🎲 Monte Carlo
 
 </button>
 
 
-<button id="backtestBtn">
+
+<button>
 
 📊 历史回测
 
@@ -127,30 +127,22 @@ DLT-AI-CORE VIP
 <div class="progress-box">
 
 
-<div>
+<div class="progress-bg">
 
-AI计算进度
+
+<div id="progress"
+class="progress">
+
+</div>
+
 
 </div>
 
 
 
-<div class="progress">
-
-
-<div id="progressBar">
+<p id="progressText">
 
 0%
-
-</div>
-
-
-</div>
-
-
-<p id="processText">
-
-等待计算...
 
 </p>
 
@@ -159,6 +151,8 @@ AI计算进度
 </div>
 
 
+
+
 </section>
 
 
@@ -169,7 +163,7 @@ AI计算进度
 
 
 
-<section class="card">
+<section class="panel">
 
 
 <h2>
@@ -177,11 +171,15 @@ AI计算进度
 </h2>
 
 
+
 <div id="prediction">
 
-等待预测...
+
+等待分析...
+
 
 </div>
+
 
 
 </section>
@@ -194,7 +192,7 @@ AI计算进度
 
 
 
-<section class="card">
+<section class="panel">
 
 
 <h2>
@@ -202,9 +200,12 @@ AI计算进度
 </h2>
 
 
-<div id="aiMeeting">
 
-等待模型分析...
+<div id="meeting">
+
+
+等待模型启动...
+
 
 </div>
 
@@ -220,7 +221,7 @@ AI计算进度
 
 
 
-<section class="card">
+<section class="panel">
 
 
 <h2>
@@ -231,10 +232,11 @@ AI计算进度
 
 <div id="learning">
 
+
 等待学习...
 
-</div>
 
+</div>
 
 
 </section>
@@ -247,43 +249,14 @@ AI计算进度
 
 
 
-<section class="card">
+<section class="panel">
 
 
 <h2>
-📊 历史回测结果
-</h2>
 
-
-
-<div id="backtest">
-
-等待回测...
-
-</div>
-
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<section class="card">
-
-
-<h2>
 🎯 开奖反馈学习
+
 </h2>
-
-
-
-<div class="input-area">
 
 
 
@@ -293,18 +266,30 @@ AI计算进度
 
 
 
-<div class="numbers">
+<div class="input-group">
 
 
-<input id="f1" maxlength="2">
-<input id="f2" maxlength="2">
-<input id="f3" maxlength="2">
-<input id="f4" maxlength="2">
-<input id="f5" maxlength="2">
+<input id="front1"
+placeholder="前区1">
+
+
+<input id="front2"
+placeholder="前区2">
+
+
+<input id="front3"
+placeholder="前区3">
+
+
+<input id="front4"
+placeholder="前区4">
+
+
+<input id="front5"
+placeholder="前区5">
 
 
 </div>
-
 
 
 
@@ -316,11 +301,16 @@ AI计算进度
 
 
 
-<div class="numbers">
+
+<div class="input-group">
 
 
-<input id="b1" maxlength="2">
-<input id="b2" maxlength="2">
+<input id="back1"
+placeholder="后区1">
+
+
+<input id="back2"
+placeholder="后区2">
 
 
 </div>
@@ -329,23 +319,15 @@ AI计算进度
 
 
 
-<button id="learnBtn">
 
-提交反馈
+<button onclick="submitFeedback()">
+
+
+提交反馈学习
+
 
 </button>
 
-
-
-</div>
-
-
-
-<div id="learnResult">
-
-等待学习...
-
-</div>
 
 
 </section>
@@ -356,9 +338,13 @@ AI计算进度
 
 
 
+
+
 <footer>
 
-DLT-AI-CORE VIP V3.0 FINAL
+
+DLT-AI-CORE VIP V4.0 FINAL
+
 
 </footer>
 

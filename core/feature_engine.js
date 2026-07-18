@@ -1,8 +1,8 @@
 /**
  * DLT-AI-CORE VIP
- * Feature Engine V2.0 FINAL
+ * Feature Engine V5.0 FINAL
  *
- * 大乐透特征提取
+ * 特征提取核心
  */
 
 
@@ -13,10 +13,14 @@ class FeatureEngine {
     constructor(){
 
 
-        this.maxNumber = 35;
+        this.version=
+
+        "V5.0 FINAL";
 
 
     }
+
+
 
 
 
@@ -36,6 +40,18 @@ class FeatureEngine {
 
 
 
+            version:
+
+            this.version,
+
+
+
+            count:
+
+            history.length,
+
+
+
             frequency:
 
             this.frequency(
@@ -47,20 +63,9 @@ class FeatureEngine {
 
 
 
-            hotCold:
+            missing:
 
-            this.hotCold(
-
-                history
-
-            ),
-
-
-
-
-            omission:
-
-            this.omission(
+            this.missing(
 
                 history
 
@@ -69,9 +74,42 @@ class FeatureEngine {
 
 
 
-            structure:
+            sum:
 
-            this.structure(
+            this.sumTrend(
+
+                history
+
+            ),
+
+
+
+
+            parity:
+
+            this.parity(
+
+                history
+
+            ),
+
+
+
+
+            zones:
+
+            this.zones(
+
+                history
+
+            ),
+
+
+
+
+            consecutive:
+
+            this.consecutive(
 
                 history
 
@@ -93,11 +131,6 @@ class FeatureEngine {
 
 
 
-    // ===================
-    // 号码频率
-    // ===================
-
-
     frequency(
 
         history
@@ -106,7 +139,7 @@ class FeatureEngine {
 
 
 
-        const result={};
+        const map={};
 
 
 
@@ -123,11 +156,10 @@ class FeatureEngine {
         ){
 
 
-            result[i]=0;
+            map[i]=0;
 
 
         }
-
 
 
 
@@ -139,19 +171,19 @@ class FeatureEngine {
             item=>{
 
 
-                item.front
 
-                .forEach(
+                item.front.forEach(
 
                     n=>{
 
 
-                        result[n]++;
+                        map[n]++;
 
 
                     }
 
                 );
+
 
 
             }
@@ -162,109 +194,44 @@ class FeatureEngine {
 
 
 
-        return result;
+
+
+        return Object.keys(
+
+            map
+
+        )
+
+        .map(
+
+            n=>({
+
+
+                number:
+
+                Number(n),
 
 
 
-    }
+                count:
+
+                map[n]
 
 
+            })
 
+        )
 
+        .sort(
 
+            (a,b)=>
 
-
-
-
-    // ===================
-    // 热冷号
-    // ===================
-
-
-    hotCold(
-
-        history
-
-    ){
-
-
-
-        const recent =
-
-        history.slice(
-
-            -100
+            b.count-a.count
 
         );
 
 
 
-
-
-        const result={};
-
-
-
-
-
-        for(
-
-            let i=1;
-
-            i<=35;
-
-            i++
-
-        ){
-
-
-
-            let count=0;
-
-
-
-            recent.forEach(
-
-                item=>{
-
-
-                    if(
-
-                        item.front
-
-                        .includes(i)
-
-                    ){
-
-
-                        count++;
-
-                    }
-
-
-
-                }
-
-            );
-
-
-
-
-            result[i]=count;
-
-
-
-        }
-
-
-
-
-
-
-        return result;
-
-
-
     }
 
 
@@ -275,12 +242,7 @@ class FeatureEngine {
 
 
 
-    // ===================
-    // 遗漏统计
-    // ===================
-
-
-    omission(
+    missing(
 
         history
 
@@ -288,7 +250,19 @@ class FeatureEngine {
 
 
 
-        const result={};
+        const last=
+
+        history[
+
+            history.length-1
+
+        ];
+
+
+
+
+
+        const result=[];
 
 
 
@@ -297,11 +271,11 @@ class FeatureEngine {
 
         for(
 
-            let num=1;
+            let n=1;
 
-            num<=35;
+            n<=35;
 
-            num++
+            n++
 
         ){
 
@@ -333,7 +307,7 @@ class FeatureEngine {
 
                     .front
 
-                    .includes(num)
+                    .includes(n)
 
                 ){
 
@@ -356,7 +330,21 @@ class FeatureEngine {
 
 
 
-            result[num]=miss;
+
+
+            result.push({
+
+
+
+                number:n,
+
+
+
+                missing:miss
+
+
+
+            });
 
 
 
@@ -367,7 +355,14 @@ class FeatureEngine {
 
 
 
-        return result;
+
+        return result.sort(
+
+            (a,b)=>
+
+            b.missing-a.missing
+
+        );
 
 
 
@@ -381,12 +376,7 @@ class FeatureEngine {
 
 
 
-    // ===================
-    // 结构特征
-    // ===================
-
-
-    structure(
+    sumTrend(
 
         history
 
@@ -394,64 +384,75 @@ class FeatureEngine {
 
 
 
-        let oddTotal=0;
+        return history.map(
 
-
-        let sumTotal=0;
-
-
-        let spanTotal=0;
+            item=>({
 
 
 
+                issue:
+
+                item.issue,
+
+
+
+                sum:
+
+                item.front.reduce(
+
+                    (a,b)=>
+
+                    a+b,
+
+                    0
+
+                )
+
+
+
+            })
+
+        )
+
+        .slice(
+
+            -100
+
+        );
+
+
+
+    }
 
 
 
 
-        const zones={
-
-
-
-            zone1:0,
-
-
-            zone2:0,
-
-
-            zone3:0
-
-
-
-        };
 
 
 
 
 
+    parity(
+
+        history
+
+    ){
 
 
 
-        history.forEach(
+        return history.map(
 
             item=>{
 
 
 
-                const nums =
+                const odd=
 
-                item.front;
-
-
-
-
-
-                oddTotal +=
-
-                nums.filter(
+                item.front.filter(
 
                     n=>
 
-                    n%2
+                    n%2!==0
 
                 )
 
@@ -461,74 +462,97 @@ class FeatureEngine {
 
 
 
-                sumTotal +=
-
-                nums.reduce(
-
-                    (a,b)=>
-
-                    a+b,
-
-                    0
-
-                );
+                return {
 
 
 
+                    issue:
+
+                    item.issue,
 
 
 
-                spanTotal +=
-
-                nums[4]
-
-                -
-
-                nums[0];
+                    odd,
 
 
 
+                    even:
+
+                    5-odd
+
+
+
+                };
+
+
+
+            }
+
+        )
+
+        .slice(
+
+            -100
+
+        );
+
+
+
+    }
 
 
 
 
-                nums.forEach(
+
+
+
+
+
+    zones(
+
+        history
+
+    ){
+
+
+
+        return history.map(
+
+            item=>{
+
+
+
+                let z1=0;
+
+                let z2=0;
+
+                let z3=0;
+
+
+
+
+
+                item.front.forEach(
 
                     n=>{
 
 
 
-                        if(
+                        if(n<=12)
 
-                            n<=12
-
-                        ){
+                        z1++;
 
 
-                            zones.zone1++;
+
+                        else if(n<=24)
+
+                        z2++;
 
 
-                        }
 
-                        else if(
+                        else
 
-                            n<=24
-
-                        ){
-
-
-                            zones.zone2++;
-
-
-                        }
-
-                        else{
-
-
-                            zones.zone3++;
-
-
-                        }
+                        z3++;
 
 
 
@@ -538,61 +562,144 @@ class FeatureEngine {
 
 
 
+
+
+
+
+
+                return {
+
+
+
+                    issue:
+
+                    item.issue,
+
+
+
+                    z1,
+
+                    z2,
+
+                    z3
+
+
+
+                };
+
+
+
             }
+
+        )
+
+        .slice(
+
+            -100
 
         );
 
 
 
-
-
-
-
-        return {
-
-
-
-            averageOdd:
-
-            oddTotal
-
-            /
-
-            history.length,
+    }
 
 
 
 
 
-            averageSum:
-
-            sumTotal
-
-            /
-
-            history.length,
 
 
 
 
+    consecutive(
 
-            averageSpan:
+        history
 
-            spanTotal
-
-            /
-
-            history.length,
+    ){
 
 
 
+        return history.map(
+
+            item=>{
 
 
-            zones
+
+                let count=0;
 
 
 
-        };
+
+
+                for(
+
+                    let i=1;
+
+                    i<item.front.length;
+
+                    i++
+
+                ){
+
+
+
+                    if(
+
+                        item.front[i]
+
+                        -
+
+                        item.front[i-1]
+
+                        ===1
+
+                    ){
+
+
+                        count++;
+
+
+                    }
+
+
+
+                }
+
+
+
+
+
+
+
+                return {
+
+
+
+                    issue:
+
+                    item.issue,
+
+
+
+                    consecutive:
+
+                    count
+
+
+
+                };
+
+
+
+            }
+
+        )
+
+        .slice(
+
+            -100
+
+        );
 
 
 

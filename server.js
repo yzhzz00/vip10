@@ -1,6 +1,6 @@
 /**
  * DLT-AI-CORE VIP
- * Server V4.0 FINAL
+ * Server V4.1 FINAL
  */
 
 
@@ -11,11 +11,17 @@ import { fileURLToPath } from "url";
 
 import DataEngine from "./core/data_engine.js";
 import FeatureEngine from "./core/feature_engine.js";
-import ModelEngine from "./core/model_engine.js";
 import PredictionEngine from "./core/prediction_engine.js";
-import BacktestEngine from "./core/backtest_engine.js";
 import LearningEngine from "./core/learning_engine.js";
-import OutputEngine from "./core/output_engine.js";
+
+
+import StatisticsModel from "./models/statistics_model.js";
+import BayesianModel from "./models/bayesian_model.js";
+import MarkovModel from "./models/markov_model.js";
+import MatrixModel from "./models/matrix_model.js";
+import StructureModel from "./models/structure_model.js";
+import EnsembleModel from "./models/ensemble_model.js";
+
 
 
 
@@ -23,25 +29,18 @@ import OutputEngine from "./core/output_engine.js";
 const app = express();
 
 
-const PORT =
-process.env.PORT || 3000;
 
+const __filename = fileURLToPath(import.meta.url);
 
-
-const __filename =
-fileURLToPath(import.meta.url);
-
-
-const __dirname =
-path.dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 
 
 
 
-app.use(
-express.json()
-);
+app.use(express.json());
+
+
 
 
 
@@ -67,45 +66,23 @@ __dirname,
 
 
 
-let history=[];
-
-let features={};
-
-let models={};
 
 
+const dataEngine =
+
+new DataEngine();
 
 
 
+const featureEngine =
 
-
-async function init(){
-
-
-
-    const dataEngine =
-    new DataEngine();
+new FeatureEngine();
 
 
 
-    history =
-    await dataEngine.load();
+const learningEngine =
 
-
-
-
-
-    const featureEngine =
-    new FeatureEngine();
-
-
-
-    features =
-    await featureEngine.build(
-
-        history
-
-    );
+new LearningEngine();
 
 
 
@@ -113,19 +90,9 @@ async function init(){
 
 
 
-    const modelEngine =
-    new ModelEngine();
 
 
-
-    models =
-    await modelEngine.train(
-
-        history,
-
-        features
-
-    );
+let system={};
 
 
 
@@ -133,21 +100,182 @@ async function init(){
 
 
 
-    console.log(
 
-        "DLT-AI-CORE VIP启动完成"
 
-    );
+async function trainSystem(){
 
 
 
-    console.log(
+const history =
 
-        "历史数据:",
+await dataEngine.load();
 
-        history.length
 
-    );
+
+
+
+const features =
+
+await featureEngine.build(
+
+history
+
+);
+
+
+
+
+
+
+const statistics =
+
+new StatisticsModel()
+
+.train(
+
+history,
+
+features
+
+);
+
+
+
+
+
+const bayesian =
+
+new BayesianModel()
+
+.train(
+
+history,
+
+features
+
+);
+
+
+
+
+
+const markov =
+
+new MarkovModel()
+
+.train(
+
+history
+
+);
+
+
+
+
+
+const matrix =
+
+new MatrixModel()
+
+.train(
+
+history
+
+);
+
+
+
+
+
+const structure =
+
+new StructureModel()
+
+.train(
+
+history
+
+);
+
+
+
+
+
+
+
+const ensemble =
+
+new EnsembleModel()
+
+.train({
+
+
+statistics,
+
+bayesian,
+
+markov,
+
+matrix,
+
+structure
+
+
+});
+
+
+
+
+
+
+system={
+
+
+
+history,
+
+
+
+features,
+
+
+
+models:{
+
+
+statistics,
+
+
+bayesian,
+
+
+markov,
+
+
+matrix,
+
+
+structure,
+
+
+ensemble
+
+
+}
+
+
+
+};
+
+
+
+
+
+console.log(
+
+"DLT-AI-CORE VIP READY"
+
+);
 
 
 
@@ -159,12 +287,6 @@ async function init(){
 
 
 
-
-
-
-// =====================
-// 状态
-// =====================
 
 
 app.get(
@@ -174,38 +296,30 @@ app.get(
 (req,res)=>{
 
 
-    res.json({
-
-
-        system:
-
-        "DLT-AI-CORE VIP",
+res.json({
 
 
 
-        status:
+system:
 
-        "running",
-
-
-
-        history:
-
-        history.length,
+"DLT-AI-CORE VIP",
 
 
 
-        models:
+history:
 
-        Object.keys(
-
-            models
-
-        )
+system.history.length,
 
 
 
-    });
+models:
+
+6
+
+
+
+});
+
 
 
 }
@@ -218,56 +332,6 @@ app.get(
 
 
 
-
-
-// =====================
-// 数据
-// =====================
-
-
-app.get(
-
-"/api/data",
-
-(req,res)=>{
-
-
-    res.json({
-
-
-        count:
-
-        history.length,
-
-
-
-        latest:
-
-        history[
-
-            history.length-1
-
-        ]
-
-
-    });
-
-
-}
-
-);
-
-
-
-
-
-
-
-
-
-// =====================
-// 预测
-// =====================
 
 
 app.get(
@@ -277,74 +341,18 @@ app.get(
 async(req,res)=>{
 
 
-    try{
+
+try{
 
 
 
-        const engine =
+const engine=
 
-        new PredictionEngine(
+new PredictionEngine(
 
-            models
+system.models,
 
-        );
-
-
-
-
-        const result =
-
-        await engine.predict();
-
-
-
-
-
-        const output =
-
-        new OutputEngine();
-
-
-
-
-
-        res.json(
-
-            output.prediction(
-
-                result.predictions,
-
-                models
-
-            )
-
-        );
-
-
-
-
-    }catch(e){
-
-
-
-        res.status(500)
-
-        .json({
-
-
-            error:
-
-            e.message
-
-
-        });
-
-
-
-    }
-
-
-}
+system.features
 
 );
 
@@ -352,112 +360,46 @@ async(req,res)=>{
 
 
 
+const result=
 
+await engine.predict();
 
 
 
-// =====================
-// 回测
-// =====================
 
 
-app.get(
+learningEngine
 
-"/api/backtest",
+.savePrediction(
 
-async(req,res)=>{
+result.predictions[0]
 
+);
 
-    try{
 
 
 
-        const engine =
 
-        new BacktestEngine();
+res.json(result);
 
 
 
+}
 
-        const result={
+catch(e){
 
 
 
-            "100期":
+res.status(500)
 
-            await engine.run(
+.json({
 
-                history,
+error:e.message
 
-                100
+});
 
-            ),
 
-
-
-            "500期":
-
-            await engine.run(
-
-                history,
-
-                500
-
-            ),
-
-
-
-            "1000期":
-
-            await engine.run(
-
-                history,
-
-                1000
-
-            )
-
-
-
-        };
-
-
-
-
-        const output =
-
-        new OutputEngine();
-
-
-
-
-        res.json(
-
-            output.backtest(
-
-                result
-
-            )
-
-        );
-
-
-
-    }catch(e){
-
-
-        res.status(500)
-
-        .json({
-
-            error:
-
-            e.message
-
-        });
-
-
-    }
+}
 
 
 
@@ -471,11 +413,6 @@ async(req,res)=>{
 
 
 
-
-
-// =====================
-// 学习反馈
-// =====================
 
 
 app.post(
@@ -486,83 +423,40 @@ async(req,res)=>{
 
 
 
-    try{
+try{
 
 
 
-        const engine =
+const result=
 
-        new LearningEngine();
+await learningEngine.learn(
 
+req.body
 
-
-
-
-        const data =
-
-        engine.parseInput(
-
-            req.body.front,
-
-            req.body.back
-
-        );
+);
 
 
 
-
-
-        const result =
-
-        await engine.update(
-
-            data,
-
-            models
-
-        );
+res.json(result);
 
 
 
+}
 
-
-        const output =
-
-        new OutputEngine();
-
+catch(e){
 
 
 
-        res.json(
+res.status(500)
 
-            output.learning(
+.json({
 
-                result
+error:e.message
 
-            )
-
-        );
+});
 
 
-
-
-
-    }catch(e){
-
-
-
-        res.status(500)
-
-        .json({
-
-            error:
-
-            e.message
-
-        });
-
-
-    }
+}
 
 
 
@@ -578,31 +472,30 @@ async(req,res)=>{
 
 
 
-
-init()
-
-.then(()=>{
+trainSystem();
 
 
-    app.listen(
-
-        PORT,
-
-        ()=>{
 
 
-            console.log(
-
-            "PORT:",
-
-            PORT
-
-            );
 
 
-        }
-
-    );
 
 
-});
+app.listen(
+
+3000,
+
+()=>{
+
+
+console.log(
+
+"Server running: 3000"
+
+);
+
+
+
+}
+
+);

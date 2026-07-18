@@ -1,19 +1,19 @@
 /**
  * DLT-AI-CORE VIP
- * Matrix Model V2.0
+ * Matrix Model V5.0 FINAL
  *
- * 数字位置矩阵模型
+ * 前区位置矩阵模型
  */
 
 
 class MatrixModel {
 
 
-
     constructor(){
 
 
-        this.name =
+        this.name=
+
         "matrix";
 
 
@@ -26,42 +26,24 @@ class MatrixModel {
 
 
 
+
     train(
 
-        history=[],
-
-        features={}
+        history=[]
 
     ){
 
 
 
+        const matrix={};
+
+
+
+
+
         /*
-         * 五个前区位置
-         *
-         * position[0-4]
-         *
+         * 初始化5个位置
          */
-
-
-        const matrix = [
-
-            {},
-
-            {},
-
-            {},
-
-            {},
-
-            {}
-
-        ];
-
-
-
-
-
 
 
         for(
@@ -76,22 +58,25 @@ class MatrixModel {
 
 
 
+            matrix[pos]={};
+
+
+
             for(
 
-                let num=1;
+                let n=1;
 
-                num<=35;
+                n<=35;
 
-                num++
+                n++
 
             ){
 
 
-                matrix[pos][num]=0;
+                matrix[pos][n]=0;
 
 
             }
-
 
 
         }
@@ -102,8 +87,10 @@ class MatrixModel {
 
 
 
+
+
         /*
-         * 建立位置矩阵
+         * 统计历史位置分布
          */
 
 
@@ -113,14 +100,14 @@ class MatrixModel {
 
 
 
-                item.front
+                item.front.forEach(
 
-                .forEach(
-
-                    (num,index)=>{
+                    (n,pos)=>{
 
 
-                        matrix[index][num]++;
+
+                        matrix[pos][n]++;
+
 
 
                     }
@@ -140,9 +127,13 @@ class MatrixModel {
 
 
 
-        const scores=[];
+
+        /*
+         * 当前评分
+         */
 
 
+        const score={};
 
 
 
@@ -150,67 +141,17 @@ class MatrixModel {
 
         for(
 
-            let num=1;
+            let n=1;
 
-            num<=35;
+            n<=35;
 
-            num++
+            n++
 
         ){
 
 
 
-            let score=0;
-
-
-
-
-
-            matrix.forEach(
-
-                position=>{
-
-
-                    score +=
-
-                    position[num]
-
-                    ||
-
-                    0;
-
-
-                }
-
-            );
-
-
-
-
-
-
-
-            scores.push({
-
-
-
-                number:num,
-
-
-
-                score:
-
-                Number(
-
-                    score
-
-                    .toFixed(3)
-
-                )
-
-
-
-            });
+            score[n]=0;
 
 
 
@@ -223,11 +164,115 @@ class MatrixModel {
 
 
 
+        /*
+         * 五个位置综合
+         */
+
+
+        Object.keys(
+
+            matrix
+
+        )
+
+        .forEach(
+
+            pos=>{
+
+
+
+                Object.keys(
+
+                    matrix[pos]
+
+                )
+
+                .forEach(
+
+                    n=>{
+
+
+
+                        score[n]
+
+                        +=
+
+                        matrix[pos][n];
+
+
+
+                    }
+
+                );
+
+
+
+            }
+
+        );
+
+
+
+
+
+
+
+
+
+        const result=
+
+        Object.keys(score)
+
+        .map(
+
+            n=>({
+
+
+
+                number:
+
+                Number(n),
+
+
+
+                score:
+
+                Number(
+
+                    score[n]
+
+                    .toFixed(3)
+
+                )
+
+
+
+            })
+
+        )
+
+        .sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
+
+
+
+
+
+
+
+
         return {
 
 
 
-            name:this.name,
+            name:
+
+            this.name,
 
 
 
@@ -237,11 +282,17 @@ class MatrixModel {
 
             numbers:
 
-            scores.sort(
+            result,
 
-                (a,b)=>
 
-                b.score-a.score
+
+            top:
+
+            result.slice(
+
+                0,
+
+                10
 
             )
 
@@ -252,9 +303,6 @@ class MatrixModel {
 
 
     }
-
-
-
 
 
 

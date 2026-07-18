@@ -1,49 +1,39 @@
 /**
  * DLT-AI-CORE VIP
- * Ensemble Model V2.0
+ * Ensemble Model V5.0 FINAL
  *
- * 多模型融合
+ * 多模型融合核心
  */
 
 
-
 class EnsembleModel {
-
 
 
     constructor(){
 
 
         this.name =
+
         "ensemble";
 
 
-
-        this.weights={
-
-
-            statistics:
-            0.25,
+        this.weights = {
 
 
-            bayesian:
-            0.20,
+            statistics:0.25,
 
 
-            markov:
-            0.15,
+            bayesian:0.20,
 
 
-            matrix:
-            0.15,
+            markov:0.20,
 
 
-            structure:
-            0.15,
+            matrix:0.15,
 
 
-            trend:
-            0.10
+            structure:0.20
+
 
 
         };
@@ -73,23 +63,18 @@ class EnsembleModel {
 
 
 
-        /*
-         * 初始化号码
-         */
-
-
         for(
 
-            let i=1;
+            let n=1;
 
-            i<=35;
+            n<=35;
 
-            i++
+            n++
 
         ){
 
 
-            scoreMap[i]=0;
+            scoreMap[n]=0;
 
 
         }
@@ -100,96 +85,70 @@ class EnsembleModel {
 
 
 
-        Object.keys(
 
-            this.weights
+        this.merge(
 
-        )
+            scoreMap,
 
-        .forEach(
+            models.statistics,
 
-            modelName=>{
+            this.weights.statistics
 
-
-
-                const model =
-
-                models[modelName];
+        );
 
 
 
 
 
-                if(
+        this.merge(
 
-                    !model
+            scoreMap,
 
-                    ||
+            models.bayesian,
 
-                    !model.numbers
+            this.weights.bayesian
 
-                ){
-
-                    return;
-
-                }
+        );
 
 
 
 
 
+        this.merge(
 
+            scoreMap,
 
-                const weight =
+            models.markov,
 
-                this.weights[modelName];
+            this.weights.markov
 
-
-
-
-
-
-
-
-                model.numbers
-
-                .forEach(
-
-                    item=>{
+        );
 
 
 
-                        scoreMap[item.number]
 
-                        +=
 
-                        (
+        this.merge(
 
-                            Number(
+            scoreMap,
 
-                                item.score
+            models.matrix,
 
-                            )
+            this.weights.matrix
 
-                            ||
-
-                            0
-
-                        )
-
-                        *
-
-                        weight;
+        );
 
 
 
-                    }
-
-                );
 
 
+        this.merge(
 
-            }
+            scoreMap,
+
+            models.structure,
+
+            this.weights.structure
 
         );
 
@@ -199,13 +158,9 @@ class EnsembleModel {
 
 
 
-        const numbers=[];
 
 
-
-
-
-
+        const numbers =
 
         Object.keys(
 
@@ -213,39 +168,39 @@ class EnsembleModel {
 
         )
 
-        .forEach(
+        .map(
 
-            n=>{
-
-
-
-                numbers.push({
+            n=>({
 
 
 
-                    number:
+                number:
 
-                    Number(n),
-
-
-
-                    score:
-
-                    Number(
-
-                        scoreMap[n]
-
-                        .toFixed(5)
-
-                    )
+                Number(n),
 
 
 
-                });
+                score:
+
+                Number(
+
+                    scoreMap[n]
+
+                    .toFixed(4)
+
+                )
 
 
 
-            }
+            })
+
+        )
+
+        .sort(
+
+            (a,b)=>
+
+            b.score-a.score
 
         );
 
@@ -259,21 +214,29 @@ class EnsembleModel {
 
 
 
-            name:this.name,
+            name:
+
+            this.name,
 
 
 
-            weights:this.weights,
+            weights:
+
+            this.weights,
 
 
 
-            numbers:
+            numbers,
 
-            numbers.sort(
 
-                (a,b)=>
 
-                b.score-a.score
+            top:
+
+            numbers.slice(
+
+                0,
+
+                15
 
             )
 
@@ -293,17 +256,72 @@ class EnsembleModel {
 
 
 
-    predict(
+    merge(
 
-        models={}
+        target,
+
+        model,
+
+        weight
 
     ){
 
 
 
-        return this.train(
+        if(
 
-            models
+            !model
+
+            ||
+
+            !model.numbers
+
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+
+
+
+        model.numbers.forEach(
+
+            item=>{
+
+
+
+                if(
+
+                    target[item.number]
+
+                    !==undefined
+
+                ){
+
+
+
+                    target[item.number]
+
+                    +=
+
+                    item.score
+
+                    *
+
+                    weight;
+
+
+
+                }
+
+
+
+            }
 
         );
 
@@ -318,17 +336,33 @@ class EnsembleModel {
 
 
 
-    updateWeight(
 
-        result={}
+    updateWeights(
+
+        feedback
 
     ){
 
 
 
         /*
-         * 后续开奖反馈学习接口
-         */
+        后续接入学习系统
+        */
+
+
+        if(
+
+            feedback>0
+
+        ){
+
+
+
+            this.weights.ensemble +=0.01;
+
+
+
+        }
 
 
 
@@ -337,8 +371,6 @@ class EnsembleModel {
 
 
     }
-
-
 
 
 

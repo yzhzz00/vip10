@@ -1,12 +1,22 @@
 /**
  * DLT-AI-CORE VIP
- * Learning Engine V3.0 FINAL
  *
- * 开奖反馈学习系统
+ * Learning Engine V8.0 FINAL
+ *
+ * 功能:
+ * 1. 开奖反馈学习
+ * 2. 历史滚动记录
+ * 3. 模型表现统计
+ * 4. 动态权重竞争
+ * 5. 数据持久化
  */
 
 
-import fs from "fs";
+import StorageEngine from "./storage_engine.js";
+
+import ModelCompetition from "./model_competition.js";
+
+
 
 
 
@@ -17,67 +27,112 @@ class LearningEngine {
     constructor(){
 
 
-        this.file =
 
-        "./data/learn_history.json";
+        this.storage =
 
-
-
-        this.weightFile =
-
-        "./data/model_weight.json";
+        new StorageEngine();
 
 
 
-    }
+
+        this.competition =
+
+        new ModelCompetition();
 
 
 
 
 
+        this.records=[];
 
 
 
 
-    parseInput(
-
-        front=[],
-
-        back=[]
-
-    ){
+        this.lastPrediction=null;
 
 
 
-        return {
+
+
+        this.models={
 
 
 
-            front:
-
-            front.map(
-
-                Number
-
-            ),
+            statistics:{
 
 
+                hit:0,
 
-            back:
 
-            back.map(
+                total:0
 
-                Number
 
-            ),
+            },
 
 
 
-            time:
+            bayesian:{
 
-            new Date()
 
-            .toISOString()
+                hit:0,
+
+
+                total:0
+
+
+            },
+
+
+
+            markov:{
+
+
+                hit:0,
+
+
+                total:0
+
+
+            },
+
+
+
+            matrix:{
+
+
+                hit:0,
+
+
+                total:0
+
+
+            },
+
+
+
+            structure:{
+
+
+                hit:0,
+
+
+                total:0
+
+
+            },
+
+
+
+            ensemble:{
+
+
+                hit:0,
+
+
+                total:0
+
+
+            }
 
 
 
@@ -95,47 +150,157 @@ class LearningEngine {
 
 
 
-    async update(
+    /*
+     * 保存预测结果
+     */
 
-        result,
 
-        models={}
+    savePrediction(
+
+        prediction
 
     ){
 
 
 
-        const history =
+        this.lastPrediction =
 
-        this.loadHistory();
-
-
+        prediction;
 
 
 
-        history.push(
+
+
+        this.storage.savePrediction(
+
+            prediction
+
+        );
+
+
+
+
+
+        return {
+
+
+            status:
+
+            "prediction_saved"
+
+
+
+        };
+
+
+    }
+
+
+
+
+
+
+
+
+
+    /*
+     * 提交开奖结果学习
+     */
+
+
+    async learn(
+
+        feedback
+
+    ){
+
+
+
+        if(
+
+            !this.lastPrediction
+
+        ){
+
+
+
+            return {
+
+
+                status:
+
+                "no_prediction"
+
+
+            };
+
+
+        }
+
+
+
+
+
+
+
+
+
+        const result =
+
+        this.compare(
+
+            this.lastPrediction,
+
+            feedback
+
+        );
+
+
+
+
+
+
+
+
+        const record={
+
+
+
+            time:
+
+            new Date(),
+
+
+
+            prediction:
+
+            this.lastPrediction,
+
+
+
+            feedback,
+
+
+
+            hit:
 
             result
 
-        );
+
+
+        };
 
 
 
 
 
-        fs.writeFileSync(
 
-            this.file,
 
-            JSON.stringify(
 
-                history,
 
-                null,
+        this.records.push(
 
-                2
-
-            )
+            record
 
         );
 
@@ -145,14 +310,9 @@ class LearningEngine {
 
 
 
+        this.storage.saveLearning(
 
-        const weights =
-
-        this.updateWeights(
-
-            models,
-
-            result
+            record
 
         );
 
@@ -162,21 +322,35 @@ class LearningEngine {
 
 
 
-        fs.writeFileSync(
 
-            this.weightFile,
 
-            JSON.stringify(
+        this.updateModels(
 
-                weights,
-
-                null,
-
-                2
-
-            )
+            result.score
 
         );
+
+
+
+
+
+
+
+
+
+        /*
+         * 模型竞争更新
+         */
+
+
+        const ranking =
+
+        this.competition.update(
+
+            result.score
+
+        );
+
 
 
 
@@ -195,13 +369,28 @@ class LearningEngine {
 
 
 
+
+            hit:
+
+            result,
+
+
+
             total:
 
-            history.length,
+            this.records.length,
 
 
 
-            weights
+            models:
+
+            this.models,
+
+
+
+            competition:
+
+            ranking
 
 
 
@@ -219,139 +408,30 @@ class LearningEngine {
 
 
 
-    loadHistory(){
+    /*
+     * 命中计算
+     */
 
 
+    compare(
 
-        if(
+        prediction,
 
-            !fs.existsSync(
-
-                this.file
-
-            )
-
-        ){
-
-
-
-            return [];
-
-        }
-
-
-
-
-
-
-        try{
-
-
-
-            return JSON.parse(
-
-                fs.readFileSync(
-
-                    this.file,
-
-                    "utf-8"
-
-                )
-
-            );
-
-
-
-        }catch(e){
-
-
-
-            return [];
-
-        }
-
-
-    }
-
-
-
-
-
-
-
-
-
-    updateWeights(
-
-        models,
-
-        result
+        feedback
 
     ){
 
 
 
-        const weights={
+        const frontHit =
 
+        prediction.front.filter(
 
+            n=>
 
-            statistics:
+            feedback.front.includes(n)
 
-            0.25,
-
-
-
-            bayesian:
-
-            0.20,
-
-
-
-            markov:
-
-            0.15,
-
-
-
-            matrix:
-
-            0.15,
-
-
-
-            structure:
-
-            0.15,
-
-
-
-            ensemble:
-
-            0.10
-
-
-
-        };
-
-
-
-
-
-
-
-        /*
-         * 后续根据命中情况调整
-         *
-         * 当前保持稳定基线
-         */
-
-
-
-        return weights;
-
-
-
-    }
+        ).length;
 
 
 
@@ -360,14 +440,19 @@ class LearningEngine {
 
 
 
+        const backHit =
 
-    getLearningStatus(){
+        prediction.back.filter(
+
+            n=>
+
+            feedback.back.includes(n)
+
+        ).length;
 
 
 
-        const history=
 
-        this.loadHistory();
 
 
 
@@ -377,15 +462,19 @@ class LearningEngine {
 
 
 
-            learned:
-
-            history.length,
+            frontHit,
 
 
 
-            status:
+            backHit,
 
-            "active"
+
+
+            score:
+
+            frontHit +
+
+            backHit
 
 
 
@@ -395,6 +484,149 @@ class LearningEngine {
 
     }
 
+
+
+
+
+
+
+
+
+    /*
+     * 更新模型表现
+     */
+
+
+    updateModels(
+
+        score
+
+    ){
+
+
+
+        Object.keys(
+
+            this.models
+
+        )
+
+        .forEach(
+
+            name=>{
+
+
+
+                this.models[name].total++;
+
+
+
+
+
+
+                if(
+
+                    score>=3
+
+                ){
+
+
+
+                    this.models[name].hit++;
+
+
+
+                }
+
+
+
+            }
+
+
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    /*
+     * 获取学习状态
+     */
+
+
+    getStatus(){
+
+
+
+        return {
+
+
+
+            total:
+
+            this.records.length,
+
+
+
+            latest:
+
+            this.records.slice(
+
+                -20
+
+            ),
+
+
+
+            models:
+
+            this.models,
+
+
+
+            ranking:
+
+            this.competition.ranking()
+
+
+
+        };
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    /*
+     * 获取动态权重
+     */
+
+
+    getWeights(){
+
+
+
+        return this.competition.getWeights();
+
+
+
+    }
 
 
 

@@ -1,6 +1,6 @@
 /**
  * DLT-AI-CORE VIP
- * Markov Model V2.0
+ * Markov Model V5.0 FINAL
  *
  * 一阶马尔可夫转移模型
  */
@@ -13,7 +13,8 @@ class MarkovModel {
     constructor(){
 
 
-        this.name =
+        this.name=
+
         "markov";
 
 
@@ -25,11 +26,11 @@ class MarkovModel {
 
 
 
+
+
     train(
 
-        history=[],
-
-        features={}
+        history=[]
 
     ){
 
@@ -39,9 +40,13 @@ class MarkovModel {
 
 
 
+
+
+
         /*
          * 初始化转移矩阵
          */
+
 
         for(
 
@@ -54,7 +59,9 @@ class MarkovModel {
         ){
 
 
+
             transition[i]={};
+
 
 
         }
@@ -66,22 +73,17 @@ class MarkovModel {
 
 
 
+
         /*
-         * 构建:
-         *
-         * 上一期号码
-         *
-         * ->
-         *
-         * 下一期号码
+         * 统计上一期到下一期
          */
 
 
         for(
 
-            let i=1;
+            let i=0;
 
-            i<history.length;
+            i<history.length-1;
 
             i++
 
@@ -89,53 +91,52 @@ class MarkovModel {
 
 
 
-            const prev =
+            const current =
 
-            history[i-1]
-            .front;
+            history[i].front;
 
 
 
             const next =
 
-            history[i]
-            .front;
+            history[i+1].front;
 
 
 
 
 
-            prev.forEach(
-
-                p=>{
 
 
-                    if(
-                        !transition[p]
-                    ){
+            current.forEach(
 
-                        transition[p]={};
-
-                    }
-
+                a=>{
 
 
 
                     next.forEach(
 
-                        n=>{
+                        b=>{
+
 
 
                             if(
-                                !transition[p][n]
+
+                                !transition[a][b]
+
                             ){
 
-                                transition[p][n]=0;
+
+
+                                transition[a][b]=0;
+
 
                             }
 
 
-                            transition[p][n]++;
+
+
+
+                            transition[a][b]++;
 
 
 
@@ -159,35 +160,27 @@ class MarkovModel {
 
 
 
-        const scores=[];
-
-
-
-
 
 
         /*
-         * 使用最近一期状态预测
+         * 当前最新一期
          */
 
 
         const last =
 
-        history.length
-
-        ?
-
         history[
+
             history.length-1
-        ]
 
-        .front
-
-        :
-
-        [];
+        ].front;
 
 
+
+
+
+
+        const score={};
 
 
 
@@ -195,84 +188,22 @@ class MarkovModel {
 
         for(
 
-            let num=1;
+            let n=1;
 
-            num<=35;
+            n<=35;
 
-            num++
+            n++
 
         ){
 
 
 
-            let score=0;
-
-
-
-
-
-            last.forEach(
-
-                prev=>{
-
-
-                    const map =
-
-                    transition[prev];
-
-
-
-                    if(
-                        map
-                        &&
-                        map[num]
-                    ){
-
-
-                        score +=
-
-                        map[num];
-
-
-                    }
-
-
-
-                }
-
-            );
-
-
-
-
-
-
-
-            scores.push({
-
-
-
-                number:num,
-
-
-
-                score:
-
-                Number(
-
-                    score
-
-                    .toFixed(3)
-
-                )
-
-
-
-            });
+            score[n]=0;
 
 
 
         }
+
 
 
 
@@ -282,39 +213,90 @@ class MarkovModel {
 
 
         /*
-         * 没有转移记录保护
+         * 根据最新号码预测迁移
          */
 
-        const hasValue =
 
-        scores.some(
+        last.forEach(
 
-            x=>
+            current=>{
 
-            x.score>0
+
+
+                const map =
+
+                transition[current];
+
+
+
+
+
+                Object.keys(map)
+
+                .forEach(
+
+                    n=>{
+
+
+
+                        score[n]
+
+                        +=
+
+                        map[n];
+
+
+
+                    }
+
+                );
+
+
+
+            }
 
         );
 
 
 
 
-        if(
-            !hasValue
-        ){
 
 
-            scores.forEach(
-
-                x=>{
-
-                    x.score=1;
-
-                }
-
-            );
 
 
-        }
+        const result=
+
+        Object.keys(score)
+
+        .map(
+
+            n=>({
+
+
+
+                number:
+
+                Number(n),
+
+
+
+                score:
+
+                score[n]
+
+
+
+            })
+
+        )
+
+        .sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
 
 
 
@@ -327,17 +309,25 @@ class MarkovModel {
 
 
 
-            name:this.name,
+            name:
+
+            this.name,
 
 
 
             numbers:
 
-            scores.sort(
+            result,
 
-                (a,b)=>
 
-                b.score-a.score
+
+            top:
+
+            result.slice(
+
+                0,
+
+                10
 
             )
 
@@ -348,8 +338,6 @@ class MarkovModel {
 
 
     }
-
-
 
 
 

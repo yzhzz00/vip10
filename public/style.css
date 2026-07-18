@@ -1,48 +1,44 @@
 /**
- * DLT-AI-CORE VIP
- * Style V3.0 FINAL
- */
+DLT-AI-CORE VIP
+STYLE V4.0 FINAL
+*/
 
 
 
 *{
 
-    box-sizing:border-box;
+box-sizing:border-box;
 
 }
+
+
 
 
 
 body{
 
 
-    margin:0;
+margin:0;
 
 
-    padding:0;
+font-family:
+
+"Microsoft YaHei",
+Arial,
+sans-serif;
 
 
-    background:#f2f4f8;
+background:
+
+#0b1020;
 
 
-    font-family:
-
-    -apple-system,
-
-    BlinkMacSystemFont,
-
-    "Segoe UI",
-
-    Arial,
-
-    sans-serif;
-
-
-
-    color:#222;
+color:#ffffff;
 
 
 }
+
+
 
 
 
@@ -51,19 +47,20 @@ body{
 .container{
 
 
-    width:100%;
+width:100%;
 
 
-    max-width:900px;
+max-width:520px;
 
 
-    margin:auto;
+margin:auto;
 
 
-    padding:15px;
+padding:15px;
 
 
 }
+
 
 
 
@@ -74,43 +71,112 @@ body{
 header{
 
 
-    text-align:center;
+text-align:center;
 
 
-    padding:20px 0;
+padding:20px;
+
+
+background:
+
+linear-gradient(
+
+135deg,
+
+#162447,
+
+#1f4068
+
+);
+
+
+border-radius:16px;
+
+
+margin-bottom:15px;
 
 
 }
-
-
 
 
 
 header h1{
 
 
-    margin:0;
+margin:0;
 
 
-    font-size:28px;
+font-size:26px;
 
 
-    color:#1565c0;
+color:#ffd700;
 
 
 }
-
-
 
 
 
 header p{
 
 
-    margin-top:8px;
+margin-top:10px;
 
 
-    color:#666;
+color:#ddd;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+.panel{
+
+
+background:
+
+#151b30;
+
+
+border-radius:16px;
+
+
+padding:15px;
+
+
+margin-bottom:15px;
+
+
+box-shadow:
+
+0 5px 15px
+
+rgba(0,0,0,.35);
+
+
+}
+
+
+
+
+.panel h2{
+
+
+font-size:18px;
+
+
+border-left:
+
+4px solid #ffd700;
+
+
+padding-left:10px;
 
 
 }
@@ -123,47 +189,18 @@ header p{
 
 
 
-.card{
+.status{
 
 
-    background:white;
+line-height:30px;
 
 
-    border-radius:15px;
-
-
-    padding:18px;
-
-
-    margin-bottom:15px;
-
-
-    box-shadow:
-
-    0 3px 12px
-
-    rgba(0,0,0,.08);
+font-size:15px;
 
 
 }
 
 
-
-
-
-.card h2{
-
-
-    margin-top:0;
-
-
-    color:#1565c0;
-
-
-    font-size:20px;
-
-
-}
 
 
 
@@ -174,28 +211,41 @@ header p{
 button{
 
 
-    border:0;
+width:100%;
 
 
-    padding:12px 18px;
+padding:13px;
 
 
-    margin:5px;
+margin-top:10px;
 
 
-    border-radius:10px;
+border:none;
 
 
-    background:#1565c0;
+border-radius:12px;
 
 
-    color:white;
+background:
+
+linear-gradient(
+
+135deg,
+
+#ff9800,
+
+#ff5722
+
+);
 
 
-    font-size:15px;
+color:white;
 
 
-    cursor:pointer;
+font-size:16px;
+
+
+font-weight:bold;
 
 
 }
@@ -203,10 +253,14 @@ button{
 
 
 
-button:hover{
 
 
-    opacity:.85;
+
+
+button:active{
+
+
+transform:scale(.97);
 
 
 }
@@ -222,11 +276,32 @@ button:hover{
 .progress-box{
 
 
-    margin-top:20px;
+margin-top:20px;
 
 
 }
 
+
+
+.progress-bg{
+
+
+width:100%;
+
+
+height:18px;
+
+
+background:#30364d;
+
+
+border-radius:20px;
+
+
+overflow:hidden;
+
+
+}
 
 
 
@@ -235,65 +310,26 @@ button:hover{
 .progress{
 
 
-    width:100%;
+height:100%;
 
 
-    height:28px;
+width:0;
 
 
-    background:#ddd;
+background:
+
+linear-gradient(
+
+90deg,
+
+#00c853,
+
+#64dd17
+
+);
 
 
-    border-radius:20px;
-
-
-    overflow:hidden;
-
-
-    margin-top:10px;
-
-
-}
-
-
-
-
-
-
-#progressBar{
-
-
-    height:100%;
-
-
-    width:0%;
-
-
-    background:#2196f3;
-
-
-    color:white;
-
-
-    text-align:center;
-
-
-    line-height:28px;
-
-
-    transition:.3s;
-
-
-}
-
-
-
-
-
-#processText{
-
-
-    color:#555;
+transition:.3s;
 
 
 }
@@ -306,37 +342,16 @@ button:hover{
 
 
 
-#prediction,
+#progressText{
 
 
-#aiMeeting,
+text-align:center;
 
 
-#learning,
+font-size:18px;
 
 
-#backtest,
-
-
-#status,
-
-
-#history,
-
-
-#learnResult{
-
-
-    background:#fafafa;
-
-
-    padding:15px;
-
-
-    border-radius:10px;
-
-
-    line-height:1.8;
+color:#00ff99;
 
 
 }
@@ -349,19 +364,54 @@ button:hover{
 
 
 
-.ai-item{
+.card{
 
 
-    padding:10px;
+background:
+
+#202945;
 
 
-    margin-bottom:8px;
+border-radius:15px;
 
 
-    background:#eef6ff;
+padding:15px;
 
 
-    border-radius:8px;
+margin-top:12px;
+
+
+border:
+
+1px solid #394867;
+
+
+}
+
+
+
+.card h3{
+
+
+color:#ffd700;
+
+
+}
+
+
+
+
+
+.card b{
+
+
+font-size:22px;
+
+
+color:#00ffcc;
+
+
+letter-spacing:3px;
 
 
 }
@@ -373,16 +423,35 @@ button:hover{
 
 
 
-.numbers{
+
+#meeting div{
 
 
-    display:flex;
+padding:12px;
 
 
-    gap:8px;
+margin-top:8px;
 
 
-    flex-wrap:wrap;
+background:
+
+#1d2942;
+
+
+border-radius:10px;
+
+
+font-size:15px;
+
+
+}
+
+
+
+#meeting div::first-letter{
+
+
+color:#ffd700;
 
 
 }
@@ -394,25 +463,47 @@ button:hover{
 
 
 
-.numbers input{
+
+#learning{
 
 
-    width:45px;
+background:
+
+#101728;
 
 
-    height:45px;
+padding:15px;
 
 
-    border-radius:50%;
+border-radius:12px;
 
 
-    border:2px solid #1565c0;
+line-height:28px;
 
 
-    text-align:center;
+color:#00ff99;
 
 
-    font-size:18px;
+}
+
+
+
+
+
+
+
+
+
+.input-group{
+
+
+display:flex;
+
+
+gap:8px;
+
+
+flex-wrap:wrap;
 
 
 }
@@ -421,17 +512,39 @@ button:hover{
 
 
 
+.input-group input{
 
 
+width:
 
-.input-area h3{
+calc(20% - 8px);
 
 
-    margin-bottom:8px;
+min-width:50px;
+
+
+height:45px;
+
+
+border-radius:10px;
+
+
+border:none;
+
+
+text-align:center;
+
+
+font-size:18px;
+
+
+background:#ffffff;
+
+
+color:#111;
 
 
 }
-
 
 
 
@@ -443,13 +556,16 @@ button:hover{
 footer{
 
 
-    text-align:center;
+text-align:center;
 
 
-    padding:20px;
+padding:20px;
 
 
-    color:#777;
+color:#888;
+
+
+font-size:13px;
 
 
 }
@@ -462,70 +578,29 @@ footer{
 
 
 
-@media(max-width:600px){
+@media(max-width:400px){
 
 
 
-    .container{
+.card b{
 
 
-        padding:10px;
+font-size:18px;
 
 
-    }
-
-
-
-
-    header h1{
-
-
-        font-size:23px;
-
-
-    }
+}
 
 
 
+.input-group input{
 
 
-    .card{
+width:
+
+45px;
 
 
-        padding:14px;
-
-
-    }
-
-
-
-
-
-    button{
-
-
-        width:100%;
-
-
-        margin:5px 0;
-
-
-    }
-
-
-
-
-    .numbers input{
-
-
-        width:42px;
-
-
-        height:42px;
-
-
-    }
-
+}
 
 
 }

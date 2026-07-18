@@ -1,8 +1,8 @@
 /**
  * DLT-AI-CORE VIP
- * Monte Carlo Engine V3.0 FINAL
+ * Monte Carlo Engine V6.0 FINAL
  *
- * 蒙特卡罗模拟核心
+ * 分批百万模拟
  */
 
 
@@ -10,338 +10,572 @@ class MonteCarloEngine {
 
 
 
-    constructor(){
+constructor(
 
+model,
 
-        this.times = 1000000;
+options={}
 
+){
 
-    }
 
+this.model=model;
 
 
+this.times=
 
+options.times || 1000000;
 
 
+this.batch=
 
+options.batch || 5000;
 
 
-    simulate(
+this.progress=
 
-        numbers=[],
+options.progress || null;
 
-        backNumbers=[]
 
-    ){
+}
 
 
 
-        if(
 
-            !numbers.length
 
-        ){
 
 
 
-            return [];
 
-        }
+async run(){
 
 
 
+const result=[];
 
 
+const pool=
 
+this.createScorePool();
 
-        const result = {};
 
 
 
 
+let completed=0;
 
 
 
-        /*
-         * 初始化号码权重
-         */
 
 
-        numbers.forEach(
 
-            item=>{
 
+while(
 
-                result[item.number]=0;
+completed < this.times
 
+){
 
-            }
 
-        );
 
+const currentBatch=
 
+Math.min(
 
+this.batch,
 
+this.times-completed
 
+);
 
 
 
-        /*
-         * 模拟次数
 
-         *
-         * 采用批处理
-         * 防止网页卡死
-         */
 
 
-        const batch = 10000;
+for(
 
+let i=0;
 
-        const rounds =
+i<currentBatch;
 
-        Math.floor(
+i++
 
-            this.times / batch
+){
 
-        );
 
 
+const front=
 
+this.randomFront();
 
 
 
+const back=
 
+this.randomBack();
 
-        for(
 
-            let r=0;
 
-            r<rounds;
 
-            r++
 
-        ){
+const score=
 
+this.evaluate(
 
+front,
 
-            for(
+pool
 
-                let i=0;
+);
 
-                i<batch;
 
-                i++
 
-            ){
 
 
+result.push({
 
-                const pick =
 
-                this.randomPick(
 
-                    numbers,
+front,
 
-                    5
 
-                );
+back,
 
 
+score
 
 
 
-
-                pick.forEach(
-
-                    n=>{
-
-
-                        result[n]++;
-
-                    }
-
-                );
-
-
-
-            }
-
-
-
-        }
-
-
-
-
-
-
-
-
-        return Object.keys(
-
-            result
-
-        )
-
-        .map(
-
-            n=>({
-
-
-
-                number:
-
-                Number(n),
-
-
-
-                score:
-
-                result[n]
-
-
-
-            })
-
-        )
-
-        .sort(
-
-            (a,b)=>
-
-            b.score-a.score
-
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    randomPick(
-
-        pool,
-
-        count
-
-    ){
-
-
-
-        const temp =
-
-        [...pool];
-
-
-
-        const arr=[];
-
-
-
-
-
-
-
-        while(
-
-            arr.length<count
-
-        ){
-
-
-
-            const index =
-
-            Math.floor(
-
-                Math.random()
-
-                *
-
-                temp.length
-
-            );
-
-
-
-
-
-            arr.push(
-
-                temp[index]
-
-                .number
-
-            );
-
-
-
-
-
-            temp.splice(
-
-                index,
-
-                1
-
-            );
-
-
-        }
-
-
-
-
-
-
-
-        return arr.sort(
-
-            (a,b)=>
-
-            a-b
-
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-    setTimes(
-
-        value
-
-    ){
-
-
-        this.times=value;
-
-
-    }
-
-
+});
 
 
 
 }
 
 
+
+
+
+
+
+completed += currentBatch;
+
+
+
+
+
+
+
+if(this.progress){
+
+
+
+this.progress(
+
+Math.floor(
+
+completed/
+
+this.times*
+
+100
+
+)
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+await this.nextTick();
+
+
+
+}
+
+
+
+
+
+
+
+result.sort(
+
+(a,b)=>
+
+b.score-a.score
+
+);
+
+
+
+
+
+
+
+
+return result.slice(
+
+0,
+
+3
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+createScorePool(){
+
+
+
+const pool={};
+
+
+
+for(
+
+let i=1;
+
+i<=35;
+
+i++
+
+){
+
+
+
+pool[i]=0;
+
+
+}
+
+
+
+
+
+
+if(
+
+this.model
+
+&&
+
+this.model.numbers
+
+){
+
+
+
+this.model.numbers.forEach(
+
+item=>{
+
+
+
+pool[item.number]=
+
+item.score;
+
+
+
+}
+
+);
+
+
+
+}
+
+
+
+
+
+return pool;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+randomFront(){
+
+
+
+const set=new Set();
+
+
+
+
+
+while(
+
+set.size<5
+
+){
+
+
+
+set.add(
+
+Math.floor(
+
+Math.random()*35
+
+)+1
+
+);
+
+
+
+}
+
+
+
+
+
+return Array.from(set)
+
+.sort(
+
+(a,b)=>a-b
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+randomBack(){
+
+
+
+const set=new Set();
+
+
+
+
+
+while(
+
+set.size<2
+
+){
+
+
+
+set.add(
+
+Math.floor(
+
+Math.random()*12
+
+)+1
+
+);
+
+
+
+}
+
+
+
+
+
+return Array.from(set)
+
+.sort(
+
+(a,b)=>a-b
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+evaluate(
+
+front,
+
+pool
+
+){
+
+
+
+let score=0;
+
+
+
+
+
+front.forEach(
+
+n=>{
+
+
+score+=pool[n]||0;
+
+
+}
+
+);
+
+
+
+
+
+const sum=
+
+front.reduce(
+
+(a,b)=>a+b,
+
+0
+
+);
+
+
+
+
+
+if(
+
+sum>=80
+
+&&
+
+sum<=130
+
+){
+
+score+=15;
+
+}
+
+
+
+const odd=
+
+front.filter(
+
+n=>n%2
+
+).length;
+
+
+
+
+
+if(
+
+odd===2
+
+||
+
+odd===3
+
+){
+
+
+
+score+=10;
+
+
+}
+
+
+
+
+
+return Number(
+
+score.toFixed(3)
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+nextTick(){
+
+
+
+return new Promise(
+
+resolve=>{
+
+
+setTimeout(
+
+resolve,
+
+0
+
+);
+
+
+}
+
+);
+
+
+
+}
+
+
+
+}
 
 
 

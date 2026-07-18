@@ -1,13 +1,12 @@
 /**
  * DLT-AI-CORE VIP
- * Data Engine V2.0 FINAL
+ * Data Engine V5.0 FINAL
  *
- * 大乐透历史数据读取
+ * 大乐透数据管理核心
  */
 
 
 import fs from "fs";
-
 
 
 
@@ -18,9 +17,17 @@ class DataEngine {
     constructor(){
 
 
+
         this.file =
 
-        "./data/dlt_history.txt";
+        "./data/dlt_raw.txt";
+
+
+
+        this.jsonFile =
+
+        "./data/history.json";
+
 
 
     }
@@ -39,6 +46,66 @@ class DataEngine {
 
         if(
 
+            fs.existsSync(
+
+                this.jsonFile
+
+            )
+
+        ){
+
+
+
+            return this.readJSON();
+
+
+
+        }
+
+
+
+
+
+
+
+        const history =
+
+        this.parseTXT();
+
+
+
+
+
+        this.saveJSON(
+
+            history
+
+        );
+
+
+
+
+
+        return history;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    parseTXT(){
+
+
+
+        if(
+
             !fs.existsSync(
 
                 this.file
@@ -49,14 +116,10 @@ class DataEngine {
 
 
 
-            throw new Error(
-
-                "历史数据文件不存在"
-
-            );
-
+            return [];
 
         }
+
 
 
 
@@ -79,22 +142,13 @@ class DataEngine {
 
 
 
-
-
         const lines =
 
-        text
+        text.split(
 
-        .split(/\r?\n/)
-
-        .filter(
-
-            line=>
-
-            line.trim()
+            "\n"
 
         );
-
 
 
 
@@ -115,11 +169,13 @@ class DataEngine {
 
 
 
-                const item =
+                const arr =
 
-                this.parseLine(
+                line.trim()
 
-                    line
+                .split(
+
+                    /\s+/
 
                 );
 
@@ -127,10 +183,69 @@ class DataEngine {
 
 
 
-                if(item){
+                if(
+
+                    arr.length>=9
+
+                ){
 
 
-                    result.push(item);
+
+                    result.push({
+
+
+
+                        issue:
+
+                        arr[0],
+
+
+
+
+                        date:
+
+                        arr[1],
+
+
+
+
+                        front:[
+
+
+
+                            Number(arr[2]),
+
+                            Number(arr[3]),
+
+                            Number(arr[4]),
+
+                            Number(arr[5]),
+
+                            Number(arr[6])
+
+
+
+                        ],
+
+
+
+
+                        back:[
+
+
+
+                            Number(arr[7]),
+
+                            Number(arr[8])
+
+
+
+                        ]
+
+
+
+                    });
+
 
 
                 }
@@ -140,6 +255,7 @@ class DataEngine {
             }
 
         );
+
 
 
 
@@ -160,83 +276,25 @@ class DataEngine {
 
 
 
-    parseLine(
+    addNew(
 
-        line
+        item
 
     ){
 
 
 
+        const history=
 
-
-        const parts =
-
-        line
-
-        .trim()
-
-        .split(/\s+/);
+        this.readJSON();
 
 
 
 
 
+        history.push(
 
-
-        if(
-
-            parts.length < 9
-
-        ){
-
-            return null;
-
-        }
-
-
-
-
-
-
-
-        const issue =
-
-        parts[0];
-
-
-
-
-
-
-
-        const date =
-
-        parts[1];
-
-
-
-
-
-
-
-        const nums =
-
-        parts
-
-        .slice(
-
-            2
-
-        )
-
-        .map(Number)
-
-        .filter(
-
-            n=>
-
-            !isNaN(n)
+            item
 
         );
 
@@ -244,21 +302,11 @@ class DataEngine {
 
 
 
+        this.saveJSON(
 
+            history
 
-
-        if(
-
-            nums.length < 7
-
-        ){
-
-            return null;
-
-        }
-
-
-
+        );
 
 
 
@@ -268,41 +316,15 @@ class DataEngine {
 
 
 
-            issue,
+            status:
+
+            "added",
 
 
 
-            date,
+            total:
 
-
-
-            front:
-
-
-
-            nums.slice(
-
-                0,
-
-                5
-
-            ),
-
-
-
-
-
-            back:
-
-
-
-            nums.slice(
-
-                5,
-
-                7
-
-            )
+            history.length
 
 
 
@@ -320,23 +342,125 @@ class DataEngine {
 
 
 
-    latest(
-
-        data=[]
-
-    ){
+    latest(){
 
 
-        return data[
 
-            data.length-1
+        const history=
+
+        this.readJSON();
+
+
+
+
+
+        return history[
+
+            history.length-1
 
         ];
+
 
 
     }
 
 
+
+
+
+
+
+
+
+    readJSON(){
+
+
+
+        try{
+
+
+
+            return JSON.parse(
+
+                fs.readFileSync(
+
+                    this.jsonFile,
+
+                    "utf-8"
+
+                )
+
+            );
+
+
+
+        }catch(e){
+
+
+
+            return [];
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    saveJSON(
+
+        data
+
+    ){
+
+
+
+        fs.writeFileSync(
+
+            this.jsonFile,
+
+            JSON.stringify(
+
+                data,
+
+                null,
+
+                2
+
+            )
+
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    count(){
+
+
+
+        return this.readJSON()
+
+        .length;
+
+
+
+    }
 
 
 

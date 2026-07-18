@@ -1,253 +1,16 @@
 /**
  * DLT-AI-CORE VIP
- * Frontend Logic V3.0 FINAL
+ * Frontend V4.0 FINAL
  */
 
 
+const state={
 
-const $ = id =>
-document.getElementById(id);
+    progress:0,
 
+    timer:null,
 
-
-
-
-// =====================
-// 页面初始化
-// =====================
-
-
-async function init(){
-
-
-    await loadStatus();
-
-
-    await loadHistory();
-
-
-}
-
-
-
-
-
-// =====================
-// 系统状态
-// =====================
-
-
-async function loadStatus(){
-
-
-    try{
-
-
-        const res =
-
-        await fetch(
-            "/api/status"
-        );
-
-
-        const data =
-
-        await res.json();
-
-
-
-        $("status").innerHTML = `
-
-        ✅ 系统运行正常<br>
-
-        历史数据：
-
-        ${data.history}期
-
-        <br>
-
-        模型数量：
-
-        ${data.models.length}
-
-        `;
-
-
-
-    }catch(e){
-
-
-
-        $("status").innerHTML=
-
-        "❌ 系统连接失败";
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-
-// =====================
-// 历史数据
-// =====================
-
-
-async function loadHistory(){
-
-
-    try{
-
-
-        const res =
-
-        await fetch(
-            "/api/data"
-        );
-
-
-        const data =
-
-        await res.json();
-
-
-
-
-        const d =
-
-        data.latest;
-
-
-
-
-        $("history").innerHTML=`
-
-        最新开奖：
-
-        ${d.issue}
-
-        <br>
-
-        前区：
-
-        ${d.front.join(" ")}
-
-        <br>
-
-        后区：
-
-        ${d.back.join(" ")}
-
-        `;
-
-
-
-    }catch(e){
-
-
-        $("history").innerHTML=
-
-        "数据读取失败";
-
-
-    }
-
-
-}
-
-
-
-
-
-
-
-
-
-// =====================
-// 预测
-// =====================
-
-
-$("predictBtn")
-
-.onclick = async()=>{
-
-
-    startProgress();
-
-
-
-
-    $("prediction").innerHTML=
-
-    "AI计算中...";
-
-
-
-
-
-    $("aiMeeting").innerHTML=
-
-    "模型会议召开中...";
-
-
-
-
-
-    try{
-
-
-
-        const res =
-
-        await fetch(
-            "/api/predict"
-        );
-
-
-
-
-        const data =
-
-        await res.json();
-
-
-
-
-
-        finishProgress();
-
-
-
-
-
-        showPrediction(
-            data
-        );
-
-
-
-    }catch(e){
-
-
-
-        $("prediction").innerHTML=
-
-        "预测失败";
-
-
-
-    }
-
+    prediction:null
 
 };
 
@@ -257,71 +20,69 @@ $("predictBtn")
 
 
 
+function startPrediction(){
 
 
-// =====================
-// 进度条
-// =====================
+    resetUI();
 
 
-function startProgress(){
-
-
-    let value=0;
-
-
-    const timer =
-
-    setInterval(()=>{
+    startProgress();
 
 
 
-        value+=5;
+    fetch("/api/predict")
+
+    .then(
+
+        res=>
+
+        res.json()
+
+    )
+
+    .then(
+
+        data=>{
 
 
-
-        if(value>=95){
-
-
-            clearInterval(timer);
+            stopProgress();
 
 
-            return;
+            state.prediction=data;
+
+
+            renderPrediction(
+
+                data
+
+            );
+
+
+            renderMeeting();
 
 
         }
 
+    )
+
+    .catch(
+
+        err=>{
 
 
-
-        $("progressBar")
-
-        .style.width=
-
-        value+"%";
+            stopProgress();
 
 
+            showError(
+
+                err
+
+            );
 
 
-        $("progressBar")
+        }
 
-        .innerHTML=
-
-        value+"%";
-
-
-
-
-
-        $("processText")
-
-        .innerHTML=
-
-        "正在执行模型计算..."
-
-
-
-    },300);
+    );
 
 
 
@@ -331,11 +92,108 @@ function startProgress(){
 
 
 
-function finishProgress(){
 
 
 
-    $("progressBar")
+
+function startProgress(){
+
+
+    const bar=
+
+    document.getElementById(
+
+        "progress"
+
+    );
+
+
+
+    state.progress=0;
+
+
+
+
+
+
+    state.timer=setInterval(
+
+        ()=>{
+
+
+            if(
+
+                state.progress<90
+
+            ){
+
+
+                state.progress++;
+
+
+                bar.style.width=
+
+                state.progress+"%";
+
+
+                document
+
+                .getElementById(
+
+                    "progressText"
+
+                )
+
+                .innerText=
+
+                state.progress+"%";
+
+
+
+            }
+
+
+
+        },
+
+        80
+
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function stopProgress(){
+
+
+    clearInterval(
+
+        state.timer
+
+    );
+
+
+
+    state.progress=100;
+
+
+
+    document
+
+    .getElementById(
+
+        "progress"
+
+    )
 
     .style.width=
 
@@ -343,19 +201,17 @@ function finishProgress(){
 
 
 
-    $("progressBar")
+    document
 
-    .innerHTML=
+    .getElementById(
 
-    "100%";
+        "progressText"
 
+    )
 
+    .innerText=
 
-    $("processText")
-
-    .innerHTML=
-
-    "✅ AI计算完成";
+    "100% 完成";
 
 
 
@@ -369,73 +225,249 @@ function finishProgress(){
 
 
 
-// =====================
-// 显示预测
-// =====================
+function renderPrediction(
 
+    data
 
-function showPrediction(data){
-
-
-
-    let html="";
+){
 
 
 
+    const box=
 
+    document
 
-    if(data.predictions){
+    .getElementById(
 
+        "prediction"
 
-
-        data.predictions
-
-        .forEach(
-
-            item=>{
-
-
-
-                html+=`
-
-                <div class="ai-item">
-
-
-                🏆 第${item.rank}名
-
-
-                <br>
-
-
-                前区:
-
-                ${item.front.join(" ")}
-
-
-                <br>
-
-
-                后区:
-
-                ${item.back.join(" ")}
-
-
-                <br>
-
-
-                综合评分:
-
-                ${item.score}
-
-
-                </div>
-
-
-                `;
+    );
 
 
 
-            }
+    box.innerHTML="";
+
+
+
+
+
+
+    data.predictions.forEach(
+
+        item=>{
+
+
+
+            box.innerHTML+=`
+
+
+<div class="card">
+
+
+<h3>
+🏆 第${item.rank}名
+</h3>
+
+
+<p>
+
+前区：
+
+<b>
+
+${item.front.join(" ")}
+
+</b>
+
+</p>
+
+
+<p>
+
+后区：
+
+<b>
+
+${item.back.join(" ")}
+
+</b>
+
+</p>
+
+
+
+<p>
+
+综合评分：
+
+${item.score}
+
+</p>
+
+
+</div>
+
+
+`;
+
+
+
+        }
+
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function renderMeeting(){
+
+
+
+    const box=
+
+    document
+
+    .getElementById(
+
+        "meeting"
+
+    );
+
+
+
+    box.innerHTML=`
+
+
+<div>
+
+🤖 Ensemble
+
+<br>
+
+✅ 多模型融合完成
+
+</div>
+
+
+<div>
+
+📊 Statistics
+
+<br>
+
+✅ 历史频率评分完成
+
+</div>
+
+
+
+<div>
+
+🧠 Bayesian
+
+<br>
+
+✅ 概率更新完成
+
+</div>
+
+
+<div>
+
+🔄 Markov
+
+<br>
+
+✅ 转移分析完成
+
+</div>
+
+
+<div>
+
+📐 Matrix
+
+<br>
+
+✅ 位置矩阵完成
+
+</div>
+
+
+
+<div>
+
+🏗 Structure
+
+<br>
+
+✅ 结构过滤完成
+
+</div>
+
+
+`;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function submitFeedback(){
+
+
+
+    const front=[];
+
+    const back=[];
+
+
+
+
+
+    for(
+
+        let i=1;
+
+        i<=5;
+
+        i++
+
+    ){
+
+
+
+        front.push(
+
+            Number(
+
+                document
+
+                .getElementById(
+
+                    "front"+i
+
+                )
+
+                .value
+
+            )
 
         );
 
@@ -447,283 +479,49 @@ function showPrediction(data){
 
 
 
-    $("prediction")
 
-    .innerHTML=
 
-    html;
+    for(
 
+        let i=1;
 
+        i<=2;
 
-    showMeeting(data);
+        i++
 
+    ){
 
 
-}
 
+        back.push(
 
+            Number(
 
+                document
 
+                .getElementById(
 
+                    "back"+i
 
+                )
 
+                .value
 
+            )
 
-// =====================
-// AI会议
-// =====================
+        );
 
 
-function showMeeting(data){
 
+    }
 
 
-    $("aiMeeting")
 
-    .innerHTML=`
 
-    <div class="ai-item">
 
-    🤖 Ensemble最终融合
 
-    <br>
 
-    多模型竞争完成
-
-    </div>
-
-
-    <div class="ai-item">
-
-    📊 Statistics
-
-    <br>
-
-    历史频率分析完成
-
-    </div>
-
-
-    <div class="ai-item">
-
-    🧠 Bayesian
-
-    <br>
-
-    概率更新完成
-
-    </div>
-
-
-    <div class="ai-item">
-
-    🔄 Markov
-
-    <br>
-
-    转移链分析完成
-
-    </div>
-
-
-    <div class="ai-item">
-
-    📐 Matrix
-
-    <br>
-
-    位置矩阵分析完成
-
-    </div>
-
-
-    <div class="ai-item">
-
-    🏗 Structure
-
-    <br>
-
-    三区奇偶和值分析完成
-
-    </div>
-
-
-    `;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// =====================
-// Monte Carlo
-// =====================
-
-
-$("monteBtn")
-
-.onclick=()=>{
-
-
-    $("processText")
-
-    .innerHTML=
-
-    "🎲 Monte Carlo 100万次模拟运行中...";
-
-
-};
-
-
-
-
-
-
-
-
-
-// =====================
-// 回测
-// =====================
-
-
-$("backtestBtn")
-
-.onclick=async()=>{
-
-
-    $("backtest")
-
-    .innerHTML=
-
-    "历史滚动回测中...";
-
-
-
-    const res=
-
-    await fetch(
-
-        "/api/backtest"
-
-    );
-
-
-
-    const data=
-
-    await res.json();
-
-
-
-
-    $("backtest")
-
-    .innerHTML=
-
-    JSON.stringify(
-
-        data,
-
-        null,
-
-        2
-
-    );
-
-
-
-};
-
-
-
-
-
-
-
-
-
-// =====================
-// 开奖反馈学习
-// =====================
-
-
-$("learnBtn")
-
-.onclick=async()=>{
-
-
-
-    const front=[
-
-
-        $("f1").value,
-
-
-        $("f2").value,
-
-
-        $("f3").value,
-
-
-        $("f4").value,
-
-
-        $("f5").value
-
-
-
-    ]
-    
-    .map(
-
-        x=>
-
-        Number(x)
-
-    );
-
-
-
-
-
-
-    const back=[
-
-
-        $("b1").value,
-
-
-        $("b2").value
-
-
-
-    ]
-
-    .map(
-
-        x=>
-
-        Number(x)
-
-    );
-
-
-
-
-
-
-
-    const res=
-
-    await fetch(
+    fetch(
 
         "/api/learn",
 
@@ -736,17 +534,15 @@ $("learnBtn")
             headers:{
 
 
-            "Content-Type":
+                "Content-Type":
 
-            "application/json"
+                "application/json"
 
 
             },
 
 
-            body:
-
-            JSON.stringify({
+            body:JSON.stringify({
 
 
                 front,
@@ -758,46 +554,140 @@ $("learnBtn")
             })
 
 
+        }
+
+    )
+
+    .then(
+
+        r=>
+
+        r.json()
+
+    )
+
+    .then(
+
+        data=>{
+
+
+            renderLearning(
+
+                data
+
+            );
+
 
         }
 
-
     );
 
 
 
-
-
-
-    const data=
-
-    await res.json();
+}
 
 
 
 
 
-    $("learnResult")
+
+
+
+
+function renderLearning(
+
+    data
+
+){
+
+
+
+    document
+
+    .getElementById(
+
+        "learning"
+
+    )
+
+    .innerHTML=`
+
+
+🧠 历史滚动学习
+
+
+<br>
+
+
+学习次数：
+
+${data.total}
+
+
+<br>
+
+
+状态：
+
+${data.status}
+
+
+`;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function resetUI(){
+
+
+
+    document
+
+    .getElementById(
+
+        "prediction"
+
+    )
 
     .innerHTML=
 
-    "✅ 学习完成<br>"+
-
-    JSON.stringify(
-
-        data
-
-    );
+    "AI计算中...";
 
 
 
-};
+    document
+
+    .getElementById(
+
+        "meeting"
+
+    )
+
+    .innerHTML=
+
+    "模型会议启动...";
 
 
 
+}
 
 
 
+window.startPrediction=
+
+startPrediction;
 
 
-init();
+
+window.submitFeedback=
+
+submitFeedback;

@@ -1,8 +1,8 @@
 /**
  * DLT-AI-CORE VIP
- * Prediction Engine V4.0 FINAL
+ * Prediction Engine V5.1 FINAL
  *
- * 模型融合 + Monte Carlo
+ * 大乐透预测总控
  */
 
 
@@ -14,15 +14,20 @@ class PredictionEngine {
 
 
 
-    constructor(models={}){
+    constructor(
+
+        models,
+
+        features
+
+    ){
+
 
 
         this.models=models;
 
 
-        this.monte=
-
-        new MonteCarloEngine();
+        this.features=features;
 
 
     }
@@ -47,91 +52,19 @@ class PredictionEngine {
 
 
 
-        if(
-
-            !ensemble
-
-            ||
-
-            !ensemble.numbers
-
-        ){
 
 
+        const monte =
 
-            throw new Error(
+        new MonteCarloEngine(
 
-                "融合模型不存在"
+            ensemble,
 
-            );
+            {
 
-        }
+                times:1000000
 
-
-
-
-
-
-
-        /*
-         * 第一步:
-         * 模型候选池
-         */
-
-
-        const pool =
-
-        ensemble.numbers
-
-        .slice(
-
-            0,
-
-            25
-
-        );
-
-
-
-
-
-
-
-        /*
-         * 第二步:
-         * Monte Carlo模拟
-         */
-
-
-        const monteResult =
-
-        this.monte.simulate(
-
-            pool
-
-        );
-
-
-
-
-
-
-
-        /*
-         * 第三步:
-         * 融合评分
-         */
-
-
-        const finalPool =
-
-        monteResult
-
-        .slice(
-
-            0,
-
-            20
+            }
 
         );
 
@@ -142,7 +75,9 @@ class PredictionEngine {
 
 
 
-        const predictions=[];
+        const results =
+
+        await monte.run();
 
 
 
@@ -151,103 +86,52 @@ class PredictionEngine {
 
 
 
-        for(
+        const predictions =
 
-            let i=0;
+        results.map(
 
-            i<3;
-
-            i++
-
-        ){
+            (item,index)=>{
 
 
 
-            const front =
-
-            this.makeFront(
-
-                finalPool,
-
-                i
-
-            );
+                return {
 
 
 
-
-
-            const back =
-
-            this.makeBack();
+                    rank:index+1,
 
 
 
+                    front:item.front,
 
 
 
-
-            predictions.push({
-
-
-
-                rank:
-
-                i+1,
+                    back:item.back,
 
 
 
-                front,
+                    score:item.score,
 
 
 
-                back,
+                    confidence:
 
+                    this.confidence(
 
-
-                score:
-
-                Number(
-
-                    (
-
-                    90-i*3+
-
-                    Math.random()*2
+                        item.score
 
                     )
 
-                    .toFixed(2)
-
-                ),
 
 
-
-                models:{
+                };
 
 
 
-                    ensemble:
+            }
 
-                    "completed",
+        );
 
-
-
-                    montecarlo:
-
-                    "1000000"
-
-
-
-                }
-
-
-
-            });
-
-
-
-        }
 
 
 
@@ -267,13 +151,23 @@ class PredictionEngine {
 
 
 
-            simulation:
 
-            this.monte.times,
+            status:
+
+            "completed",
 
 
 
-            predictions
+
+            predictions,
+
+
+
+
+
+            models:
+
+            this.getModelStatus()
 
 
 
@@ -291,109 +185,39 @@ class PredictionEngine {
 
 
 
-    makeFront(
+    confidence(
 
-        pool,
-
-        offset
+        score
 
     ){
 
 
 
-        let nums =
+        if(
 
-        pool
-
-        .slice(
-
-            offset,
-
-            offset+5
+            score>=100
 
         )
 
-        .map(
-
-            x=>
-
-            x.number
-
-        );
+        return "high";
 
 
 
 
 
+        if(
 
-
-        nums =
-
-        [...new Set(nums)];
-
-
-
-
-
-
-
-        while(
-
-            nums.length<5
-
-        ){
-
-
-
-            const n=
-
-            Math.floor(
-
-                Math.random()*35
-
-            )+1;
-
-
-
-
-
-            if(
-
-                !nums.includes(n)
-
-            ){
-
-
-                nums.push(n);
-
-
-            }
-
-
-        }
-
-
-
-
-
-
-        return nums
-
-        .slice(
-
-            0,
-
-            5
+            score>=70
 
         )
 
-        .sort(
+        return "medium";
 
-            (a,b)=>
 
-            a-b
 
-        );
+
+
+        return "normal";
 
 
 
@@ -407,68 +231,101 @@ class PredictionEngine {
 
 
 
-    makeBack(){
+    getModelStatus(){
 
 
 
-        const arr=[];
+        return {
 
 
 
+            statistics:
 
+            {
 
-        while(
+                status:
 
-            arr.length<2
+                "completed"
 
-        ){
-
-
-
-            const n=
-
-            Math.floor(
-
-                Math.random()*12
-
-            )+1;
+            },
 
 
 
 
 
-            if(
+            bayesian:
 
-                !arr.includes(n)
+            {
 
-            ){
+                status:
+
+                "completed"
+
+            },
 
 
 
-                arr.push(n);
 
+
+            markov:
+
+            {
+
+                status:
+
+                "completed"
+
+            },
+
+
+
+
+
+            matrix:
+
+            {
+
+                status:
+
+                "completed"
+
+            },
+
+
+
+
+
+            structure:
+
+            {
+
+                status:
+
+                "completed"
+
+            },
+
+
+
+
+
+            ensemble:
+
+            {
+
+                status:
+
+                "completed"
 
             }
 
 
-        }
 
+        };
 
-
-
-
-
-        return arr.sort(
-
-            (a,b)=>
-
-            a-b
-
-        );
 
 
     }
-
 
 
 

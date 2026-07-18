@@ -1,24 +1,25 @@
 /**
  * DLT-AI-CORE VIP
- * Statistics Model V2.0
+ * Statistics Model V5.0 FINAL
  *
- * 基础统计概率模型
+ * 历史统计评分模型
  */
 
 
-
 class StatisticsModel {
-
 
 
     constructor(){
 
 
         this.name =
+
         "statistics";
 
 
     }
+
+
 
 
 
@@ -36,52 +37,66 @@ class StatisticsModel {
 
 
 
-        const scores=[];
+        const frequency =
+
+        features.frequency || [];
+
+
+
+
+
+        const missing =
+
+        features.missing || [];
+
+
+
+
+
+
+
+        const result=[];
+
+
+
+
 
 
 
         for(
 
-            let num=1;
+            let n=1;
 
-            num<=35;
+            n<=35;
 
-            num++
+            n++
 
         ){
 
 
 
-            let total=0;
+            const freqItem =
 
+            frequency.find(
 
-            let recent=0;
+                x=>
 
+                x.number===n
 
-
-            history.forEach(
-
-                item=>{
-
-
-
-                    if(
-
-                        item.front
-
-                        .includes(num)
-
-                    ){
-
-
-                        total++;
-
-
-                    }
+            );
 
 
 
-                }
+
+
+
+            const missItem =
+
+            missing.find(
+
+                x=>
+
+                x.number===n
 
             );
 
@@ -91,34 +106,36 @@ class StatisticsModel {
 
 
 
-            history
 
-            .slice(-100)
+            const freqScore =
 
-            .forEach(
+            freqItem
 
-                item=>{
+            ?
 
+            freqItem.count
 
-                    if(
+            :
 
-                        item.front
-
-                        .includes(num)
-
-                    ){
-
-
-                        recent++;
-
-
-                    }
+            0;
 
 
 
-                }
 
-            );
+
+
+
+            const missScore =
+
+            missItem
+
+            ?
+
+            missItem.missing*2
+
+            :
+
+            0;
 
 
 
@@ -130,23 +147,9 @@ class StatisticsModel {
 
             const score =
 
+            freqScore +
 
-
-            total
-
-            *
-
-            0.7
-
-
-
-            +
-
-            recent
-
-            *
-
-            1.5;
+            missScore;
 
 
 
@@ -154,19 +157,18 @@ class StatisticsModel {
 
 
 
-            scores.push({
+
+            result.push({
 
 
 
-                number:num,
+                number:n,
 
 
 
                 score:Number(
 
-                    score
-
-                    .toFixed(3)
+                    score.toFixed(3)
 
                 )
 
@@ -183,6 +185,22 @@ class StatisticsModel {
 
 
 
+
+
+        result.sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
+
+
+
+
+
+
+
         return {
 
 
@@ -191,15 +209,17 @@ class StatisticsModel {
 
 
 
-            numbers:
+            numbers:result,
 
-            scores
 
-            .sort(
 
-                (a,b)=>
+            top:
 
-                b.score-a.score
+            result.slice(
+
+                0,
+
+                10
 
             )
 
@@ -210,7 +230,6 @@ class StatisticsModel {
 
 
     }
-
 
 
 

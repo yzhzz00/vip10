@@ -1,10 +1,9 @@
 /**
  * DLT-AI-CORE VIP
- * Structure Model V2.0
+ * Structure Model V5.0 FINAL
  *
  * 大乐透结构分析模型
  */
-
 
 
 class StructureModel {
@@ -15,6 +14,7 @@ class StructureModel {
 
 
         this.name =
+
         "structure";
 
 
@@ -30,77 +30,13 @@ class StructureModel {
 
     train(
 
-        history=[],
-
-        features={}
+        history=[]
 
     ){
 
 
 
-        const stats={
-
-
-            odd:{
-
-                min:0,
-
-                max:5,
-
-                avg:0
-
-            },
-
-
-            zones:{
-
-
-                low:0,
-
-                mid:0,
-
-                high:0
-
-
-            },
-
-
-            sum:{
-
-
-                avg:0
-
-
-            },
-
-
-            span:{
-
-
-                avg:0
-
-
-            }
-
-
-
-        };
-
-
-
-
-
-
-
-
-        let totalOdd=0;
-
-
-        let totalSum=0;
-
-
-        let totalSpan=0;
-
+        const patterns = [];
 
 
 
@@ -113,7 +49,7 @@ class StructureModel {
 
 
 
-                const nums =
+                const front =
 
                 item.front;
 
@@ -121,11 +57,58 @@ class StructureModel {
 
 
 
+                let z1=0;
+
+                let z2=0;
+
+                let z3=0;
+
+
+
+
+
+                front.forEach(
+
+                    n=>{
+
+
+
+                        if(n<=12)
+
+                        z1++;
+
+
+
+                        else if(n<=24)
+
+                        z2++;
+
+
+
+                        else
+
+                        z3++;
+
+
+
+                    }
+
+                );
+
+
+
+
+
+
+
+
                 const odd =
 
-                nums.filter(
+                front.filter(
 
-                    n=>n%2
+                    n=>
+
+                    n%2!==0
 
                 )
 
@@ -135,17 +118,12 @@ class StructureModel {
 
 
 
-                totalOdd += odd;
-
-
-
-
 
 
 
                 const sum =
 
-                nums.reduce(
+                front.reduce(
 
                     (a,b)=>
 
@@ -157,54 +135,77 @@ class StructureModel {
 
 
 
-                totalSum += sum;
 
 
 
 
 
-
-                totalSpan +=
-
-                nums[4]
-
-                -
-
-                nums[0];
+                let consecutive=0;
 
 
 
 
 
-                nums.forEach(
+                for(
 
-                    n=>{
+                    let i=1;
+
+                    i<front.length;
+
+                    i++
+
+                ){
 
 
-                        if(n<=12){
 
-                            stats.zones.low++;
+                    if(
 
-                        }
+                        front[i]
 
-                        else if(n<=24){
+                        -
 
-                            stats.zones.mid++;
+                        front[i-1]
 
-                        }
+                        ===1
 
-                        else{
+                    ){
 
-                            stats.zones.high++;
 
-                        }
-
+                        consecutive++;
 
 
                     }
 
-                );
 
+
+                }
+
+
+
+
+
+
+
+
+                patterns.push({
+
+
+
+                    z1,
+
+                    z2,
+
+                    z3,
+
+                    odd,
+
+                    sum,
+
+                    consecutive
+
+
+
+                });
 
 
 
@@ -218,49 +219,59 @@ class StructureModel {
 
 
 
-        if(
-
-            history.length
-
-        ){
 
 
-
-            stats.odd.avg =
-
-            totalOdd
-
-            /
-
-            history.length;
+        const stats = {
 
 
 
 
+            zone:
 
-            stats.sum.avg =
+            this.zoneScore(
 
-            totalSum
+                patterns
 
-            /
-
-            history.length;
+            ),
 
 
 
 
 
-            stats.span.avg =
+            parity:
 
-            totalSpan
+            this.parityScore(
 
-            /
+                patterns
 
-            history.length;
+            ),
 
 
 
-        }
+
+            sum:
+
+            this.sumScore(
+
+                patterns
+
+            ),
+
+
+
+
+            consecutive:
+
+            this.consecutiveScore(
+
+                patterns
+
+            )
+
+
+
+        };
+
 
 
 
@@ -275,77 +286,75 @@ class StructureModel {
 
 
 
-
         for(
 
-            let num=1;
+            let n=1;
 
-            num<=35;
+            n<=35;
 
-            num++
+            n++
 
         ){
 
 
 
-            let score=50;
+            let score=0;
 
 
 
 
-
-            /*
-             * 高频结构奖励
-             */
 
 
             if(
 
-                num<=12
+                n<=12
 
-            ){
+            )
 
-                score+=
-
-                stats.zones.low
-
-                /
-
-                history.length;
+            score+=stats.zone.z1;
 
 
-            }
+
+
 
             else if(
 
-                num<=24
+                n<=24
 
-            ){
+            )
 
-                score+=
-
-                stats.zones.mid
-
-                /
-
-                history.length;
+            score+=stats.zone.z2;
 
 
-            }
-
-            else{
 
 
-                score+=
 
-                stats.zones.high
+            else
 
-                /
-
-                history.length;
+            score+=stats.zone.z3;
 
 
-            }
+
+
+
+
+
+            score+=
+
+            stats.parity;
+
+
+
+            score+=
+
+            stats.sum;
+
+
+
+            score+=
+
+            stats.consecutive;
+
 
 
 
@@ -357,7 +366,7 @@ class StructureModel {
 
 
 
-                number:num,
+                number:n,
 
 
 
@@ -365,17 +374,13 @@ class StructureModel {
 
                 Number(
 
-                    score
-
-                    .toFixed(3)
+                    score.toFixed(3)
 
                 )
 
 
 
             });
-
-
 
 
 
@@ -387,27 +392,45 @@ class StructureModel {
 
 
 
+        numbers.sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
+
+
+
+
+
 
 
         return {
 
 
 
-            name:this.name,
+            name:
+
+            this.name,
 
 
 
-            structure:stats,
+            patterns,
 
 
 
-            numbers:
+            numbers,
 
-            numbers.sort(
 
-                (a,b)=>
 
-                b.score-a.score
+            top:
+
+            numbers.slice(
+
+                0,
+
+                10
 
             )
 
@@ -427,67 +450,43 @@ class StructureModel {
 
 
 
-    check(
+    zoneScore(
 
-        nums=[]
+        patterns
 
     ){
 
 
 
-        let score=0;
+        const avg =
+
+        {
+
+            z1:0,
+
+            z2:0,
+
+            z3:0
+
+        };
 
 
 
 
 
-        // 奇偶
+        patterns.forEach(
 
-        const odd =
-
-        nums.filter(
-
-            n=>n%2
-
-        )
-
-        .length;
+            p=>{
 
 
+                avg.z1+=p.z1;
+
+                avg.z2+=p.z2;
+
+                avg.z3+=p.z3;
 
 
-
-        if(
-
-            odd>=2
-
-            &&
-
-            odd<=3
-
-        ){
-
-            score+=20;
-
-        }
-
-
-
-
-
-
-
-        // 和值
-
-        const sum =
-
-        nums.reduce(
-
-            (a,b)=>
-
-            a+b,
-
-            0
+            }
 
         );
 
@@ -495,66 +494,108 @@ class StructureModel {
 
 
 
-        if(
+        const len=
 
-            sum>=90
-
-            &&
-
-            sum<=130
-
-        ){
-
-            score+=20;
-
-        }
+        patterns.length;
 
 
 
 
 
 
-
-        // 跨度
-
-        const span =
-
-        nums[4]
-
-        -
-
-        nums[0];
+        return {
 
 
 
+            z1:
 
-
-        if(
-
-            span>=15
-
-            &&
-
-            span<=30
-
-        ){
-
-            score+=20;
-
-        }
+            avg.z1/len,
 
 
 
+            z2:
+
+            avg.z2/len,
 
 
 
-        return score;
+            z3:
+
+            avg.z3/len
+
+
+
+        };
 
 
 
     }
 
 
+
+
+
+
+
+
+
+    parityScore(
+
+        patterns
+
+    ){
+
+
+
+        return 5;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    sumScore(
+
+        patterns
+
+    ){
+
+
+
+        return 5;
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    consecutiveScore(
+
+        patterns
+
+    ){
+
+
+
+        return 3;
+
+
+
+    }
 
 
 

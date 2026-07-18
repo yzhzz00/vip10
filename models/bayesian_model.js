@@ -1,10 +1,9 @@
 /**
  * DLT-AI-CORE VIP
- * Bayesian Model V2.0
+ * Bayesian Model V5.0 FINAL
  *
- * 贝叶斯概率模型
+ * 贝叶斯概率更新模型
  */
-
 
 
 class BayesianModel {
@@ -14,11 +13,13 @@ class BayesianModel {
     constructor(){
 
 
-        this.name =
+        this.name=
+
         "bayesian";
 
 
     }
+
 
 
 
@@ -37,13 +38,37 @@ class BayesianModel {
 
 
 
+        const frequency =
+
+        features.frequency || [];
+
+
+
+
+
+        const missing =
+
+        features.missing || [];
+
+
+
+
+
+
+
+        const total =
+
+        history.length*5;
+
+
+
+
+
+
+
         const result=[];
 
 
-
-        const totalDraws =
-
-        history.length || 1;
 
 
 
@@ -51,48 +76,39 @@ class BayesianModel {
 
         for(
 
-            let num=1;
+            let n=1;
 
-            num<=35;
+            n<=35;
 
-            num++
+            n++
 
         ){
 
 
 
-            let count=0;
 
 
-            let recentCount=0;
+            const freq =
 
+            frequency.find(
 
+                x=>
 
+                x.number===n
 
-
-            history.forEach(
-
-                item=>{
-
-
-
-                    if(
-
-                        item.front
-
-                        .includes(num)
-
-                    ){
-
-
-                        count++;
-
-
-                    }
+            );
 
 
 
-                }
+
+
+            const miss =
+
+            missing.find(
+
+                x=>
+
+                x.number===n
 
             );
 
@@ -102,35 +118,19 @@ class BayesianModel {
 
 
 
-            history
-
-            .slice(-100)
-
-            .forEach(
-
-                item=>{
 
 
-                    if(
+            const count =
 
-                        item.front
+            freq
 
-                        .includes(num)
+            ?
 
-                    ){
+            freq.count
 
+            :
 
-                        recentCount++;
-
-
-                    }
-
-
-
-                }
-
-            );
-
+            0;
 
 
 
@@ -139,27 +139,15 @@ class BayesianModel {
 
 
             /*
-             * 贝叶斯平滑
-             *
-             * P(num)
+             * 先验概率
              */
 
 
             const prior =
 
-            (
+            count /
 
-                count + 1
-
-            )
-
-            /
-
-            (
-
-                totalDraws + 35
-
-            );
+            total;
 
 
 
@@ -169,23 +157,27 @@ class BayesianModel {
 
 
             /*
-             * 近期证据更新
+             * 遗漏修正
              */
 
 
             const likelihood =
 
+            1 +
 
             (
 
-                recentCount + 1
+                miss
 
-            )
+                ?
 
-            /
+                miss.missing/100
 
-            101;
+                :
 
+                0
+
+            );
 
 
 
@@ -196,14 +188,9 @@ class BayesianModel {
 
             const posterior =
 
-
-
-            prior
-
-            *
+            prior *
 
             likelihood;
-
 
 
 
@@ -215,7 +202,17 @@ class BayesianModel {
 
 
 
-                number:num,
+                number:n,
+
+
+
+                probability:
+
+                Number(
+
+                    posterior.toFixed(6)
+
+                ),
 
 
 
@@ -223,17 +220,19 @@ class BayesianModel {
 
                 Number(
 
-                    posterior
+                    (
 
-                    .toFixed(8)
+                    posterior*10000
+
+                    )
+
+                    .toFixed(3)
 
                 )
 
 
 
             });
-
-
 
 
 
@@ -245,21 +244,43 @@ class BayesianModel {
 
 
 
+        result.sort(
+
+            (a,b)=>
+
+            b.score-a.score
+
+        );
+
+
+
+
+
+
+
         return {
 
 
 
-            name:this.name,
+            name:
+
+            this.name,
 
 
 
             numbers:
 
-            result.sort(
+            result,
 
-                (a,b)=>
 
-                b.score-a.score
+
+            top:
+
+            result.slice(
+
+                0,
+
+                10
 
             )
 
@@ -270,7 +291,6 @@ class BayesianModel {
 
 
     }
-
 
 
 
