@@ -1,0 +1,15 @@
+{
+  "name": "dlt-ai-core-vip",
+  "version": "1.0.0",
+  "description": "大乐透智能分析核心系统 - 真实历史滚动回测版",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "cors": "^2.8.5",
+    "fs-extra": "^11.3.0"
+  }
+}
