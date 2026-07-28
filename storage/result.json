@@ -1,0 +1,16 @@
+{
+  "total": 0,
+  "history": [],
+  "weights": {
+    "frequency": 0.6,
+    "missing": 0.3,
+    "random": 0.1
+  },
+
+  "backtest": {
+    "periods": 0,
+    "averageFrontHit": 0,
+    "averageBackHit": 0,
+    "bestResult": null
+  }
+}
